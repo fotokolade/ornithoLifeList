@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Meine Lebensliste</title>
+<style>
+:root{
+  --bg:#f7f8f6; --card:#ffffff; --text:#1d2521; --muted:#6a746e; --line:#e4e8e4;
+  --accent:#2f8f4e; --accent-soft:#eaf4ed; --bar:#4a86b6; --bar-soft:#dbe7f0;
+  --hl:#fff7cc; --link:#3d6a8c; --stripe:#f6f8f5;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#121614; --card:#1b201d; --text:#e8ece9; --muted:#96a19a; --line:#2c332f;
+    --accent:#4cc275; --accent-soft:#1f3327; --bar:#5b9bcf; --bar-soft:#2b3b48;
+    --hl:#3b3717; --link:#8ab8dc; --stripe:#202622;
+  }
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);
+  font:14px/1.35 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:920px;margin:0 auto;padding:0 12px 32px}
+header.top{background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+header.top .wrap{padding-bottom:0}
+.brand{display:flex;align-items:baseline;gap:4px 12px;flex-wrap:wrap;padding-top:8px}
+h1{font-size:1.05rem;margin:0}
+.sub{color:var(--muted);font-size:.78rem;margin:0}
+.filters{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:6px}
+select,input[type=search]{font:inherit;font-size:.82rem;padding:3px 6px;border:1px solid var(--line);
+  border-radius:6px;background:var(--card);color:var(--text);max-width:100%}
+input[type=search]{min-width:0;flex:1 1 200px}
+details.opts{font-size:.8rem;color:var(--muted)}
+details.opts summary{cursor:pointer}
+details.opts label{display:block;margin:3px 0}
+nav.tabs{display:flex;gap:0;margin-top:4px;overflow-x:auto}
+nav.tabs button{font:inherit;font-size:.85rem;border:0;background:none;color:var(--muted);
+  padding:6px 10px;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap}
+nav.tabs button.on{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
+section.tab{display:none;padding-top:10px}
+section.tab.on{display:block}
+h2{font-size:.9rem;margin:16px 0 4px}
+h2 small{font-weight:400;color:var(--muted);margin-left:6px}
+.prose{color:var(--muted);font-size:.78rem;text-align:justify;hyphens:auto;margin:2px 0 6px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:6px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 10px}
+.kpi b{display:block;font-size:1.25rem;line-height:1.15}
+.kpi span{color:var(--muted);font-size:.74rem;line-height:1.2;display:block}
+.kpi.main b{color:var(--accent)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:2px 8px;overflow-x:auto}
+.yhead,.yrow{display:grid;grid-template-columns:2.6rem 4.2rem 1fr 3rem 2.6rem;gap:6px;align-items:center;padding:2px 4px}
+.yhead{color:var(--muted);font-size:.72rem;padding-top:4px}
+.yrow{border-radius:6px}
+.yrow.cur{background:var(--hl)}
+.yrow .y{font-weight:600}
+.yrow .ytd{color:var(--muted);text-align:right;font-variant-numeric:tabular-nums}
+.yrow .tot{color:var(--accent);font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
+.yrow .new{color:var(--muted);text-align:right;font-size:.78rem;font-variant-numeric:tabular-nums}
+.yhead span:nth-child(2),.yhead span:nth-child(4),.yhead span:nth-child(5){text-align:right}
+.bar{height:10px;background:var(--bar-soft);border-radius:3px;position:relative;overflow:hidden}
+.bar i{position:absolute;left:0;top:0;bottom:0;background:var(--bar);border-radius:3px 0 0 3px}
+table{border-collapse:collapse;width:100%;font-size:.84rem}
+th{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;text-align:left;
+  padding:5px 6px;border-bottom:1px solid var(--line);white-space:nowrap;user-select:none}
+th.sortable{cursor:pointer}
+th.sorted{color:var(--text)}
+td{padding:4px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:nth-child(odd) td{background:var(--stripe)}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+td.nr{color:var(--muted);width:2rem}
+.latin{color:var(--muted);font-style:italic;font-size:.74rem;display:block;line-height:1.2}
+.small{color:var(--muted);font-size:.74rem;display:block;line-height:1.2}
+button.lnk{color:var(--link);background:none;border:0;padding:0;font:inherit;cursor:pointer;text-align:left}
+button.lnk:hover{text-decoration:underline}
+tr.row{cursor:pointer}
+tr.detail td{background:var(--accent-soft)!important;padding:8px}
+.pheno{display:grid;grid-template-columns:repeat(12,1fr);gap:2px;align-items:end;height:54px;max-width:360px}
+.pheno div{background:var(--bar);border-radius:2px 2px 0 0;min-height:1px;position:relative}
+.pheno-l{display:grid;grid-template-columns:repeat(12,1fr);gap:2px;max-width:360px;font-size:.66rem;color:var(--muted);text-align:center}
+.chips{display:flex;flex-wrap:wrap;gap:4px;margin:4px 0}
+.chip{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:0 7px;font-size:.74rem}
+.detailgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.heat td,.heat th{text-align:center;padding:2px 1px;font-size:.72rem}
+.heat td.y{text-align:left;font-weight:600;padding-left:4px}
+.heat td{border:1px solid var(--card)}
+svg.curve{width:100%;height:auto;display:block}
+svg.curve text{fill:var(--muted);font-size:11px}
+.pick{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 8px}
+.empty{color:var(--muted);padding:10px 4px}
+.more{margin:4px 0}
+#map{height:66vh;min-height:340px;border-radius:8px;border:1px solid var(--line)}
+.leaflet-popup-content{font:13px/1.35 system-ui,sans-serif;color:#1d2521}
+@media (max-width:700px){
+  .hide-sm{display:none}
+  header.top{position:static}
+  #h-sub{display:none}
+  .yhead,.yrow{grid-template-columns:2.4rem 2.8rem 1fr 2.6rem 2.2rem;gap:4px}
+}
+.ab{display:inline-block;min-width:1.9rem;text-align:center;border-radius:5px;padding:0 5px;font-size:.74rem;font-weight:600;color:#fff}
+.ab-A{background:#8a949d}.ab-B{background:#d18a1b}.ab-C{background:#2f8f4e}
+.btn{font:inherit;font-size:.82rem;padding:3px 10px;border:1px solid var(--accent);border-radius:6px;background:var(--accent);color:#fff;cursor:pointer}
+.printonly{display:none}
+@page{size:A4;margin:14mm}
+@media print{
+  :root{--bg:#fff;--card:#fff;--text:#111;--muted:#555;--line:#ccc;--accent:#1f7a3d;--accent-soft:#eef6f0;
+    --bar:#3d78a8;--bar-soft:#d3e2ee;--hl:#fff;--link:#111;--stripe:#f5f5f5}
+  body{font-size:10pt}
+  header.top{position:static;border:0}
+  .filters,nav.tabs,.pick,#tab-map,.more{display:none!important}
+  .printonly{display:block}
+  section.tab{display:block!important;padding-top:0}
+  .wrap{max-width:none;padding:0}
+  .card{overflow:visible;border-color:var(--line)}
+  tr,.yrow,.kpi{break-inside:avoid}
+  h2{break-after:avoid;margin-top:14px}
+  #tab-list,#tab-regions,#tab-targets,#tab-activity{break-before:page}
+  tr.row{cursor:auto}
+  .hide-sm{display:revert!important}
+  th.hide-sm,td.hide-sm{display:table-cell!important}
+  .bar,.bar i,.heat td,.pheno div{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="brand">
+      <h1 id="h-title"></h1>
+      <p class="sub" id="h-sub"></p>
+    </div>
+    <p class="sub printonly" id="h-print"></p>
+    <div class="filters">
+      <select id="f-region" aria-label="Region"></select>
+      <select id="f-year" aria-label="Jahr"></select>
+      <select id="f-month" aria-label="Monat"></select>
+      <details class="opts">
+        <summary id="o-sum"></summary>
+        <label><input type="checkbox" id="o-escaped"> <span id="o-escaped-t"></span></label>
+        <label><input type="checkbox" id="o-collective"> <span id="o-collective-t"></span></label>
+        <label id="o-redact-l"><input type="checkbox" id="o-redact"> <span id="o-redact-t"></span></label>
+      </details>
+      <button class="btn" id="b-pdf" type="button"></button>
+    </div>
+    <nav class="tabs" id="tabs"></nav>
+  </div>
+</header>
+<main class="wrap">
+  <section class="tab" id="tab-overview"></section>
+  <section class="tab" id="tab-list">
+    <div class="pick">
+      <input type="search" id="q" autocomplete="off">
+      <select id="q-sort" aria-label="Sortierung"></select>
+      <select id="q-atlas" aria-label="Brutzeitcode"></select>
+    </div>
+    <div class="card" id="list-out"></div>
+  </section>
+  <section class="tab" id="tab-regions"></section>
+  <section class="tab" id="tab-targets"></section>
+  <section class="tab" id="tab-activity">
+    <div class="pick">
+      <select id="a-metric" aria-label="Wert"></select>
+      <select id="a-scope" aria-label="Zeitraum"></select>
+    </div>
+    <div id="act-out"></div>
+  </section>
+  <section class="tab" id="tab-map">
+    <div class="pick"><select id="m-metric" aria-label="Kartenwert"></select></div>
+    <div id="map"></div>
+    <p class="prose" id="map-note"></p>
+  </section>
+</main>
+
+<script id="data" type="application/json">__DATA_JSON__</script>
+<script>
+"use strict";
+/* ---------- text resources ---------- */
+const T = {
+  title: "Meine Lebensliste",
+  pdf: "PDF erstellen", printed: "Stand: {0}",
+  subtitle: "Ornitho.de, Exportdatei {0}, {1} Beobachtungen",
+  tabOverview: "Übersicht", tabList: "Lebensliste", tabRegions: "Regionen", tabTargets: "Ziele", tabActivity: "Tagesaktivität", tabMap: "Karte",
+  actHelp: "Zu welcher Uhrzeit du Beobachtungen meldest. Berücksichtigt sind {0} von {1} Meldungen, denn manche Meldungen (vor allem über die Weboberfläche) haben keine Uhrzeit.",
+  actScopeAll: "Alle Jahre", actScopeYear: "Nur {0}",
+  actMObs: "Beobachtungen", actMSpecies: "Arten", actMDays: "Beobachtungstage",
+  actKTimed: "Meldungen mit Uhrzeit", actKPeak: "Aktivste Stunde",
+  actHourTitle: "Verlauf über den Tag", actWeekday: "Wochentage", actWeekdayHelp: "Tage mit mindestens einer Meldung, nach Wochentag.",
+  actHeat: "Monat und Uhrzeit", actHeatHelp: "Beobachtungen je Monat und Stunde. Je dunkler die Zelle, desto mehr Meldungen.",
+  actSpecies: "Tageszeit nach Art", actSpeciesHelp: "Typische Uhrzeit je Art: Die Hälfte der Meldungen liegt davor, die Hälfte danach. Berücksichtigt sind Arten ab {0} Meldungen mit Uhrzeit.",
+  actEarly: "Frühe Arten", actLate: "Späte Arten", colMedian: "Typische Uhrzeit", hourRange: "{0} bis {1} Uhr",
+  weekdays: ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"],
+  mapStreets: "Straßenkarte", mapTopo: "Topografisch", mapSat: "Satellit",
+  colAtlas: "Brut", atlasTitle: "Brutzeitcodes (Atlascode)",
+  atlasHelp: "{0} von {1} Beobachtungen tragen einen Brutzeitcode. Gezählt wird pro Art der höchste Code: A mögliches, B wahrscheinliches, C sicheres Brüten.",
+  atlasC: "Arten mit sicherem Brüten (C)", atlasB: "Arten mit wahrscheinlichem Brüten (B)", atlasA: "Arten mit möglichem Brüten (A)", atlasAny: "Arten mit Brutzeitcode",
+  atlasBest: "Höchster Code", atlasWhen: "Wann und wo", atlasCodesTitle: "Brutzeitcodes dieser Art",
+  atlasFilter: {all: "Alle Arten", any: "Mit Brutzeitcode", C: "Sicher (C)", B: "Wahrscheinlich (B)", A: "Möglich (A)", none: "Ohne Brutzeitcode"},
+  atlasCats: {A: "Mögliches Brüten / Brutzeitfeststellung", B: "Wahrscheinliches Brüten / Brutverdacht", C: "Sicheres Brüten / Brutnachweis"},
+  atlasCodes: {
+    A0: "Art zur Brutzeit festgestellt (in ornitho deaktiviert)",
+    A1: "Art zur Brutzeit im möglichen Bruthabitat festgestellt",
+    A2: "Singendes, trommelndes oder balzendes Männchen zur Brutzeit im möglichen Bruthabitat",
+    B3: "Paar zur Brutzeit in geeignetem Bruthabitat",
+    B4: "Revierverhalten an mindestens 2 Tagen im Abstand von mindestens 7 Tagen am selben Ort (dauerhaft besetztes Revier)",
+    B5: "Balzverhalten (Männchen und Weibchen)",
+    B6: "Altvogel sucht einen wahrscheinlichen Nestplatz auf",
+    B7: "Warn- oder Angstrufe oder anderes aufgeregtes Verhalten, das auf ein Nest oder Junge in der Nähe hindeutet",
+    B8: "Brutfleck bei gefangenem Altvogel",
+    B9: "Nest- oder Höhlenbau, Anlage einer Nistmulde",
+    C10: "Ablenkungsverhalten oder Verleiten (Flügellahmstellen)",
+    C11a: "Benutztes Nest aus der aktuellen Brutperiode gefunden",
+    C11b: "Eischalen geschlüpfter Jungvögel aus der aktuellen Brutperiode gefunden",
+    C12: "Eben flügge Jungvögel (Nesthocker) oder Dunenjunge (Nestflüchter)",
+    C13a: "Altvögel verlassen oder suchen einen Nestplatz auf, Hinweis auf ein besetztes, nicht einsehbares Nest",
+    C13b: "Nest mit brütendem Altvogel entdeckt",
+    C14a: "Altvogel trägt Kotsack von Nestling weg",
+    C14b: "Altvogel mit Futter für die nicht flüggen Jungen",
+    C15: "Nest mit Eiern entdeckt",
+    C16: "Junge im Nest gesehen oder gehört",
+    E99: "Art trotz Beobachtungsgängen nicht (mehr) festgestellt"
+  },
+  mapLife: "Lifer", mapYear: "Arten {0}", mapObs: "Beobachtungen",
+  mapNoLib: "Die Kartenbibliothek konnte nicht geladen werden. Für die Karte wird eine Internetverbindung benötigt.",
+  mapNote: "{0} Orte. Die Größe der Kreise zeigt den gewählten Wert, ein Klick öffnet Details.",
+  mapSpecies: "Arten", mapFilter: "Auf diesen Ort filtern",
+  regionAll: "Alle Regionen", grpState: "Bundesland", grpCounty: "Landkreis", grpMuni: "Gemeinde", grpPlace: "Beobachtungsort",
+  optsSummary: "Einstellungen",
+  optEscaped: "Gefangenschaftsflüchtlinge mitzählen",
+  optCollective: "Sammeltaxa mitzählen (z. B. Gattung sp., Art A / B)",
+  optRedact: "Ortsangaben schwärzen (Beobachtungsorte, Gemeinden, Karte)",
+  speciesLife: "Lifer gesamt", observations: "Beobachtungen", days: "Beobachtungstage", places: "Orte",
+  period: "Zeitraum", newInYear: "Neu in {0}", newLast30: "Neu in den letzten 30 Tagen",
+  perYear: "Deine Arten pro Jahr", perMonth: "Deine Arten für {0}",
+  perYearHelp: "Der dunkle Teil des Balkens und die linke Zahl zeigen den Stand bis zum {0} des jeweiligen Jahres, der helle Teil den Rest des Jahres. „Neu“ sind Arten, die in diesem Jahr erstmals gemeldet wurden.",
+  colYear: "Jahr", colTotal: "Gesamt", colNew: "Neu", colUntil: "bis {0}",
+  curve: "Lebenslistenkurve", curveHelp: "Jeder Punkt ist eine Art an ihrem Erstnachweis.",
+  heat: "Arten pro Jahr und Monat",
+  latest: "Neueste Lifer", latestHelp: "Die zuletzt erstmals nachgewiesenen Arten.",
+  searchPh: "Art suchen (deutsch oder wissenschaftlich)", nr: "Nr.", name: "Art", first: "Erstnachweis", last: "Zuletzt",
+  obsShort: "Beob.", max: "Max.", yearsShort: "Jahre", hits: "{0} von {1} Arten",
+  sortNr: "Nach Erstnachweis", sortTaxon: "Systematisch", sortName: "Alphabetisch", sortColumn: "Nach Spalte",
+  detailPheno: "Wann gesehen (Beobachtungen pro Monat)", detailYears: "Jahre", detailPlaces: "Häufigste Orte",
+  detailFirst: "Erstnachweis", detailLast: "Letzte Beobachtung", detailMax: "Höchste Anzahl", detailPhotos: "Beobachtungen mit Foto",
+  regionsBy: "Arten nach {0}", regionsHelp: "Klick auf einen Namen filtert die gesamte Seite auf diese Region.",
+  colLife: "Lifer", colYearShort: "Jahr", showAll: "Alle {0} anzeigen", showLess: "Weniger anzeigen",
+  tgtYear: "Jahresziele {0}", tgtYearHelp: "Arten deiner Lebensliste, die du in {0} noch nicht gemeldet hast. Die Reihenfolge richtet sich danach, in wie vielen früheren Jahren du sie im Zeitfenster von 7 Tagen vor bis 21 Tage nach heute gesehen hast.",
+  tgtYearPast: "Arten deiner Lebensliste, die du in {0} nicht gemeldet hast, sortiert nach der Zahl der Vorjahre, in denen du sie gesehen hast.",
+  tgtMonth: "Monatsziele {0}", tgtMonthHelp: "Arten, die du in früheren Jahren im {0} gemeldet hast, in {1} aber noch nicht.",
+  tgtNote: "Hinweis: Echte Ziele (Arten, die du noch nie gesehen hast) lassen sich aus dem Export nicht ableiten, weil dafür die Häufigkeitsdaten der Region fehlen. Diese Liste beruht nur auf deinen eigenen Meldungen.",
+  colWindow: "Im Zeitfenster", colYearsSeen: "Jahre gesehen", colMonthYears: "Jahre im Monat", colLastSeen: "Zuletzt",
+  windowOf: "{0} von {1}", none: "Nichts offen. Alle Arten sind bereits gemeldet.", noData: "Keine Daten für diese Auswahl.",
+  months: ["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"],
+  monthsShort: ["Jan.","Feb.","März","Apr.","Mai","Juni","Juli","Aug.","Sept.","Okt.","Nov.","Dez."],
+  states: {BW:"Baden-Württemberg",BY:"Bayern",BE:"Berlin",BB:"Brandenburg",HB:"Bremen",HH:"Hamburg",HE:"Hessen",
+    MV:"Mecklenburg-Vorpommern",NI:"Niedersachsen",NW:"Nordrhein-Westfalen",RP:"Rheinland-Pfalz",SL:"Saarland",
+    SN:"Sachsen",ST:"Sachsen-Anhalt",SH:"Schleswig-Holstein",TH:"Thüringen"},
+  counties: {"SN/BZ":"Bautzen","SN/GR":"Görlitz","SN/MEI":"Meißen","SN/DD":"Dresden","SN/PIR":"Sächsische Schweiz-Osterzgebirge",
+    "SN/L":"Leipzig","SN/C":"Chemnitz","SN/ERZ":"Erzgebirgskreis"},
+  unknown: "Unbekannt"
+};
+const t = (k, ...a) => { let s = T[k] ?? k; a.forEach((v, i) => { s = s.replace("{" + i + "}", v); }); return s; };
+
+/* ---------- data ---------- */
+const RAW = JSON.parse(document.getElementById("data").textContent);
+const SP = RAW.sp.map(([name, latin, order, flags]) => ({ name, latin, order, flags }));
+const PL = RAW.pl.map(([name, muni, state, county, lat, lon], i) => {
+  const s = state || "?", c = s + "/" + (county || "?");
+  return { i, name, muni, state, county, lat, lon,
+    keys: { s, c, m: c + "/" + muni, p: String(i) } };
+});
+const NOW = new Date();
+const TODAY_Y = NOW.getFullYear(), TODAY_M = NOW.getMonth() + 1;
+const pad = n => String(n).padStart(2, "0");
+const TODAY_MD = pad(TODAY_M) + "-" + pad(NOW.getDate());
+const doyOf = md => Math.floor((Date.UTC(2001, +md.slice(0, 2) - 1, +md.slice(3)) - Date.UTC(2001, 0, 1)) / 864e5);
+const TODAY_DOY = doyOf(TODAY_MD);
+const atlasRank = ac => /^[ABC]/.test(ac) ? (parseInt(ac.slice(1), 10) || { A: 1, B: 3, C: 10 }[ac[0]]) : 0;  // E99 and unknown prefixes are no breeding evidence
+const OBS = RAW.obs.map(([s, d, p, c, ph, ac, tm]) => {
+  const md = d.slice(5);
+  return { s, d, y: +d.slice(0, 4), m: +d.slice(5, 7), md, doy: doyOf(md), p, c, ph, ac, tm, ar: ac ? atlasRank(ac) : 0 };
+});
+const YEARS = [...new Set(OBS.map(o => o.y))].sort((a, b) => a - b);
+const MIN_Y = YEARS[0], MAX_Y = YEARS[YEARS.length - 1];
+
+const S = { tab: "overview", region: "all", year: Math.min(TODAY_Y, MAX_Y), month: TODAY_M,
+  escaped: false, collective: false, atlasF: "all", actMetric: "obs", actScope: "all", redact: !!RAW.meta.redacted, metric: "life", q: "", sort: "nr", dir: -1, open: new Set(),
+  regSort: {}, regAll: {} };
+
+/* ---------- helpers ---------- */
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const fmtN = n => n.toLocaleString("de-DE");
+const fmtD = d => d.slice(8) + "." + d.slice(5, 7) + "." + d.slice(0, 4);
+const shortMD = md => (+md.slice(3)) + ". " + T.monthsShort[+md.slice(0, 2) - 1];
+const byDateDesc = (a, b) => (a < b ? 1 : a > b ? -1 : 0);
+const REDACT_MASK = "██████████";
+const placeName = i => S.redact ? REDACT_MASK : PL[i].name;
+const stateName = c => T.states[c] || (c === "?" ? T.unknown : c);
+const countyName = key => T.counties[key] || (key.split("/")[1] === "?" ? T.unknown : key.split("/")[1]);
+const collator = new Intl.Collator("de");
+
+function baseObs() {
+  return OBS.filter(o => {
+    const f = SP[o.s].flags;
+    return !((f & 1) && !S.escaped) && !((f & 2) && !S.collective);
+  });
+}
+function regionObs(list) {
+  if (S.region === "all") return list;
+  const [lvl, key] = [S.region[0], S.region.slice(2)];
+  return list.filter(o => PL[o.p].keys[lvl] === key);
+}
+function speciesStats(list) {
+  const m = new Map();
+  for (const o of list) {
+    let r = m.get(o.s);
+    if (!r) {
+      r = { s: o.s, first: o, last: o, n: 0, max: 0, years: new Map(), months: Array(12).fill(0),
+        places: new Map(), photos: 0, obs: [], ar: 0, ac: "", codes: new Map(), acObs: null };
+      m.set(o.s, r);
+    }
+    r.last = o; r.n++; r.obs.push(o);
+    if (o.c > r.max) r.max = o.c;
+    r.years.set(o.y, (r.years.get(o.y) || 0) + 1);
+    r.months[o.m - 1]++;
+    r.places.set(o.p, (r.places.get(o.p) || 0) + 1);
+    r.photos += o.ph;
+    if (o.ac) { r.codes.set(o.ac, (r.codes.get(o.ac) || 0) + 1); if (o.ar > r.ar) { r.ar = o.ar; r.ac = o.ac; r.acObs = o; } }
+  }
+  return m;
+}
+
+/* ---------- overview ---------- */
+// Distinct species per year (whole year and up to today's date); `keep` narrows the observations, e.g. to one month.
+function yearSets(list, keep = () => true) {
+  const ys = new Map();
+  for (let y = MIN_Y; y <= MAX_Y; y++) ys.set(y, { y, all: new Set(), ytd: new Set(), lifers: 0 });
+  for (const o of list) {
+    if (!keep(o)) continue;
+    const r = ys.get(o.y);
+    r.all.add(o.s);
+    if (o.md <= TODAY_MD) r.ytd.add(o.s);
+  }
+  return [...ys.values()].sort((a, b) => b.y - a.y);
+}
+function yearRows(list, stats) {
+  const rows = yearSets(list);
+  for (const st of stats.values()) rows.find(r => r.y === st.first.y).lifers++;
+  return rows;
+}
+const monthRows = list => yearSets(list, o => o.m === S.month);
+function renderYearBlock(rows, opts) {
+  const max = Math.max(1, ...rows.map(r => r.all.size));
+  const head = `<div class="yhead"><span>${t("colYear")}</span><span>${opts.showYtd ? t("colUntil", shortMD(TODAY_MD)) : ""}</span><span></span><span>${t("colTotal")}</span><span>${opts.showNew ? t("colNew") : ""}</span></div>`;
+  return `<div class="card">${head}` + rows.map(r => {
+    const tot = r.all.size, ytd = r.ytd.size;
+    const cur = r.y === S.year ? " cur" : "";
+    const wTot = tot / max * 100, wYtd = opts.showYtd ? ytd / max * 100 : wTot;
+    return `<div class="yrow${cur}"><span class="y">${r.y}</span>
+      <span class="ytd">${opts.showYtd ? ytd : ""}</span>
+      <div class="bar"><i style="width:${wYtd}%"></i>${opts.showYtd ? `<i style="width:${wTot}%;opacity:.28"></i>` : ""}</div>
+      <span class="tot">${tot}</span>
+      <span class="new">${opts.showNew && r.lifers ? "+" + r.lifers : ""}</span></div>`;
+  }).join("") + `</div>`;
+}
+// One numbering for every view: first sighting date, ties by taxonomic order.
+function numberLifers(stats) {
+  const chrono = [...stats.values()].sort((a, b) => (a.first.d < b.first.d ? -1 : a.first.d > b.first.d ? 1 : 0) || SP[a.s].order - SP[b.s].order);
+  chrono.forEach((r, i) => { r.nr = i + 1; });
+  return chrono;
+}
+function curveSvg(chrono) {
+  const pts = chrono.map(r => r.first);
+  if (!pts.length) return "";
+  const W = 720, H = 230, L = 38, R = 10, Tp = 10, B = 24;
+  const t0 = Date.UTC(MIN_Y, 0, 1), t1 = Date.UTC(Math.max(MAX_Y, TODAY_Y) + 1, 0, 1);
+  const x = ms => L + (ms - t0) / (t1 - t0) * (W - L - R);
+  const mag = Math.pow(10, Math.floor(Math.log10(pts.length)));
+  const step = Math.max(1, mag / (pts.length / mag < 2.5 ? 2 : 1));
+  const yMax = Math.ceil(pts.length / step) * step;
+  const y = n => H - B - n / yMax * (H - B - Tp);
+  let g = "", d = `M${x(t0)},${y(0)}`, prev = 0, dots = "";
+  for (let v = 0; v <= yMax; v += step) g += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${L - 6}" y="${y(v) + 4}" text-anchor="end">${v}</text>`;
+  const every = (Math.max(MAX_Y, TODAY_Y) - MIN_Y) > 8 ? 2 : 1;
+  for (let yr = MIN_Y; yr <= Math.max(MAX_Y, TODAY_Y); yr += every)
+    g += `<text x="${x(Date.UTC(yr, 0, 1)) + 2}" y="${H - 6}">${yr}</text>`;
+  pts.forEach((o, i) => {
+    const ms = Date.parse(o.d + "T00:00:00Z");
+    d += ` L${x(ms)},${y(prev)} L${x(ms)},${y(i + 1)}`;
+    prev = i + 1;
+    dots += `<circle cx="${x(ms)}" cy="${y(i + 1)}" r="${o.y === S.year ? 3 : 2}" fill="${o.y === S.year ? "var(--accent)" : "var(--bar)"}"><title>${i + 1}. ${esc(SP[o.s].name)}, ${fmtD(o.d)}</title></circle>`;
+  });
+  d += ` L${x(Date.now())},${y(prev)}`;
+  return `<svg class="curve" viewBox="0 0 ${W} ${H}" role="img" aria-label="${t("curve")}">${g}<path d="${d}" fill="none" stroke="var(--bar)" stroke-width="1.5"/>${dots}</svg>`;
+}
+function heatTable(list) {
+  const cell = new Map();
+  for (const o of list) {
+    const k = o.y * 100 + o.m;
+    if (!cell.has(k)) cell.set(k, new Set());
+    cell.get(k).add(o.s);
+  }
+  let max = 1;
+  for (const s of cell.values()) max = Math.max(max, s.size);
+  let h = `<table class="heat"><thead><tr><th></th>${T.monthsShort.map(m => `<th>${m.replace(".", "")}</th>`).join("")}</tr></thead><tbody>`;
+  for (let y = MAX_Y; y >= MIN_Y; y--) {
+    h += `<tr><td class="y">${y}</td>`;
+    for (let m = 1; m <= 12; m++) {
+      const n = (cell.get(y * 100 + m) || { size: 0 }).size;
+      h += n ? `<td style="background:color-mix(in srgb,var(--accent) ${Math.round(12 + n / max * 78)}%,transparent)">${n}</td>` : `<td></td>`;
+    }
+    h += `</tr>`;
+  }
+  return h + `</tbody></table>`;
+}
+function renderOverview() {
+  const list = regionObs(baseObs());
+  if (!list.length) { $("tab-overview").innerHTML = `<p class="empty">${t("noData")}</p>`; return; }
+  const stats = speciesStats(list);
+  const days = new Set(list.map(o => o.d)).size, places = new Set(list.map(o => o.p)).size;
+  const rows = yearRows(list, stats);
+  const newYear = rows.find(r => r.y === S.year)?.lifers || 0;
+  const c30 = new Date(NOW.getFullYear(), NOW.getMonth(), NOW.getDate() - 30);  // local dates, like the export
+  const cutoff = c30.getFullYear() + "-" + pad(c30.getMonth() + 1) + "-" + pad(c30.getDate());
+  const new30 = [...stats.values()].filter(r => r.first.d >= cutoff).length;
+  const first = list[0].d, last = list[list.length - 1].d;
+  const chrono = numberLifers(stats);
+  const latest = chrono.slice(-10).reverse();
+  const monthLabel = T.months[S.month - 1];
+  $("tab-overview").innerHTML = `
+    <div class="kpis">
+      <div class="kpi main"><b>${fmtN(stats.size)}</b><span>${t("speciesLife")}</span></div>
+      <div class="kpi"><b>${fmtN(list.length)}</b><span>${t("observations")}</span></div>
+      <div class="kpi"><b>${fmtN(days)}</b><span>${t("days")}</span></div>
+      <div class="kpi"><b>${fmtN(places)}</b><span>${t("places")}</span></div>
+      <div class="kpi"><b>+${newYear}</b><span>${t("newInYear", S.year)}</span></div>
+      <div class="kpi"><b>+${new30}</b><span>${t("newLast30")}</span></div>
+    </div>
+    <p class="sub" style="margin-top:8px">${t("period")}: ${fmtD(first)} bis ${fmtD(last)}</p>
+    <h2>${t("perYear")}</h2>
+    <p class="prose">${t("perYearHelp", shortMD(TODAY_MD))}</p>
+    ${renderYearBlock(rows, { showYtd: true, showNew: true })}
+    <h2>${t("perMonth", monthLabel)}</h2>
+    ${renderYearBlock(monthRows(list), { showYtd: S.month === TODAY_M, showNew: false })}
+    <h2>${t("curve")}</h2>
+    <p class="prose">${t("curveHelp")}</p>
+    <div class="card">${curveSvg(chrono)}</div>
+    <h2>${t("heat")}</h2>
+    <div class="card">${heatTable(list)}</div>
+    <h2>${t("latest")}</h2>
+    <p class="prose">${t("latestHelp")}</p>
+    <div class="card"><table><tbody>${latest.map(r => `<tr><td class="nr">${r.nr}</td>
+      <td>${esc(SP[r.s].name)}<span class="latin">${esc(SP[r.s].latin)}</span></td>
+      <td class="num">${fmtD(r.first.d)}<span class="small">${esc(placeName(r.first.p))}</span></td></tr>`).join("")}</tbody></table></div>
+    ${atlasSection(list, stats)}`;
+}
+
+/* ---------- life list ---------- */
+function atlasBadge(r) {
+  if (!r.ac) return "";
+  return `<span class="ab ab-${r.ac[0]}" title="${esc(atlasText(r.ac))}">${esc(r.ac)}</span>`;
+}
+function atlasDesc(code) {
+  return T.atlasCodes[code] ?? T.atlasCats[code] ?? "";
+}
+function atlasText(code) {
+  return code + ": " + atlasDesc(code);
+}
+function atlasSection(list, stats) {
+  const cat = { A: [], B: [], C: [] };
+  for (const r of stats.values()) if (r.ac) cat[r.ac[0]].push(r);
+  const withCode = cat.A.length + cat.B.length + cat.C.length;
+  const rows = [...cat.C, ...cat.B].sort((a, b) => b.ar - a.ar || byDateDesc(a.acObs.d, b.acObs.d));
+  const nObs = list.filter(o => o.ar).length;
+  return `<h2>${t("atlasTitle")}</h2>
+    <p class="prose">${t("atlasHelp", fmtN(nObs), fmtN(list.length))}</p>
+    <div class="kpis">
+      <div class="kpi"><b>${cat.C.length}</b><span>${t("atlasC")}</span></div>
+      <div class="kpi"><b>${cat.B.length}</b><span>${t("atlasB")}</span></div>
+      <div class="kpi"><b>${cat.A.length}</b><span>${t("atlasA")}</span></div>
+      <div class="kpi"><b>${withCode}</b><span>${t("atlasAny")}</span></div>
+    </div>
+    ${rows.length ? `<div class="card" style="margin-top:10px"><table><thead><tr><th>${t("name")}</th><th>${t("atlasBest")}</th><th class="hide-sm">${t("atlasWhen")}</th></tr></thead><tbody>${rows.map(r =>
+      `<tr><td>${esc(SP[r.s].name)}<span class="latin">${esc(SP[r.s].latin)}</span></td>
+       <td>${atlasBadge(r)}<span class="small">${esc(atlasDesc(r.ac))}</span></td>
+       <td class="hide-sm">${fmtD(r.acObs.d)}<span class="small">${esc(placeName(r.acObs.p))}</span></td></tr>`).join("")}</tbody></table></div>` : ""}`;
+}
+function renderList() {
+  const list = regionObs(baseObs());
+  const stats = speciesStats(list);
+  // life number by first date (ties broken by taxonomic order)
+  const chrono = numberLifers(stats);
+  const q = S.q.trim().toLowerCase();
+  const af = S.atlasF;
+  let rows = chrono.filter(r => (!q || SP[r.s].name.toLowerCase().includes(q) || SP[r.s].latin.toLowerCase().includes(q))
+    && (af === "all" || (af === "any" ? r.ac : af === "none" ? !r.ac : r.ac[0] === af)));
+  const cmp = {
+    nr: (a, b) => a.nr - b.nr,
+    first: (a, b) => (a.first.d < b.first.d ? -1 : a.first.d > b.first.d ? 1 : 0) || a.nr - b.nr,
+    taxon: (a, b) => SP[a.s].order - SP[b.s].order,
+    name: (a, b) => collator.compare(SP[a.s].name, SP[b.s].name),
+    last: (a, b) => a.last.d < b.last.d ? -1 : a.last.d > b.last.d ? 1 : 0,
+    n: (a, b) => a.n - b.n,
+    max: (a, b) => a.max - b.max,
+    years: (a, b) => a.years.size - b.years.size,
+    atlas: (a, b) => a.ar - b.ar,
+  }[S.sort];
+  rows.sort((a, b) => S.dir * cmp(a, b));
+  const th = (key, label, cls = "") => `<th class="sortable ${cls}${S.sort === key ? " sorted" : ""}" data-sort="${key}">${label}${S.sort === key ? (S.dir > 0 ? " ▲" : " ▼") : ""}</th>`;
+  let h = `<p class="sub" style="margin:4px 4px 6px">${t("hits", rows.length, stats.size)}</p>
+    <table><thead><tr>${th("nr", t("nr"))}${th("name", t("name"))}${th("first", t("first"), "hide-sm")}${th("last", t("last"), "hide-sm")}${th("n", t("obsShort"), "num")}${th("max", t("max"), "num hide-sm")}${th("years", t("yearsShort"), "num hide-sm")}${th("atlas", t("colAtlas"))}</tr></thead><tbody>`;
+  for (const r of rows) {
+    const sp = SP[r.s], open = S.open.has(r.s);
+    h += `<tr class="row" data-sp="${r.s}"><td class="nr">${r.nr}</td>
+      <td>${esc(sp.name)}<span class="latin">${esc(sp.latin)}</span></td>
+      <td class="hide-sm">${fmtD(r.first.d)}<span class="small">${esc(placeName(r.first.p))}</span></td>
+      <td class="hide-sm">${fmtD(r.last.d)}</td>
+      <td class="num">${r.n}</td><td class="num hide-sm">${r.max || "x"}</td><td class="num hide-sm">${r.years.size}</td><td>${atlasBadge(r)}</td></tr>`;
+    if (open) h += `<tr class="detail"><td colspan="8">${detailHtml(r)}</td></tr>`;
+  }
+  $("q-sort").value = ["nr", "taxon", "name"].includes(S.sort) ? S.sort : "";
+  $("list-out").innerHTML = h + `</tbody></table>`;
+}
+function detailHtml(r) {
+  const maxM = Math.max(1, ...r.months);
+  const top = [...r.places].sort((a, b) => b[1] - a[1]).slice(0, 5);
+  const yrs = [...r.years].sort((a, b) => a[0] - b[0]);
+  return `<div class="detailgrid">
+    <div><b>${t("detailPheno")}</b>
+      <div class="pheno" style="margin-top:8px">${r.months.map((n, i) => `<div style="height:${n / maxM * 100}%" title="${T.months[i]}: ${n}"></div>`).join("")}</div>
+      <div class="pheno-l">${T.monthsShort.map(m => `<span>${m[0]}</span>`).join("")}</div></div>
+    <div><b>${t("detailYears")}</b><div class="chips">${yrs.map(([y, n]) => `<span class="chip">${y} (${n})</span>`).join("")}</div>
+      ${r.codes.size ? `<b>${t("atlasCodesTitle")}</b><div class="chips">${[...r.codes].sort((a, b) => atlasRank(b[0]) - atlasRank(a[0])).map(([c, n]) => `<span class="chip" title="${esc(atlasText(c))}">${esc(c)} (${n})</span>`).join("")}</div>` : ""}
+      <b>${t("detailPlaces")}</b><div class="chips">${top.map(([p, n]) => `<span class="chip">${esc(placeName(p))} (${n})</span>`).join("")}</div></div>
+    <div><span class="small">${t("detailFirst")}</span>${fmtD(r.first.d)}, ${esc(placeName(r.first.p))}
+      <span class="small" style="margin-top:6px">${t("detailLast")}</span>${fmtD(r.last.d)}, ${esc(placeName(r.last.p))}
+      <span class="small" style="margin-top:6px">${t("detailMax")}</span>${r.max || "x"}
+      <span class="small" style="margin-top:6px">${t("detailPhotos")}</span>${r.photos}</div></div>`;
+}
+
+/* ---------- regions ---------- */
+const LEVELS = [
+  { lvl: "s", title: "grpState", label: p => stateName(p.state || "?") },
+  { lvl: "c", title: "grpCounty", label: p => countyName(p.keys.c) },
+  { lvl: "m", title: "grpMuni", label: p => p.muni || T.unknown },
+  { lvl: "p", title: "grpPlace", label: p => p.name },
+];
+function regionTable(lv, list) {
+  const map = new Map();
+  for (const o of list) {
+    const p = PL[o.p], key = p.keys[lv.lvl];
+    let r = map.get(key);
+    if (!r) { r = { key, name: lv.label(p), life: new Set(), year: new Set(), month: new Set() }; map.set(key, r); }
+    r.life.add(o.s);
+    if (o.y === S.year) { r.year.add(o.s); if (o.m === S.month) r.month.add(o.s); }
+  }
+  const rows = [...map.values()];
+  const sort = S.regSort[lv.lvl] || { k: "life", d: -1 };
+  const val = { life: r => r.life.size, year: r => r.year.size, month: r => r.month.size };
+  rows.sort((a, b) => sort.k === "name" ? sort.d * collator.compare(a.name, b.name)
+    : sort.d * (val[sort.k](a) - val[sort.k](b)) || collator.compare(a.name, b.name));
+  const showAll = S.regAll[lv.lvl], shown = showAll ? rows : rows.slice(0, 10);
+  const th = (k, label, cls) => `<th class="sortable ${cls}${sort.k === k ? " sorted" : ""}" data-lvl="${lv.lvl}" data-k="${k}">${label}${sort.k === k ? (sort.d > 0 ? " ▲" : " ▼") : ""}</th>`;
+  return `<h2>${t("regionsBy", t(lv.title))}<small>${rows.length}</small></h2><div class="card"><table><thead><tr>
+    <th class="nr">#</th>${th("name", t("name"), "")}${th("life", t("colLife"), "num")}${th("year", t("colYearShort") + " " + S.year, "num")}${th("month", T.monthsShort[S.month - 1].replace(".", "") + " " + S.year, "num")}</tr></thead><tbody>` +
+    shown.map((r, i) => `<tr><td class="nr">${i + 1}</td><td><button class="lnk" data-region="${lv.lvl}:${esc(r.key)}">${esc(r.name)}</button></td>
+      <td class="num">${r.life.size}</td><td class="num">${r.year.size}</td><td class="num">${r.month.size}</td></tr>`).join("") +
+    `</tbody></table>${rows.length > 10 ? `<p class="more"><button class="lnk" data-more="${lv.lvl}">${showAll ? t("showLess") : t("showAll", rows.length)}</button></p>` : ""}</div>`;
+}
+function renderRegions() {
+  const list = baseObs();
+  $("tab-regions").innerHTML = `<p class="prose">${t("regionsHelp")}</p>` + LEVELS.filter(lv => !S.redact || lv.lvl === "s" || lv.lvl === "c").map(lv => regionTable(lv, list)).join("");
+}
+
+/* ---------- targets ---------- */
+function circDiff(doy, ref) { return ((doy - ref + 182 + 365) % 365) - 182; }
+function renderTargets() {
+  const list = regionObs(baseObs()).filter(o => o.y <= S.year);
+  const stats = speciesStats(list);
+  const prevYears = new Set(list.filter(o => o.y < S.year).map(o => o.y));
+  const isCur = S.year === TODAY_Y;
+  const yearRowsT = [];
+  for (const r of stats.values()) {
+    if (r.years.has(S.year)) continue;
+    const seen = [...r.years.keys()].filter(y => y < S.year);
+    if (!seen.length) continue;
+    let win = 0;
+    if (isCur) {
+      const wy = new Set();
+      for (const o of r.obs) if (o.y < S.year) { const d = circDiff(o.doy, TODAY_DOY); if (d >= -7 && d <= 21) wy.add(o.y); }
+      win = wy.size;
+    }
+    yearRowsT.push({ r, seen: seen.length, win });
+  }
+  yearRowsT.sort((a, b) => b.win - a.win || b.seen - a.seen || byDateDesc(a.r.last.d, b.r.last.d));
+  const monthRowsT = [];
+  for (const r of stats.values()) {
+    const inMonth = new Set(), thisYear = r.obs.some(o => o.y === S.year && o.m === S.month);
+    for (const o of r.obs) if (o.y < S.year && o.m === S.month) inMonth.add(o.y);
+    if (inMonth.size && !thisYear) monthRowsT.push({ r, n: inMonth.size });
+  }
+  monthRowsT.sort((a, b) => b.n - a.n || byDateDesc(a.r.last.d, b.r.last.d));
+  const tbl = (rows, cols, cell) => rows.length ? `<div class="card"><table><thead><tr><th class="nr">#</th><th>${t("name")}</th>${cols}</tr></thead><tbody>${rows.map((x, i) =>
+    `<tr><td class="nr">${i + 1}</td><td>${esc(SP[x.r.s].name)}<span class="latin">${esc(SP[x.r.s].latin)}</span></td>${cell(x)}</tr>`).join("")}</tbody></table></div>`
+    : `<p class="empty">${t("none")}</p>`;
+  const monthName = T.months[S.month - 1];
+  $("tab-targets").innerHTML = `<p class="prose">${t("tgtNote")}</p>
+    <h2>${t("tgtYear", S.year)}<small>${yearRowsT.length}</small></h2>
+    <p class="prose">${isCur ? t("tgtYearHelp", S.year) : t("tgtYearPast", S.year)}</p>
+    ${tbl(yearRowsT, `${isCur ? `<th class="num">${t("colWindow")}</th>` : ""}<th class="num">${t("colYearsSeen")}</th><th class="num hide-sm">${t("colLastSeen")}</th>`,
+      x => `${isCur ? `<td class="num">${t("windowOf", x.win, prevYears.size)}</td>` : ""}<td class="num">${t("windowOf", x.seen, prevYears.size)}</td><td class="num hide-sm">${fmtD(x.r.last.d)}</td>`)}
+    <h2>${t("tgtMonth", monthName + " " + S.year)}<small>${monthRowsT.length}</small></h2>
+    <p class="prose">${t("tgtMonthHelp", monthName, monthName + " " + S.year)}</p>
+    ${tbl(monthRowsT, `<th class="num">${t("colMonthYears")}</th><th class="num hide-sm">${t("colLastSeen")}</th>`,
+      x => `<td class="num">${t("windowOf", x.n, prevYears.size)}</td><td class="num hide-sm">${fmtD(x.r.last.d)}</td>`)}`;
+}
+
+/* ---------- map ---------- */
+let MAP = null, MAP_LAYER = null;
+/* ---------- daily activity ---------- */
+const MIN_TIMED = 5;  // minimum timed sightings before a species gets a typical time of day
+const fmtTime = m => pad(Math.floor(m / 60)) + ":" + pad(m % 60);
+const median = arr => {
+  const a = [...arr].sort((x, y) => x - y), n = a.length;
+  return n % 2 ? a[(n - 1) / 2] : Math.round((a[n / 2 - 1] + a[n / 2]) / 2);
+};
+function niceStep(max) {
+  const mag = Math.pow(10, Math.floor(Math.log10(max)));
+  for (const m of [1, 2, 5, 10]) if (max / (m * mag) <= 5) return Math.max(1, m * mag);
+  return mag;
+}
+// Vertical bars with a light grid; `tips[i]` becomes the hover text of bar i.
+function barChartSvg(values, labels, tips, every = 1) {
+  const W = 720, H = 200, L = 36, R = 8, Tp = 10, B = 22, n = values.length;
+  const max = Math.max(1, ...values), step = niceStep(max), yMax = Math.ceil(max / step) * step;
+  const y = v => H - B - v / yMax * (H - B - Tp), slot = (W - L - R) / n, top = Math.max(...values);
+  let g = "";
+  for (let v = 0; v <= yMax; v += step) g += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${L - 6}" y="${y(v) + 4}" text-anchor="end">${v}</text>`;
+  values.forEach((v, i) => {
+    const x = L + i * slot + slot * 0.15;
+    g += `<rect x="${x}" y="${y(v)}" width="${slot * 0.7}" height="${H - B - y(v)}" rx="2" fill="${v === top && v > 0 ? "var(--accent)" : "var(--bar)"}"><title>${esc(tips[i])}</title></rect>`;
+    if (i % every === 0) g += `<text x="${x + slot * 0.35}" y="${H - 6}" text-anchor="middle">${esc(labels[i])}</text>`;
+  });
+  return `<svg class="curve" viewBox="0 0 ${W} ${H}" role="img">${g}</svg>`;
+}
+function renderActivity() {
+  const scoped = regionObs(baseObs()).filter(o => S.actScope === "all" || o.y === S.year);
+  $("a-scope").options[1].text = t("actScopeYear", S.year);
+  const timed = scoped.filter(o => o.tm >= 0);
+  if (!timed.length) { $("act-out").innerHTML = `<p class="empty">${t("noData")}</p>`; return; }
+
+  const obsH = Array(24).fill(0), spH = Array.from({ length: 24 }, () => new Set()), dayH = Array.from({ length: 24 }, () => new Set());
+  const bySpecies = new Map(), monthHour = Array.from({ length: 12 }, () => Array(24).fill(0));
+  for (const o of timed) {
+    const h = Math.floor(o.tm / 60);
+    obsH[h]++; spH[h].add(o.s); dayH[h].add(o.d); monthHour[o.m - 1][h]++;
+    if (!bySpecies.has(o.s)) bySpecies.set(o.s, []);
+    bySpecies.get(o.s).push(o.tm);
+  }
+  const series = { obs: obsH, species: spH.map(s => s.size), days: dayH.map(s => s.size) }[S.actMetric];
+  const hours = [...Array(24).keys()], hourLabel = h => t("hourRange", h, (h + 1) % 24);
+  const peak = obsH.indexOf(Math.max(...obsH));
+
+  // weekday chart counts days, so it uses every sighting of the scope, with or without a time
+  const wdDays = Array.from({ length: 7 }, () => new Set());
+  for (const o of scoped) wdDays[(new Date(o.d + "T00:00:00Z").getUTCDay() + 6) % 7].add(o.d);
+
+  const speciesRows = [...bySpecies].filter(([, a]) => a.length >= MIN_TIMED).map(([s, a]) => ({ s, med: median(a), n: a.length }));
+  const speciesTable = rows => `<div class="card"><table><thead><tr><th>${t("name")}</th><th class="num">${t("colMedian")}</th><th class="num">${t("obsShort")}</th></tr></thead><tbody>${rows.map(r =>
+    `<tr><td>${esc(SP[r.s].name)}<span class="latin">${esc(SP[r.s].latin)}</span></td><td class="num">${fmtTime(r.med)}</td><td class="num">${r.n}</td></tr>`).join("")}</tbody></table></div>`;
+  const early = [...speciesRows].sort((a, b) => a.med - b.med).slice(0, 8), late = [...speciesRows].sort((a, b) => b.med - a.med).slice(0, 8);
+
+  const heatMax = Math.max(1, ...monthHour.flat());
+  const heat = `<table class="heat"><thead><tr><th></th>${hours.map(h => `<th>${h}</th>`).join("")}</tr></thead><tbody>${monthHour.map((row, m) =>
+    `<tr><td class="y">${T.monthsShort[m].replace(".", "")}</td>${row.map((n, h) => n
+      ? `<td title="${esc(T.months[m] + ", " + hourLabel(h) + ": " + n)}" style="background:color-mix(in srgb,var(--accent) ${Math.round(10 + n / heatMax * 80)}%,transparent)">&nbsp;</td>`
+      : `<td></td>`).join("")}</tr>`).join("")}</tbody></table>`;
+
+  $("act-out").innerHTML = `
+    <p class="prose">${t("actHelp", fmtN(timed.length), fmtN(scoped.length))}</p>
+    <div class="kpis">
+      <div class="kpi main"><b>${fmtN(timed.length)}</b><span>${t("actKTimed")}</span></div>
+      <div class="kpi"><b>${hourLabel(peak)}</b><span>${t("actKPeak")}</span></div>
+    </div>
+    <h2>${t("actHourTitle")}</h2>
+    <div class="card">${barChartSvg(series, hours, hours.map(h => hourLabel(h) + ": " + series[h]), 3)}</div>
+    <h2>${t("actWeekday")}</h2>
+    <p class="prose">${t("actWeekdayHelp")}</p>
+    <div class="card">${barChartSvg(wdDays.map(s => s.size), T.weekdays, T.weekdays.map((w, i) => w + ": " + wdDays[i].size))}</div>
+    <h2>${t("actHeat")}</h2>
+    <p class="prose">${t("actHeatHelp")}</p>
+    <div class="card">${heat}</div>
+    <h2>${t("actSpecies")}</h2>
+    <p class="prose">${t("actSpeciesHelp", MIN_TIMED)}</p>
+    <div class="detailgrid"><div><b>${t("actEarly")}</b>${speciesTable(early)}</div><div><b>${t("actLate")}</b>${speciesTable(late)}</div></div>`;
+}
+
+// Leaflet is fetched on the first visit of the map tab, so a slow or blocked CDN cannot delay the rest of the page.
+const LEAFLET_URL = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min";
+let leafletLoading = null;
+function loadLeaflet() {
+  if (typeof L !== "undefined") return Promise.resolve();
+  if (!leafletLoading) {
+    leafletLoading = new Promise((resolve, reject) => {
+      const css = document.createElement("link");
+      css.rel = "stylesheet"; css.href = LEAFLET_URL + ".css";
+      const js = document.createElement("script");
+      js.src = LEAFLET_URL + ".js";
+      js.onload = resolve;
+      js.onerror = () => { leafletLoading = null; css.remove(); reject(new Error("leaflet")); };
+      document.head.append(css, js);
+    });
+  }
+  return leafletLoading;
+}
+function renderMap() {
+  $("map-note").textContent = "";
+  loadLeaflet().then(() => { if (S.tab === "map") drawMap(); },
+    () => { if (!MAP) $("map").innerHTML = `<p class="empty">${t("mapNoLib")}</p>`; });
+}
+function drawMap() {
+  const box = $("map");
+  if (!MAP) {
+    box.innerHTML = "";
+    MAP = L.map(box);
+    const esri = "&copy; Esri, HERE, Garmin, OpenStreetMap-Mitwirkende";
+    const layers = {
+      [t("mapStreets")]: L.tileLayer("https://services.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", { maxZoom: 19, attribution: esri }),
+      [t("mapTopo")]: L.tileLayer("https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png", { maxZoom: 17, subdomains: "abc", attribution: "Kartendaten &copy; OpenStreetMap-Mitwirkende, SRTM, Darstellung &copy; OpenTopoMap (CC-BY-SA)" }),
+      [t("mapSat")]: L.tileLayer("https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", { maxZoom: 19, attribution: "&copy; Esri, Maxar, Earthstar Geographics" }),
+    };
+    Object.values(layers)[0].addTo(MAP);
+    L.control.layers(layers, null, { position: "topright" }).addTo(MAP);
+    MAP_LAYER = L.layerGroup().addTo(MAP);
+  }
+  $("m-metric").options[1].text = t("mapYear", S.year);
+  MAP.invalidateSize();
+  MAP_LAYER.clearLayers();
+  const byPlace = new Map();
+  for (const o of regionObs(baseObs())) {
+    let r = byPlace.get(o.p);
+    if (!r) { r = { p: o.p, sp: new Set(), ySp: new Set(), n: 0, first: o.d, last: o.d }; byPlace.set(o.p, r); }
+    r.sp.add(o.s); r.n++; r.last = o.d;
+    if (o.y === S.year) r.ySp.add(o.s);
+  }
+  const value = r => S.metric === "year" ? r.ySp.size : S.metric === "obs" ? r.n : r.sp.size;
+  const pts = [...byPlace.values()].filter(r => PL[r.p].lat && value(r) > 0).sort((a, b) => value(b) - value(a));
+  $("map-note").textContent = t("mapNote", pts.length);
+  if (!pts.length) return;
+  const max = value(pts[0]);
+  const bounds = [];
+  for (const r of pts) {
+    const p = PL[r.p], v = value(r);
+    L.circleMarker([p.lat, p.lon], { radius: 5 + 17 * Math.sqrt(v / max), color: "#1f6b39", weight: 1.5, fillColor: "#2f8f4e", fillOpacity: .55 })
+      .bindPopup(`<b>${esc(p.name)}</b><br>${esc(p.muni)}<br>${t("mapSpecies")}: ${r.sp.size}, ${t("observations")}: ${r.n}<br>${fmtD(r.first)} bis ${fmtD(r.last)}<br><button class="lnk" data-region="p:${p.i}">${t("mapFilter")}</button>`)
+      .bindTooltip(`${esc(p.name)}: ${v}`)
+      .addTo(MAP_LAYER);
+    bounds.push([p.lat, p.lon]);
+  }
+  MAP.fitBounds(bounds, { padding: [30, 30], maxZoom: 15 });
+}
+
+/* ---------- chrome ---------- */
+function buildRegionSelect() {
+  const base = baseObs(), groups = { s: new Map(), c: new Map(), m: new Map() };
+  for (const o of base) {
+    const p = PL[o.p];
+    for (const g of ["s", "c", "m"]) {
+      const k = p.keys[g];
+      if (!groups[g].has(k)) groups[g].set(k, { name: g === "s" ? stateName(p.state || "?") : g === "c" ? countyName(p.keys.c) : (p.muni || T.unknown), sp: new Set() });
+      groups[g].get(k).sp.add(o.s);
+    }
+  }
+  const opt = (g, k, v) => `<option value="${g}:${esc(k)}">${esc(v.name)} (${v.sp.size})</option>`;
+  const grp = (g, title) => {
+    const items = [...groups[g]].sort((a, b) => b[1].sp.size - a[1].sp.size);
+    return `<optgroup label="${t(title)}">${items.map(([k, v]) => opt(g, k, v)).join("")}</optgroup>`;
+  };
+  const sel = $("f-region");
+  sel.innerHTML = `<option value="all">${t("regionAll")}</option>` + grp("s", "grpState") + grp("c", "grpCounty") + (S.redact ? "" : grp("m", "grpMuni"));
+  if (S.region.startsWith("p:") && PL[+S.region.slice(2)]) {
+    sel.insertAdjacentHTML("beforeend", `<optgroup label="${t("grpPlace")}"><option value="${S.region}">${esc(PL[+S.region.slice(2)].name)}</option></optgroup>`);
+  }
+  sel.value = [...sel.options].some(o => o.value === S.region) ? S.region : "all";
+  S.region = sel.value;
+}
+function applyRedact(on) {
+  S.redact = on;
+  $("o-redact").checked = on;
+  document.querySelector('#tabs button[data-tab="map"]').hidden = on;
+  if (on && /^[pm]:/.test(S.region)) S.region = "all";
+  if (on && S.tab === "map") { S.tab = "overview"; }
+  // drop everything rendered with place names; each tab re-renders when it is shown
+  for (const id of ["tab-overview", "list-out", "tab-regions", "tab-targets"]) $(id).innerHTML = "";
+  if (MAP_LAYER) MAP_LAYER.clearLayers();
+  $("map-note").textContent = "";
+  buildRegionSelect();
+  setTab(S.tab);
+}
+function setTab(tab) {
+  S.tab = tab;
+  for (const b of document.querySelectorAll("#tabs button")) b.classList.toggle("on", b.dataset.tab === tab);
+  for (const s of document.querySelectorAll("section.tab")) s.classList.toggle("on", s.id === "tab-" + tab);
+  try { history.replaceState(null, "", "#" + tab); } catch (e) { /* file: URLs may refuse */ }
+  renderActive();
+}
+function renderActive() {
+  ({ overview: renderOverview, list: renderList, regions: renderRegions, targets: renderTargets, activity: renderActivity, map: renderMap })[S.tab]();
+}
+function refreshAll() { buildRegionSelect(); renderActive(); }
+
+function init() {
+  $("h-title").textContent = t("title");
+  $("h-sub").textContent = t("subtitle", RAW.meta.source, fmtN(OBS.length));
+  $("o-sum").textContent = t("optsSummary");
+  $("o-escaped-t").textContent = t("optEscaped");
+  $("o-collective-t").textContent = t("optCollective");
+  $("o-redact-t").textContent = t("optRedact");
+  $("o-redact-l").hidden = !!RAW.meta.redacted;
+  $("q").placeholder = t("searchPh");
+  $("tabs").innerHTML = [["overview", "tabOverview"], ["list", "tabList"], ["regions", "tabRegions"], ["targets", "tabTargets"], ["activity", "tabActivity"], ["map", "tabMap"]]
+    .map(([k, l]) => `<button data-tab="${k}">${t(l)}</button>`).join("");
+  $("f-year").innerHTML = YEARS.slice().reverse().map(y => `<option>${y}</option>`).join("");
+  $("f-year").value = S.year;
+  $("f-month").innerHTML = T.months.map((m, i) => `<option value="${i + 1}">${m}</option>`).join("");
+  $("f-month").value = S.month;
+
+  $("tabs").addEventListener("click", e => { const b = e.target.closest("button"); if (b) setTab(b.dataset.tab); });
+  $("f-region").addEventListener("change", e => { S.region = e.target.value; renderActive(); });
+  $("f-year").addEventListener("change", e => { S.year = +e.target.value; renderActive(); });
+  $("f-month").addEventListener("change", e => { S.month = +e.target.value; renderActive(); });
+  $("o-escaped").addEventListener("change", e => { S.escaped = e.target.checked; refreshAll(); });
+  $("o-collective").addEventListener("change", e => { S.collective = e.target.checked; refreshAll(); });
+  $("o-redact").addEventListener("change", e => { applyRedact(e.target.checked); });
+  $("q").addEventListener("input", e => { S.q = e.target.value; renderList(); });
+  $("q-sort").innerHTML = ["nr", "taxon", "name"].map(k => `<option value="${k}">${t("sort" + k[0].toUpperCase() + k.slice(1))}</option>`).join("") + `<option value="" disabled>${t("sortColumn")}</option>`;
+  $("q-sort").addEventListener("change", e => { S.sort = e.target.value; S.dir = S.sort === "nr" ? -1 : 1; renderList(); });
+  $("a-metric").innerHTML = [["obs", "actMObs"], ["species", "actMSpecies"], ["days", "actMDays"]].map(([k, l]) => `<option value="${k}">${t(l)}</option>`).join("");
+  $("a-scope").innerHTML = `<option value="all">${t("actScopeAll")}</option><option value="year"></option>`;
+  $("a-metric").addEventListener("change", e => { S.actMetric = e.target.value; renderActivity(); });
+  $("a-scope").addEventListener("change", e => { S.actScope = e.target.value; renderActivity(); });
+  $("q-atlas").innerHTML = Object.entries(T.atlasFilter).map(([k, v]) => `<option value="${k}">${v}</option>`).join("");
+  $("q-atlas").addEventListener("change", e => { S.atlasF = e.target.value; renderList(); });
+  $("b-pdf").textContent = t("pdf");
+  $("b-pdf").addEventListener("click", () => window.print());
+  let printBackup = null;
+  window.addEventListener("beforeprint", () => {
+    // the report contains every section in full: no open detail rows, search, atlas filter or truncated region tables
+    printBackup = { q: S.q, open: S.open, atlasF: S.atlasF, regAll: S.regAll };
+    S.q = ""; S.open = new Set(); S.atlasF = "all"; S.regAll = Object.fromEntries(LEVELS.map(lv => [lv.lvl, true]));
+    $("h-print").textContent = t("printed", new Date().toLocaleDateString("de-DE")) + (S.region === "all" ? "" : ", " + $("f-region").selectedOptions[0].text);
+    renderOverview(); renderList(); renderRegions(); renderTargets(); renderActivity();
+  });
+  window.addEventListener("afterprint", () => {
+    if (printBackup) { Object.assign(S, printBackup); printBackup = null; }
+    renderActive();
+  });
+  $("m-metric").innerHTML = `<option value="life">${t("mapLife")}</option><option value="year">${t("mapYear", "(Jahr)")}</option><option value="obs">${t("mapObs")}</option>`;
+  $("m-metric").addEventListener("change", e => { S.metric = e.target.value; renderMap(); });
+  $("tab-map").addEventListener("click", e => {
+    const r = e.target.closest("[data-region]");
+    if (r) { S.region = r.dataset.region; buildRegionSelect(); renderMap(); }
+  });
+
+  $("list-out").addEventListener("click", e => {
+    const th = e.target.closest("th[data-sort]");
+    if (th) {
+      const k = th.dataset.sort;
+      if (S.sort === k) S.dir = -S.dir; else { S.sort = k; S.dir = k === "name" || k === "taxon" ? 1 : -1; }
+      renderList(); return;
+    }
+    const tr = e.target.closest("tr.row");
+    if (tr) { const s = +tr.dataset.sp; S.open.has(s) ? S.open.delete(s) : S.open.add(s); renderList(); }
+  });
+  $("tab-regions").addEventListener("click", e => {
+    const th = e.target.closest("th[data-lvl]");
+    if (th) {
+      const cur = S.regSort[th.dataset.lvl] || { k: "life", d: -1 };
+      S.regSort[th.dataset.lvl] = cur.k === th.dataset.k ? { k: cur.k, d: -cur.d } : { k: th.dataset.k, d: th.dataset.k === "name" ? 1 : -1 };
+      renderRegions(); return;
+    }
+    const more = e.target.closest("[data-more]");
+    if (more) { S.regAll[more.dataset.more] = !S.regAll[more.dataset.more]; renderRegions(); return; }
+    const r = e.target.closest("[data-region]");
+    if (r) {
+      S.region = r.dataset.region;
+      buildRegionSelect();
+      setTab("overview");
+    }
+  });
+
+  if (S.redact) { $("o-redact").checked = true; document.querySelector('#tabs button[data-tab="map"]').hidden = true; }
+  const hash = location.hash.slice(1);
+  buildRegionSelect();
+  const tabs = ["overview", "list", "regions", "targets", "activity"].concat(S.redact ? [] : ["map"]);
+  setTab(tabs.includes(hash) ? hash : "overview");
+}
+init();
+</script>
+</body>
+</html>
