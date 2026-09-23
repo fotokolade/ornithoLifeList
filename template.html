@@ -9,49 +9,57 @@
   --bg:#f7f8f6; --card:#ffffff; --text:#1d2521; --muted:#6a746e; --line:#e4e8e4;
   --accent:#2f8f4e; --accent-soft:#eaf4ed; --bar:#4a86b6; --bar-soft:#dbe7f0;
   --hl:#fff7cc; --link:#3d6a8c; --stripe:#f6f8f5;
+  --k1:#2f8f4e; --k2:#c98a1b; --k3:#3d78a8; --k4:#8659b3; --k5:#c1554a; --k6:#2f9e93;
 }
 @media (prefers-color-scheme: dark){
   :root{
     --bg:#121614; --card:#1b201d; --text:#e8ece9; --muted:#96a19a; --line:#2c332f;
     --accent:#4cc275; --accent-soft:#1f3327; --bar:#5b9bcf; --bar-soft:#2b3b48;
     --hl:#3b3717; --link:#8ab8dc; --stripe:#202622;
+    --k1:#4cc275; --k2:#e0a23c; --k3:#5b9bcf; --k4:#b28ee0; --k5:#e08578; --k6:#4cc2b3;
   }
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--text);
-  font:14px/1.35 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-.wrap{max-width:920px;margin:0 auto;padding:0 12px 32px}
+  font:14px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:960px;margin:0 auto;padding:0 16px 44px}
 header.top{background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
 header.top .wrap{padding-bottom:0}
 .brand{display:flex;align-items:baseline;gap:4px 12px;flex-wrap:wrap;padding-top:8px}
 h1{font-size:1.05rem;margin:0}
 .sub{color:var(--muted);font-size:.78rem;margin:0}
-.filters{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:6px}
-select,input[type=search]{font:inherit;font-size:.82rem;padding:3px 6px;border:1px solid var(--line);
-  border-radius:6px;background:var(--card);color:var(--text);max-width:100%}
+.filters{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:10px}
+select,input[type=search]{font:inherit;font-size:.82rem;padding:5px 8px;border:1px solid var(--line);
+  border-radius:7px;background:var(--card);color:var(--text);max-width:100%}
 input[type=search]{min-width:0;flex:1 1 200px}
 details.opts{font-size:.8rem;color:var(--muted)}
 details.opts summary{cursor:pointer}
-details.opts label{display:block;margin:3px 0}
-nav.tabs{display:flex;gap:0;margin-top:4px;overflow-x:auto}
+details.opts label{display:block;margin:5px 0}
+nav.tabs{display:flex;gap:2px;margin-top:8px;overflow-x:auto}
 nav.tabs button{font:inherit;font-size:.85rem;border:0;background:none;color:var(--muted);
-  padding:6px 10px;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap}
+  padding:8px 14px;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap}
 nav.tabs button.on{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
-section.tab{display:none;padding-top:10px}
+section.tab{display:none;padding-top:16px}
 section.tab.on{display:block}
-h2{font-size:.9rem;margin:16px 0 4px}
+h2{font-size:.92rem;margin:26px 0 8px}
 h2 small{font-weight:400;color:var(--muted);margin-left:6px}
-.prose{color:var(--muted);font-size:.78rem;text-align:justify;hyphens:auto;margin:2px 0 6px}
-.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:6px}
-.kpi{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 10px}
-.kpi b{display:block;font-size:1.25rem;line-height:1.15}
-.kpi span{color:var(--muted);font-size:.74rem;line-height:1.2;display:block}
+.prose{color:var(--muted);font-size:.78rem;text-align:justify;hyphens:auto;margin:3px 0 12px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:10px}
+.kpi{background:var(--card);border:1px solid var(--line);border-top:3px solid var(--k3);border-radius:9px;padding:10px 14px}
+.kpi:nth-child(6n+1){border-top-color:var(--k1)}
+.kpi:nth-child(6n+2){border-top-color:var(--k2)}
+.kpi:nth-child(6n+3){border-top-color:var(--k3)}
+.kpi:nth-child(6n+4){border-top-color:var(--k4)}
+.kpi:nth-child(6n+5){border-top-color:var(--k5)}
+.kpi:nth-child(6n+6){border-top-color:var(--k6)}
+.kpi b{display:block;font-size:1.3rem;line-height:1.2}
+.kpi span{color:var(--muted);font-size:.74rem;line-height:1.25;display:block;margin-top:1px}
 .kpi.main b{color:var(--accent)}
-.card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:2px 8px;overflow-x:auto}
-.yhead,.yrow{display:grid;grid-template-columns:2.6rem 4.2rem 1fr 3rem 2.6rem;gap:6px;align-items:center;padding:2px 4px}
-.yhead{color:var(--muted);font-size:.72rem;padding-top:4px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:10px 14px;overflow-x:auto}
+.yhead,.yrow{display:grid;grid-template-columns:2.6rem 4.2rem 1fr 3rem 2.6rem;gap:8px;align-items:center;padding:4px 6px}
+.yhead{color:var(--muted);font-size:.72rem;padding-top:6px}
 .yrow{border-radius:6px}
 .yrow.cur{background:var(--hl)}
 .yrow .y{font-weight:600}
@@ -60,17 +68,23 @@ h2 small{font-weight:400;color:var(--muted);margin-left:6px}
 .yrow .new{color:var(--muted);text-align:right;font-size:.78rem;font-variant-numeric:tabular-nums}
 .yhead span:nth-child(2),.yhead span:nth-child(4),.yhead span:nth-child(5){text-align:right}
 .bar{height:10px;background:var(--bar-soft);border-radius:3px;position:relative;overflow:hidden}
-.bar i{position:absolute;left:0;top:0;bottom:0;background:var(--bar);border-radius:3px 0 0 3px}
+.bar i{position:absolute;left:0;top:0;bottom:0;border-radius:3px 0 0 3px;
+  background:linear-gradient(90deg,color-mix(in srgb,var(--bar) 45%,transparent),var(--bar))}
+.yrow.cur .bar i{background:linear-gradient(90deg,color-mix(in srgb,var(--accent) 45%,transparent),var(--accent))}
 table{border-collapse:collapse;width:100%;font-size:.84rem}
 th{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;text-align:left;
-  padding:5px 6px;border-bottom:1px solid var(--line);white-space:nowrap;user-select:none}
+  padding:7px 8px;border-bottom:1px solid var(--line);white-space:nowrap;user-select:none}
 th.sortable{cursor:pointer}
 th.sorted{color:var(--text)}
-td{padding:4px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+td{padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
 tbody tr:last-child td{border-bottom:0}
 tbody tr:nth-child(odd) td{background:var(--stripe)}
 td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 td.nr{color:var(--muted);width:2rem}
+table.rtable{table-layout:fixed}
+table.rtable .nr{width:2.2rem}
+table.rtable .num{width:4.5rem}
+table.rtable td:not(.nr):not(.num),table.rtable th:not(.nr):not(.num){overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .latin{color:var(--muted);font-style:italic;font-size:.74rem;display:block;line-height:1.2}
 .small{color:var(--muted);font-size:.74rem;display:block;line-height:1.2}
 button.lnk{color:var(--link);background:none;border:0;padding:0;font:inherit;cursor:pointer;text-align:left}
@@ -80,19 +94,37 @@ tr.detail td{background:var(--accent-soft)!important;padding:8px}
 .pheno{display:grid;grid-template-columns:repeat(12,1fr);gap:2px;align-items:end;height:54px;max-width:360px}
 .pheno div{background:var(--bar);border-radius:2px 2px 0 0;min-height:1px;position:relative}
 .pheno-l{display:grid;grid-template-columns:repeat(12,1fr);gap:2px;max-width:360px;font-size:.66rem;color:var(--muted);text-align:center}
-.chips{display:flex;flex-wrap:wrap;gap:4px;margin:4px 0}
-.chip{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:0 7px;font-size:.74rem}
-.detailgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
-.heat td,.heat th{text-align:center;padding:2px 1px;font-size:.72rem}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.chip{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:.74rem}
+.detailgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+.heat td,.heat th{text-align:center;padding:3px 2px;font-size:.72rem}
 .heat td.y{text-align:left;font-weight:600;padding-left:4px}
-.heat td{border:1px solid var(--card)}
+.heat td{border:1px solid var(--card);border-radius:3px}
+.time-chip{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:middle}
+.new-badge{background:var(--accent);color:#fff;border-radius:999px;padding:0 6px;font-size:.62rem;font-weight:700;margin-left:6px;vertical-align:middle}
+.cal-months-wrap{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:16px}
+.cal-month h4{margin:0 0 5px;font-size:.76rem;color:var(--muted);font-weight:600}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal-dow{font-size:.6rem;color:var(--muted);text-align:center;line-height:1.6}
+.cal-day{aspect-ratio:1;border-radius:2px;background:var(--bar-soft)}
+.cal-day.cal-lifer{box-shadow:0 0 0 1.5px var(--accent) inset}
+.cal-day.cal-empty{background:transparent}
 svg.curve{width:100%;height:auto;display:block}
 svg.curve text{fill:var(--muted);font-size:11px}
-.pick{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 8px}
+.pick{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}
 .empty{color:var(--muted);padding:10px 4px}
-.more{margin:4px 0}
+.more{margin:8px 0 2px}
 #map{height:66vh;min-height:340px;border-radius:8px;border:1px solid var(--line)}
 .leaflet-popup-content{font:13px/1.35 system-ui,sans-serif;color:#1d2521}
+.leaflet-popup-content .visits{max-height:190px;overflow:auto;margin-top:6px;border-top:1px solid #e4e8e4;padding-top:4px}
+.leaflet-popup-content .visits details{margin:2px 0}
+.leaflet-popup-content .visits summary{cursor:pointer}
+.leaflet-popup-content .visits ul{margin:2px 0 4px;padding-left:18px}
+.marker-cluster-custom{background:color-mix(in srgb,var(--accent) 22%,transparent)}
+.marker-cluster-custom div{background:var(--accent);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font:600 12px/1 system-ui,sans-serif;width:100%;height:100%}
+.m-year{display:flex;align-items:center;gap:8px;flex:1 1 220px;min-width:180px}
+.m-year input[type=range]{flex:1;accent-color:var(--accent)}
+.m-year span{font-variant-numeric:tabular-nums;color:var(--muted);min-width:2.6em}
 @media (max-width:700px){
   .hide-sm{display:none}
   header.top{position:static}
@@ -102,6 +134,13 @@ svg.curve text{fill:var(--muted);font-size:11px}
 .ab{display:inline-block;min-width:1.9rem;text-align:center;border-radius:5px;padding:0 5px;font-size:.74rem;font-weight:600;color:#fff}
 .ab-A{background:#8a949d}.ab-B{background:#d18a1b}.ab-C{background:#2f8f4e}
 .btn{font:inherit;font-size:.82rem;padding:3px 10px;border:1px solid var(--accent);border-radius:6px;background:var(--accent);color:#fff;cursor:pointer}
+.legend{display:flex;align-items:center;gap:8px;margin:6px 2px 14px;font-size:.72rem;color:var(--muted)}
+.legend .grad{flex:0 0 90px;height:8px;border-radius:4px;background:linear-gradient(90deg,var(--k3),var(--accent))}
+.propbar{display:flex;height:14px;border-radius:7px;overflow:hidden;margin:10px 2px 6px}
+.propbar div{height:100%}
+.hbar{display:flex;flex-direction:column;gap:8px;padding:12px 14px}
+.hbar-row{display:grid;grid-template-columns:minmax(0,9rem) 1fr 2.4rem;gap:10px;align-items:center;font-size:.8rem}
+.hbar-row .lbl{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text)}
 .printonly{display:none}
 @page{size:A4;margin:14mm}
 @media print{
@@ -133,6 +172,10 @@ svg.curve text{fill:var(--muted);font-size:11px}
     </div>
     <p class="sub printonly" id="h-print"></p>
     <div class="filters">
+      <select id="f-lang" aria-label="Language / Sprache">
+        <option value="de">Deutsch</option>
+        <option value="en">English</option>
+      </select>
       <select id="f-region" aria-label="Region"></select>
       <select id="f-year" aria-label="Jahr"></select>
       <select id="f-month" aria-label="Monat"></select>
@@ -167,7 +210,10 @@ svg.curve text{fill:var(--muted);font-size:11px}
     <div id="act-out"></div>
   </section>
   <section class="tab" id="tab-map">
-    <div class="pick"><select id="m-metric" aria-label="Kartenwert"></select></div>
+    <div class="pick">
+      <select id="m-metric" aria-label="Kartenwert"></select>
+      <span class="m-year"><input type="range" id="m-year" step="1"><span id="m-year-val"></span></span>
+    </div>
     <div id="map"></div>
     <p class="prose" id="map-note"></p>
   </section>
@@ -176,9 +222,129 @@ svg.curve text{fill:var(--muted);font-size:11px}
 <script id="data" type="application/json">__DATA_JSON__</script>
 <script>
 "use strict";
+const APP_VERSION = "1.0.0";  // SemVer of this page's HTML/JS, independent of the ornitho.de export it was built from
 /* ---------- text resources ---------- */
-const T = {
-  title: "Meine Lebensliste",
+const COUNTIES = {"SN/BZ":"Bautzen","SN/GR":"Görlitz","SN/MEI":"Meißen","SN/DD":"Dresden","SN/PIR":"Sächsische Schweiz-Osterzgebirge",
+  "SN/L":"Leipzig","SN/C":"Chemnitz","SN/ERZ":"Erzgebirgskreis"};
+// Curated, non-exhaustive list of regularly occurring European species (German name, matching ornitho.de naming) for the wishlist feature.
+// Not an official checklist; rare vagrants are mostly left out on purpose.
+const EURO_SPECIES = [
+  ["Gavia stellata","Sterntaucher"],["Gavia arctica","Prachttaucher"],["Gavia immer","Eistaucher"],
+  ["Tachybaptus ruficollis","Zwergtaucher"],["Podiceps cristatus","Haubentaucher"],["Podiceps grisegena","Rothalstaucher"],
+  ["Podiceps auritus","Ohrentaucher"],["Podiceps nigricollis","Schwarzhalstaucher"],
+  ["Fulmarus glacialis","Eissturmvogel"],["Calonectris diomedea","Gelbschnabelsturmtaucher"],["Puffinus puffinus","Atlantiksturmtaucher"],
+  ["Hydrobates pelagicus","Sturmschwalbe"],["Morus bassanus","Basstölpel"],
+  ["Phalacrocorax carbo","Kormoran"],["Phalacrocorax aristotelis","Krähenscharbe"],
+  ["Botaurus stellaris","Rohrdommel"],["Botaurus minutus","Zwergdommel"],["Nycticorax nycticorax","Nachtreiher"],
+  ["Ardeola ralloides","Rallenreiher"],["Bubulcus ibis","Kuhreiher"],["Egretta garzetta","Seidenreiher"],
+  ["Ardea cinerea","Graureiher"],["Ardea purpurea","Purpurreiher"],["Ardea alba","Silberreiher"],
+  ["Ciconia nigra","Schwarzstorch"],["Ciconia ciconia","Weißstorch"],["Plegadis falcinellus","Sichler"],["Platalea leucorodia","Löffler"],
+  ["Phoenicopterus roseus","Rosaflamingo"],
+  ["Cygnus olor","Höckerschwan"],["Cygnus columbianus","Zwergschwan"],["Cygnus cygnus","Singschwan"],
+  ["Anser fabalis","Saatgans"],["Anser brachyrhynchus","Kurzschnabelgans"],["Anser albifrons","Blässgans"],["Anser erythropus","Zwerggans"],
+  ["Anser anser","Graugans"],["Branta leucopsis","Weißwangengans"],["Branta bernicla","Ringelgans"],["Branta canadensis","Kanadagans"],
+  ["Tadorna ferruginea","Rostgans"],["Tadorna tadorna","Brandgans"],
+  ["Mareca penelope","Pfeifente"],["Mareca strepera","Schnatterente"],["Anas crecca","Krickente"],["Anas platyrhynchos","Stockente"],
+  ["Anas acuta","Spießente"],["Spatula querquedula","Knäkente"],["Spatula clypeata","Löffelente"],
+  ["Netta rufina","Kolbenente"],["Aythya ferina","Tafelente"],["Aythya nyroca","Moorente"],["Aythya fuligula","Reiherente"],["Aythya marila","Bergente"],
+  ["Somateria mollissima","Eiderente"],["Clangula hyemalis","Eisente"],["Melanitta nigra","Trauerente"],["Melanitta fusca","Samtente"],
+  ["Bucephala clangula","Schellente"],["Mergellus albellus","Zwergsäger"],["Mergus serrator","Mittelsäger"],["Mergus merganser","Gänsesäger"],
+  ["Oxyura leucocephala","Weißkopfruderente"],
+  ["Pandion haliaetus","Fischadler"],["Pernis apivorus","Wespenbussard"],["Milvus migrans","Schwarzmilan"],["Milvus milvus","Rotmilan"],
+  ["Haliaeetus albicilla","Seeadler"],["Neophron percnopterus","Schmutzgeier"],["Gyps fulvus","Gänsegeier"],["Circaetus gallicus","Schlangenadler"],
+  ["Circus aeruginosus","Rohrweihe"],["Circus cyaneus","Kornweihe"],["Circus pygargus","Wiesenweihe"],
+  ["Astur gentilis","Habicht"],["Accipiter nisus","Sperber"],["Buteo buteo","Mäusebussard"],["Buteo lagopus","Rauhfußbussard"],
+  ["Aquila pomarina","Schreiadler"],["Aquila chrysaetos","Steinadler"],
+  ["Falco naumanni","Rötelfalke"],["Falco tinnunculus","Turmfalke"],["Falco vespertinus","Rotfußfalke"],["Falco columbarius","Merlin"],
+  ["Falco subbuteo","Baumfalke"],["Falco peregrinus","Wanderfalke"],
+  ["Tetrao urogallus","Auerhuhn"],["Lyrurus tetrix","Birkhuhn"],["Bonasa bonasia","Haselhuhn"],["Lagopus muta","Alpenschneehuhn"],
+  ["Perdix perdix","Rebhuhn"],["Coturnix coturnix","Wachtel"],["Alectoris rufa","Rothuhn"],["Alectoris graeca","Steinhuhn"],["Phasianus colchicus","Fasan"],
+  ["Rallus aquaticus","Wasserralle"],["Porzana porzana","Tüpfelsumpfhuhn"],["Zapornia parva","Kleines Sumpfhuhn"],["Crex crex","Wachtelkönig"],
+  ["Gallinula chloropus","Teichhuhn"],["Fulica atra","Blässhuhn"],["Grus grus","Kranich"],["Tetrax tetrax","Zwergtrappe"],["Otis tarda","Großtrappe"],
+  ["Haematopus ostralegus","Austernfischer"],["Himantopus himantopus","Stelzenläufer"],["Recurvirostra avosetta","Säbelschnäbler"],
+  ["Burhinus oedicnemus","Triel"],["Glareola pratincola","Brachschwalbe"],
+  ["Charadrius dubius","Flussregenpfeifer"],["Charadrius hiaticula","Sandregenpfeifer"],["Charadrius alexandrinus","Seeregenpfeifer"],
+  ["Charadrius morinellus","Mornellregenpfeifer"],["Pluvialis apricaria","Goldregenpfeifer"],["Pluvialis squatarola","Kiebitzregenpfeifer"],
+  ["Vanellus vanellus","Kiebitz"],
+  ["Calidris canutus","Knutt"],["Calidris alba","Sanderling"],["Calidris minuta","Zwergstrandläufer"],["Calidris temminckii","Temminckstrandläufer"],
+  ["Calidris alpina","Alpenstrandläufer"],["Calidris ferruginea","Sichelstrandläufer"],["Calidris pugnax","Kampfläufer"],
+  ["Lymnocryptes minimus","Zwergschnepfe"],["Gallinago gallinago","Bekassine"],["Scolopax rusticola","Waldschnepfe"],
+  ["Limosa limosa","Uferschnepfe"],["Limosa lapponica","Pfuhlschnepfe"],["Numenius phaeopus","Regenbrachvogel"],["Numenius arquata","Großer Brachvogel"],
+  ["Tringa erythropus","Dunkler Wasserläufer"],["Tringa totanus","Rotschenkel"],["Tringa stagnatilis","Teichwasserläufer"],
+  ["Tringa nebularia","Grünschenkel"],["Tringa ochropus","Waldwasserläufer"],["Tringa glareola","Bruchwasserläufer"],
+  ["Actitis hypoleucos","Flussuferläufer"],["Arenaria interpres","Steinwälzer"],["Phalaropus lobatus","Odinshühnchen"],
+  ["Stercorarius parasiticus","Schmarotzerraubmöwe"],["Stercorarius pomarinus","Spatelraubmöwe"],["Stercorarius skua","Große Raubmöwe"],
+  ["Larus melanocephalus","Schwarzkopfmöwe"],["Hydrocoloeus minutus","Zwergmöwe"],["Chroicocephalus ridibundus","Lachmöwe"],
+  ["Larus genei","Dünnschnabelmöwe"],["Larus canus","Sturmmöwe"],["Larus fuscus","Heringsmöwe"],["Larus argentatus","Silbermöwe"],
+  ["Larus michahellis","Mittelmeermöwe"],["Larus cachinnans","Steppenmöwe"],["Larus marinus","Mantelmöwe"],["Larus hyperboreus","Polarmöwe"],
+  ["Rissa tridactyla","Dreizehenmöwe"],
+  ["Gelochelidon nilotica","Lachseeschwalbe"],["Hydroprogne caspia","Raubseeschwalbe"],["Thalasseus sandvicensis","Brandseeschwalbe"],
+  ["Sterna hirundo","Flussseeschwalbe"],["Sterna paradisaea","Küstenseeschwalbe"],["Sternula albifrons","Zwergseeschwalbe"],
+  ["Chlidonias hybrida","Weißbartseeschwalbe"],["Chlidonias niger","Trauerseeschwalbe"],
+  ["Alca torda","Tordalk"],["Uria aalge","Trottellumme"],["Cepphus grylle","Gryllteiste"],["Fratercula arctica","Papageitaucher"],
+  ["Columba livia","Felsentaube"],["Columba oenas","Hohltaube"],["Columba palumbus","Ringeltaube"],
+  ["Streptopelia decaocto","Türkentaube"],["Streptopelia turtur","Turteltaube"],["Clamator glandarius","Häherkuckuck"],["Cuculus canorus","Kuckuck"],
+  ["Tyto alba","Schleiereule"],["Otus scops","Zwergohreule"],["Bubo bubo","Uhu"],["Bubo scandiacus","Schnee-Eule"],
+  ["Surnia ulula","Sperbereule"],["Glaucidium passerinum","Sperlingskauz"],["Athene noctua","Steinkauz"],["Strix aluco","Waldkauz"],
+  ["Strix uralensis","Habichtskauz"],["Asio otus","Waldohreule"],["Asio flammeus","Sumpfohreule"],["Aegolius funereus","Raufußkauz"],
+  ["Caprimulgus europaeus","Ziegenmelker"],["Apus apus","Mauersegler"],["Apus pallidus","Fahlsegler"],["Tachymarptis melba","Alpensegler"],
+  ["Alcedo atthis","Eisvogel"],["Merops apiaster","Bienenfresser"],["Coracias garrulus","Blauracke"],["Upupa epops","Wiedehopf"],
+  ["Jynx torquilla","Wendehals"],["Picus canus","Grauspecht"],["Picus viridis","Grünspecht"],["Dryocopus martius","Schwarzspecht"],
+  ["Dendrocopos major","Buntspecht"],["Dendrocopos syriacus","Blutspecht"],["Dendrocoptes medius","Mittelspecht"],
+  ["Dendrocopos leucotos","Weißrückenspecht"],["Dryobates minor","Kleinspecht"],["Picoides tridactylus","Dreizehenspecht"],
+  ["Calandrella brachydactyla","Kurzzehenlerche"],["Melanocorypha calandra","Kalanderlerche"],["Galerida cristata","Haubenlerche"],
+  ["Lullula arborea","Heidelerche"],["Alauda arvensis","Feldlerche"],["Eremophila alpestris","Ohrenlerche"],
+  ["Riparia riparia","Uferschwalbe"],["Ptyonoprogne rupestris","Felsenschwalbe"],["Hirundo rustica","Rauchschwalbe"],
+  ["Cecropis daurica","Rötelschwalbe"],["Delichon urbicum","Mehlschwalbe"],
+  ["Anthus campestris","Brachpieper"],["Anthus trivialis","Baumpieper"],["Anthus pratensis","Wiesenpieper"],["Anthus cervinus","Rotkehlpieper"],
+  ["Anthus spinoletta","Bergpieper"],["Anthus petrosus","Strandpieper"],
+  ["Motacilla flava","Wiesenschafstelze"],["Motacilla cinerea","Gebirgsstelze"],["Motacilla alba","Bachstelze"],
+  ["Bombycilla garrulus","Seidenschwanz"],["Cinclus cinclus","Wasseramsel"],["Troglodytes troglodytes","Zaunkönig"],
+  ["Prunella modularis","Heckenbraunelle"],["Prunella collaris","Alpenbraunelle"],
+  ["Erithacus rubecula","Rotkehlchen"],["Luscinia megarhynchos","Nachtigall"],["Luscinia luscinia","Sprosser"],["Luscinia svecica","Blaukehlchen"],
+  ["Phoenicurus ochruros","Hausrotschwanz"],["Phoenicurus phoenicurus","Gartenrotschwanz"],
+  ["Saxicola rubetra","Braunkehlchen"],["Saxicola rubicola","Schwarzkehlchen"],
+  ["Oenanthe oenanthe","Steinschmätzer"],["Oenanthe hispanica","Mittelmeersteinschmätzer"],
+  ["Monticola saxatilis","Steinrötel"],["Monticola solitarius","Blaumerle"],
+  ["Turdus torquatus","Ringdrossel"],["Turdus merula","Amsel"],["Turdus pilaris","Wacholderdrossel"],["Turdus iliacus","Rotdrossel"],
+  ["Turdus philomelos","Singdrossel"],["Turdus viscivorus","Misteldrossel"],
+  ["Cettia cetti","Seidensänger"],["Cisticola juncidis","Cistensänger"],
+  ["Locustella naevia","Feldschwirl"],["Locustella fluviatilis","Schlagschwirl"],["Locustella luscinioides","Rohrschwirl"],
+  ["Acrocephalus melanopogon","Mariskensänger"],["Acrocephalus schoenobaenus","Schilfrohrsänger"],["Acrocephalus palustris","Sumpfrohrsänger"],
+  ["Acrocephalus scirpaceus","Teichrohrsänger"],["Acrocephalus arundinaceus","Drosselrohrsänger"],
+  ["Hippolais icterina","Gelbspötter"],["Hippolais polyglotta","Orpheusspötter"],
+  ["Curruca nisoria","Sperbergrasmücke"],["Curruca curruca","Klappergrasmücke"],["Curruca communis","Dorngrasmücke"],
+  ["Sylvia borin","Gartengrasmücke"],["Sylvia atricapilla","Mönchsgrasmücke"],["Curruca melanocephala","Samtkopfgrasmücke"],["Curruca hortensis","Orpheusgrasmücke"],
+  ["Phylloscopus bonelli","Berglaubsänger"],["Phylloscopus sibilatrix","Waldlaubsänger"],["Phylloscopus collybita","Zilpzalp"],["Phylloscopus trochilus","Fitis"],
+  ["Regulus regulus","Wintergoldhähnchen"],["Regulus ignicapilla","Sommergoldhähnchen"],
+  ["Muscicapa striata","Grauschnäpper"],["Ficedula parva","Zwergschnäpper"],["Ficedula albicollis","Halsbandschnäpper"],["Ficedula hypoleuca","Trauerschnäpper"],
+  ["Aegithalos caudatus","Schwanzmeise"],["Poecile palustris","Sumpfmeise"],["Poecile montanus","Weidenmeise"],
+  ["Lophophanes cristatus","Haubenmeise"],["Periparus ater","Tannenmeise"],["Cyanistes caeruleus","Blaumeise"],["Parus major","Kohlmeise"],
+  ["Sitta europaea","Kleiber"],["Tichodroma muraria","Mauerläufer"],["Certhia familiaris","Waldbaumläufer"],["Certhia brachydactyla","Gartenbaumläufer"],
+  ["Remiz pendulinus","Beutelmeise"],["Oriolus oriolus","Pirol"],
+  ["Lanius collurio","Neuntöter"],["Lanius minor","Schwarzstirnwürger"],["Lanius excubitor","Raubwürger"],["Lanius senator","Rotkopfwürger"],
+  ["Garrulus glandarius","Eichelhäher"],["Pica pica","Elster"],["Nucifraga caryocatactes","Tannenhäher"],
+  ["Pyrrhocorax graculus","Alpendohle"],["Pyrrhocorax pyrrhocorax","Alpenkrähe"],
+  ["Coloeus monedula","Dohle"],["Corvus frugilegus","Saatkrähe"],["Corvus corone","Rabenkrähe"],["Corvus cornix","Nebelkrähe"],["Corvus corax","Kolkrabe"],
+  ["Sturnus vulgaris","Star"],["Passer domesticus","Haussperling"],["Passer montanus","Feldsperling"],["Petronia petronia","Steinsperling"],
+  ["Fringilla coelebs","Buchfink"],["Fringilla montifringilla","Bergfink"],["Serinus serinus","Girlitz"],
+  ["Chloris chloris","Grünfink"],["Carduelis carduelis","Stieglitz"],["Spinus spinus","Erlenzeisig"],
+  ["Linaria cannabina","Bluthänfling"],["Linaria flavirostris","Berghänfling"],["Acanthis flammea","Birkenzeisig"],
+  ["Loxia curvirostra","Fichtenkreuzschnabel"],["Loxia pytyopsittacus","Kiefernkreuzschnabel"],["Loxia leucoptera","Bindenkreuzschnabel"],
+  ["Pyrrhula pyrrhula","Gimpel"],["Coccothraustes coccothraustes","Kernbeißer"],
+  ["Plectrophenax nivalis","Schneeammer"],["Calcarius lapponicus","Spornammer"],
+  ["Emberiza citrinella","Goldammer"],["Emberiza cirlus","Zaunammer"],["Emberiza cia","Zippammer"],["Emberiza hortulana","Ortolan"],
+  ["Emberiza schoeniclus","Rohrammer"],["Emberiza calandra","Grauammer"]
+];
+const EURO_BY_NAME = new Map(EURO_SPECIES.map(([latin, name]) => [name.toLowerCase(), [latin, name]]));
+let EURO_SUGGESTIONS_HTML = null;  // built lazily: needs esc(), which isn't defined yet at this point in the script
+function euroSuggestionsHtml() {
+  if (EURO_SUGGESTIONS_HTML === null) EURO_SUGGESTIONS_HTML = EURO_SPECIES.map(([, name]) => `<option value="${esc(name)}">`).join("");
+  return EURO_SUGGESTIONS_HTML;
+}
+const STR = {
+de: {
+  title: "Meine Lebensliste", version: "Version {0}",
   pdf: "PDF erstellen", printed: "Stand: {0}",
   subtitle: "Ornitho.de, Exportdatei {0}, {1} Beobachtungen",
   tabOverview: "Übersicht", tabList: "Lebensliste", tabRegions: "Regionen", tabTargets: "Ziele", tabActivity: "Tagesaktivität", tabMap: "Karte",
@@ -221,7 +387,8 @@ const T = {
     C16: "Junge im Nest gesehen oder gehört",
     E99: "Art trotz Beobachtungsgängen nicht (mehr) festgestellt"
   },
-  mapLife: "Lifer", mapYear: "Arten {0}", mapObs: "Beobachtungen",
+  mapLife: "Lifer", mapYear: "Arten {0}", mapObs: "Beobachtungen", yearPlaceholder: "(Jahr)",
+  mapLifer: "Lifer bis {0}", mapLifeHere: "Lifer hier",
   mapNoLib: "Die Kartenbibliothek konnte nicht geladen werden. Für die Karte wird eine Internetverbindung benötigt.",
   mapNote: "{0} Orte. Die Größe der Kreise zeigt den gewählten Wert, ein Klick öffnet Details.",
   mapSpecies: "Arten", mapFilter: "Auf diesen Ort filtern",
@@ -230,36 +397,134 @@ const T = {
   optEscaped: "Gefangenschaftsflüchtlinge mitzählen",
   optCollective: "Sammeltaxa mitzählen (z. B. Gattung sp., Art A / B)",
   optRedact: "Ortsangaben schwärzen (Beobachtungsorte, Gemeinden, Karte)",
-  speciesLife: "Lifer gesamt", observations: "Beobachtungen", days: "Beobachtungstage", places: "Orte",
-  period: "Zeitraum", newInYear: "Neu in {0}", newLast30: "Neu in den letzten 30 Tagen",
+  speciesLife: "Lifer gesamt", observations: "Beobachtungen", days: "Beobachtungstage", places: "Orte", photoShare: "Anteil mit Foto", bestDay: "Bester Tag ({0})",
+  calTitle: "Birding-Jahr {0}", calHelp: "Farbe zeigt die Artenzahl je Tag, der grüne Ring markiert einen Tag mit mindestens einer neuen Art.",
+  ariaRegion: "Region", ariaYear: "Jahr", ariaMonth: "Monat", ariaSort: "Sortierung", ariaAtlas: "Brutzeitcode", ariaMetric: "Wert", ariaScope: "Zeitraum", ariaMapMetric: "Kartenwert",
+  period: "Zeitraum", to: "bis", newInYear: "Neu in {0}", newLast30: "Neu in den letzten 30 Tagen",
   perYear: "Deine Arten pro Jahr", perMonth: "Deine Arten für {0}",
   perYearHelp: "Der dunkle Teil des Balkens und die linke Zahl zeigen den Stand bis zum {0} des jeweiligen Jahres, der helle Teil den Rest des Jahres. „Neu“ sind Arten, die in diesem Jahr erstmals gemeldet wurden.",
   colYear: "Jahr", colTotal: "Gesamt", colNew: "Neu", colUntil: "bis {0}",
   curve: "Lebenslistenkurve", curveHelp: "Jeder Punkt ist eine Art an ihrem Erstnachweis.",
   heat: "Arten pro Jahr und Monat",
   latest: "Neueste Lifer", latestHelp: "Die zuletzt erstmals nachgewiesenen Arten.",
+  topPlaces: "Top-Orte", topPlacesHelp: "Die 10 Orte mit den meisten unterschiedlichen Arten.",
+  newBadge: "NEU",
   searchPh: "Art suchen (deutsch oder wissenschaftlich)", nr: "Nr.", name: "Art", first: "Erstnachweis", last: "Zuletzt",
   obsShort: "Beob.", max: "Max.", yearsShort: "Jahre", hits: "{0} von {1} Arten",
   sortNr: "Nach Erstnachweis", sortTaxon: "Systematisch", sortName: "Alphabetisch", sortColumn: "Nach Spalte",
   detailPheno: "Wann gesehen (Beobachtungen pro Monat)", detailYears: "Jahre", detailPlaces: "Häufigste Orte",
   detailFirst: "Erstnachweis", detailLast: "Letzte Beobachtung", detailMax: "Höchste Anzahl", detailPhotos: "Beobachtungen mit Foto",
+  detailWindow: "Typisches Zeitfenster", detailGapYears: "Jahre ohne Nachweis", windowRange: "{0}–{1}", calYearRound: "ganzjährig",
   regionsBy: "Arten nach {0}", regionsHelp: "Klick auf einen Namen filtert die gesamte Seite auf diese Region.",
+  regCoverage: "Abdeckung: {0}", regCoverageHint: "Wähle oben eine Region, um zu sehen, welche Arten deiner Lebensliste dort noch fehlen.",
+  regCoverageHelp: "{0} von {1} Lebenslisten-Arten hier gesehen, {2} fehlen noch.", regCoverageDone: "Alle Lebenslisten-Arten wurden bereits in dieser Region gesehen.",
   colLife: "Lifer", colYearShort: "Jahr", showAll: "Alle {0} anzeigen", showLess: "Weniger anzeigen",
-  tgtYear: "Jahresziele {0}", tgtYearHelp: "Arten deiner Lebensliste, die du in {0} noch nicht gemeldet hast. Die Reihenfolge richtet sich danach, in wie vielen früheren Jahren du sie im Zeitfenster von 7 Tagen vor bis 21 Tage nach heute gesehen hast.",
-  tgtYearPast: "Arten deiner Lebensliste, die du in {0} nicht gemeldet hast, sortiert nach der Zahl der Vorjahre, in denen du sie gesehen hast.",
-  tgtMonth: "Monatsziele {0}", tgtMonthHelp: "Arten, die du in früheren Jahren im {0} gemeldet hast, in {1} aber noch nicht.",
-  tgtNote: "Hinweis: Echte Ziele (Arten, die du noch nie gesehen hast) lassen sich aus dem Export nicht ableiten, weil dafür die Häufigkeitsdaten der Region fehlen. Diese Liste beruht nur auf deinen eigenen Meldungen.",
-  colWindow: "Im Zeitfenster", colYearsSeen: "Jahre gesehen", colMonthYears: "Jahre im Monat", colLastSeen: "Zuletzt",
-  windowOf: "{0} von {1}", none: "Nichts offen. Alle Arten sind bereits gemeldet.", noData: "Keine Daten für diese Auswahl.",
+  wishTitle: "Nie gesehene Arten", wishHelp: "Arten aus der europäischen Artenliste und/oder deiner eigenen Liste, die noch nicht auf deiner Lebensliste stehen.",
+  wishProgress: "{0} von {1} Arten gesehen ({2} %)",
+  wishSrcAll: "Europa + eigene Liste", wishSrcEuro: "Europäische Arten", wishSrcOwn: "Eigene Liste", wishSrcCol: "Quelle",
+  wishManage: "Eigene Liste verwalten", wishManageHelp: "Eigene Wunschart eintragen oder aus den Vorschlägen wählen.",
+  wishSearchPh: "Art suchen oder eingeben", wishAdd: "Hinzufügen", wishRemove: "Entfernen",
+  wishEmpty: "Noch keine eigenen Arten eingetragen.", wishDone: "Alles auf dieser Liste schon gesehen.",
+  noData: "Keine Daten für diese Auswahl.",
   months: ["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"],
   monthsShort: ["Jan.","Feb.","März","Apr.","Mai","Juni","Juli","Aug.","Sept.","Okt.","Nov.","Dez."],
   states: {BW:"Baden-Württemberg",BY:"Bayern",BE:"Berlin",BB:"Brandenburg",HB:"Bremen",HH:"Hamburg",HE:"Hessen",
     MV:"Mecklenburg-Vorpommern",NI:"Niedersachsen",NW:"Nordrhein-Westfalen",RP:"Rheinland-Pfalz",SL:"Saarland",
     SN:"Sachsen",ST:"Sachsen-Anhalt",SH:"Schleswig-Holstein",TH:"Thüringen"},
-  counties: {"SN/BZ":"Bautzen","SN/GR":"Görlitz","SN/MEI":"Meißen","SN/DD":"Dresden","SN/PIR":"Sächsische Schweiz-Osterzgebirge",
-    "SN/L":"Leipzig","SN/C":"Chemnitz","SN/ERZ":"Erzgebirgskreis"},
   unknown: "Unbekannt"
+},
+en: {
+  title: "My Life List", version: "Version {0}",
+  pdf: "Create PDF", printed: "As of: {0}",
+  subtitle: "Ornitho.de, export file {0}, {1} observations",
+  tabOverview: "Overview", tabList: "Life List", tabRegions: "Regions", tabTargets: "Targets", tabActivity: "Daily Activity", tabMap: "Map",
+  actHelp: "Time of day you log sightings. Covers {0} of {1} records — some entries, especially via the web, carry no time.",
+  actScopeAll: "All years", actScopeYear: "{0} only",
+  actMObs: "Observations", actMSpecies: "Species", actMDays: "Observation days",
+  actKTimed: "Records with a time", actKPeak: "Busiest hour",
+  actHourTitle: "Course of the day", actWeekday: "Weekdays", actWeekdayHelp: "Days with at least one record, by weekday.",
+  actHeat: "Month and time of day", actHeatHelp: "Observations by month and hour. The darker the cell, the more records.",
+  actSpecies: "Time of day by species", actSpeciesHelp: "Typical time per species: half the timed records fall before it, half after. Species with at least {0} timed records.",
+  actEarly: "Early species", actLate: "Late species", colMedian: "Typical time", hourRange: "{0}–{1}",
+  weekdays: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+  mapStreets: "Streets", mapTopo: "Topographic", mapSat: "Satellite",
+  colAtlas: "Breeding", atlasTitle: "Breeding evidence codes (atlas codes)",
+  atlasHelp: "{0} of {1} observations carry a breeding code. Highest code per species counts: A possible, B probable, C confirmed.",
+  atlasC: "Species with confirmed breeding (C)", atlasB: "Species with probable breeding (B)", atlasA: "Species with possible breeding (A)", atlasAny: "Species with a breeding code",
+  atlasBest: "Highest code", atlasWhen: "When and where", atlasCodesTitle: "Breeding codes for this species",
+  atlasFilter: {all: "All species", any: "With a breeding code", C: "Confirmed (C)", B: "Probable (B)", A: "Possible (A)", none: "Without a breeding code"},
+  atlasCats: {A: "Possible breeding", B: "Probable breeding", C: "Confirmed breeding"},
+  atlasCodes: {
+    A0: "Recorded in the breeding season (disabled in ornitho)",
+    A1: "Recorded in possible breeding habitat, breeding season",
+    A2: "Singing or displaying male in possible breeding habitat",
+    B3: "Pair in suitable breeding habitat",
+    B4: "Territory held on 2+ days, ≥7 days apart, same site",
+    B5: "Courtship or display behaviour",
+    B6: "Adult visiting a probable nest site",
+    B7: "Alarm calls suggesting a nest or young nearby",
+    B8: "Brood patch on a captured adult",
+    B9: "Nest-building or cavity excavation",
+    C10: "Distraction display or injury feigning",
+    C11a: "Used nest found, this breeding period",
+    C11b: "Eggshells found, this breeding period",
+    C12: "Recently fledged or downy young",
+    C13a: "Adults visiting a well-hidden, occupied nest",
+    C13b: "Nest found with adult incubating",
+    C14a: "Adult carrying a faecal sac",
+    C14b: "Adult carrying food for young",
+    C15: "Nest found with eggs",
+    C16: "Young seen or heard in the nest",
+    E99: "Not found despite survey visits"
+  },
+  mapLife: "Life species", mapYear: "Species {0}", mapObs: "Observations", yearPlaceholder: "(Year)",
+  mapLifer: "New life species through {0}", mapLifeHere: "Life species here",
+  mapNoLib: "Map library failed to load. The map needs an internet connection.",
+  mapNote: "{0} places. Circle size shows the selected value; click for details.",
+  mapSpecies: "Species", mapFilter: "Filter to this place",
+  regionAll: "All regions", grpState: "State", grpCounty: "County", grpMuni: "Municipality", grpPlace: "Observation site",
+  optsSummary: "Settings",
+  optEscaped: "Include captivity escapes",
+  optCollective: "Include collective taxa (e.g. genus sp., species A/B)",
+  optRedact: "Redact place data (sites, municipalities, map)",
+  speciesLife: "Life species total", observations: "Observations", days: "Observation days", places: "Places", photoShare: "Share with photo", bestDay: "Best day ({0})",
+  calTitle: "Birding year {0}", calHelp: "Color shows the number of species that day; the green ring marks a day with at least one new species.",
+  ariaRegion: "Region", ariaYear: "Year", ariaMonth: "Month", ariaSort: "Sort", ariaAtlas: "Breeding code", ariaMetric: "Value", ariaScope: "Period", ariaMapMetric: "Map value",
+  period: "Period", to: "to", newInYear: "New in {0}", newLast30: "New in the last 30 days",
+  perYear: "Your species per year", perMonth: "Your species for {0}",
+  perYearHelp: "Dark bar and left number: total by {0} of that year. Light bar: rest of the year. \"New\" = first reported that year.",
+  colYear: "Year", colTotal: "Total", colNew: "New", colUntil: "through {0}",
+  curve: "Life list curve", curveHelp: "Each point is a species at its first record.",
+  heat: "Species per year and month",
+  latest: "Latest life species", latestHelp: "The most recently added life species.",
+  topPlaces: "Top places", topPlacesHelp: "The 10 places with the most different species.",
+  newBadge: "NEW",
+  searchPh: "Search species (German or scientific)", nr: "No.", name: "Species", first: "First record", last: "Last",
+  obsShort: "Obs.", max: "Max.", yearsShort: "Years", hits: "{0} of {1} species",
+  sortNr: "By first record", sortTaxon: "Taxonomic", sortName: "Alphabetical", sortColumn: "By column",
+  detailPheno: "When seen (observations per month)", detailYears: "Years", detailPlaces: "Most frequent places",
+  detailFirst: "First record", detailLast: "Last observation", detailMax: "Highest count", detailPhotos: "Observations with a photo",
+  detailWindow: "Typical window", detailGapYears: "Years without a record", windowRange: "{0}–{1}", calYearRound: "year-round",
+  regionsBy: "Species by {0}", regionsHelp: "Click a name to filter the whole page to that region.",
+  regCoverage: "Coverage: {0}", regCoverageHint: "Pick a region above to see which of your life-list species are still missing there.",
+  regCoverageHelp: "{0} of {1} life-list species seen here, {2} still missing.", regCoverageDone: "All life-list species have already been seen in this region.",
+  colLife: "Life", colYearShort: "Year", showAll: "Show all {0}", showLess: "Show less",
+  wishTitle: "Never seen", wishHelp: "Species from the European checklist and/or your own list not yet on your life list.",
+  wishProgress: "{0} of {1} species seen ({2}%)",
+  wishSrcAll: "Europe + own list", wishSrcEuro: "European species", wishSrcOwn: "Own list", wishSrcCol: "Source",
+  wishManage: "Manage your own list", wishManageHelp: "Add a wanted species, or pick one from the suggestions.",
+  wishSearchPh: "Search or type a species", wishAdd: "Add", wishRemove: "Remove",
+  wishEmpty: "No species on your own list yet.", wishDone: "Everything on this list is already seen.",
+  noData: "No data for this selection.",
+  months: ["January","February","March","April","May","June","July","August","September","October","November","December"],
+  monthsShort: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
+  states: {BW:"Baden-Württemberg",BY:"Bavaria",BE:"Berlin",BB:"Brandenburg",HB:"Bremen",HH:"Hamburg",HE:"Hesse",
+    MV:"Mecklenburg-Western Pomerania",NI:"Lower Saxony",NW:"North Rhine-Westphalia",RP:"Rhineland-Palatinate",SL:"Saarland",
+    SN:"Saxony",ST:"Saxony-Anhalt",SH:"Schleswig-Holstein",TH:"Thuringia"},
+  unknown: "Unknown"
+}
 };
+let T = STR.de;
 const t = (k, ...a) => { let s = T[k] ?? k; a.forEach((v, i) => { s = s.replace("{" + i + "}", v); }); return s; };
 
 /* ---------- data ---------- */
@@ -274,32 +539,36 @@ const NOW = new Date();
 const TODAY_Y = NOW.getFullYear(), TODAY_M = NOW.getMonth() + 1;
 const pad = n => String(n).padStart(2, "0");
 const TODAY_MD = pad(TODAY_M) + "-" + pad(NOW.getDate());
-const doyOf = md => Math.floor((Date.UTC(2001, +md.slice(0, 2) - 1, +md.slice(3)) - Date.UTC(2001, 0, 1)) / 864e5);
-const TODAY_DOY = doyOf(TODAY_MD);
 const atlasRank = ac => /^[ABC]/.test(ac) ? (parseInt(ac.slice(1), 10) || { A: 1, B: 3, C: 10 }[ac[0]]) : 0;  // E99 and unknown prefixes are no breeding evidence
 const OBS = RAW.obs.map(([s, d, p, c, ph, ac, tm]) => {
   const md = d.slice(5);
-  return { s, d, y: +d.slice(0, 4), m: +d.slice(5, 7), md, doy: doyOf(md), p, c, ph, ac, tm, ar: ac ? atlasRank(ac) : 0 };
+  return { s, d, y: +d.slice(0, 4), m: +d.slice(5, 7), md, p, c, ph, ac, tm, ar: ac ? atlasRank(ac) : 0 };
 });
 const YEARS = [...new Set(OBS.map(o => o.y))].sort((a, b) => a - b);
 const MIN_Y = YEARS[0], MAX_Y = YEARS[YEARS.length - 1];
 
-const S = { tab: "overview", region: "all", year: Math.min(TODAY_Y, MAX_Y), month: TODAY_M,
+const initialLang = (() => {
+  try { return localStorage.getItem("lifelist-lang") === "en" ? "en" : "de"; } catch (e) { return "de"; }
+})();
+const S = { tab: "overview", region: "all", year: Math.min(TODAY_Y, MAX_Y), month: TODAY_M, lang: initialLang,
   escaped: false, collective: false, atlasF: "all", actMetric: "obs", actScope: "all", redact: !!RAW.meta.redacted, metric: "life", q: "", sort: "nr", dir: -1, open: new Set(),
-  regSort: {}, regAll: {} };
+  regSort: {}, regAll: {}, targetSrc: "all", customTargets: loadCustomTargets() };
+T = STR[S.lang];
 
 /* ---------- helpers ---------- */
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-const fmtN = n => n.toLocaleString("de-DE");
+const fmtN = n => n.toLocaleString(S.lang === "en" ? "en-GB" : "de-DE");
+// rounds for display but never claims 100% unless truly complete, or 0% when something is actually there
+const pctDisplay = (count, total) => !total ? 0 : count === 0 ? 0 : count === total ? 100 : Math.min(99, Math.max(1, Math.round(count / total * 100)));
 const fmtD = d => d.slice(8) + "." + d.slice(5, 7) + "." + d.slice(0, 4);
 const shortMD = md => (+md.slice(3)) + ". " + T.monthsShort[+md.slice(0, 2) - 1];
 const byDateDesc = (a, b) => (a < b ? 1 : a > b ? -1 : 0);
 const REDACT_MASK = "██████████";
 const placeName = i => S.redact ? REDACT_MASK : PL[i].name;
 const stateName = c => T.states[c] || (c === "?" ? T.unknown : c);
-const countyName = key => T.counties[key] || (key.split("/")[1] === "?" ? T.unknown : key.split("/")[1]);
-const collator = new Intl.Collator("de");
+const countyName = key => COUNTIES[key] || (key.split("/")[1] === "?" ? T.unknown : key.split("/")[1]);
+let collator = new Intl.Collator(S.lang === "en" ? "en" : "de");
 
 function baseObs() {
   return OBS.filter(o => {
@@ -358,9 +627,11 @@ function renderYearBlock(rows, opts) {
     const tot = r.all.size, ytd = r.ytd.size;
     const cur = r.y === S.year ? " cur" : "";
     const wTot = tot / max * 100, wYtd = opts.showYtd ? ytd / max * 100 : wTot;
+    const c = r.y === S.year ? "var(--accent)" : `var(${CHART_PALETTE[(r.y - MIN_Y) % CHART_PALETTE.length]})`;
+    const grad = `linear-gradient(90deg,color-mix(in srgb,${c} 45%,transparent),${c})`;
     return `<div class="yrow${cur}"><span class="y">${r.y}</span>
       <span class="ytd">${opts.showYtd ? ytd : ""}</span>
-      <div class="bar"><i style="width:${wYtd}%"></i>${opts.showYtd ? `<i style="width:${wTot}%;opacity:.28"></i>` : ""}</div>
+      <div class="bar"><i style="width:${wYtd}%;background:${grad}"></i>${opts.showYtd ? `<i style="width:${wTot}%;opacity:.28;background:${grad}"></i>` : ""}</div>
       <span class="tot">${tot}</span>
       <span class="new">${opts.showNew && r.lifers ? "+" + r.lifers : ""}</span></div>`;
   }).join("") + `</div>`;
@@ -381,6 +652,7 @@ function curveSvg(chrono) {
   const step = Math.max(1, mag / (pts.length / mag < 2.5 ? 2 : 1));
   const yMax = Math.ceil(pts.length / step) * step;
   const y = n => H - B - n / yMax * (H - B - Tp);
+  const yearColor = yr => `var(${CHART_PALETTE[(yr - MIN_Y) % CHART_PALETTE.length]})`;
   let g = "", d = `M${x(t0)},${y(0)}`, prev = 0, dots = "";
   for (let v = 0; v <= yMax; v += step) g += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${L - 6}" y="${y(v) + 4}" text-anchor="end">${v}</text>`;
   const every = (Math.max(MAX_Y, TODAY_Y) - MIN_Y) > 8 ? 2 : 1;
@@ -390,10 +662,31 @@ function curveSvg(chrono) {
     const ms = Date.parse(o.d + "T00:00:00Z");
     d += ` L${x(ms)},${y(prev)} L${x(ms)},${y(i + 1)}`;
     prev = i + 1;
-    dots += `<circle cx="${x(ms)}" cy="${y(i + 1)}" r="${o.y === S.year ? 3 : 2}" fill="${o.y === S.year ? "var(--accent)" : "var(--bar)"}"><title>${i + 1}. ${esc(SP[o.s].name)}, ${fmtD(o.d)}</title></circle>`;
+    const cur = o.y === S.year;
+    dots += `<circle cx="${x(ms)}" cy="${y(i + 1)}" r="${cur ? 4.5 : 2.5}" fill="${cur ? "var(--accent)" : yearColor(o.y)}" stroke="var(--card)" stroke-width="${cur ? 1.5 : 1}"><title>${i + 1}. ${esc(SP[o.s].name)}, ${fmtD(o.d)}</title></circle>`;
   });
+  const baseline = ` L${x(Date.now())},${y(0)} L${x(t0)},${y(0)} Z`;
+  const area = d + ` L${x(Date.now())},${y(prev)}` + baseline;
   d += ` L${x(Date.now())},${y(prev)}`;
-  return `<svg class="curve" viewBox="0 0 ${W} ${H}" role="img" aria-label="${t("curve")}">${g}<path d="${d}" fill="none" stroke="var(--bar)" stroke-width="1.5"/>${dots}</svg>`;
+  return `<svg class="curve" viewBox="0 0 ${W} ${H}" role="img" aria-label="${t("curve")}">
+    <defs>
+      <linearGradient id="curveGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="var(--accent)" stop-opacity="0.3"/>
+        <stop offset="100%" stop-color="var(--accent)" stop-opacity="0"/>
+      </linearGradient>
+      <linearGradient id="curveLine" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%" stop-color="var(--k3)"/>
+        <stop offset="100%" stop-color="var(--accent)"/>
+      </linearGradient>
+    </defs>
+    ${g}<path d="${area}" fill="url(#curveGrad)" stroke="none"/><path d="${d}" fill="none" stroke="url(#curveLine)" stroke-width="2.25" stroke-linejoin="round"/>${dots}</svg>`;
+}
+// shared cool-to-warm intensity scale, reused by the heatmaps and the map markers
+function heatColor(frac) {
+  return `color-mix(in srgb, var(--accent) ${Math.round(15 + Math.max(0, Math.min(1, frac)) * 85)}%, var(--k3))`;
+}
+function heatLegend(max) {
+  return `<div class="legend"><span>0</span><div class="grad"></div><span>${max}</span></div>`;
 }
 function heatTable(list) {
   const cell = new Map();
@@ -409,11 +702,66 @@ function heatTable(list) {
     h += `<tr><td class="y">${y}</td>`;
     for (let m = 1; m <= 12; m++) {
       const n = (cell.get(y * 100 + m) || { size: 0 }).size;
-      h += n ? `<td style="background:color-mix(in srgb,var(--accent) ${Math.round(12 + n / max * 78)}%,transparent)">${n}</td>` : `<td></td>`;
+      h += n ? `<td style="background:${heatColor(n / max)}">${n}</td>` : `<td></td>`;
     }
     h += `</tr>`;
   }
-  return h + `</tbody></table>`;
+  return { html: h + `</tbody></table>`, max };
+}
+function topPlacesSection(list) {
+  if (S.redact) return "";
+  const byPlace = new Map();
+  for (const o of list) {
+    let r = byPlace.get(o.p);
+    if (!r) { r = { p: o.p, sp: new Set() }; byPlace.set(o.p, r); }
+    r.sp.add(o.s);
+  }
+  const rows = [...byPlace.values()].sort((a, b) => b.sp.size - a.sp.size).slice(0, 10);
+  if (!rows.length) return "";
+  const max = rows[0].sp.size;
+  return `<h2>${t("topPlaces")}</h2>
+    <p class="prose">${t("topPlacesHelp")}</p>
+    <div class="card hbar">${rows.map((r, i) => {
+      const c = `var(${CHART_PALETTE[i % CHART_PALETTE.length]})`;
+      return `<div class="hbar-row"><span class="lbl">${esc(placeName(r.p))}</span><div class="bar"><i style="width:${r.sp.size / max * 100}%;background:linear-gradient(90deg,color-mix(in srgb,${c} 45%,transparent),${c})"></i></div><span class="num">${r.sp.size}</span></div>`;
+    }).join("")}</div>`;
+}
+function calendarSection(list, statsAll) {
+  const year = S.year;
+  const dayData = new Map();
+  for (const o of list) {
+    if (o.y !== year) continue;
+    if (!dayData.has(o.d)) dayData.set(o.d, new Set());
+    dayData.get(o.d).add(o.s);
+  }
+  if (!dayData.size) return "";
+  let max = 1;
+  for (const sp of dayData.values()) max = Math.max(max, sp.size);
+  const liferDays = new Set([...statsAll.values()].filter(r => r.first.y === year).map(r => r.first.d));
+  const dowLetters = T.weekdays.map(w => w[0]);
+  const months = T.months.map((name, mi) => {
+    const m = mi + 1;
+    const first = new Date(Date.UTC(year, mi, 1));
+    const startDow = (first.getUTCDay() + 6) % 7;  // 0 = Monday
+    const daysInMonth = new Date(Date.UTC(year, mi + 1, 0)).getUTCDate();
+    let cells = "";
+    for (let i = 0; i < startDow; i++) cells += `<div class="cal-day cal-empty"></div>`;
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dateStr = `${year}-${pad(m)}-${pad(day)}`;
+      const sp = dayData.get(dateStr);
+      const n = sp ? sp.size : 0;
+      const lifer = liferDays.has(dateStr);
+      const bg = n ? heatColor(n / max) : "var(--bar-soft)";
+      const title = n ? `${fmtD(dateStr)}: ${n} ${t("mapSpecies")}${lifer ? " · " + t("newBadge") : ""}` : fmtD(dateStr);
+      cells += `<div class="cal-day${lifer ? " cal-lifer" : ""}" style="background:${bg}" title="${esc(title)}"></div>`;
+    }
+    return `<div class="cal-month"><h4>${name}</h4>
+      <div class="cal-grid">${dowLetters.map(l => `<span class="cal-dow">${l}</span>`).join("")}${cells}</div></div>`;
+  }).join("");
+  return `<h2>${t("calTitle", year)}</h2>
+    <p class="prose">${t("calHelp")}</p>
+    <div class="card"><div class="cal-months-wrap">${months}</div></div>
+    ${heatLegend(max)}`;
 }
 function renderOverview() {
   const list = regionObs(baseObs());
@@ -429,6 +777,12 @@ function renderOverview() {
   const chrono = numberLifers(stats);
   const latest = chrono.slice(-10).reverse();
   const monthLabel = T.months[S.month - 1];
+  const photoPct = pctDisplay(list.filter(o => o.ph).length, list.length);
+  const dayMap = new Map();
+  for (const o of list) { if (!dayMap.has(o.d)) dayMap.set(o.d, new Set()); dayMap.get(o.d).add(o.s); }
+  let bestDay = list[0].d, bestCount = 0;
+  for (const [d, sp] of dayMap) if (sp.size > bestCount) { bestCount = sp.size; bestDay = d; }
+  const heatT = heatTable(list);
   $("tab-overview").innerHTML = `
     <div class="kpis">
       <div class="kpi main"><b>${fmtN(stats.size)}</b><span>${t("speciesLife")}</span></div>
@@ -437,8 +791,11 @@ function renderOverview() {
       <div class="kpi"><b>${fmtN(places)}</b><span>${t("places")}</span></div>
       <div class="kpi"><b>+${newYear}</b><span>${t("newInYear", S.year)}</span></div>
       <div class="kpi"><b>+${new30}</b><span>${t("newLast30")}</span></div>
+      <div class="kpi"><b>${photoPct}%</b><span>${t("photoShare")}</span></div>
+      <div class="kpi"><b>${bestCount}</b><span>${t("bestDay", fmtD(bestDay))}</span></div>
     </div>
-    <p class="sub" style="margin-top:8px">${t("period")}: ${fmtD(first)} bis ${fmtD(last)}</p>
+    <p class="sub" style="margin-top:8px">${t("period")}: ${fmtD(first)} ${t("to")} ${fmtD(last)}</p>
+    ${calendarSection(list, stats)}
     <h2>${t("perYear")}</h2>
     <p class="prose">${t("perYearHelp", shortMD(TODAY_MD))}</p>
     ${renderYearBlock(rows, { showYtd: true, showNew: true })}
@@ -448,12 +805,14 @@ function renderOverview() {
     <p class="prose">${t("curveHelp")}</p>
     <div class="card">${curveSvg(chrono)}</div>
     <h2>${t("heat")}</h2>
-    <div class="card">${heatTable(list)}</div>
+    <div class="card">${heatT.html}</div>
+    ${heatLegend(heatT.max)}
     <h2>${t("latest")}</h2>
     <p class="prose">${t("latestHelp")}</p>
     <div class="card"><table><tbody>${latest.map(r => `<tr><td class="nr">${r.nr}</td>
       <td>${esc(SP[r.s].name)}<span class="latin">${esc(SP[r.s].latin)}</span></td>
       <td class="num">${fmtD(r.first.d)}<span class="small">${esc(placeName(r.first.p))}</span></td></tr>`).join("")}</tbody></table></div>
+    ${topPlacesSection(list)}
     ${atlasSection(list, stats)}`;
 }
 
@@ -467,6 +826,13 @@ function atlasDesc(code) {
 }
 function atlasText(code) {
   return code + ": " + atlasDesc(code);
+}
+function atlasProportionBar(cat) {
+  const total = cat.A.length + cat.B.length + cat.C.length;
+  if (!total) return "";
+  const segs = [["C", cat.C.length, "var(--accent)"], ["B", cat.B.length, "#d18a1b"], ["A", cat.A.length, "#8a949d"]];
+  return `<div class="propbar">${segs.map(([k, n, color]) => n
+    ? `<div style="width:${n / total * 100}%;background:${color}" title="${esc(T.atlasCats[k])}: ${n}"></div>` : "").join("")}</div>`;
 }
 function atlasSection(list, stats) {
   const cat = { A: [], B: [], C: [] };
@@ -482,6 +848,7 @@ function atlasSection(list, stats) {
       <div class="kpi"><b>${cat.A.length}</b><span>${t("atlasA")}</span></div>
       <div class="kpi"><b>${withCode}</b><span>${t("atlasAny")}</span></div>
     </div>
+    ${atlasProportionBar(cat)}
     ${rows.length ? `<div class="card" style="margin-top:10px"><table><thead><tr><th>${t("name")}</th><th>${t("atlasBest")}</th><th class="hide-sm">${t("atlasWhen")}</th></tr></thead><tbody>${rows.map(r =>
       `<tr><td>${esc(SP[r.s].name)}<span class="latin">${esc(SP[r.s].latin)}</span></td>
        <td>${atlasBadge(r)}<span class="small">${esc(atlasDesc(r.ac))}</span></td>
@@ -514,7 +881,7 @@ function renderList() {
   for (const r of rows) {
     const sp = SP[r.s], open = S.open.has(r.s);
     h += `<tr class="row" data-sp="${r.s}"><td class="nr">${r.nr}</td>
-      <td>${esc(sp.name)}<span class="latin">${esc(sp.latin)}</span></td>
+      <td>${esc(sp.name)}${r.first.y === S.year ? `<span class="new-badge">${t("newBadge")}</span>` : ""}<span class="latin">${esc(sp.latin)}</span></td>
       <td class="hide-sm">${fmtD(r.first.d)}<span class="small">${esc(placeName(r.first.p))}</span></td>
       <td class="hide-sm">${fmtD(r.last.d)}</td>
       <td class="num">${r.n}</td><td class="num hide-sm">${r.max || "x"}</td><td class="num hide-sm">${r.years.size}</td><td>${atlasBadge(r)}</td></tr>`;
@@ -523,15 +890,37 @@ function renderList() {
   $("q-sort").value = ["nr", "taxon", "name"].includes(S.sort) ? S.sort : "";
   $("list-out").innerHTML = h + `</tbody></table>`;
 }
+const PHENO_SEASON = ["--k3", "--k3", "--k1", "--k1", "--k1", "--k2", "--k2", "--k2", "--k5", "--k5", "--k5", "--k3"];  // winter/spring/summer/autumn
+// shortest contiguous (wrap-around) run of months covering at least 80% of observations
+function typicalWindow(months) {
+  const total = months.reduce((a, b) => a + b, 0);
+  if (!total) return null;
+  for (let size = 1; size <= 12; size++) {
+    for (let start = 0; start < 12; start++) {
+      let sum = 0;
+      for (let i = 0; i < size; i++) sum += months[(start + i) % 12];
+      if (sum / total >= 0.8) return { start, size };
+    }
+  }
+  return { start: 0, size: 12 };
+}
 function detailHtml(r) {
   const maxM = Math.max(1, ...r.months);
   const top = [...r.places].sort((a, b) => b[1] - a[1]).slice(0, 5);
   const yrs = [...r.years].sort((a, b) => a[0] - b[0]);
+  const win = typicalWindow(r.months);
+  const winLabel = win ? (win.size >= 12 ? t("calYearRound")
+    : win.size === 1 ? T.months[win.start]
+    : t("windowRange", T.months[win.start], T.months[(win.start + win.size - 1) % 12])) : "";
+  const gapYears = [];
+  for (let y = r.first.y; y <= MAX_Y; y++) if (!r.years.has(y)) gapYears.push(y);
   return `<div class="detailgrid">
     <div><b>${t("detailPheno")}</b>
-      <div class="pheno" style="margin-top:8px">${r.months.map((n, i) => `<div style="height:${n / maxM * 100}%" title="${T.months[i]}: ${n}"></div>`).join("")}</div>
-      <div class="pheno-l">${T.monthsShort.map(m => `<span>${m[0]}</span>`).join("")}</div></div>
+      <div class="pheno" style="margin-top:8px">${r.months.map((n, i) => `<div style="height:${n / maxM * 100}%;background:linear-gradient(180deg,var(${PHENO_SEASON[i]}),color-mix(in srgb,var(${PHENO_SEASON[i]}) 55%,transparent))" title="${T.months[i]}: ${n}"></div>`).join("")}</div>
+      <div class="pheno-l">${T.monthsShort.map(m => `<span>${m[0]}</span>`).join("")}</div>
+      <span class="small" style="margin-top:6px">${t("detailWindow")}</span>${winLabel}</div>
     <div><b>${t("detailYears")}</b><div class="chips">${yrs.map(([y, n]) => `<span class="chip">${y} (${n})</span>`).join("")}</div>
+      ${gapYears.length ? `<b>${t("detailGapYears")}</b><div class="chips">${gapYears.map(y => `<span class="chip" style="opacity:.55">${y}</span>`).join("")}</div>` : ""}
       ${r.codes.size ? `<b>${t("atlasCodesTitle")}</b><div class="chips">${[...r.codes].sort((a, b) => atlasRank(b[0]) - atlasRank(a[0])).map(([c, n]) => `<span class="chip" title="${esc(atlasText(c))}">${esc(c)} (${n})</span>`).join("")}</div>` : ""}
       <b>${t("detailPlaces")}</b><div class="chips">${top.map(([p, n]) => `<span class="chip">${esc(placeName(p))} (${n})</span>`).join("")}</div></div>
     <div><span class="small">${t("detailFirst")}</span>${fmtD(r.first.d)}, ${esc(placeName(r.first.p))}
@@ -562,63 +951,110 @@ function regionTable(lv, list) {
   rows.sort((a, b) => sort.k === "name" ? sort.d * collator.compare(a.name, b.name)
     : sort.d * (val[sort.k](a) - val[sort.k](b)) || collator.compare(a.name, b.name));
   const showAll = S.regAll[lv.lvl], shown = showAll ? rows : rows.slice(0, 10);
+  const maxLife = Math.max(1, ...rows.map(r => r.life.size));
   const th = (k, label, cls) => `<th class="sortable ${cls}${sort.k === k ? " sorted" : ""}" data-lvl="${lv.lvl}" data-k="${k}">${label}${sort.k === k ? (sort.d > 0 ? " ▲" : " ▼") : ""}</th>`;
-  return `<h2>${t("regionsBy", t(lv.title))}<small>${rows.length}</small></h2><div class="card"><table><thead><tr>
+  return `<h2>${t("regionsBy", t(lv.title))}<small>${rows.length}</small></h2><div class="card"><table class="rtable"><thead><tr>
     <th class="nr">#</th>${th("name", t("name"), "")}${th("life", t("colLife"), "num")}${th("year", t("colYearShort") + " " + S.year, "num")}${th("month", T.monthsShort[S.month - 1].replace(".", "") + " " + S.year, "num")}</tr></thead><tbody>` +
-    shown.map((r, i) => `<tr><td class="nr">${i + 1}</td><td><button class="lnk" data-region="${lv.lvl}:${esc(r.key)}">${esc(r.name)}</button></td>
-      <td class="num">${r.life.size}</td><td class="num">${r.year.size}</td><td class="num">${r.month.size}</td></tr>`).join("") +
+    shown.map((r, i) => {
+      const pct = Math.round(r.life.size / maxLife * 100);
+      return `<tr><td class="nr">${i + 1}</td><td><button class="lnk" data-region="${lv.lvl}:${esc(r.key)}">${esc(r.name)}</button></td>
+      <td class="num" style="background:linear-gradient(90deg,color-mix(in srgb,var(--accent) 16%,transparent) ${pct}%,transparent ${pct}%)">${r.life.size}</td><td class="num">${r.year.size}</td><td class="num">${r.month.size}</td></tr>`;
+    }).join("") +
     `</tbody></table>${rows.length > 10 ? `<p class="more"><button class="lnk" data-more="${lv.lvl}">${showAll ? t("showLess") : t("showAll", rows.length)}</button></p>` : ""}</div>`;
+}
+function regionCoverageSection(list) {
+  if (S.region === "all") return `<p class="prose">${t("regCoverageHint")}</p>`;
+  const here = regionObs(list);
+  const fullSpecies = new Set(list.map(o => o.s));
+  const hereSpecies = new Set(here.map(o => o.s));
+  const missing = [...fullSpecies].filter(s => !hereSpecies.has(s)).sort((a, b) => collator.compare(SP[a].name, SP[b].name));
+  const label = $("f-region").selectedOptions[0] ? $("f-region").selectedOptions[0].text.replace(/\s*\(\d+\)$/, "") : "";
+  return `<h2>${t("regCoverage", label)}</h2>
+    <p class="prose">${t("regCoverageHelp", hereSpecies.size, fullSpecies.size, missing.length)}</p>
+    ${missing.length ? `<div class="card" style="max-height:260px;overflow:auto"><div class="chips">${missing.map(s => `<span class="chip">${esc(SP[s].name)}</span>`).join("")}</div></div>` : `<p class="empty">${t("regCoverageDone")}</p>`}`;
 }
 function renderRegions() {
   const list = baseObs();
-  $("tab-regions").innerHTML = `<p class="prose">${t("regionsHelp")}</p>` + LEVELS.filter(lv => !S.redact || lv.lvl === "s" || lv.lvl === "c").map(lv => regionTable(lv, list)).join("");
+  $("tab-regions").innerHTML = `<p class="prose">${t("regionsHelp")}</p>`
+    + regionCoverageSection(list)
+    + LEVELS.filter(lv => !S.redact || lv.lvl === "s" || lv.lvl === "c").map(lv => regionTable(lv, list)).join("");
 }
 
-/* ---------- targets ---------- */
-function circDiff(doy, ref) { return ((doy - ref + 182 + 365) % 365) - 182; }
+/* ---------- targets / wishlist ---------- */
+function loadCustomTargets() {
+  try {
+    const data = JSON.parse(localStorage.getItem("lifelist-custom-targets") || "[]");
+    if (!Array.isArray(data)) return [];
+    return data.filter(x => x && typeof x.name === "string" && x.name)
+      .map(x => ({ name: x.name, latin: typeof x.latin === "string" ? x.latin : null }));
+  } catch (e) { return []; }
+}
+function saveCustomTargets() {
+  try { localStorage.setItem("lifelist-custom-targets", JSON.stringify(S.customTargets)); } catch (e) { /* private mode may refuse */ }
+}
 function renderTargets() {
-  const list = regionObs(baseObs()).filter(o => o.y <= S.year);
+  // deliberately unscoped by S.region: "never seen" means never seen anywhere, not just in the currently filtered region
+  const list = baseObs();
   const stats = speciesStats(list);
-  const prevYears = new Set(list.filter(o => o.y < S.year).map(o => o.y));
-  const isCur = S.year === TODAY_Y;
-  const yearRowsT = [];
-  for (const r of stats.values()) {
-    if (r.years.has(S.year)) continue;
-    const seen = [...r.years.keys()].filter(y => y < S.year);
-    if (!seen.length) continue;
-    let win = 0;
-    if (isCur) {
-      const wy = new Set();
-      for (const o of r.obs) if (o.y < S.year) { const d = circDiff(o.doy, TODAY_DOY); if (d >= -7 && d <= 21) wy.add(o.y); }
-      win = wy.size;
-    }
-    yearRowsT.push({ r, seen: seen.length, win });
+  const seenLatin = new Set([...stats.keys()].map(s => SP[s].latin));
+  const seenName = new Set([...stats.keys()].map(s => SP[s].name.toLowerCase()));
+  const src = S.targetSrc;
+  const pool = [];
+  if (src !== "own") for (const [latin, name] of EURO_SPECIES) pool.push({ latin, name, src: "euro" });
+  if (src !== "euro") for (const x of S.customTargets) pool.push({ latin: x.latin, name: x.name, src: "own" });
+  const seenKey = new Set(), rows = [];
+  let totalDistinct = 0, seenCount = 0;
+  for (const p of pool) {
+    const key = (p.latin || p.name).toLowerCase();
+    if (seenKey.has(key)) continue;
+    seenKey.add(key);
+    totalDistinct++;
+    // match by Latin binomial OR German name: guards against taxonomic renames between this list and the export
+    if ((p.latin && seenLatin.has(p.latin)) || seenName.has(p.name.toLowerCase())) { seenCount++; continue; }
+    rows.push(p);
   }
-  yearRowsT.sort((a, b) => b.win - a.win || b.seen - a.seen || byDateDesc(a.r.last.d, b.r.last.d));
-  const monthRowsT = [];
-  for (const r of stats.values()) {
-    const inMonth = new Set(), thisYear = r.obs.some(o => o.y === S.year && o.m === S.month);
-    for (const o of r.obs) if (o.y < S.year && o.m === S.month) inMonth.add(o.y);
-    if (inMonth.size && !thisYear) monthRowsT.push({ r, n: inMonth.size });
-  }
-  monthRowsT.sort((a, b) => b.n - a.n || byDateDesc(a.r.last.d, b.r.last.d));
-  const tbl = (rows, cols, cell) => rows.length ? `<div class="card"><table><thead><tr><th class="nr">#</th><th>${t("name")}</th>${cols}</tr></thead><tbody>${rows.map((x, i) =>
-    `<tr><td class="nr">${i + 1}</td><td>${esc(SP[x.r.s].name)}<span class="latin">${esc(SP[x.r.s].latin)}</span></td>${cell(x)}</tr>`).join("")}</tbody></table></div>`
-    : `<p class="empty">${t("none")}</p>`;
-  const monthName = T.months[S.month - 1];
-  $("tab-targets").innerHTML = `<p class="prose">${t("tgtNote")}</p>
-    <h2>${t("tgtYear", S.year)}<small>${yearRowsT.length}</small></h2>
-    <p class="prose">${isCur ? t("tgtYearHelp", S.year) : t("tgtYearPast", S.year)}</p>
-    ${tbl(yearRowsT, `${isCur ? `<th class="num">${t("colWindow")}</th>` : ""}<th class="num">${t("colYearsSeen")}</th><th class="num hide-sm">${t("colLastSeen")}</th>`,
-      x => `${isCur ? `<td class="num">${t("windowOf", x.win, prevYears.size)}</td>` : ""}<td class="num">${t("windowOf", x.seen, prevYears.size)}</td><td class="num hide-sm">${fmtD(x.r.last.d)}</td>`)}
-    <h2>${t("tgtMonth", monthName + " " + S.year)}<small>${monthRowsT.length}</small></h2>
-    <p class="prose">${t("tgtMonthHelp", monthName, monthName + " " + S.year)}</p>
-    ${tbl(monthRowsT, `<th class="num">${t("colMonthYears")}</th><th class="num hide-sm">${t("colLastSeen")}</th>`,
-      x => `<td class="num">${t("windowOf", x.n, prevYears.size)}</td><td class="num hide-sm">${fmtD(x.r.last.d)}</td>`)}`;
+  rows.sort((a, b) => collator.compare(a.name, b.name));
+  const progressPct = pctDisplay(seenCount, totalDistinct);
+
+  const suggestions = euroSuggestionsHtml();
+  const chips = S.customTargets.length
+    ? `<div class="chips" style="margin-top:10px">${S.customTargets.map((x, i) =>
+        `<span class="chip">${esc(x.name)}${x.latin ? `<i class="latin" style="display:inline;font-style:italic"> ${esc(x.latin)}</i>` : ""}
+         <button class="lnk" data-remove="${i}" aria-label="${t("wishRemove")}" style="margin-left:4px">×</button></span>`).join("")}</div>`
+    : `<p class="empty">${t("wishEmpty")}</p>`;
+  const resultTable = rows.length
+    ? `<div class="card"><table><thead><tr><th>${t("name")}</th>${src === "all" ? `<th>${t("wishSrcCol")}</th>` : ""}</tr></thead><tbody>${rows.map(r =>
+        `<tr><td>${esc(r.name)}${r.latin ? `<span class="latin">${esc(r.latin)}</span>` : ""}</td>${src === "all" ? `<td>${r.src === "euro" ? t("wishSrcEuro") : t("wishSrcOwn")}</td>` : ""}</tr>`).join("")}</tbody></table></div>`
+    : `<p class="empty">${pool.length ? t("wishDone") : t("wishEmpty")}</p>`;
+
+  $("tab-targets").innerHTML = `
+    <p class="prose">${t("wishHelp")}</p>
+    <p class="sub">${t("wishProgress", seenCount, totalDistinct, progressPct)}</p>
+    <div class="bar" style="max-width:360px;margin-bottom:12px"><i style="width:${progressPct}%;background:linear-gradient(90deg,color-mix(in srgb,var(--accent) 45%,transparent),var(--accent))"></i></div>
+    <div class="pick">
+      <select id="tgt-src" aria-label="${t("wishSrcCol")}">
+        <option value="all">${t("wishSrcAll")}</option>
+        <option value="euro">${t("wishSrcEuro")}</option>
+        <option value="own">${t("wishSrcOwn")}</option>
+      </select>
+    </div>
+    <h2>${t("wishManage")}</h2>
+    <p class="prose">${t("wishManageHelp")}</p>
+    <div class="card">
+      <div class="pick" style="margin:0">
+        <input type="search" id="tgt-search" list="tgt-suggest" placeholder="${t("wishSearchPh")}" autocomplete="off">
+        <datalist id="tgt-suggest">${suggestions}</datalist>
+        <button class="btn" id="tgt-add" type="button">${t("wishAdd")}</button>
+      </div>
+      ${chips}
+    </div>
+    <h2>${t("wishTitle")}<small>${rows.length}</small></h2>
+    ${resultTable}`;
+  $("tgt-src").value = src;
 }
 
 /* ---------- map ---------- */
-let MAP = null, MAP_LAYER = null;
+let MAP = null, MAP_LAYER = null, mapYearRAF = null;
 /* ---------- daily activity ---------- */
 const MIN_TIMED = 5;  // minimum timed sightings before a species gets a typical time of day
 const fmtTime = m => pad(Math.floor(m / 60)) + ":" + pad(m % 60);
@@ -632,15 +1068,19 @@ function niceStep(max) {
   return mag;
 }
 // Vertical bars with a light grid; `tips[i]` becomes the hover text of bar i.
-function barChartSvg(values, labels, tips, every = 1) {
+function barChartSvg(values, labels, tips, every = 1, color = "--bar") {
   const W = 720, H = 200, L = 36, R = 8, Tp = 10, B = 22, n = values.length;
   const max = Math.max(1, ...values), step = niceStep(max), yMax = Math.ceil(max / step) * step;
   const y = v => H - B - v / yMax * (H - B - Tp), slot = (W - L - R) / n, top = Math.max(...values);
-  let g = "";
+  const gid = "barGrad" + color.replace(/[^a-z0-9]/gi, "");
+  let g = `<defs>
+    <linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(${color})"/><stop offset="100%" stop-color="var(${color})" stop-opacity="0.6"/></linearGradient>
+    <linearGradient id="${gid}Top" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--accent)"/><stop offset="100%" stop-color="var(--accent)" stop-opacity="0.65"/></linearGradient>
+  </defs>`;
   for (let v = 0; v <= yMax; v += step) g += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${L - 6}" y="${y(v) + 4}" text-anchor="end">${v}</text>`;
   values.forEach((v, i) => {
     const x = L + i * slot + slot * 0.15;
-    g += `<rect x="${x}" y="${y(v)}" width="${slot * 0.7}" height="${H - B - y(v)}" rx="2" fill="${v === top && v > 0 ? "var(--accent)" : "var(--bar)"}"><title>${esc(tips[i])}</title></rect>`;
+    g += `<rect x="${x}" y="${y(v)}" width="${slot * 0.7}" height="${H - B - y(v)}" rx="2" fill="url(#${v === top && v > 0 ? gid + "Top" : gid})"><title>${esc(tips[i])}</title></rect>`;
     if (i % every === 0) g += `<text x="${x + slot * 0.35}" y="${H - 6}" text-anchor="middle">${esc(labels[i])}</text>`;
   });
   return `<svg class="curve" viewBox="0 0 ${W} ${H}" role="img">${g}</svg>`;
@@ -669,13 +1109,13 @@ function renderActivity() {
 
   const speciesRows = [...bySpecies].filter(([, a]) => a.length >= MIN_TIMED).map(([s, a]) => ({ s, med: median(a), n: a.length }));
   const speciesTable = rows => `<div class="card"><table><thead><tr><th>${t("name")}</th><th class="num">${t("colMedian")}</th><th class="num">${t("obsShort")}</th></tr></thead><tbody>${rows.map(r =>
-    `<tr><td>${esc(SP[r.s].name)}<span class="latin">${esc(SP[r.s].latin)}</span></td><td class="num">${fmtTime(r.med)}</td><td class="num">${r.n}</td></tr>`).join("")}</tbody></table></div>`;
+    `<tr><td>${esc(SP[r.s].name)}<span class="latin">${esc(SP[r.s].latin)}</span></td><td class="num"><span class="time-chip" style="background:${heatColor(r.med / 1439)}"></span>${fmtTime(r.med)}</td><td class="num">${r.n}</td></tr>`).join("")}</tbody></table></div>`;
   const early = [...speciesRows].sort((a, b) => a.med - b.med).slice(0, 8), late = [...speciesRows].sort((a, b) => b.med - a.med).slice(0, 8);
 
   const heatMax = Math.max(1, ...monthHour.flat());
   const heat = `<table class="heat"><thead><tr><th></th>${hours.map(h => `<th>${h}</th>`).join("")}</tr></thead><tbody>${monthHour.map((row, m) =>
     `<tr><td class="y">${T.monthsShort[m].replace(".", "")}</td>${row.map((n, h) => n
-      ? `<td title="${esc(T.months[m] + ", " + hourLabel(h) + ": " + n)}" style="background:color-mix(in srgb,var(--accent) ${Math.round(10 + n / heatMax * 80)}%,transparent)">&nbsp;</td>`
+      ? `<td title="${esc(T.months[m] + ", " + hourLabel(h) + ": " + n)}" style="background:${heatColor(n / heatMax)}">&nbsp;</td>`
       : `<td></td>`).join("")}</tr>`).join("")}</tbody></table>`;
 
   $("act-out").innerHTML = `
@@ -685,32 +1125,100 @@ function renderActivity() {
       <div class="kpi"><b>${hourLabel(peak)}</b><span>${t("actKPeak")}</span></div>
     </div>
     <h2>${t("actHourTitle")}</h2>
-    <div class="card">${barChartSvg(series, hours, hours.map(h => hourLabel(h) + ": " + series[h]), 3)}</div>
+    <div class="card" id="hour-card">${barChartSvg(series, hours, hours.map(h => hourLabel(h) + ": " + series[h]), 3)}</div>
     <h2>${t("actWeekday")}</h2>
     <p class="prose">${t("actWeekdayHelp")}</p>
-    <div class="card">${barChartSvg(wdDays.map(s => s.size), T.weekdays, T.weekdays.map((w, i) => w + ": " + wdDays[i].size))}</div>
+    <div class="card" id="weekday-card">${barChartSvg(wdDays.map(s => s.size), T.weekdays, T.weekdays.map((w, i) => w + ": " + wdDays[i].size), 1, "--k6")}</div>
     <h2>${t("actHeat")}</h2>
     <p class="prose">${t("actHeatHelp")}</p>
     <div class="card">${heat}</div>
+    ${heatLegend(heatMax)}
     <h2>${t("actSpecies")}</h2>
     <p class="prose">${t("actSpeciesHelp", MIN_TIMED)}</p>
     <div class="detailgrid"><div><b>${t("actEarly")}</b>${speciesTable(early)}</div><div><b>${t("actLate")}</b>${speciesTable(late)}</div></div>`;
+  upgradeBarChart($("hour-card"), hours.map(String), series, 0, hours.map(h => hourLabel(h)));
+  upgradeBarChart($("weekday-card"), T.weekdays, wdDays.map(s => s.size), 3);
 }
 
-// Leaflet is fetched on the first visit of the map tab, so a slow or blocked CDN cannot delay the rest of the page.
+// Chart.js is fetched lazily and only upgrades the hand-drawn SVG bar chart already in the card;
+// offline or a blocked CDN just leaves the SVG in place, so the page never depends on it.
+const CHARTJS_URL = "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.1/chart.umd.min.js";
+let chartjsLoading = null;
+function loadChartJs() {
+  if (typeof Chart !== "undefined") return Promise.resolve();
+  if (!chartjsLoading) {
+    chartjsLoading = new Promise((resolve, reject) => {
+      const js = document.createElement("script");
+      js.src = CHARTJS_URL;
+      js.onload = resolve;
+      js.onerror = () => { chartjsLoading = null; js.remove(); reject(new Error("chartjs")); };
+      document.head.append(js);
+    });
+  }
+  return chartjsLoading;
+}
+const CHART_PALETTE = ["--k1", "--k2", "--k3", "--k4", "--k5", "--k6"];
+const BAR_CHARTS = {};  // card.id -> Chart instance; id stays stable across re-renders even though the DOM node is recreated each time
+function upgradeBarChart(card, labels, values, paletteOffset, tips) {
+  if (!card) return;
+  loadChartJs().then(() => {
+    if (!document.body.contains(card)) return;  // page moved on before the library arrived
+    if (BAR_CHARTS[card.id]) { BAR_CHARTS[card.id].destroy(); delete BAR_CHARTS[card.id]; }
+    const style = getComputedStyle(document.documentElement);
+    const palette = CHART_PALETTE.map(v => style.getPropertyValue(v).trim());
+    const accent = style.getPropertyValue("--accent").trim();
+    const max = Math.max(...values);
+    const hue = (v, i) => v === max && v > 0 ? accent : palette[(i + paletteOffset) % palette.length];
+    card.innerHTML = "";
+    const box = document.createElement("div");
+    box.style.height = "220px";
+    const canvas = document.createElement("canvas");
+    box.append(canvas);
+    card.append(box);
+    BAR_CHARTS[card.id] = new Chart(canvas, {
+      type: "bar",
+      data: { labels, datasets: [{
+        data: values,
+        backgroundColor: values.map((v, i) => hue(v, i) + "cc"),
+        hoverBackgroundColor: values.map((v, i) => hue(v, i)),
+        borderColor: values.map((v, i) => hue(v, i)),
+        borderWidth: 1.5, borderRadius: 5, maxBarThickness: 34,
+      }] },
+      options: {
+        responsive: true, maintainAspectRatio: false, animation: { duration: 300 },
+        plugins: { legend: { display: false }, tooltip: tips ? { callbacks: { title: items => tips[items[0].dataIndex] } } : {} },
+        scales: { y: { beginAtZero: true, ticks: { precision: 0 } }, x: { grid: { display: false } } },
+      },
+    });
+  }, () => { /* offline or blocked: the SVG rendered synchronously above stays as-is */ });
+}
+
+// Leaflet (+ the marker-cluster plugin) is fetched on the first visit of the map tab, so a slow or blocked CDN cannot delay the rest of the page.
 const LEAFLET_URL = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min";
+const CLUSTER_URL = "https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js";
+const CLUSTER_CSS = ["https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.min.css",
+  "https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.min.css"];
 let leafletLoading = null;
 function loadLeaflet() {
   if (typeof L !== "undefined") return Promise.resolve();
   if (!leafletLoading) {
     leafletLoading = new Promise((resolve, reject) => {
+      const links = CLUSTER_CSS.map(href => Object.assign(document.createElement("link"), { rel: "stylesheet", href }));
       const css = document.createElement("link");
       css.rel = "stylesheet"; css.href = LEAFLET_URL + ".css";
       const js = document.createElement("script");
       js.src = LEAFLET_URL + ".js";
-      js.onload = resolve;
+      js.onload = () => {
+        const cluster = document.createElement("script");
+        cluster.src = CLUSTER_URL;
+        // clustering is a nice-to-have on top of core Leaflet: if only this CDN request fails, still resolve
+        // so the map renders with drawMap()'s plain-layerGroup fallback instead of the whole map being disabled
+        cluster.onload = resolve;
+        cluster.onerror = resolve;
+        document.head.append(cluster);
+      };
       js.onerror = () => { leafletLoading = null; css.remove(); reject(new Error("leaflet")); };
-      document.head.append(css, js);
+      document.head.append(css, ...links, js);
     });
   }
   return leafletLoading;
@@ -733,19 +1241,40 @@ function drawMap() {
     };
     Object.values(layers)[0].addTo(MAP);
     L.control.layers(layers, null, { position: "topright" }).addTo(MAP);
-    MAP_LAYER = L.layerGroup().addTo(MAP);
+    MAP_LAYER = L.markerClusterGroup
+      ? L.markerClusterGroup({
+          maxClusterRadius: 45,
+          iconCreateFunction: cl => L.divIcon({
+            html: `<div>${cl.getChildCount()}</div>`, className: "marker-cluster-custom", iconSize: [36, 36],
+          }),
+        })
+      : L.layerGroup();
+    MAP_LAYER.addTo(MAP);
   }
   $("m-metric").options[1].text = t("mapYear", S.year);
+  $("m-metric").options[3].text = t("mapLifer", S.year);
   MAP.invalidateSize();
   MAP_LAYER.clearLayers();
+  const regionList = regionObs(baseObs());
   const byPlace = new Map();
-  for (const o of regionObs(baseObs())) {
+  for (const o of regionList) {
     let r = byPlace.get(o.p);
-    if (!r) { r = { p: o.p, sp: new Set(), ySp: new Set(), n: 0, first: o.d, last: o.d }; byPlace.set(o.p, r); }
+    if (!r) { r = { p: o.p, sp: new Set(), ySp: new Set(), n: 0, first: o.d, last: o.d, visits: new Map(), lifer: 0 }; byPlace.set(o.p, r); }
     r.sp.add(o.s); r.n++; r.last = o.d;
     if (o.y === S.year) r.ySp.add(o.s);
+    if (!r.visits.has(o.d)) r.visits.set(o.d, []);
+    r.visits.get(o.d).push(o);
   }
-  const value = r => S.metric === "year" ? r.ySp.size : S.metric === "obs" ? r.n : r.sp.size;
+  // species whose first-ever record (across all years) falls at this place, up to the selected year: powers the "lifer time travel" metric.
+  // OBS is already date-sorted ascending, so the first entry seen per species here is its earliest record — cheaper than a full speciesStats() pass.
+  const firstOfSpecies = new Map();
+  for (const o of regionList) if (!firstOfSpecies.has(o.s)) firstOfSpecies.set(o.s, o);
+  for (const first of firstOfSpecies.values()) {
+    if (first.y > S.year) continue;
+    const r = byPlace.get(first.p);
+    if (r) r.lifer++;
+  }
+  const value = r => S.metric === "year" ? r.ySp.size : S.metric === "obs" ? r.n : S.metric === "lifer" ? r.lifer : r.sp.size;
   const pts = [...byPlace.values()].filter(r => PL[r.p].lat && value(r) > 0).sort((a, b) => value(b) - value(a));
   $("map-note").textContent = t("mapNote", pts.length);
   if (!pts.length) return;
@@ -753,8 +1282,20 @@ function drawMap() {
   const bounds = [];
   for (const r of pts) {
     const p = PL[r.p], v = value(r);
-    L.circleMarker([p.lat, p.lon], { radius: 5 + 17 * Math.sqrt(v / max), color: "#1f6b39", weight: 1.5, fillColor: "#2f8f4e", fillOpacity: .55 })
-      .bindPopup(`<b>${esc(p.name)}</b><br>${esc(p.muni)}<br>${t("mapSpecies")}: ${r.sp.size}, ${t("observations")}: ${r.n}<br>${fmtD(r.first)} bis ${fmtD(r.last)}<br><button class="lnk" data-region="p:${p.i}">${t("mapFilter")}</button>`)
+    const visits = [...r.visits].sort((a, b) => byDateDesc(a[0], b[0]));
+    const visitList = visits.map(([d, obs]) => `<details><summary>${fmtD(d)} (${obs.length})</summary><ul>${obs
+      .map(o => `<li>${esc(SP[o.s].name)}${o.c ? ` (${o.c})` : ""}${o.ph ? " 📷" : ""}</li>`).join("")}</ul></details>`).join("");
+    // a plain div-icon marker (not circleMarker) so the cluster plugin, which only understands L.Marker, can group these
+    const dia = Math.round(2 * (5 + 17 * Math.sqrt(v / max)));
+    const icon = L.divIcon({
+      className: "value-marker",
+      html: `<div style="width:${dia}px;height:${dia}px;background:${heatColor(v / max)};opacity:.8;border:1.5px solid rgba(0,0,0,.35);border-radius:50%"></div>`,
+      iconSize: [dia, dia], iconAnchor: [dia / 2, dia / 2],
+    });
+    L.marker([p.lat, p.lon], { icon })
+      .bindPopup(`<b>${esc(p.name)}</b><br>${esc(p.muni)}<br>${t("mapSpecies")}: ${r.sp.size}, ${t("observations")}: ${r.n}${r.lifer ? `, ${t("mapLifeHere")}: ${r.lifer}` : ""}<br>${fmtD(r.first)} ${t("to")} ${fmtD(r.last)}
+        <div class="visits">${visitList}</div>
+        <button class="lnk" data-region="p:${p.i}">${t("mapFilter")}</button>`, { maxWidth: 280 })
       .bindTooltip(`${esc(p.name)}: ${v}`)
       .addTo(MAP_LAYER);
     bounds.push([p.lat, p.lon]);
@@ -811,9 +1352,10 @@ function renderActive() {
 }
 function refreshAll() { buildRegionSelect(); renderActive(); }
 
-function init() {
+// (re-)sets every static label, option list and select value from the active language; safe to call again after a language switch
+function renderChrome() {
   $("h-title").textContent = t("title");
-  $("h-sub").textContent = t("subtitle", RAW.meta.source, fmtN(OBS.length));
+  $("h-sub").textContent = t("subtitle", RAW.meta.source, fmtN(OBS.length)) + " · " + t("version", APP_VERSION);
   $("o-sum").textContent = t("optsSummary");
   $("o-escaped-t").textContent = t("optEscaped");
   $("o-collective-t").textContent = t("optCollective");
@@ -822,12 +1364,55 @@ function init() {
   $("q").placeholder = t("searchPh");
   $("tabs").innerHTML = [["overview", "tabOverview"], ["list", "tabList"], ["regions", "tabRegions"], ["targets", "tabTargets"], ["activity", "tabActivity"], ["map", "tabMap"]]
     .map(([k, l]) => `<button data-tab="${k}">${t(l)}</button>`).join("");
+  for (const b of document.querySelectorAll("#tabs button")) b.classList.toggle("on", b.dataset.tab === S.tab);
+  if (S.redact) document.querySelector('#tabs button[data-tab="map"]').hidden = true;
+  $("f-lang").value = S.lang;
+  $("f-region").setAttribute("aria-label", t("ariaRegion"));
+  $("f-year").setAttribute("aria-label", t("ariaYear"));
+  $("f-month").setAttribute("aria-label", t("ariaMonth"));
+  $("q-sort").setAttribute("aria-label", t("ariaSort"));
+  $("q-atlas").setAttribute("aria-label", t("ariaAtlas"));
+  $("a-metric").setAttribute("aria-label", t("ariaMetric"));
+  $("a-scope").setAttribute("aria-label", t("ariaScope"));
+  $("m-metric").setAttribute("aria-label", t("ariaMapMetric"));
   $("f-year").innerHTML = YEARS.slice().reverse().map(y => `<option>${y}</option>`).join("");
   $("f-year").value = S.year;
   $("f-month").innerHTML = T.months.map((m, i) => `<option value="${i + 1}">${m}</option>`).join("");
   $("f-month").value = S.month;
+  $("q-sort").innerHTML = ["nr", "taxon", "name"].map(k => `<option value="${k}">${t("sort" + k[0].toUpperCase() + k.slice(1))}</option>`).join("") + `<option value="" disabled>${t("sortColumn")}</option>`;
+  $("q-sort").value = ["nr", "taxon", "name"].includes(S.sort) ? S.sort : "";
+  $("a-metric").innerHTML = [["obs", "actMObs"], ["species", "actMSpecies"], ["days", "actMDays"]].map(([k, l]) => `<option value="${k}">${t(l)}</option>`).join("");
+  $("a-metric").value = S.actMetric;
+  $("a-scope").innerHTML = `<option value="all">${t("actScopeAll")}</option><option value="year">${S.actScope === "year" ? t("actScopeYear", S.year) : ""}</option>`;
+  $("a-scope").value = S.actScope;
+  $("q-atlas").innerHTML = Object.entries(T.atlasFilter).map(([k, v]) => `<option value="${k}">${v}</option>`).join("");
+  $("q-atlas").value = S.atlasF;
+  $("b-pdf").textContent = t("pdf");
+  $("m-metric").innerHTML = `<option value="life">${t("mapLife")}</option><option value="year">${S.metric === "year" ? t("mapYear", S.year) : t("mapYear", t("yearPlaceholder"))}</option><option value="obs">${t("mapObs")}</option><option value="lifer">${S.metric === "lifer" ? t("mapLifer", S.year) : t("mapLifer", t("yearPlaceholder"))}</option>`;
+  $("m-metric").value = S.metric;
+  $("m-year").min = MIN_Y; $("m-year").max = MAX_Y; $("m-year").value = S.year;
+  $("m-year").setAttribute("aria-label", t("ariaYear"));
+  $("m-year-val").textContent = S.year;
+}
+function applyLang(lang) {
+  if (lang === S.lang) return;
+  S.lang = lang;
+  T = STR[lang];
+  collator = new Intl.Collator(lang === "en" ? "en" : "de");
+  try { localStorage.setItem("lifelist-lang", lang); } catch (e) { /* private mode may refuse */ }
+  document.documentElement.lang = lang;
+  document.title = t("title");
+  renderChrome();
+  buildRegionSelect();
+  renderActive();
+}
+function init() {
+  document.documentElement.lang = S.lang;
+  document.title = t("title");
+  renderChrome();
 
   $("tabs").addEventListener("click", e => { const b = e.target.closest("button"); if (b) setTab(b.dataset.tab); });
+  $("f-lang").addEventListener("change", e => { applyLang(e.target.value); });
   $("f-region").addEventListener("change", e => { S.region = e.target.value; renderActive(); });
   $("f-year").addEventListener("change", e => { S.year = +e.target.value; renderActive(); });
   $("f-month").addEventListener("change", e => { S.month = +e.target.value; renderActive(); });
@@ -835,30 +1420,34 @@ function init() {
   $("o-collective").addEventListener("change", e => { S.collective = e.target.checked; refreshAll(); });
   $("o-redact").addEventListener("change", e => { applyRedact(e.target.checked); });
   $("q").addEventListener("input", e => { S.q = e.target.value; renderList(); });
-  $("q-sort").innerHTML = ["nr", "taxon", "name"].map(k => `<option value="${k}">${t("sort" + k[0].toUpperCase() + k.slice(1))}</option>`).join("") + `<option value="" disabled>${t("sortColumn")}</option>`;
   $("q-sort").addEventListener("change", e => { S.sort = e.target.value; S.dir = S.sort === "nr" ? -1 : 1; renderList(); });
-  $("a-metric").innerHTML = [["obs", "actMObs"], ["species", "actMSpecies"], ["days", "actMDays"]].map(([k, l]) => `<option value="${k}">${t(l)}</option>`).join("");
-  $("a-scope").innerHTML = `<option value="all">${t("actScopeAll")}</option><option value="year"></option>`;
   $("a-metric").addEventListener("change", e => { S.actMetric = e.target.value; renderActivity(); });
   $("a-scope").addEventListener("change", e => { S.actScope = e.target.value; renderActivity(); });
-  $("q-atlas").innerHTML = Object.entries(T.atlasFilter).map(([k, v]) => `<option value="${k}">${v}</option>`).join("");
   $("q-atlas").addEventListener("change", e => { S.atlasF = e.target.value; renderList(); });
-  $("b-pdf").textContent = t("pdf");
   $("b-pdf").addEventListener("click", () => window.print());
   let printBackup = null;
   window.addEventListener("beforeprint", () => {
-    // the report contains every section in full: no open detail rows, search, atlas filter or truncated region tables
-    printBackup = { q: S.q, open: S.open, atlasF: S.atlasF, regAll: S.regAll };
-    S.q = ""; S.open = new Set(); S.atlasF = "all"; S.regAll = Object.fromEntries(LEVELS.map(lv => [lv.lvl, true]));
-    $("h-print").textContent = t("printed", new Date().toLocaleDateString("de-DE")) + (S.region === "all" ? "" : ", " + $("f-region").selectedOptions[0].text);
+    // the report contains every section in full: no open detail rows, search, atlas filter, truncated region tables or wishlist source filter
+    printBackup = { q: S.q, open: S.open, atlasF: S.atlasF, regAll: S.regAll, targetSrc: S.targetSrc };
+    S.q = ""; S.open = new Set(); S.atlasF = "all"; S.regAll = Object.fromEntries(LEVELS.map(lv => [lv.lvl, true])); S.targetSrc = "all";
+    $("h-print").textContent = t("printed", new Date().toLocaleDateString(S.lang === "en" ? "en-GB" : "de-DE")) + (S.region === "all" ? "" : ", " + $("f-region").selectedOptions[0].text);
     renderOverview(); renderList(); renderRegions(); renderTargets(); renderActivity();
   });
   window.addEventListener("afterprint", () => {
     if (printBackup) { Object.assign(S, printBackup); printBackup = null; }
     renderActive();
   });
-  $("m-metric").innerHTML = `<option value="life">${t("mapLife")}</option><option value="year">${t("mapYear", "(Jahr)")}</option><option value="obs">${t("mapObs")}</option>`;
   $("m-metric").addEventListener("change", e => { S.metric = e.target.value; renderMap(); });
+  $("m-year").addEventListener("input", e => {
+    S.year = +e.target.value;
+    $("m-year-val").textContent = S.year;
+    $("f-year").value = S.year;
+    // MAP may still be loading (or have failed to load) while the user drags; and rAF-throttle redraws during the drag itself
+    if ((S.metric === "year" || S.metric === "lifer") && MAP) {
+      if (mapYearRAF) cancelAnimationFrame(mapYearRAF);
+      mapYearRAF = requestAnimationFrame(() => { mapYearRAF = null; drawMap(); });
+    }
+  });
   $("tab-map").addEventListener("click", e => {
     const r = e.target.closest("[data-region]");
     if (r) { S.region = r.dataset.region; buildRegionSelect(); renderMap(); }
@@ -889,6 +1478,26 @@ function init() {
       buildRegionSelect();
       setTab("overview");
     }
+  });
+
+  $("tab-targets").addEventListener("change", e => {
+    if (e.target.id === "tgt-src") { S.targetSrc = e.target.value; renderTargets(); }
+  });
+  $("tab-targets").addEventListener("click", e => {
+    if (e.target.closest("#tgt-add")) {
+      const input = $("tgt-search"), val = input.value.trim();
+      if (val) {
+        const match = EURO_BY_NAME.get(val.toLowerCase());
+        const dup = S.customTargets.some(x => x.name.toLowerCase() === (match ? match[1] : val).toLowerCase());
+        if (!dup) S.customTargets.push(match ? { name: match[1], latin: match[0] } : { name: val, latin: null });
+        saveCustomTargets();
+        input.value = "";
+        renderTargets();
+      }
+      return;
+    }
+    const rm = e.target.closest("[data-remove]");
+    if (rm) { S.customTargets.splice(+rm.dataset.remove, 1); saveCustomTargets(); renderTargets(); }
   });
 
   if (S.redact) { $("o-redact").checked = true; document.querySelector('#tabs button[data-tab="map"]').hidden = true; }

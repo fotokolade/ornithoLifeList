@@ -1,8 +1,8 @@
 """Builds lifelist.html from an ornitho.de JSON export.
 
-Usage:  python build.py [export.json] [--schwaerzen]
-Without an argument the newest export_*.json next to this script is used.
---schwaerzen writes lifelist_geschwaerzt.html without any place names or coordinates.
+Usage:  python lifelist.py [--source export.json] [--redact]
+Without --source, the newest export_*.json next to this script is used.
+--redact writes lifelist_redacted.html without any place names or coordinates.
 """
 import argparse
 import glob
@@ -20,7 +20,7 @@ FLAG_COLLECTIVE = 2
 def find_export():
     files = glob.glob(os.path.join(HERE, "export_*.json"))
     if not files:
-        sys.exit("Kein export_*.json gefunden.")
+        sys.exit("No export_*.json found.")
     return max(files, key=os.path.getmtime)
 
 
@@ -114,13 +114,13 @@ def build_data(sightings):
 
 def main():
     parser = argparse.ArgumentParser(description="Builds lifelist.html from an ornitho.de JSON export.")
-    parser.add_argument("export", nargs="?", help="export.json (default: newest export_*.json)")
-    parser.add_argument("--schwaerzen", action="store_true", help="write lifelist_geschwaerzt.html without place data")
+    parser.add_argument("--source", "-s", help="export JSON file (default: newest export_*.json)")
+    parser.add_argument("--redact", action="store_true", help="write lifelist_redacted.html without place data")
     opts = parser.parse_args()  # unknown flags abort, so a typo cannot produce an unredacted file
-    redact = opts.schwaerzen
-    src = opts.export or find_export()
+    redact = opts.redact
+    src = opts.source or find_export()
     src = os.path.abspath(src)
-    print("Quelle:", src)
+    print("Source:", src)
     with open(src, encoding="utf-8") as fh:
         sightings = json.load(fh)["data"]["sightings"]
 
@@ -136,14 +136,14 @@ def main():
         tpl = fh.read()
     blob = json.dumps(data, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
     out = tpl.replace("__DATA_JSON__", blob)
-    dst = os.path.join(HERE, "lifelist_geschwaerzt.html" if redact else "lifelist.html")
+    dst = os.path.join(HERE, "lifelist_redacted.html" if redact else "lifelist.html")
     with open(dst, "w", encoding="utf-8") as fh:
         fh.write(out)
 
     counted = {r[0] for r in data["obs"] if data["sp"][r[0]][3] == 0}
-    print(f"Beobachtungen: {len(data['obs'])}, Taxa: {len(data['sp'])}, "
-          f"Arten (ohne Flüchtlinge und Sammeltaxa): {len(counted)}")
-    print("Geschrieben:", dst, f"({os.path.getsize(dst) / 1e6:.2f} MB)")
+    print(f"Observations: {len(data['obs'])}, taxa: {len(data['sp'])}, "
+          f"species (excluding escapes and collective taxa): {len(counted)}")
+    print("Written:", dst, f"({os.path.getsize(dst) / 1e6:.2f} MB)")
 
 
 if __name__ == "__main__":

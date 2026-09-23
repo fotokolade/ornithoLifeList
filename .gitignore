@@ -5,4 +5,4 @@ __pycache__/
 # Persönliche Beobachtungsdaten (Orte, Koordinaten, Daten) – nicht versionieren
 export_*.json
 lifelist.html
-lifelist_geschwaerzt.html
+lifelist_redacted.html
