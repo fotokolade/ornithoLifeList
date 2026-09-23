@@ -2,7 +2,7 @@
 
 Aus einem [ornitho.de](https://www.ornitho.de/)-Export wird eine interaktive Vogel-Lebensliste als einzelne HTML-Datei.
 
-Die fertige `lifelist.html` kann direkt im Browser geöffnet werden – kein Server und keine Installation der Anwendung nötig.
+Die fertige `lifelist.html` lässt sich direkt im Browser öffnen, ganz ohne Server oder Installation.
 
 ## Was bietet die Lebensliste?
 
@@ -15,7 +15,7 @@ Die fertige `lifelist.html` kann direkt im Browser geöffnet werden – kein Ser
 - Deutsch und Englisch, einschließlich englischer Artnamen
 - Saisonhinweise für Arten, die noch auf der Wunschliste stehen
 
-Leaflet (Karte) und Chart.js (Diagramme in der Tagesaktivität) sind fest in die Seite eingebettet statt von einem CDN nachgeladen zu werden (siehe `vendor/`) – die Lebensliste funktioniert komplett offline. Nur die Kartenkacheln selbst (Straßenkarte/Topografisch/Satellit) brauchen eine Internetverbindung; ohne sie bleibt die Karte nutzbar, nur ohne Hintergrundbild.
+Internet braucht die Lebensliste nur für die Kartenansicht, alles andere funktioniert offline.
 
 ## Schnellstart
 
@@ -71,22 +71,20 @@ Das erzeugt:
 lifelist_redacted.html
 ```
 
-In dieser Version sind Beobachtungsorte, Gemeinden und Koordinaten entfernt. Die eigentlichen Beobachtungsdaten bleiben dabei natürlich erhalten – nur die Ortsinformationen werden ausgeblendet.
+In dieser Version sind Beobachtungsorte, Gemeinden und Koordinaten entfernt. Die eigentlichen Beobachtungsdaten bleiben dabei natürlich erhalten, nur die Ortsinformationen werden ausgeblendet.
 
 ## Voraussetzungen
-
-Für die normale Erstellung der Lebensliste wird lediglich benötigt:
 
 - Python 3
 - ein JSON-Export von ornitho.de
 
-Zusätzliche Python-Pakete sind für den normalen Build nicht erforderlich, und es wird keine Internetverbindung gebraucht (Leaflet/Chart.js sind bereits in `vendor/` enthalten, siehe unten).
+Mehr wird nicht gebraucht, auch keine Internetverbindung.
 
 ## Welche Daten werden verwendet?
 
 Die Artennamen stammen aus der offiziellen ornitho-Artenliste. Dadurch stehen neben den deutschen auch die lateinischen und englischen Namen zur Verfügung.
 
-Für die Saisonhinweise auf der Wunschliste werden – je nach Art – unterschiedliche Informationen verwendet:
+Für die Saisonhinweise auf der Wunschliste werden je nach Art unterschiedliche Informationen verwendet:
 
 - Bei in Deutschland bzw. Luxemburg brütenden Arten wird das offizielle Brutzeitfenster von ornitho verwendet.
 - Bei Zug- und Gastvögeln, die hier nicht brüten, wird ein typischer Beobachtungszeitraum aus öffentlichen GBIF-Fundmeldungen abgeleitet.
@@ -97,31 +95,31 @@ Die entsprechenden Referenzdaten liegen im Verzeichnis `reference/` bzw. in `spe
 
 ### Für Anwender
 
-- `lifelist.py` – erstellt die fertige Lebensliste
-- `export_*.json` – eigener ornitho.de-Export
-- `lifelist.html` – fertige Lebensliste
-- `lifelist_redacted.html` – fertige Lebensliste ohne Ortsangaben
-- `HOWTO.md` – bebilderte Anleitung für den Datenexport von ornitho.de
+- `lifelist.py`: erstellt die fertige Lebensliste
+- `export_*.json`: eigener ornitho.de-Export
+- `lifelist.html`: fertige Lebensliste
+- `lifelist_redacted.html`: fertige Lebensliste ohne Ortsangaben
+- `HOWTO.md`: bebilderte Anleitung für den Datenexport von ornitho.de
 
 Die persönlichen Export- und HTML-Dateien gehören nicht ins Git-Repository und sind deshalb über `.gitignore` ausgeschlossen.
 
 ### Für die Entwicklung
 
-- `template.html` – HTML-Vorlage der fertigen Seite, mit den Platzhaltern `__DATA_JSON__`, `__APP_JS__`, `__VENDOR_JS__` und `__VENDOR_CSS__`
-- `src/*.js` – JavaScript-Code der Anwendung, aufgeteilt nach Tab/Thema (`i18n.js`, `data.js`, `charts.js`, `overview.js`, `list.js`, `regions.js`, `targets.js`, `activity.js`, `map.js`, `app.js`)
-- `tsconfig.json`, `src/globals.d.ts` – für die optionale JSDoc-Typprüfung (siehe unten)
-- `species_reference.json` – Referenzdaten zu Arten, Namen und Saisonzeiträumen
-- `reference/` – originale Referenztabellen von ornitho.de, Quelle für `species_reference.json`
-- `tools/extract_species_reference.py` – aktualisiert die Arten-Referenzdaten aus `reference/ornitho-Referenzliste-Arten-*.xlsx`; benötigt `pip install openpyxl`
-- `tools/fetch_occurrence_windows.py` – ermittelt Beobachtungszeiträume für Zug- und Gastvögel über die öffentliche GBIF-API
-- `vendor/` – Leaflet, das Leaflet.markercluster-Plugin und Chart.js als mitgelieferte Dateien (siehe Lizenzen unten); `tools/update_vendor.py` lädt sie bei Bedarf neu, z. B. für ein Versions-Update
-- `howto/` – Screenshots für `HOWTO.md`
+- `template.html`: HTML-Vorlage der fertigen Seite, mit den Platzhaltern `__DATA_JSON__`, `__APP_JS__`, `__VENDOR_JS__` und `__VENDOR_CSS__`
+- `src/*.js`: JavaScript-Code der Anwendung, aufgeteilt nach Tab/Thema (`i18n.js`, `data.js`, `charts.js`, `overview.js`, `list.js`, `regions.js`, `targets.js`, `activity.js`, `map.js`, `app.js`)
+- `tsconfig.json`, `src/globals.d.ts`: für die optionale JSDoc-Typprüfung (siehe unten)
+- `species_reference.json`: Referenzdaten zu Arten, Namen und Saisonzeiträumen
+- `reference/`: originale Referenztabellen von ornitho.de, Quelle für `species_reference.json`; wegen unklarer Weitergaberechte nicht Teil des Git-Repositorys
+- `tools/extract_species_reference.py`: aktualisiert die Arten-Referenzdaten aus `reference/ornitho-Referenzliste-Arten-*.xlsx`; benötigt `pip install openpyxl`
+- `tools/fetch_occurrence_windows.py`: ermittelt Beobachtungszeiträume für Zug- und Gastvögel über die öffentliche GBIF-API
+- `vendor/`: Leaflet, das Leaflet.markercluster-Plugin und Chart.js als mitgelieferte Dateien (siehe Lizenzen unten); `tools/update_vendor.py` lädt sie bei Bedarf neu, z. B. für ein Versions-Update
+- `howto/`: Screenshots für `HOWTO.md`
 
-Alle mit "benötigt"/"lädt neu" markierten Tools sind reine Entwicklungs-/Pflegewerkzeuge und für den normalen Build nicht nötig.
+Diese Werkzeuge dienen nur der Datenpflege, für den normalen Build werden sie nicht gebraucht.
 
 ## Entwicklung
 
-Die Aufteilung in `src/*.js` ist nur für die Bearbeitung gedacht. Beim Erstellen der Lebensliste fügt `lifelist.py` sie in fester Reihenfolge (`APP_JS_FILES`) zu einem einzigen `<script>` zusammen – es gibt keine `import`/`export`-Module, weil `<script type="module">` unter `file://` an Chromes CORS-Sperre scheitern würde. Ausgeliefert wird weiterhin ausschließlich die eine generierte HTML-Datei, kein Build-Schritt, keine Laufzeit-Abhängigkeit für Nutzer:innen.
+Die Aufteilung in `src/*.js` ist nur für die Bearbeitung gedacht. Beim Erstellen der Lebensliste fügt `lifelist.py` sie in fester Reihenfolge (`APP_JS_FILES`) zu einem einzigen `<script>` zusammen. Es gibt keine `import`/`export`-Module, weil `<script type="module">` unter `file://` an Chromes CORS-Sperre scheitern würde. Ausgeliefert wird weiterhin nur die eine generierte HTML-Datei.
 
 Optional lässt sich `src/*.js` per JSDoc-Kommentaren mit dem TypeScript-Compiler typprüfen (ohne dass daraus TypeScript-Syntax im ausgelieferten Code entsteht):
 
@@ -129,13 +127,13 @@ Optional lässt sich `src/*.js` per JSDoc-Kommentaren mit dem TypeScript-Compile
 npx --package typescript -- tsc -p tsconfig.json
 ```
 
-(Einfaches `npx tsc` funktioniert nicht – auf npm existiert ein gleichnamiges, unrelated Paket `tsc`, das den echten TypeScript-Compiler überschattet.)
+(Einfaches `npx tsc` funktioniert nicht: Auf npm existiert ein gleichnamiges, fremdes Paket `tsc`, das den echten TypeScript-Compiler überschattet.)
 
 ### Lizenzen der mitgelieferten Bibliotheken (`vendor/`)
 
-- [Leaflet](https://leafletjs.com/) – BSD-2-Clause, © Vladimir Agafonkin, © 2010–2023 CloudMade
-- [Leaflet.markercluster](https://github.com/Leaflet/Leaflet.markercluster) – MIT, © Dave Leaver
-- [Chart.js](https://www.chartjs.org/) – MIT, © Chart.js Contributors
+- [Leaflet](https://leafletjs.com/): BSD-2-Clause, © Vladimir Agafonkin, © 2010–2023 CloudMade
+- [Leaflet.markercluster](https://github.com/Leaflet/Leaflet.markercluster): MIT, © Dave Leaver
+- [Chart.js](https://www.chartjs.org/): MIT, © Chart.js Contributors
 
 Alle drei erlauben Einbettung/Weitergabe; der jeweilige Copyright-Hinweis bleibt in den Dateien in `vendor/` erhalten.
 
