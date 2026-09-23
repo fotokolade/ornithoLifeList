@@ -6,3 +6,5 @@ __pycache__/
 export_*.json
 lifelist.html
 lifelist_redacted.html
+# Offizielle ornitho.de/DDA-Referenztabellen, unklare Weitergaberechte; Quelle für species_reference.json
+reference/
