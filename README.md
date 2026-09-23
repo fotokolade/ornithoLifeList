@@ -49,6 +49,18 @@ Diese Datei einfach im Browser öffnen.
 
 Wenn mehrere `export_*.json`-Dateien vorhanden sind, wird automatisch die neueste verwendet.
 
+### Ohne Python: fertige exe verwenden
+
+Wer kein Python installieren möchte, findet auf der [Releases-Seite](../../releases) eine fertige `lifelist.exe` für Windows. Sie tut dasselbe wie `python lifelist.py`, versteht dieselben Optionen und braucht die exportierte `export_*.json` im selben Ordner.
+
+Vor der ersten Ausführung lohnt sich ein Abgleich der SHA256-Prüfsumme mit der auf der Releases-Seite angegebenen, zum Beispiel in PowerShell:
+
+```powershell
+Get-FileHash lifelist.exe -Algorithm SHA256
+```
+
+Stimmt der Hash nicht mit dem veröffentlichten überein, stammt die Datei nicht von diesem Release und sollte nicht ausgeführt werden.
+
 ### Einen bestimmten Export verwenden
 
 Falls eine bestimmte Exportdatei verwendet werden soll:
@@ -75,7 +87,7 @@ In dieser Version sind Beobachtungsorte, Gemeinden und Koordinaten entfernt. Die
 
 ## Voraussetzungen
 
-- Python 3
+- Python 3 (oder, unter Windows, die fertige `lifelist.exe` von der [Releases-Seite](../../releases) statt Python)
 - ein JSON-Export von ornitho.de
 
 Mehr wird nicht gebraucht, auch keine Internetverbindung.
@@ -114,6 +126,7 @@ Die persönlichen Export- und HTML-Dateien gehören nicht ins Git-Repository und
 - `tools/fetch_occurrence_windows.py`: ermittelt Beobachtungszeiträume für Zug- und Gastvögel über die öffentliche GBIF-API
 - `vendor/`: Leaflet, das Leaflet.markercluster-Plugin und Chart.js als mitgelieferte Dateien (siehe Lizenzen unten); `tools/update_vendor.py` lädt sie bei Bedarf neu, z. B. für ein Versions-Update
 - `howto/`: Screenshots für `HOWTO.md`
+- `lifelist.spec`: Bauanleitung für PyInstaller, erzeugt die `lifelist.exe` für die Releases-Seite (siehe unten)
 
 Diese Werkzeuge dienen nur der Datenpflege, für den normalen Build werden sie nicht gebraucht.
 

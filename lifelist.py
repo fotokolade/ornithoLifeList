@@ -1,7 +1,8 @@
 """Builds lifelist.html from an ornitho.de JSON export.
 
 Usage:  python lifelist.py [--source export.json] [--redact]
-Without --source, the newest export_*.json next to this script is used.
+        lifelist.exe [--source export.json] [--redact]
+Without --source, the newest export_*.json next to the script (or the exe) is used.
 --redact writes lifelist_redacted.html without any place names or coordinates.
 """
 import argparse
@@ -12,7 +13,16 @@ import os
 import re
 import sys
 
-HERE = os.path.dirname(os.path.abspath(__file__))
+# Two different base directories are needed once this script can also run as a PyInstaller-frozen
+# exe: RESOURCES is where the app's own bundled files live (template.html, src/, vendor/,
+# species_reference.json) -- inside the exe's temp extraction dir (sys._MEIPASS) when frozen, next
+# to this script otherwise. HERE is where the user's own files live: the export_*.json to read and
+# the lifelist.html to write, both expected next to the exe (or next to this script in dev mode).
+if getattr(sys, "frozen", False):
+    RESOURCES = sys._MEIPASS
+    HERE = os.path.dirname(os.path.abspath(sys.executable))
+else:
+    RESOURCES = HERE = os.path.dirname(os.path.abspath(__file__))
 
 FLAG_ESCAPED = 1
 FLAG_COLLECTIVE = 2
@@ -41,7 +51,7 @@ VENDOR_CSS_IMAGES = ["layers.png", "layers-2x.png"]
 def build_app_js():
     parts = []
     for name in APP_JS_FILES:
-        with open(os.path.join(HERE, "src", name), encoding="utf-8") as fh:
+        with open(os.path.join(RESOURCES, "src", name), encoding="utf-8") as fh:
             parts.append(fh.read().rstrip("\n"))
     return "\n".join(parts)
 
@@ -49,7 +59,7 @@ def build_app_js():
 def build_vendor_js():
     parts = []
     for name in VENDOR_JS_FILES:
-        with open(os.path.join(HERE, "vendor", name), encoding="utf-8") as fh:
+        with open(os.path.join(RESOURCES, "vendor", name), encoding="utf-8") as fh:
             parts.append(fh.read().rstrip("\n"))
     return "\n".join(parts)
 
@@ -57,11 +67,11 @@ def build_vendor_js():
 def build_vendor_css():
     parts = []
     for name in VENDOR_CSS_FILES:
-        with open(os.path.join(HERE, "vendor", name), encoding="utf-8") as fh:
+        with open(os.path.join(RESOURCES, "vendor", name), encoding="utf-8") as fh:
             css = fh.read()
         if name == "leaflet.min.css":
             for image in VENDOR_CSS_IMAGES:
-                with open(os.path.join(HERE, "vendor", "images", image), "rb") as fh:
+                with open(os.path.join(RESOURCES, "vendor", "images", image), "rb") as fh:
                     data_uri = "data:image/png;base64," + base64.b64encode(fh.read()).decode("ascii")
                 css = css.replace(f"images/{image}", data_uri)
         parts.append(css)
@@ -114,7 +124,7 @@ def load_species_reference():
     """Latin-name lookups generated from the official ornitho.de species list, plus GBIF-derived
     occurrence windows for non-breeding species; see tools/extract_species_reference.py and
     tools/fetch_occurrence_windows.py. Returns (english_by_latin, wishlist_rows)."""
-    path = os.path.join(HERE, "species_reference.json")
+    path = os.path.join(RESOURCES, "species_reference.json")
     with open(path, encoding="utf-8") as fh:
         ref = json.load(fh)
     english_by_latin = {latin: names["en"] for latin, names in ref["lifeListNames"].items() if names.get("en")}
@@ -200,7 +210,7 @@ def main():
         "source": os.path.basename(src),
     }
 
-    with open(os.path.join(HERE, "template.html"), encoding="utf-8") as fh:
+    with open(os.path.join(RESOURCES, "template.html"), encoding="utf-8") as fh:
         tpl = fh.read()
     blob = json.dumps(data, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
     app_js = build_app_js().replace("</script", "<\\/script")
@@ -223,4 +233,16 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    # When frozen into an exe, the console window closes the instant the process exits, so a
+    # double-clicking user would never see the output (including an error like "no export found").
+    # Keep the window open with a pause in that case, on both success and a controlled sys.exit().
+    frozen = getattr(sys, "frozen", False)
+    try:
+        main()
+    except SystemExit as e:
+        if isinstance(e.code, str):
+            print(e.code, file=sys.stderr)
+        if not frozen:
+            raise
+    if frozen:
+        input("\nDone. Press Enter to close.")

@@ -8,3 +8,8 @@ lifelist.html
 lifelist_redacted.html
 # Offizielle ornitho.de/DDA-Referenztabellen, unklare Weitergaberechte; Quelle für species_reference.json
 reference/
+
+# PyInstaller-Build-Ausgabe (siehe lifelist.spec); die exe selbst wird per GitHub-Release verteilt,
+# nicht im Repository versioniert
+build/
+dist/
