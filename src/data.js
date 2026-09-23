@@ -71,15 +71,17 @@ if (initialTheme !== "system") document.documentElement.setAttribute("data-theme
  * @typedef {Object} AppState
  * @property {string} tab - active tab id, e.g. "overview"
  * @property {string} region - "all" or "<level>:<key>", e.g. "s:SN"
- * @property {number} year - selected year (header filter, also drives the map's time-travel slider)
- * @property {number} month - selected month, 1-12; also the map time-travel slider's within-year cutoff
+ * @property {number} year - the global time-bar's selected year
+ * @property {number} month - the global time-bar's selected month, 1-12
+ * @property {boolean} timeAll - "Gesamt": true shows all-time data in the few views that support a
+ *   cumulative cutoff (Karte "Lifer", Tagesaktivität); every other view always uses year/month
+ *   exactly regardless of this flag (Übersicht, Regionen, the life-list "NEU" badge, ...)
  * @property {"de"|"en"} lang
  * @property {"system"|"light"|"dark"} theme - UI theme; printing always forces light regardless
  * @property {boolean} escaped - include captivity escapes
  * @property {boolean} collective - include collective taxa (genus sp., hybrids, ...)
  * @property {string} atlasF - life-list atlas-code filter: "all"|"any"|"none"|"A"|"B"|"C"
  * @property {string} actMetric - activity tab metric: "obs"|"species"|"days"
- * @property {string} actScope - activity tab scope: "all"|"year"
  * @property {boolean} redact - place data hidden in the UI (and, for a --redact build, in the data too)
  * @property {string} metric - map metric: "life"|"year"|"obs"|"lifer"
  * @property {string} q - life-list search text
@@ -92,8 +94,8 @@ if (initialTheme !== "system") document.documentElement.setAttribute("data-theme
  * @property {{name: string, latin: string|null}[]} customTargets - user-maintained wishlist entries
  * @property {{k: "name"|"season"|"breed"|"occ", d: 1|-1}} wishSort - wishlist table sort
  */
-const S = { tab: "overview", region: "all", year: Math.min(TODAY_Y, MAX_Y), month: TODAY_M, lang: initialLang, theme: initialTheme,
-  escaped: false, collective: false, atlasF: "all", actMetric: "obs", actScope: "all", redact: !!RAW.meta.redacted, metric: "life", q: "", sort: "nr", dir: -1, open: new Set(),
+const S = { tab: "overview", region: "all", year: Math.min(TODAY_Y, MAX_Y), month: TODAY_M, timeAll: true, lang: initialLang, theme: initialTheme,
+  escaped: false, collective: false, atlasF: "all", actMetric: "obs", redact: !!RAW.meta.redacted, metric: "life", q: "", sort: "nr", dir: -1, open: new Set(),
   regSort: {}, regAll: {}, targetSrc: "all", customTargets: loadCustomTargets(), wishSort: { k: "season", d: 1 } };
 T = STR[S.lang];
 

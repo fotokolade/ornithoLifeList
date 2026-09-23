@@ -92,55 +92,38 @@ function barChartSvg(values, labels, tips, every = 1, color = "--bar") {
   });
   return `<svg class="curve" viewBox="0 0 ${W} ${H}" role="img">${g}</svg>`;
 }
-// Chart.js is fetched lazily and only upgrades the hand-drawn SVG bar chart already in the card;
-// offline or a blocked CDN just leaves the SVG in place, so the page never depends on it.
-const CHARTJS_URL = "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.1/chart.umd.min.js";
-let chartjsLoading = null;
-function loadChartJs() {
-  if (typeof Chart !== "undefined") return Promise.resolve();
-  if (!chartjsLoading) {
-    chartjsLoading = new Promise((resolve, reject) => {
-      const js = document.createElement("script");
-      js.src = CHARTJS_URL;
-      js.onload = resolve;
-      js.onerror = () => { chartjsLoading = null; js.remove(); reject(new Error("chartjs")); };
-      document.head.append(js);
-    });
-  }
-  return chartjsLoading;
-}
+// Chart.js is vendored into the page (see lifelist.py's vendor-JS embedding), not fetched from a CDN, so
+// it's always present; upgradeBarChart() replaces the hand-drawn SVG bar chart already in the card
+// with a nicer Chart.js one. If Chart is somehow missing (a broken build), the SVG just stays as-is.
 const CHART_PALETTE = ["--k1", "--k2", "--k3", "--k4", "--k5", "--k6"];
 const BAR_CHARTS = {};  // card.id -> Chart instance; id stays stable across re-renders even though the DOM node is recreated each time
 function upgradeBarChart(card, labels, values, paletteOffset, tips) {
-  if (!card) return;
-  loadChartJs().then(() => {
-    if (!document.body.contains(card)) return;  // page moved on before the library arrived
-    if (BAR_CHARTS[card.id]) { BAR_CHARTS[card.id].destroy(); delete BAR_CHARTS[card.id]; }
-    const style = getComputedStyle(document.documentElement);
-    const palette = CHART_PALETTE.map(v => style.getPropertyValue(v).trim());
-    const accent = style.getPropertyValue("--accent").trim();
-    const max = Math.max(...values);
-    const hue = (v, i) => v === max && v > 0 ? accent : palette[(i + paletteOffset) % palette.length];
-    card.innerHTML = "";
-    const box = document.createElement("div");
-    box.style.height = "220px";
-    const canvas = document.createElement("canvas");
-    box.append(canvas);
-    card.append(box);
-    BAR_CHARTS[card.id] = new Chart(canvas, {
-      type: "bar",
-      data: { labels, datasets: [{
-        data: values,
-        backgroundColor: values.map((v, i) => hue(v, i) + "cc"),
-        hoverBackgroundColor: values.map((v, i) => hue(v, i)),
-        borderColor: values.map((v, i) => hue(v, i)),
-        borderWidth: 1.5, borderRadius: 5, maxBarThickness: 34,
-      }] },
-      options: {
-        responsive: true, maintainAspectRatio: false, animation: { duration: 300 },
-        plugins: { legend: { display: false }, tooltip: tips ? { callbacks: { title: items => tips[items[0].dataIndex] } } : {} },
-        scales: { y: { beginAtZero: true, ticks: { precision: 0 } }, x: { grid: { display: false } } },
-      },
-    });
-  }, () => { /* offline or blocked: the SVG rendered synchronously above stays as-is */ });
+  if (!card || typeof Chart === "undefined") return;
+  if (BAR_CHARTS[card.id]) { BAR_CHARTS[card.id].destroy(); delete BAR_CHARTS[card.id]; }
+  const style = getComputedStyle(document.documentElement);
+  const palette = CHART_PALETTE.map(v => style.getPropertyValue(v).trim());
+  const accent = style.getPropertyValue("--accent").trim();
+  const max = Math.max(...values);
+  const hue = (v, i) => v === max && v > 0 ? accent : palette[(i + paletteOffset) % palette.length];
+  card.innerHTML = "";
+  const box = document.createElement("div");
+  box.style.height = "220px";
+  const canvas = document.createElement("canvas");
+  box.append(canvas);
+  card.append(box);
+  BAR_CHARTS[card.id] = new Chart(canvas, {
+    type: "bar",
+    data: { labels, datasets: [{
+      data: values,
+      backgroundColor: values.map((v, i) => hue(v, i) + "cc"),
+      hoverBackgroundColor: values.map((v, i) => hue(v, i)),
+      borderColor: values.map((v, i) => hue(v, i)),
+      borderWidth: 1.5, borderRadius: 5, maxBarThickness: 34,
+    }] },
+    options: {
+      responsive: true, maintainAspectRatio: false, animation: { duration: 300 },
+      plugins: { legend: { display: false }, tooltip: tips ? { callbacks: { title: items => tips[items[0].dataIndex] } } : {} },
+      scales: { y: { beginAtZero: true, ticks: { precision: 0 } }, x: { grid: { display: false } } },
+    },
+  });
 }

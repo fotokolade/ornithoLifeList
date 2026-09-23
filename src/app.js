@@ -1,4 +1,24 @@
 /* ---------- chrome ---------- */
+// combined (year,month) index for the global time bar, 0 = January of MIN_Y, one step per calendar month
+const timeYMIndex = (y, m) => (y - MIN_Y) * 12 + (m - 1);
+const timeYMFromIndex = idx => ({ y: MIN_Y + Math.floor(idx / 12), m: (idx % 12) + 1 });
+const timePeriodLabel = () => S.month === 12 ? String(S.year) : `${T.monthsShort[S.month - 1]} ${S.year}`;
+// shared by every map-metric <option>'s label: "allKey" when Gesamt is active, else "periodKey"
+// filled in with the current period — avoids each metric re-writing this ternary separately
+const cutoffLabel = (allKey, periodKey) => S.timeAll ? t(allKey) : t(periodKey, timePeriodLabel());
+let timeRAF = null;
+// syncs the "Gesamt" button and bold period label with S.timeAll/S.year/S.month; cheap enough to
+// call from the drag handler on every input event, unlike the full renderChrome()
+function updateTimeBar() {
+  $("t-all").classList.toggle("on", S.timeAll);
+  $("t-label").textContent = S.timeAll ? t("timeAll") : timePeriodLabel();
+  $("t-range").value = timeYMIndex(S.year, S.month);
+}
+// the sticky header's real height varies (language, viewport width, redact hiding the Karte tab
+// button); the TOC's position and each h2's scroll-margin-top read this instead of a guessed constant
+function syncHeaderHeight() {
+  document.documentElement.style.setProperty("--header-h", $$("header.top").offsetHeight + "px");
+}
 function buildRegionSelect() {
   const base = baseObs(), groups = { s: new Map(), c: new Map(), m: new Map() };
   for (const o of base) {
@@ -33,10 +53,14 @@ function applyRedact(on) {
   if (MAP_LAYER) MAP_LAYER.clearLayers();
   $("map-note").textContent = "";
   buildRegionSelect();
+  syncHeaderHeight();
   setTab(S.tab);
 }
 function setTab(tab) {
   const apply = () => {
+    // tabs share one scroll position (they're just toggled via display, not real navigation); reset
+    // it on every switch so the new tab never opens wherever the previous one happened to be scrolled to
+    window.scrollTo(0, 0);
     S.tab = tab;
     for (const b of $$all("#tabs button")) b.classList.toggle("on", b.dataset.tab === tab);
     for (const s of $$all("section.tab")) s.classList.toggle("on", s.id === "tab-" + tab);
@@ -86,30 +110,24 @@ function renderChrome() {
   if (S.redact) $$('#tabs button[data-tab="map"]').hidden = true;
   $("f-lang").value = S.lang;
   $("f-region").setAttribute("aria-label", t("ariaRegion"));
-  $("f-year").setAttribute("aria-label", t("ariaYear"));
-  $("f-month").setAttribute("aria-label", t("ariaMonth"));
   $("q-sort").setAttribute("aria-label", t("ariaSort"));
   $("q-atlas").setAttribute("aria-label", t("ariaAtlas"));
   $("a-metric").setAttribute("aria-label", t("ariaMetric"));
-  $("a-scope").setAttribute("aria-label", t("ariaScope"));
   $("m-metric").setAttribute("aria-label", t("ariaMapMetric"));
-  $("f-year").innerHTML = YEARS.slice().reverse().map(y => `<option>${y}</option>`).join("");
-  $("f-year").value = S.year;
-  $("f-month").innerHTML = T.months.map((m, i) => `<option value="${i + 1}">${m}</option>`).join("");
-  $("f-month").value = S.month;
+  $("t-all").textContent = t("timeAll");
+  $("t-range").min = 0; $("t-range").max = timeYMIndex(MAX_Y, 12);
+  $("t-range").setAttribute("aria-label", t("ariaTimePoint"));
+  updateTimeBar();
   $("q-sort").innerHTML = ["nr", "taxon", "name"].map(k => `<option value="${k}">${t("sort" + k[0].toUpperCase() + k.slice(1))}</option>`).join("") + `<option value="" disabled>${t("sortColumn")}</option>`;
   $("q-sort").value = ["nr", "taxon", "name"].includes(S.sort) ? S.sort : "";
   $("a-metric").innerHTML = [["obs", "actMObs"], ["species", "actMSpecies"], ["days", "actMDays"]].map(([k, l]) => `<option value="${k}">${t(l)}</option>`).join("");
   $("a-metric").value = S.actMetric;
-  $("a-scope").innerHTML = `<option value="all">${t("actScopeAll")}</option><option value="year">${S.actScope === "year" ? t("actScopeYear", S.year) : ""}</option>`;
-  $("a-scope").value = S.actScope;
   $("q-atlas").innerHTML = Object.entries(T.atlasFilter).map(([k, v]) => `<option value="${k}">${v}</option>`).join("");
   $("q-atlas").value = S.atlasF;
   $("b-pdf").textContent = t("pdf");
-  $("m-metric").innerHTML = `<option value="life">${t("mapLife")}</option><option value="year">${S.metric === "year" ? t("mapYear", mapPeriodLabel()) : t("mapYear", t("yearPlaceholder"))}</option><option value="obs">${S.metric === "obs" ? t("mapObs", mapPeriodLabel()) : t("mapObs", t("yearPlaceholder"))}</option><option value="lifer">${S.metric === "lifer" ? t("mapLifer", mapPeriodLabel()) : t("mapLifer", t("yearPlaceholder"))}</option>`;
+  $("m-metric").innerHTML = `<option value="life">${cutoffLabel("mapLiferAll", "mapLifer")}</option><option value="year">${t("mapYear", timePeriodLabel())}</option><option value="obs">${t("mapObs", timePeriodLabel())}</option><option value="lifer">${cutoffLabel("mapNewHereAll", "mapNewHere")}</option>`;
   $("m-metric").value = S.metric;
-  $("m-year").min = 0; $("m-year").max = mapYMIndex(MAX_Y, 12); $("m-year").value = mapYMIndex(S.year, S.month);
-  $("m-year").setAttribute("aria-label", t("ariaYear"));
+  syncHeaderHeight();
 }
 function applyLang(lang) {
   if (lang === S.lang) return;
@@ -134,6 +152,7 @@ function init() {
   document.documentElement.lang = S.lang;
   document.title = t("title");
   renderChrome();
+  window.addEventListener("resize", syncHeaderHeight);
 
   $("tabs").addEventListener("click", e => { const b = e.target.closest("button"); if (b) setTab(b.dataset.tab); });
   $("toc").addEventListener("click", e => {
@@ -144,8 +163,6 @@ function init() {
   });
   $("f-lang").addEventListener("change", e => { applyLang(e.target.value); });
   $("f-region").addEventListener("change", e => { S.region = e.target.value; renderActive(); });
-  $("f-year").addEventListener("change", e => { S.year = +e.target.value; renderActive(); });
-  $("f-month").addEventListener("change", e => { S.month = +e.target.value; renderActive(); });
   $("o-theme").addEventListener("change", e => { applyTheme(e.target.value); });
   $("o-escaped").addEventListener("change", e => { S.escaped = e.target.checked; refreshAll(); });
   $("o-collective").addEventListener("change", e => { S.collective = e.target.checked; refreshAll(); });
@@ -153,8 +170,21 @@ function init() {
   $("q").addEventListener("input", e => { S.q = e.target.value; renderList(); });
   $("q-sort").addEventListener("change", e => { S.sort = e.target.value; S.dir = S.sort === "nr" ? -1 : 1; renderList(); });
   $("a-metric").addEventListener("change", e => { S.actMetric = e.target.value; renderActivity(); });
-  $("a-scope").addEventListener("change", e => { S.actScope = e.target.value; renderActivity(); });
   $("q-atlas").addEventListener("change", e => { S.atlasF = e.target.value; renderList(); });
+  $("t-all").addEventListener("click", () => {
+    if (S.timeAll) return;
+    S.timeAll = true;
+    updateTimeBar();
+    renderActive();
+  });
+  $("t-range").addEventListener("input", e => {
+    const ym = timeYMFromIndex(+e.target.value);
+    S.year = ym.y; S.month = ym.m; S.timeAll = false;
+    updateTimeBar();
+    // the active tab may still be loading (e.g. Leaflet); rAF-throttle redraws during the drag itself
+    if (timeRAF) cancelAnimationFrame(timeRAF);
+    timeRAF = requestAnimationFrame(() => { timeRAF = null; renderActive(); });
+  });
   $("b-pdf").addEventListener("click", () => window.print());
   let printBackup = null;
   window.addEventListener("beforeprint", () => {
@@ -169,17 +199,6 @@ function init() {
     renderActive();
   });
   $("m-metric").addEventListener("change", e => { S.metric = e.target.value; renderMap(); });
-  $("m-year").addEventListener("input", e => {
-    const ym = mapYMFromIndex(+e.target.value);
-    S.year = ym.y; S.month = ym.m;
-    $("f-year").value = S.year;
-    $("f-month").value = S.month;
-    // MAP may still be loading (or have failed to load) while the user drags; and rAF-throttle redraws during the drag itself
-    if ((S.metric === "year" || S.metric === "lifer" || S.metric === "obs") && MAP) {
-      if (mapYearRAF) cancelAnimationFrame(mapYearRAF);
-      mapYearRAF = requestAnimationFrame(() => { mapYearRAF = null; drawMap(); });
-    }
-  });
   $("tab-map").addEventListener("click", e => {
     const r = e.target.closest("[data-region]");
     if (r) { S.region = r.dataset.region; buildRegionSelect(); renderMap(); }

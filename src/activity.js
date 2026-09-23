@@ -5,8 +5,7 @@ const median = arr => {
   return n % 2 ? a[(n - 1) / 2] : Math.round((a[n / 2 - 1] + a[n / 2]) / 2);
 };
 function renderActivity() {
-  const scoped = regionObs(baseObs()).filter(o => S.actScope === "all" || o.y === S.year);
-  $("a-scope").options[1].text = t("actScopeYear", S.year);
+  const scoped = regionObs(baseObs()).filter(o => S.timeAll || o.y === S.year);
   const timed = scoped.filter(o => o.tm >= 0);
   if (!timed.length) { $("act-out").innerHTML = `<p class="empty">${t("noData")}</p>`; updateToc(); return; }
 

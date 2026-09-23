@@ -44,8 +44,8 @@ function regionCoverageSection(list) {
 function renderRegions() {
   const list = baseObs();
   $("tab-regions").innerHTML = infoText(t("regionsHelp"))
+    + topPlacesSection(regionObs(list))
     + regionCoverageSection(list)
-    + LEVELS.filter(lv => !S.redact || lv.lvl === "s" || lv.lvl === "c").map(lv => regionTable(lv, list)).join("")
-    + topPlacesSection(regionObs(list));
+    + LEVELS.filter(lv => !S.redact || lv.lvl === "s" || lv.lvl === "c").map(lv => regionTable(lv, list)).join("");
   updateToc();
 }

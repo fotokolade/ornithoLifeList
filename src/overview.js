@@ -89,6 +89,9 @@ function calendarSection(list, statsAll) {
       const title = n ? `${fmtD(dateStr)}: ${n} ${t("mapSpecies")}${lifer ? " · " + t("newBadge") : ""}` : fmtD(dateStr);
       cells += `<div class="cal-day${lifer ? " cal-lifer" : ""}" style="background:${bg}" title="${esc(title)}"></div>`;
     }
+    // always pad to 6 full weeks (42 cells): keeps every month's grid the same height, so the
+    // section doesn't jump as S.year changes (some years need 6 rows for a month, others only 4-5)
+    for (let i = startDow + daysInMonth; i < 42; i++) cells += `<div class="cal-day cal-empty"></div>`;
     return `<div class="cal-month"><h4>${name}</h4>
       <div class="cal-grid">${dowLetters.map(l => `<span class="cal-dow">${l}</span>`).join("")}${cells}</div></div>`;
   }).join("");

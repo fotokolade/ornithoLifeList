@@ -5,6 +5,7 @@ Without --source, the newest export_*.json next to this script is used.
 --redact writes lifelist_redacted.html without any place names or coordinates.
 """
 import argparse
+import base64
 import glob
 import json
 import os
@@ -24,12 +25,46 @@ APP_JS_FILES = [
     "regions.js", "targets.js", "activity.js", "map.js", "app.js",
 ]
 
+# Leaflet, its marker-cluster plugin, and Chart.js are vendored (see vendor/, tools/update_vendor.py)
+# rather than fetched from a CDN at runtime, so the map and charts work fully offline too. Both
+# libraries are permissively licensed (Leaflet: BSD-2-Clause, Leaflet.markercluster/Chart.js: MIT) —
+# see README for attribution.
+VENDOR_JS_FILES = ["leaflet.min.js", "leaflet.markercluster.min.js", "chart.umd.min.js"]
+VENDOR_CSS_FILES = ["leaflet.min.css", "MarkerCluster.min.css", "MarkerCluster.Default.min.css"]
+# images referenced via relative url(images/...) in leaflet.min.css; inlined as data URIs since the
+# CSS itself is embedded inline rather than served from vendor/ as a real file. The default marker
+# icon isn't included here: this app always passes its own custom `icon:`, so L.Icon.Default (the
+# only thing that would ever request it) is never instantiated and the image never fetched.
+VENDOR_CSS_IMAGES = ["layers.png", "layers-2x.png"]
+
 
 def build_app_js():
     parts = []
     for name in APP_JS_FILES:
         with open(os.path.join(HERE, "src", name), encoding="utf-8") as fh:
             parts.append(fh.read().rstrip("\n"))
+    return "\n".join(parts)
+
+
+def build_vendor_js():
+    parts = []
+    for name in VENDOR_JS_FILES:
+        with open(os.path.join(HERE, "vendor", name), encoding="utf-8") as fh:
+            parts.append(fh.read().rstrip("\n"))
+    return "\n".join(parts)
+
+
+def build_vendor_css():
+    parts = []
+    for name in VENDOR_CSS_FILES:
+        with open(os.path.join(HERE, "vendor", name), encoding="utf-8") as fh:
+            css = fh.read()
+        if name == "leaflet.min.css":
+            for image in VENDOR_CSS_IMAGES:
+                with open(os.path.join(HERE, "vendor", "images", image), "rb") as fh:
+                    data_uri = "data:image/png;base64," + base64.b64encode(fh.read()).decode("ascii")
+                css = css.replace(f"images/{image}", data_uri)
+        parts.append(css)
     return "\n".join(parts)
 
 
@@ -169,7 +204,14 @@ def main():
         tpl = fh.read()
     blob = json.dumps(data, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
     app_js = build_app_js().replace("</script", "<\\/script")
-    out = tpl.replace("__DATA_JSON__", blob).replace("__APP_JS__", app_js)
+    vendor_js = build_vendor_js().replace("</script", "<\\/script")
+    vendor_css = build_vendor_css().replace("</style", "<\\/style")
+    # vendor/data/app placeholders first, in increasing order of "how likely is this blob to
+    # accidentally contain another placeholder's literal text" — str.replace() replaces every
+    # occurrence, so once a large blob is substituted in, any later replace() pass would also hit
+    # a stray match inside *that* blob (this bit us once: a JS comment mentioning "__VENDOR_JS__")
+    out = (tpl.replace("__VENDOR_CSS__", vendor_css).replace("__VENDOR_JS__", vendor_js)
+           .replace("__DATA_JSON__", blob).replace("__APP_JS__", app_js))
     dst = os.path.join(HERE, "lifelist_redacted.html" if redact else "lifelist.html")
     with open(dst, "w", encoding="utf-8") as fh:
         fh.write(out)
