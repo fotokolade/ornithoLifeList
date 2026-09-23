@@ -1,0 +1,5100 @@
+{
+ "lifeListNames": {
+  "Acanthis cabaret": {
+   "de": "Alpenbirkenzeisig",
+   "en": "Common Redpoll (ssp. cabaret), Lesser Redpoll"
+  },
+  "Acanthis flammea": {
+   "de": "Taigabirkenzeisig",
+   "en": "Common Redpoll (ssp. flammea), Mealy Redpoll"
+  },
+  "Acanthis flammea / cabaret": {
+   "de": "Taiga- / Alpenbirkenzeisig (Birkenzeisig)",
+   "en": "Common Redpoll"
+  },
+  "Acanthis hornemanni": {
+   "de": "Polarbirkenzeisig",
+   "en": "Arctic Redpoll"
+  },
+  "Accipiter gentilis": {
+   "de": "Habicht",
+   "en": "Northern Goshawk"
+  },
+  "Accipiter nisus": {
+   "de": "Sperber",
+   "en": "Eurasian Sparrowhawk"
+  },
+  "Acridotheres tristis": {
+   "de": "Hirtenmaina",
+   "en": "Common Myna"
+  },
+  "Acrocephalus agricola": {
+   "de": "Feldrohrsänger",
+   "en": "Paddyfield Warbler"
+  },
+  "Acrocephalus arundinaceus": {
+   "de": "Drosselrohrsänger",
+   "en": "Great Reed Warbler"
+  },
+  "Acrocephalus dumetorum": {
+   "de": "Buschrohrsänger",
+   "en": "Blyth's Reed Warbler"
+  },
+  "Acrocephalus melanopogon": {
+   "de": "Mariskenrohrsänger",
+   "en": "Moustached Warbler"
+  },
+  "Acrocephalus paludicola": {
+   "de": "Seggenrohrsänger",
+   "en": "Aquatic Warbler"
+  },
+  "Acrocephalus palustris": {
+   "de": "Sumpfrohrsänger",
+   "en": "Marsh Warbler"
+  },
+  "Acrocephalus schoenobaenus": {
+   "de": "Schilfrohrsänger",
+   "en": "Sedge Warbler"
+  },
+  "Acrocephalus scirpaceus": {
+   "de": "Teichrohrsänger",
+   "en": "Eurasian Reed Warbler"
+  },
+  "Actitis hypoleucos": {
+   "de": "Flussuferläufer",
+   "en": "Common Sandpiper"
+  },
+  "Actitis macularius": {
+   "de": "Drosseluferläufer",
+   "en": "Spotted Sandpiper"
+  },
+  "Aegithalos caudatus": {
+   "de": "Schwanzmeise",
+   "en": "Long-tailed Tit"
+  },
+  "Aegithalos caudatus caudatus": {
+   "de": "Schwanzmeise (ssp. caudatus)",
+   "en": "Long-tailed Tit (ssp. caudatus)"
+  },
+  "Aegolius funereus": {
+   "de": "Raufußkauz",
+   "en": "Boreal Owl"
+  },
+  "Aegypius monachus": {
+   "de": "Mönchsgeier",
+   "en": "Cinereous Vulture"
+  },
+  "Agapornis fischeri": {
+   "de": "Pfirsichköpfchen",
+   "en": "Fischer's Lovebird"
+  },
+  "Agapornis personatus": {
+   "de": "Schwarzköpfchen",
+   "en": "Yellow-collared Lovebird"
+  },
+  "Agapornis roseicollis": {
+   "de": "Rosenköpfchen",
+   "en": "Rosy-faced Lovebird"
+  },
+  "Aix galericulata": {
+   "de": "Mandarinente",
+   "en": "Mandarin Duck"
+  },
+  "Aix sponsa": {
+   "de": "Brautente",
+   "en": "Wood Duck"
+  },
+  "Alauda arvensis": {
+   "de": "Feldlerche",
+   "en": "Eurasian Skylark"
+  },
+  "Alca torda": {
+   "de": "Tordalk",
+   "en": "Razorbill"
+  },
+  "Alcedo atthis": {
+   "de": "Eisvogel",
+   "en": "Common Kingfisher"
+  },
+  "Alectoris chukar": {
+   "de": "Chukarhuhn",
+   "en": "Chukar Partridge"
+  },
+  "Alectoris graeca": {
+   "de": "Steinhuhn",
+   "en": "Rock Partridge"
+  },
+  "Alectoris rufa": {
+   "de": "Rothuhn",
+   "en": "Red-legged Partridge"
+  },
+  "Alle alle": {
+   "de": "Krabbentaucher",
+   "en": "Little Auk"
+  },
+  "Alopochen aegyptiaca": {
+   "de": "Nilgans",
+   "en": "Egyptian Goose"
+  },
+  "Amazona aestiva": {
+   "de": "Blaustirnamazone (Rotbugamazone)",
+   "en": "Turquoise-fronted Amazon"
+  },
+  "Amazona oratrix": {
+   "de": "Gelbkopfamazone",
+   "en": "Yellow-headed Amazon"
+  },
+  "Amazonetta brasiliensis": {
+   "de": "Amazonasente",
+   "en": "Brazilian Teal"
+  },
+  "Anarhynchus leschenaultii": {
+   "de": "Wüstenregenpfeifer",
+   "en": "Greater Sand Plover"
+  },
+  "Anas acuta": {
+   "de": "Spießente",
+   "en": "Northern Pintail"
+  },
+  "Anas bahamensis": {
+   "de": "Bahamaente",
+   "en": "White-cheeked Pintail"
+  },
+  "Anas capensis": {
+   "de": "Fahlente",
+   "en": "Cape Teal"
+  },
+  "Anas carolinensis": {
+   "de": "Krickente (Amerikanische), Carolinakrickente",
+   "en": "Green-winged Teal"
+  },
+  "Anas castanea": {
+   "de": "Kastanienente",
+   "en": "Chestnut Teal"
+  },
+  "Anas crecca": {
+   "de": "Krickente",
+   "en": "Eurasian Teal"
+  },
+  "Anas flavirostris": {
+   "de": "Braunkopfente (Chile-Krickente)",
+   "en": "Yellow-billed Teal"
+  },
+  "Anas platyrhynchos": {
+   "de": "Stockente",
+   "en": "Mallard"
+  },
+  "Anas poecilorhyncha": {
+   "de": "Indien-Fleckschnabelente",
+   "en": "Indian Spot-billed Duck"
+  },
+  "Anas superciliosa": {
+   "de": "Augenbrauenente",
+   "en": "Pacific Black Duck"
+  },
+  "Anas undulata": {
+   "de": "Gelbschnabelente",
+   "en": "Yellow-billed Duck"
+  },
+  "Anser albifrons": {
+   "de": "Blässgans",
+   "en": "Greater White-fronted Goose"
+  },
+  "Anser albifrons flavirostris": {
+   "de": "Blässgans (ssp. flavirostris), Grönländische",
+   "en": "Greater White-fronted Goose (ssp. flavirostris)"
+  },
+  "Anser anser": {
+   "de": "Graugans",
+   "en": "Greylag Goose"
+  },
+  "Anser brachyrhynchus": {
+   "de": "Kurzschnabelgans",
+   "en": "Pink-footed Goose"
+  },
+  "Anser caerulescens": {
+   "de": "Schneegans",
+   "en": "Snow Goose"
+  },
+  "Anser canagicus": {
+   "de": "Kaisergans",
+   "en": "Emperor Goose"
+  },
+  "Anser erythropus": {
+   "de": "Zwerggans",
+   "en": "Lesser White-fronted Goose"
+  },
+  "Anser fabalis": {
+   "de": "Waldsaatgans",
+   "en": "Taiga Bean Goose"
+  },
+  "Anser indicus": {
+   "de": "Streifengans",
+   "en": "Bar-headed Goose"
+  },
+  "Anser rossii": {
+   "de": "Zwergschneegans",
+   "en": "Ross's Goose"
+  },
+  "Anser serrirostris": {
+   "de": "Tundrasaatgans",
+   "en": "Tundra Bean Goose"
+  },
+  "Anthus campestris": {
+   "de": "Brachpieper",
+   "en": "Tawny Pipit"
+  },
+  "Anthus cervinus": {
+   "de": "Rotkehlpieper",
+   "en": "Red-throated Pipit"
+  },
+  "Anthus godlewskii": {
+   "de": "Steppenpieper",
+   "en": "Blyth's Pipit"
+  },
+  "Anthus gustavi": {
+   "de": "Petschorapieper",
+   "en": "Pechora Pipit"
+  },
+  "Anthus hodgsoni": {
+   "de": "Waldpieper",
+   "en": "Olive-backed Pipit"
+  },
+  "Anthus petrosus": {
+   "de": "Strandpieper",
+   "en": "Eurasian Rock Pipit"
+  },
+  "Anthus pratensis": {
+   "de": "Wiesenpieper",
+   "en": "Meadow Pipit"
+  },
+  "Anthus richardi": {
+   "de": "Spornpieper",
+   "en": "Richard's Pipit"
+  },
+  "Anthus rubescens": {
+   "de": "Pazifikpieper",
+   "en": "Buff-bellied Pipit"
+  },
+  "Anthus spinoletta": {
+   "de": "Bergpieper",
+   "en": "Water Pipit"
+  },
+  "Anthus trivialis": {
+   "de": "Baumpieper",
+   "en": "Tree Pipit"
+  },
+  "Antigone canadensis": {
+   "de": "Kanadakranich",
+   "en": "Sandhill Crane"
+  },
+  "Apus affinis": {
+   "de": "Haussegler",
+   "en": "Little Swift"
+  },
+  "Apus apus": {
+   "de": "Mauersegler",
+   "en": "Common Swift"
+  },
+  "Apus caffer": {
+   "de": "Weißbürzelsegler",
+   "en": "White-rumped Swift"
+  },
+  "Apus pacificus": {
+   "de": "Pazifiksegler",
+   "en": "Pacific Swifts"
+  },
+  "Apus pallidus": {
+   "de": "Fahlsegler",
+   "en": "Pallid Swift"
+  },
+  "Aquila chrysaetos": {
+   "de": "Steinadler",
+   "en": "Golden Eagle"
+  },
+  "Aquila fasciata": {
+   "de": "Habichtsadler",
+   "en": "Bonelli's Eagle"
+  },
+  "Aquila heliaca": {
+   "de": "Kaiseradler",
+   "en": "Eastern Imperial Eagle"
+  },
+  "Aquila nipalensis": {
+   "de": "Steppenadler",
+   "en": "Steppe Eagle"
+  },
+  "Aratinga holochlora": {
+   "de": "Grünsittich",
+   "en": "Green Parakeet"
+  },
+  "Ardea alba": {
+   "de": "Silberreiher",
+   "en": "Great Egret"
+  },
+  "Ardea cinerea": {
+   "de": "Graureiher",
+   "en": "Grey Heron"
+  },
+  "Ardea purpurea": {
+   "de": "Purpurreiher",
+   "en": "Purple Heron"
+  },
+  "Ardenna gravis": {
+   "de": "Kappensturmtaucher",
+   "en": "Great Shearwater"
+  },
+  "Ardenna grisea": {
+   "de": "Dunkelsturmtaucher",
+   "en": "Sooty Shearwater"
+  },
+  "Ardeola ralloides": {
+   "de": "Rallenreiher",
+   "en": "Squacco Heron"
+  },
+  "Arenaria interpres": {
+   "de": "Steinwälzer",
+   "en": "Ruddy Turnstone"
+  },
+  "Asio flammeus": {
+   "de": "Sumpfohreule",
+   "en": "Short-eared Owl"
+  },
+  "Asio otus": {
+   "de": "Waldohreule",
+   "en": "Long-eared Owl"
+  },
+  "Athene noctua": {
+   "de": "Steinkauz",
+   "en": "Little Owl"
+  },
+  "Aythya affinis": {
+   "de": "Kanadabergente (Kleine Bergente)",
+   "en": "Lesser Scaup"
+  },
+  "Aythya americana": {
+   "de": "Rotkopfente",
+   "en": "Redhead"
+  },
+  "Aythya collaris": {
+   "de": "Ringschnabelente",
+   "en": "Ring-necked Duck"
+  },
+  "Aythya ferina": {
+   "de": "Tafelente",
+   "en": "Common Pochard"
+  },
+  "Aythya fuligula": {
+   "de": "Reiherente",
+   "en": "Tufted Duck"
+  },
+  "Aythya marila": {
+   "de": "Bergente",
+   "en": "Greater Scaup"
+  },
+  "Aythya nyroca": {
+   "de": "Moorente",
+   "en": "Ferruginous Duck"
+  },
+  "Aythya valisineria": {
+   "de": "Riesentafelente",
+   "en": "Canvasback"
+  },
+  "Balearica regulorum": {
+   "de": "Grauhals-Kronenkranich",
+   "en": "Grey Crowned Crane"
+  },
+  "Bombycilla garrulus": {
+   "de": "Seidenschwanz",
+   "en": "Bohemian Waxwing"
+  },
+  "Botaurus stellaris": {
+   "de": "Rohrdommel",
+   "en": "Eurasian Bittern"
+  },
+  "Branta bernicla": {
+   "de": "Ringelgans, unbestimmt",
+   "en": "Brant Goose"
+  },
+  "Branta bernicla bernicla": {
+   "de": "Ringelgans (ssp. bernicla), Dunkelbäuchige",
+   "en": "Brant Goose (ssp. bernicla), Dark-bellied Brant Goose"
+  },
+  "Branta bernicla hrota": {
+   "de": "Ringelgans (ssp. hrota), Hellbäuchige",
+   "en": "Brant Goose (ssp. hrota), Pale-bellied Brant Goose"
+  },
+  "Branta bernicla nigricans": {
+   "de": "Ringelgans (ssp. nigricans), Pazifische",
+   "en": "Brant Goose (ssp. nigricans), Black Brant Goose"
+  },
+  "Branta canadensis": {
+   "de": "Kanadagans",
+   "en": "Canada Goose"
+  },
+  "Branta hutchinsii": {
+   "de": "Zwergkanadagans",
+   "en": "Cackling Goose"
+  },
+  "Branta hutchinsii hutchinsii": {
+   "de": "Zwergkanadagans (ssp. hutchinsii)",
+   "en": "Cackling Goose (ssp. hutchinsii)"
+  },
+  "Branta leucopsis": {
+   "de": "Weißwangengans (Nonnengans)",
+   "en": "Barnacle Goose"
+  },
+  "Branta ruficollis": {
+   "de": "Rothalsgans",
+   "en": "Red-breasted Goose"
+  },
+  "Branta sandvicensis": {
+   "de": "Hawaiigans",
+   "en": "Nene"
+  },
+  "Bubo bubo": {
+   "de": "Uhu",
+   "en": "Eurasian Eagle-Owl"
+  },
+  "Bubo scandiacus": {
+   "de": "Schneeeule",
+   "en": "Snowy Owl"
+  },
+  "Bubulcus ibis": {
+   "de": "Kuhreiher",
+   "en": "Western Cattle Egret"
+  },
+  "Bucanetes githagineus": {
+   "de": "Wüstengimpel",
+   "en": "Trumpeter Finch"
+  },
+  "Bucephala albeola": {
+   "de": "Büffelkopfente",
+   "en": "Bufflehead"
+  },
+  "Bucephala clangula": {
+   "de": "Schellente",
+   "en": "Common Goldeneye"
+  },
+  "Bucephala islandica": {
+   "de": "Spatelente",
+   "en": "Barrow's Goldeneye"
+  },
+  "Bulweria bulwerii": {
+   "de": "Bulwersturmvogel",
+   "en": "Bulwer's Petrel"
+  },
+  "Burhinus oedicnemus": {
+   "de": "Triel",
+   "en": "Eurasian Stone-curlew"
+  },
+  "Buteo buteo": {
+   "de": "Mäusebussard",
+   "en": "Common Buzzard"
+  },
+  "Buteo buteo vulpinus": {
+   "de": "Mäusebussard (ssp. vulpinus), Falkenbussard",
+   "en": "Common Buzzard (ssp. vulpinus), Desert Buzzard"
+  },
+  "Buteo lagopus": {
+   "de": "Raufußbussard",
+   "en": "Rough-legged Buzzard"
+  },
+  "Buteo rufinus": {
+   "de": "Adlerbussard",
+   "en": "Long-legged Buzzard"
+  },
+  "Cairina moschata f. domestica": {
+   "de": "Warzenente (Moschusente)",
+   "en": "Muscovy Duck"
+  },
+  "Calandrella brachydactyla": {
+   "de": "Kurzzehenlerche",
+   "en": "Greater Short-toed Lark"
+  },
+  "Calcarius lapponicus": {
+   "de": "Spornammer",
+   "en": "Lapland Longspur"
+  },
+  "Calidris acuminata": {
+   "de": "Spitzschwanz-Strandläufer",
+   "en": "Sharp-tailed Sandpiper"
+  },
+  "Calidris alba": {
+   "de": "Sanderling",
+   "en": "Sanderling"
+  },
+  "Calidris alpina": {
+   "de": "Alpenstrandläufer",
+   "en": "Dunlin"
+  },
+  "Calidris bairdii": {
+   "de": "Bairdstrandläufer",
+   "en": "Baird's Sandpiper"
+  },
+  "Calidris canutus": {
+   "de": "Knutt",
+   "en": "Red Knot"
+  },
+  "Calidris falcinellus": {
+   "de": "Sumpfläufer",
+   "en": "Broad-billed Sandpiper"
+  },
+  "Calidris ferruginea": {
+   "de": "Sichelstrandläufer",
+   "en": "Curlew Sandpiper"
+  },
+  "Calidris fuscicollis": {
+   "de": "Weißbürzel-Strandläufer",
+   "en": "White-rumped Sandpiper"
+  },
+  "Calidris himantopus": {
+   "de": "Bindenstrandläufer",
+   "en": "Stilt Sandpiper"
+  },
+  "Calidris maritima": {
+   "de": "Meerstrandläufer",
+   "en": "Purple Sandpiper"
+  },
+  "Calidris melanotos": {
+   "de": "Graubrust-Strandläufer",
+   "en": "Pectoral Sandpiper"
+  },
+  "Calidris minuta": {
+   "de": "Zwergstrandläufer",
+   "en": "Little Stint"
+  },
+  "Calidris minutilla": {
+   "de": "Wiesenstrandläufer",
+   "en": "Least Sandpiper"
+  },
+  "Calidris pugnax": {
+   "de": "Kampfläufer",
+   "en": "Ruff"
+  },
+  "Calidris pusilla": {
+   "de": "Sandstrandläufer",
+   "en": "Semipalmated Sandpiper"
+  },
+  "Calidris ruficollis": {
+   "de": "Rotkehlstrandläufer",
+   "en": "Red-necked Stint"
+  },
+  "Calidris subminuta": {
+   "de": "Langzehen-Strandläufer",
+   "en": "Long-toed Stint"
+  },
+  "Calidris subruficollis": {
+   "de": "Grasläufer",
+   "en": "Buff-breasted Sandpiper"
+  },
+  "Calidris temminckii": {
+   "de": "Temminckstrandläufer",
+   "en": "Temminck's Stint"
+  },
+  "Calidris tenuirostris": {
+   "de": "Anadyrknutt",
+   "en": "Great Knot"
+  },
+  "Calliope calliope": {
+   "de": "Rubinkehlchen",
+   "en": "Siberian Rubythroat"
+  },
+  "Callipepla californica": {
+   "de": "Schopfwachtel",
+   "en": "California Quail"
+  },
+  "Callonetta leucophrys": {
+   "de": "Rotschulterente",
+   "en": "Ringed Teal"
+  },
+  "Calonectris borealis": {
+   "de": "Corysturmtaucher",
+   "en": "Cory's Shearwater"
+  },
+  "Calonectris diomedea / borealis": {
+   "de": "Cory-_oder_Sepiasturmtaucher (Gelbschnabelsturmtaucher)",
+   "en": "Scopoli's / Cory's Shearwater"
+  },
+  "Caprimulgus europaeus": {
+   "de": "Nachtschwalbe (Ziegenmelker)",
+   "en": "European Nightjar"
+  },
+  "Carduelis carduelis": {
+   "de": "Stieglitz",
+   "en": "European Goldfinch"
+  },
+  "Carduelis citrinella": {
+   "de": "Zitronenzeisig (Zitronengirlitz)",
+   "en": "Citril Finch"
+  },
+  "Carpodacus erythrinus": {
+   "de": "Karmingimpel",
+   "en": "Common Rosefinch"
+  },
+  "Carpodacus mexicanus": {
+   "de": "Hausgimpel",
+   "en": "House Finch"
+  },
+  "Catharus ustulatus": {
+   "de": "Zwergmusendrossel",
+   "en": "Swainson's Thrush"
+  },
+  "Cecropis daurica": {
+   "de": "Rötelschwalbe",
+   "en": "Red-rumped Swallow"
+  },
+  "Cepphus grylle": {
+   "de": "Gryllteiste",
+   "en": "Black Guillemot"
+  },
+  "Cercotrichas galactotes": {
+   "de": "Heckensänger",
+   "en": "Rufous-tailed Scrub Robin"
+  },
+  "Cereopsis novaehollandiae": {
+   "de": "Hühnergans",
+   "en": "Cape Barren Goose"
+  },
+  "Certhia brachydactyla": {
+   "de": "Gartenbaumläufer",
+   "en": "Short-toed Treecreeper"
+  },
+  "Certhia familiaris": {
+   "de": "Waldbaumläufer",
+   "en": "Eurasian Treecreeper"
+  },
+  "Cettia cetti": {
+   "de": "Seidensänger",
+   "en": "Cetti's Warbler"
+  },
+  "Charadrius alexandrinus": {
+   "de": "Seeregenpfeifer",
+   "en": "Kentish Plover"
+  },
+  "Charadrius dubius": {
+   "de": "Flussregenpfeifer",
+   "en": "Little Ringed Plover"
+  },
+  "Charadrius hiaticula": {
+   "de": "Sandregenpfeifer",
+   "en": "Common Ringed Plover"
+  },
+  "Charadrius morinellus": {
+   "de": "Mornellregenpfeifer",
+   "en": "Eurasian Dotterel"
+  },
+  "Chenonetta jubata": {
+   "de": "Mähnenente (Mähnengans)",
+   "en": "Maned Duck"
+  },
+  "Chlamydotis macqueenii": {
+   "de": "Steppenkragentrappe",
+   "en": "Macqueen's Bustard"
+  },
+  "Chlidonias hybrida": {
+   "de": "Weißbart-Seeschwalbe",
+   "en": "Whiskered Tern"
+  },
+  "Chlidonias leucopterus": {
+   "de": "Weißflügel-Seeschwalbe",
+   "en": "White-winged Tern"
+  },
+  "Chlidonias niger": {
+   "de": "Trauerseeschwalbe",
+   "en": "Black Tern"
+  },
+  "Chloephaga melanoptera": {
+   "de": "Andengans",
+   "en": "Andean Goose"
+  },
+  "Chloephaga picta": {
+   "de": "Magellangans",
+   "en": "Upland Goose"
+  },
+  "Chloephaga poliocephala": {
+   "de": "Graukopfgans",
+   "en": "Ashy-headed Goose"
+  },
+  "Chloephaga rubidiceps": {
+   "de": "Rotkopfgans",
+   "en": "Ruddy-headed Goose"
+  },
+  "Chloris chloris": {
+   "de": "Grünfink",
+   "en": "European Greenfinch"
+  },
+  "Chroicocephalus genei": {
+   "de": "Dünnschnabelmöwe",
+   "en": "Slender-billed Gull"
+  },
+  "Chroicocephalus philadelphia": {
+   "de": "Bonapartemöwe",
+   "en": "Bonaparte's Gull"
+  },
+  "Chroicocephalus ridibundus": {
+   "de": "Lachmöwe",
+   "en": "Black-headed Gull"
+  },
+  "Chrysolophus amherstiae": {
+   "de": "Diamantfasan",
+   "en": "Lady Amherst's Pheasant"
+  },
+  "Chrysolophus pictus": {
+   "de": "Goldfasan",
+   "en": "Golden Pheasant"
+  },
+  "Ciconia abdimii": {
+   "de": "Abdimstorch",
+   "en": ""
+  },
+  "Ciconia ciconia": {
+   "de": "Weißstorch",
+   "en": "White Stork"
+  },
+  "Ciconia nigra": {
+   "de": "Schwarzstorch",
+   "en": "Black Stork"
+  },
+  "Cinclus cinclus": {
+   "de": "Wasseramsel",
+   "en": "White-throated Dipper"
+  },
+  "Cinclus cinclus cinclus": {
+   "de": "Wasseramsel (ssp. cinclus)",
+   "en": "White-throated Dipper (ssp. cinclus)"
+  },
+  "Circaetus gallicus": {
+   "de": "Schlangenadler",
+   "en": "Short-toed Snake Eagle"
+  },
+  "Circus aeruginosus": {
+   "de": "Rohrweihe",
+   "en": "Western Marsh Harrier"
+  },
+  "Circus cyaneus": {
+   "de": "Kornweihe",
+   "en": "Hen Harrier"
+  },
+  "Circus macrourus": {
+   "de": "Steppenweihe",
+   "en": "Pallid Harrier"
+  },
+  "Circus pygargus": {
+   "de": "Wiesenweihe",
+   "en": "Montagu's Harrier"
+  },
+  "Cisticola juncidis": {
+   "de": "Zistensänger (Cistensänger)",
+   "en": "Zitting Cisticola"
+  },
+  "Clamator glandarius": {
+   "de": "Häherkuckuck",
+   "en": "Great Spotted Cuckoo"
+  },
+  "Clanga clanga": {
+   "de": "Schelladler",
+   "en": "Greater Spotted Eagle"
+  },
+  "Clanga pomarina": {
+   "de": "Schreiadler",
+   "en": "Lesser Spotted Eagle"
+  },
+  "Clangula hyemalis": {
+   "de": "Eisente",
+   "en": "Long-tailed Duck"
+  },
+  "Coccothraustes coccothraustes": {
+   "de": "Kernbeißer",
+   "en": "Hawfinch"
+  },
+  "Coccyzus erythropthalmus": {
+   "de": "Schwarzschnabelkuckuck",
+   "en": "Black-billed Cuckoo"
+  },
+  "Colinus virginianus": {
+   "de": "Virginiawachtel",
+   "en": "Northern Bobwhite"
+  },
+  "Coloeus monedula": {
+   "de": "Dohle",
+   "en": "Western Jackdaw"
+  },
+  "Columba livia f. domestica": {
+   "de": "Straßentaube (Haustaube)",
+   "en": "Feral Pigeon"
+  },
+  "Columba oenas": {
+   "de": "Hohltaube",
+   "en": "Stock Dove"
+  },
+  "Columba palumbus": {
+   "de": "Ringeltaube",
+   "en": "Common Wood Pigeon"
+  },
+  "Coracias garrulus": {
+   "de": "Blauracke",
+   "en": "European Roller"
+  },
+  "Corvus albus": {
+   "de": "Schildrabe",
+   "en": "Pied Crow"
+  },
+  "Corvus corax": {
+   "de": "Kolkrabe",
+   "en": "Northern Raven"
+  },
+  "Corvus cornix": {
+   "de": "Nebelkrähe",
+   "en": "Hooded Crow"
+  },
+  "Corvus corone": {
+   "de": "Rabenkrähe",
+   "en": "Carrion Crow"
+  },
+  "Corvus frugilegus": {
+   "de": "Saatkrähe",
+   "en": "Rook"
+  },
+  "Coturnix coturnix": {
+   "de": "Wachtel",
+   "en": "Common Quail"
+  },
+  "Coturnix japonica": {
+   "de": "Japanwachtel",
+   "en": "Japanese Quail"
+  },
+  "Crex crex": {
+   "de": "Wachtelkönig",
+   "en": "Corn Crake"
+  },
+  "Cuculus canorus": {
+   "de": "Kuckuck",
+   "en": "Common Cuckoo"
+  },
+  "Curruca cantillans": {
+   "de": "Balkan-Bartgrasmücke",
+   "en": ""
+  },
+  "Cursorius cursor": {
+   "de": "Rennvogel",
+   "en": "Cream-colored Courser"
+  },
+  "Cyanistes caeruleus": {
+   "de": "Blaumeise",
+   "en": "Eurasian Blue Tit"
+  },
+  "Cygnus atratus": {
+   "de": "Schwarzschwan (Trauerschwan)",
+   "en": "Black Swan"
+  },
+  "Cygnus columbianus": {
+   "de": "Zwergschwan",
+   "en": "Bewick's Swan"
+  },
+  "Cygnus columbianus columbianus": {
+   "de": "Pfeifschwan",
+   "en": "Tundra Swan"
+  },
+  "Cygnus cygnus": {
+   "de": "Singschwan",
+   "en": "Whooper Swan"
+  },
+  "Cygnus melancoryphus": {
+   "de": "Schwarzhalsschwan",
+   "en": "Black-necked Swan"
+  },
+  "Cygnus olor": {
+   "de": "Höckerschwan",
+   "en": "Mute Swan"
+  },
+  "Delichon urbicum": {
+   "de": "Mehlschwalbe",
+   "en": "Common House Martin"
+  },
+  "Dendrocopos leucotos": {
+   "de": "Weißrückenspecht",
+   "en": "White-backed Woodpecker"
+  },
+  "Dendrocopos major": {
+   "de": "Buntspecht",
+   "en": "Great Spotted Woodpecker"
+  },
+  "Dendrocopos syriacus": {
+   "de": "Blutspecht",
+   "en": "Syrian Woodpecker"
+  },
+  "Dendrocoptes medius": {
+   "de": "Mittelspecht",
+   "en": "Middle Spotted Woodpecker"
+  },
+  "Dendrocygna autumnalis": {
+   "de": "Rotschnabel-Pfeifgans",
+   "en": "Black-bellied Whistling Duck"
+  },
+  "Dendrocygna bicolor": {
+   "de": "Gelbbrust-Pfeifgans",
+   "en": "Fulvous Whistling Duck"
+  },
+  "Dendrocygna viduata": {
+   "de": "Witwenpfeifgans",
+   "en": "White-faced Whistling Duck"
+  },
+  "Dromaius novaehollandiae": {
+   "de": "Emu",
+   "en": "Emu"
+  },
+  "Dryobates minor": {
+   "de": "Kleinspecht",
+   "en": "Lesser Spotted Woodpecker"
+  },
+  "Dryocopus martius": {
+   "de": "Schwarzspecht",
+   "en": "Black Woodpecker"
+  },
+  "Egretta garzetta": {
+   "de": "Seidenreiher",
+   "en": "Little Egret"
+  },
+  "Elanus caeruleus": {
+   "de": "Gleitaar",
+   "en": "Black-winged Kite"
+  },
+  "Emberiza aureola": {
+   "de": "Weidenammer",
+   "en": "Yellow-breasted Bunting"
+  },
+  "Emberiza bruniceps": {
+   "de": "Braunkopfammer",
+   "en": "Red-headed Bunting"
+  },
+  "Emberiza buchanani": {
+   "de": "Steinortolan",
+   "en": "Grey-necked Bunting"
+  },
+  "Emberiza caesia": {
+   "de": "Grauortolan",
+   "en": "Cretzschmar's Bunting"
+  },
+  "Emberiza calandra": {
+   "de": "Grauammer",
+   "en": "Corn Bunting"
+  },
+  "Emberiza cia": {
+   "de": "Zippammer",
+   "en": "Rock Bunting"
+  },
+  "Emberiza cirlus": {
+   "de": "Zaunammer",
+   "en": "Cirl Bunting"
+  },
+  "Emberiza citrinella": {
+   "de": "Goldammer",
+   "en": "Yellowhammer"
+  },
+  "Emberiza hortulana": {
+   "de": "Ortolan",
+   "en": "Ortolan Bunting"
+  },
+  "Emberiza leucocephalos": {
+   "de": "Fichtenammer",
+   "en": "Pine Bunting"
+  },
+  "Emberiza melanocephala": {
+   "de": "Kappenammer",
+   "en": "Black-headed Bunting"
+  },
+  "Emberiza pusilla": {
+   "de": "Zwergammer",
+   "en": "Little Bunting"
+  },
+  "Emberiza rustica": {
+   "de": "Waldammer",
+   "en": "Rustic Bunting"
+  },
+  "Emberiza schoeniclus": {
+   "de": "Rohrammer",
+   "en": "Common Reed Bunting"
+  },
+  "Emberiza spodocephala": {
+   "de": "Maskenammer",
+   "en": "Black-faced Bunting"
+  },
+  "Eremophila alpestris": {
+   "de": "Ohrenlerche",
+   "en": "Horned Lark"
+  },
+  "Erithacus rubecula": {
+   "de": "Rotkehlchen",
+   "en": "European Robin"
+  },
+  "Eudocimus ruber": {
+   "de": "Scharlachsichler",
+   "en": "Scarlet Ibis"
+  },
+  "Falco biarmicus": {
+   "de": "Lannerfalke",
+   "en": "Lanner Falcon"
+  },
+  "Falco cherrug": {
+   "de": "Würgfalke",
+   "en": "Saker Falcon"
+  },
+  "Falco columbarius": {
+   "de": "Merlin",
+   "en": "Merlin"
+  },
+  "Falco eleonorae": {
+   "de": "Eleonorenfalke",
+   "en": "Eleonora's Falcon"
+  },
+  "Falco naumanni": {
+   "de": "Rötelfalke",
+   "en": "Lesser Kestrel"
+  },
+  "Falco peregrinus": {
+   "de": "Wanderfalke",
+   "en": "Peregrine Falcon"
+  },
+  "Falco peregrinus calidus": {
+   "de": "Wanderfalke (ssp. calidus)",
+   "en": "Peregrine Falcon (ssp. calidus)"
+  },
+  "Falco rusticolus": {
+   "de": "Gerfalke",
+   "en": "Gyrfalcon"
+  },
+  "Falco sparverius": {
+   "de": "Buntfalke",
+   "en": "American Kestrel"
+  },
+  "Falco subbuteo": {
+   "de": "Baumfalke",
+   "en": "Eurasian Hobby"
+  },
+  "Falco tinnunculus": {
+   "de": "Turmfalke",
+   "en": "Common Kestrel"
+  },
+  "Falco vespertinus": {
+   "de": "Rotfußfalke",
+   "en": "Red-footed Falcon"
+  },
+  "Ficedula albicilla": {
+   "de": "Taigaschnäpper",
+   "en": "Taiga Flycatcher"
+  },
+  "Ficedula albicollis": {
+   "de": "Halsbandschnäpper",
+   "en": "Collared Flycatcher"
+  },
+  "Ficedula hypoleuca": {
+   "de": "Trauerschnäpper",
+   "en": "European Pied Flycatcher"
+  },
+  "Ficedula parva": {
+   "de": "Zwergschnäpper",
+   "en": "Red-breasted Flycatcher"
+  },
+  "Fratercula arctica": {
+   "de": "Papageitaucher",
+   "en": "Atlantic Puffin"
+  },
+  "Fringilla coelebs": {
+   "de": "Buchfink",
+   "en": "Common Chaffinch"
+  },
+  "Fringilla montifringilla": {
+   "de": "Bergfink",
+   "en": "Brambling"
+  },
+  "Fulica atra": {
+   "de": "Blässhuhn",
+   "en": "Eurasian Coot"
+  },
+  "Fulmarus glacialis": {
+   "de": "Eissturmvogel",
+   "en": "Northern Fulmar"
+  },
+  "Galerida cristata": {
+   "de": "Haubenlerche",
+   "en": "Crested Lark"
+  },
+  "Gallinago gallinago": {
+   "de": "Bekassine",
+   "en": "Common Snipe"
+  },
+  "Gallinago media": {
+   "de": "Doppelschnepfe",
+   "en": "Great Snipe"
+  },
+  "Gallinula chloropus": {
+   "de": "Teichhuhn",
+   "en": "Common Moorhen"
+  },
+  "Garrulus glandarius": {
+   "de": "Eichelhäher",
+   "en": "Eurasian Jay"
+  },
+  "Gavia adamsii": {
+   "de": "Gelbschnabeltaucher",
+   "en": "Yellow-billed Loon"
+  },
+  "Gavia arctica": {
+   "de": "Prachttaucher",
+   "en": "Black-throated Loon"
+  },
+  "Gavia immer": {
+   "de": "Eistaucher",
+   "en": "Great Northern Loon"
+  },
+  "Gavia stellata": {
+   "de": "Sterntaucher",
+   "en": "Red-throated Loon"
+  },
+  "Gelochelidon nilotica": {
+   "de": "Lachseeschwalbe",
+   "en": "Gull-billed Tern"
+  },
+  "Geokichla sibirica": {
+   "de": "Schieferdrossel",
+   "en": "Siberian Thrush"
+  },
+  "Geopelia cuneata": {
+   "de": "Diamanttäubchen",
+   "en": "Diamond Dove"
+  },
+  "Geronticus eremita": {
+   "de": "Waldrapp",
+   "en": "Northern Bald Ibis"
+  },
+  "Glareola maldivarum": {
+   "de": "Orientbrachschwalbe",
+   "en": "Oriental Pratincole"
+  },
+  "Glareola nordmanni": {
+   "de": "Schwarzflügel-Brachschwalbe",
+   "en": "Black-winged Pratincole"
+  },
+  "Glareola pratincola": {
+   "de": "Rotflügel-Brachschwalbe",
+   "en": "Collared Pratincole"
+  },
+  "Glaucidium passerinum": {
+   "de": "Sperlingskauz",
+   "en": "Eurasian Pygmy Owl"
+  },
+  "Grus grus": {
+   "de": "Kranich",
+   "en": "Common Crane"
+  },
+  "Grus japonensis": {
+   "de": "Mandschurenkranich",
+   "en": "Red-crowned Crane"
+  },
+  "Grus virgo": {
+   "de": "Jungfernkranich",
+   "en": "Demoiselle Crane"
+  },
+  "Gypaetus barbatus": {
+   "de": "Bartgeier",
+   "en": "Bearded Vulture"
+  },
+  "Gyps fulvus": {
+   "de": "Gänsegeier",
+   "en": "Griffon Vulture"
+  },
+  "Haematopus ostralegus": {
+   "de": "Austernfischer",
+   "en": "Eurasian Oystercatcher"
+  },
+  "Haliaeetus albicilla": {
+   "de": "Seeadler",
+   "en": "White-tailed Eagle"
+  },
+  "Helopsaltes certhiola": {
+   "de": "Streifenschwirl",
+   "en": ""
+  },
+  "Hieraaetus pennatus": {
+   "de": "Zwergadler",
+   "en": "Booted Eagle"
+  },
+  "Himantopus himantopus": {
+   "de": "Stelzenläufer",
+   "en": "Black-winged Stilt"
+  },
+  "Hippolais icterina": {
+   "de": "Gelbspötter",
+   "en": "Icterine Warbler"
+  },
+  "Hippolais polyglotta": {
+   "de": "Orpheusspötter",
+   "en": "Melodious Warbler"
+  },
+  "Hirundo rustica": {
+   "de": "Rauchschwalbe",
+   "en": "Barn Swallow"
+  },
+  "Histrionicus histrionicus": {
+   "de": "Kragenente",
+   "en": "Harlequin Duck"
+  },
+  "Hoplopterus indicus": {
+   "de": "Rotlappenkiebitz",
+   "en": "Red-wattled Lapwing"
+  },
+  "Hydrobates monorhis": {
+   "de": "Swinhoewellenläufer",
+   "en": "Swinhoe's Storm Petrel"
+  },
+  "Hydrobates pelagicus": {
+   "de": "Sturmwellenläufer (Sturmschwalbe)",
+   "en": "European Storm Petrel"
+  },
+  "Hydrocoloeus minutus": {
+   "de": "Zwergmöwe",
+   "en": "Little Gull"
+  },
+  "Hydroprogne caspia": {
+   "de": "Raubseeschwalbe",
+   "en": "Caspian Tern"
+  },
+  "Ichthyaetus audouinii": {
+   "de": "Korallenmöwe",
+   "en": "Audouin's Gull"
+  },
+  "Ichthyaetus ichthyaetus": {
+   "de": "Fischmöwe",
+   "en": "Pallas's Gull"
+  },
+  "Ichthyaetus melanocephalus": {
+   "de": "Schwarzkopfmöwe",
+   "en": "Mediterranean Gull"
+  },
+  "Iduna caligata": {
+   "de": "Buschspötter",
+   "en": "Booted Warbler"
+  },
+  "Iduna opaca": {
+   "de": "Isabellspötter",
+   "en": "Western Olivaceous Warbler"
+  },
+  "Iduna pallida": {
+   "de": "Blassspötter",
+   "en": "Eastern Olivaceous Warbler"
+  },
+  "Iduna rama": {
+   "de": "Steppenspötter",
+   "en": "Sykes's Warbler"
+  },
+  "Ixobrychus minutus": {
+   "de": "Zwergdommel",
+   "en": "Little Bittern"
+  },
+  "Jynx torquilla": {
+   "de": "Wendehals",
+   "en": "Eurasian Wryneck"
+  },
+  "Lagopus muta": {
+   "de": "Alpenschneehuhn",
+   "en": "Rock Ptarmigan"
+  },
+  "Lanius collurio": {
+   "de": "Neuntöter",
+   "en": "Red-backed Shrike"
+  },
+  "Lanius cristatus": {
+   "de": "Braunwürger",
+   "en": "Brown Shrike"
+  },
+  "Lanius excubitor": {
+   "de": "Raubwürger",
+   "en": "Great Grey Shrike"
+  },
+  "Lanius excubitor homeyeri": {
+   "de": "Raubwürger (ssp. homeyeri)",
+   "en": "Great Grey Shrike (ssp. homeyeri)"
+  },
+  "Lanius isabellinus": {
+   "de": "Isabellwürger",
+   "en": "Isabelline Shrike"
+  },
+  "Lanius minor": {
+   "de": "Schwarzstirnwürger",
+   "en": "Lesser Grey Shrike"
+  },
+  "Lanius nubicus": {
+   "de": "Maskenwürger",
+   "en": "Masked Shrike"
+  },
+  "Lanius phoenicuroides": {
+   "de": "Rotschwanzwürger",
+   "en": "Red-tailed Shrike"
+  },
+  "Lanius senator": {
+   "de": "Rotkopfwürger",
+   "en": "Woodchat Shrike"
+  },
+  "Larus argentatus": {
+   "de": "Silbermöwe",
+   "en": "European Herring Gull"
+  },
+  "Larus cachinnans": {
+   "de": "Steppenmöwe",
+   "en": "Caspian Gull"
+  },
+  "Larus canus": {
+   "de": "Sturmmöwe",
+   "en": "Mew Gull"
+  },
+  "Larus delawarensis": {
+   "de": "Ringschnabelmöwe",
+   "en": "Ring-billed Gull"
+  },
+  "Larus fuscus": {
+   "de": "Heringsmöwe",
+   "en": "Lesser Black-backed Gull"
+  },
+  "Larus fuscus fuscus": {
+   "de": "Heringsmöwe (ssp. fuscus), Baltische",
+   "en": "Lesser Black-backed Gull (ssp. fuscus)"
+  },
+  "Larus fuscus graellsii": {
+   "de": "Heringsmöwe (ssp. graellsii)",
+   "en": "Lesser Black-backed Gull (ssp. graellsii)"
+  },
+  "Larus fuscus heuglini": {
+   "de": "Heringsmöwe (ssp. heuglini), Tundramöwe",
+   "en": "Heuglin's Gull"
+  },
+  "Larus fuscus intermedius": {
+   "de": "Heringsmöwe (ssp. intermedius)",
+   "en": "Lesser Black-backed Gull (ssp. intermedius)"
+  },
+  "Larus glaucoides": {
+   "de": "Polarmöwe",
+   "en": "Iceland Gull"
+  },
+  "Larus glaucoides kumlieni": {
+   "de": "Polarmöwe (ssp. kumlieni), Kumlienmöwe",
+   "en": "Iceland Gull (ssp. kumlieni), Kumlien's Gull"
+  },
+  "Larus hyperboreus": {
+   "de": "Eismöwe",
+   "en": "Glaucous Gull"
+  },
+  "Larus marinus": {
+   "de": "Mantelmöwe",
+   "en": "Great Black-backed Gull"
+  },
+  "Larus michahellis": {
+   "de": "Mittelmeermöwe",
+   "en": "Yellow-legged Gull"
+  },
+  "Larus smithsonianus": {
+   "de": "Silbermöwe (Amerikanische), Kanadamöwe",
+   "en": "American Herring Gull"
+  },
+  "Leiothrix lutea": {
+   "de": "Rotschnabel-Sonnenvogel",
+   "en": "Red-billed Leiothrix"
+  },
+  "Leucophaeus atricilla": {
+   "de": "Aztekenmöwe",
+   "en": "Laughing Gull"
+  },
+  "Leucophaeus pipixcan": {
+   "de": "Präriemöwe",
+   "en": "Franklin's Gull"
+  },
+  "Limnodromus griseus": {
+   "de": "Moorschlammläufer (Kleiner Schlammläufer)",
+   "en": "Short-billed Dowitcher"
+  },
+  "Limnodromus scolopaceus": {
+   "de": "Tundraschlammläufer (Großer Schlammläufer)",
+   "en": "Long-billed Dowitcher"
+  },
+  "Limosa lapponica": {
+   "de": "Pfuhlschnepfe",
+   "en": "Bar-tailed Godwit"
+  },
+  "Limosa limosa": {
+   "de": "Uferschnepfe",
+   "en": "Black-tailed Godwit"
+  },
+  "Limosa limosa islandica": {
+   "de": "Uferschnepfe (ssp. islandica), Isländische",
+   "en": "Black-tailed Godwit (ssp. islandica)"
+  },
+  "Linaria cannabina": {
+   "de": "Bluthänfling",
+   "en": "Common Linnet"
+  },
+  "Linaria flavirostris": {
+   "de": "Berghänfling",
+   "en": "Twite"
+  },
+  "Locustella fluviatilis": {
+   "de": "Schlagschwirl",
+   "en": "River Warbler"
+  },
+  "Locustella lanceolata": {
+   "de": "Strichelschwirl",
+   "en": "Lanceolated Warbler"
+  },
+  "Locustella luscinioides": {
+   "de": "Rohrschwirl",
+   "en": "Savi's Warbler"
+  },
+  "Locustella naevia": {
+   "de": "Feldschwirl",
+   "en": "Common Grasshopper Warbler"
+  },
+  "Lophodytes cucullatus": {
+   "de": "Kappensäger",
+   "en": "Hooded Merganser"
+  },
+  "Lophonetta specularioides": {
+   "de": "Schopfente",
+   "en": "Crested Duck"
+  },
+  "Lophophanes cristatus": {
+   "de": "Haubenmeise",
+   "en": "European Crested Tit"
+  },
+  "Lophura nycthemera": {
+   "de": "Silberfasan",
+   "en": "Silver Pheasant"
+  },
+  "Loxia curvirostra": {
+   "de": "Fichtenkreuzschnabel",
+   "en": "Red Crossbill"
+  },
+  "Loxia leucoptera": {
+   "de": "Bindenkreuzschnabel",
+   "en": "Two-barred Crossbill"
+  },
+  "Loxia pytyopsittacus": {
+   "de": "Kiefernkreuzschnabel",
+   "en": "Parrot Crossbill"
+  },
+  "Lullula arborea": {
+   "de": "Heidelerche",
+   "en": "Woodlark"
+  },
+  "Luscinia luscinia": {
+   "de": "Sprosser",
+   "en": "Thrush Nightingale"
+  },
+  "Luscinia megarhynchos": {
+   "de": "Nachtigall",
+   "en": "Common Nightingale"
+  },
+  "Luscinia svecica": {
+   "de": "Blaukehlchen",
+   "en": "Bluethroat"
+  },
+  "Luscinia svecica svecica": {
+   "de": "Blaukehlchen (ssp. svecica), Rotsterniges",
+   "en": "Bluethroat (ssp. svecica)"
+  },
+  "Lymnocryptes minimus": {
+   "de": "Zwergschnepfe",
+   "en": "Jack Snipe"
+  },
+  "Lyrurus tetrix": {
+   "de": "Birkhuhn",
+   "en": "Black Grouse"
+  },
+  "Mareca americana": {
+   "de": "Pfeifente (Nordamerikanische), Kanadapfeifente",
+   "en": "American Wigeon"
+  },
+  "Mareca falcata": {
+   "de": "Sichelente",
+   "en": "Falcated Duck"
+  },
+  "Mareca penelope": {
+   "de": "Pfeifente",
+   "en": "Eurasian Wigeon"
+  },
+  "Mareca sibilatrix": {
+   "de": "Chilepfeifente",
+   "en": "Chiloe Wigeon"
+  },
+  "Mareca strepera": {
+   "de": "Schnatterente",
+   "en": "Gadwall"
+  },
+  "Marmaronetta angustirostris": {
+   "de": "Marmelente",
+   "en": "Marbled Duck"
+  },
+  "Melanitta americana": {
+   "de": "Pazifiktrauerente",
+   "en": "Black Scoter"
+  },
+  "Melanitta deglandi": {
+   "de": "Höckersamtente",
+   "en": "White-winged Scoter"
+  },
+  "Melanitta fusca": {
+   "de": "Samtente",
+   "en": "Velvet Scoter"
+  },
+  "Melanitta nigra": {
+   "de": "Trauerente",
+   "en": "Common Scoter"
+  },
+  "Melanitta perspicillata": {
+   "de": "Brillenente",
+   "en": "Surf Scoter"
+  },
+  "Melanitta stejnegeri": {
+   "de": "Kamtschatkasamtente",
+   "en": "Stejneger's Scoter"
+  },
+  "Melanocorypha bimaculata": {
+   "de": "Bergkalanderlerche",
+   "en": "Bimaculated Lark"
+  },
+  "Melanocorypha calandra": {
+   "de": "Kalanderlerche",
+   "en": "Calandra Lark"
+  },
+  "Melanocorypha yeltoniensis": {
+   "de": "Schwarzsteppenlerche",
+   "en": "Black Lark"
+  },
+  "Meleagris gallopavo": {
+   "de": "Truthuhn",
+   "en": "Wild Turkey"
+  },
+  "Melopsittacus undulatus": {
+   "de": "Wellensittich",
+   "en": "Budgerigar"
+  },
+  "Melospiza melodia": {
+   "de": "Singammer",
+   "en": "Song Sparrow"
+  },
+  "Mergellus albellus": {
+   "de": "Zwergsäger",
+   "en": "Smew"
+  },
+  "Mergus merganser": {
+   "de": "Gänsesäger",
+   "en": "Common Merganser"
+  },
+  "Mergus serrator": {
+   "de": "Mittelsäger",
+   "en": "Red-breasted Merganser"
+  },
+  "Merops apiaster": {
+   "de": "Bienenfresser",
+   "en": "European Bee-eater"
+  },
+  "Merops persicus": {
+   "de": "Blauwangenspint",
+   "en": "Blue-cheeked Bee-eater"
+  },
+  "Microcarbo pygmaeus": {
+   "de": "Zwergscharbe",
+   "en": "Pygmy Cormorant"
+  },
+  "Milvus migrans": {
+   "de": "Schwarzmilan",
+   "en": "Black Kite"
+  },
+  "Milvus milvus": {
+   "de": "Rotmilan",
+   "en": "Red Kite"
+  },
+  "Mimus polyglottos": {
+   "de": "Gartenspottdrossel",
+   "en": "Northern Mockingbird"
+  },
+  "Molothrus ater": {
+   "de": "Braunkopf-Kuhstärling",
+   "en": "Brown-headed Cowbird"
+  },
+  "Monticola saxatilis": {
+   "de": "Steinrötel",
+   "en": "Common Rock Thrush"
+  },
+  "Monticola solitarius": {
+   "de": "Blaumerle",
+   "en": "Blue Rock Thrush"
+  },
+  "Montifringilla nivalis": {
+   "de": "Schneesperling",
+   "en": "White-winged Snowfinch"
+  },
+  "Morus bassanus": {
+   "de": "Basstölpel",
+   "en": "Northern Gannet"
+  },
+  "Motacilla alba": {
+   "de": "Bachstelze",
+   "en": "White Wagtail"
+  },
+  "Motacilla alba yarrellii": {
+   "de": "Bachstelze (ssp. yarrellii), Trauerbachstelze",
+   "en": "Pied Wagtail"
+  },
+  "Motacilla cinerea": {
+   "de": "Gebirgsstelze",
+   "en": "Grey Wagtail"
+  },
+  "Motacilla citreola": {
+   "de": "Zitronenstelze",
+   "en": "Citrine Wagtail"
+  },
+  "Motacilla flava": {
+   "de": "Schafstelze (flava), Wiesenschafstelze",
+   "en": "Blue-headed Yellow Wagtail"
+  },
+  "Motacilla flava cinereocapilla": {
+   "de": "Schafstelze (ssp. cinereocapilla), Aschkopf-Schafstelze",
+   "en": "Ashy-headed Yellow Wagtail"
+  },
+  "Motacilla flava feldegg": {
+   "de": "Schafstelze (ssp. feldegg), Maskenschafstelze",
+   "en": "Black-headed Yellow Wagtail"
+  },
+  "Motacilla flava flavissima": {
+   "de": "Schafstelze (ssp. flavissima), Gelbkopf-Schafstelze",
+   "en": "British Yellow Wagtail"
+  },
+  "Motacilla flava iberiae": {
+   "de": "Schafstelze (ssp. iberiae), Iberienschafstelze",
+   "en": ""
+  },
+  "Motacilla flava thunbergi": {
+   "de": "Schafstelze (ssp. thunbergi), Thunbergschafstelze",
+   "en": "Grey-headed Yellow Wagtail"
+  },
+  "Motacilla tschutschensis": {
+   "de": "Tschuktschenstelze",
+   "en": "Eastern Yellow Wagtail"
+  },
+  "Muscicapa striata": {
+   "de": "Grauschnäpper",
+   "en": "Spotted Flycatcher"
+  },
+  "Myiopsitta monachus": {
+   "de": "Mönchssittich",
+   "en": "Monk Parakeet"
+  },
+  "Neophron percnopterus": {
+   "de": "Schmutzgeier",
+   "en": "Egyptian Vulture"
+  },
+  "Netta peposaca": {
+   "de": "Rosenschnabelente",
+   "en": "Rosy-billed Pochard"
+  },
+  "Netta rufina": {
+   "de": "Kolbenente",
+   "en": "Red-crested Pochard"
+  },
+  "Nucifraga caryocatactes": {
+   "de": "Tannenhäher",
+   "en": "Spotted Nutcracker"
+  },
+  "Nucifraga caryocatactes macrorhynchos": {
+   "de": "Tannenhäher (ssp. macrorhynchos), Sibirischer",
+   "en": "Spotted Nutcracker (ssp. macrorhynchos)"
+  },
+  "Numenius arquata": {
+   "de": "Brachvogel (Großer)",
+   "en": "Eurasian Curlew"
+  },
+  "Numenius phaeopus": {
+   "de": "Regenbrachvogel",
+   "en": "Whimbrel"
+  },
+  "Nycticorax nycticorax": {
+   "de": "Nachtreiher",
+   "en": "Black-crowned Night Heron"
+  },
+  "Nymphicus hollandicus": {
+   "de": "Nymphensittich",
+   "en": "Cockatiel"
+  },
+  "Oceanites oceanicus": {
+   "de": "Buntfuß-Sturmschwalbe",
+   "en": "Wilson's Storm Petrel"
+  },
+  "Oceanodroma leucorhoa": {
+   "de": "Wellenläufer",
+   "en": "Leach's Storm Petrel"
+  },
+  "Oenanthe deserti": {
+   "de": "Wüstensteinschmätzer",
+   "en": "Desert Wheatear"
+  },
+  "Oenanthe hispanica": {
+   "de": "Maurensteinschmätzer",
+   "en": "Western Black-eared Wheatear"
+  },
+  "Oenanthe hispanica / melanoleuca": {
+   "de": "Mauren- / Balkansteinschmätzer (Mittelmeersteinschmätzer)",
+   "en": "Western / Eastern Black-eared Wheatear"
+  },
+  "Oenanthe isabellina": {
+   "de": "Isabellsteinschmätzer",
+   "en": "Isabelline Wheatear"
+  },
+  "Oenanthe leucopyga": {
+   "de": "Saharasteinschmätzer",
+   "en": "White-crowned Wheatear"
+  },
+  "Oenanthe melanoleuca": {
+   "de": "Balkansteinschmätzer",
+   "en": "Eastern Black-eared Wheatear"
+  },
+  "Oenanthe oenanthe": {
+   "de": "Steinschmätzer",
+   "en": "Northern Wheatear"
+  },
+  "Oenanthe pleschanka": {
+   "de": "Nonnensteinschmätzer",
+   "en": "Pied Wheatear"
+  },
+  "Onychoprion anaethetus": {
+   "de": "Zügelseeschwalbe",
+   "en": "Bridled Tern"
+  },
+  "Onychoprion fuscatus": {
+   "de": "Rußseeschwalbe",
+   "en": "Sooty Tern"
+  },
+  "Oriolus oriolus": {
+   "de": "Pirol",
+   "en": "Eurasian Golden Oriole"
+  },
+  "Otis tarda": {
+   "de": "Großtrappe",
+   "en": "Great Bustard"
+  },
+  "Otus scops": {
+   "de": "Zwergohreule",
+   "en": "Eurasian Scops Owl"
+  },
+  "Oxyura jamaicensis": {
+   "de": "Schwarzkopf-Ruderente",
+   "en": "Ruddy Duck"
+  },
+  "Oxyura leucocephala": {
+   "de": "Weißkopf-Ruderente",
+   "en": "White-headed Duck"
+  },
+  "Pagophila eburnea": {
+   "de": "Elfenbeinmöwe",
+   "en": "Ivory Gull"
+  },
+  "Pandion haliaetus": {
+   "de": "Fischadler",
+   "en": "Western Osprey"
+  },
+  "Panurus biarmicus": {
+   "de": "Bartmeise",
+   "en": "Bearded Reedling"
+  },
+  "Parabuteo unicinctus": {
+   "de": "Wüstenbussard",
+   "en": "Harris's Hawk"
+  },
+  "Parus major": {
+   "de": "Kohlmeise",
+   "en": "Great Tit"
+  },
+  "Passer domesticus": {
+   "de": "Haussperling",
+   "en": "House Sparrow"
+  },
+  "Passer hispaniolensis": {
+   "de": "Weidensperling",
+   "en": "Spanish Sparrow"
+  },
+  "Passer italiae": {
+   "de": "Italiensperling",
+   "en": "Italian Sparrow"
+  },
+  "Passer montanus": {
+   "de": "Feldsperling",
+   "en": "Eurasian Tree Sparrow"
+  },
+  "Pastor roseus": {
+   "de": "Rosenstar",
+   "en": "Rosy Starling"
+  },
+  "Pavo cristatus": {
+   "de": "Pfau",
+   "en": "Indian Peafowl"
+  },
+  "Pelecanus crispus": {
+   "de": "Krauskopfpelikan",
+   "en": "Dalmatian Pelican"
+  },
+  "Pelecanus onocrotalus": {
+   "de": "Rosapelikan",
+   "en": "Great White Pelican"
+  },
+  "Pelecanus rufescens": {
+   "de": "Rötelpelikan",
+   "en": "Pink-backed Pelican"
+  },
+  "Perdix perdix": {
+   "de": "Rebhuhn",
+   "en": "Grey Partridge"
+  },
+  "Periparus ater": {
+   "de": "Tannenmeise",
+   "en": "Coal Tit"
+  },
+  "Pernis apivorus": {
+   "de": "Wespenbussard",
+   "en": "European Honey Buzzard"
+  },
+  "Petronia petronia": {
+   "de": "Steinsperling",
+   "en": "Rock Sparrow"
+  },
+  "Phalacrocorax aristotelis": {
+   "de": "Krähenscharbe",
+   "en": "European Shag"
+  },
+  "Phalacrocorax carbo": {
+   "de": "Kormoran",
+   "en": "Great Cormorant"
+  },
+  "Phalacrocorax carbo carbo": {
+   "de": "Kormoran (ssp. carbo)",
+   "en": "Great Cormorant (ssp. carbo)"
+  },
+  "Phalaropus fulicarius": {
+   "de": "Thorshühnchen",
+   "en": "Red Phalarope"
+  },
+  "Phalaropus lobatus": {
+   "de": "Odinshühnchen",
+   "en": "Red-necked Phalarope"
+  },
+  "Phalaropus tricolor": {
+   "de": "Wilsonwassertreter",
+   "en": "Wilson's Phalarope"
+  },
+  "Phasianus colchicus": {
+   "de": "Fasan (Jagdfasan)",
+   "en": "Common Pheasant"
+  },
+  "Phoeniconaias minor": {
+   "de": "Zwergflamingo",
+   "en": "Lesser Flamingo"
+  },
+  "Phoenicopterus chilensis": {
+   "de": "Chileflamingo",
+   "en": "Chilean Flamingo"
+  },
+  "Phoenicopterus roseus": {
+   "de": "Rosaflamingo",
+   "en": "Greater Flamingo"
+  },
+  "Phoenicopterus ruber": {
+   "de": "Kubaflamingo",
+   "en": "American Flamingo"
+  },
+  "Phoenicurus ochruros": {
+   "de": "Hausrotschwanz",
+   "en": "Black Redstart"
+  },
+  "Phoenicurus ochruros phoenicuroides": {
+   "de": "Hausrotschwanz (ssp. phoenicuroides)",
+   "en": "Black Redstart (ssp. phoenicuroides)"
+  },
+  "Phoenicurus phoenicurus": {
+   "de": "Gartenrotschwanz",
+   "en": "Common Redstart"
+  },
+  "Phylloscopus bonelli": {
+   "de": "Berglaubsänger",
+   "en": "Western Bonelli's Warbler"
+  },
+  "Phylloscopus borealis": {
+   "de": "Wanderlaubsänger",
+   "en": "Arctic Warbler"
+  },
+  "Phylloscopus collybita": {
+   "de": "Zilpzalp",
+   "en": "Common Chiffchaff"
+  },
+  "Phylloscopus collybita tristis": {
+   "de": "Zilpzalp (ssp. tristis), Taigazilpzalp",
+   "en": "Common Chiffchaff (ssp. tristis), Siberian Chiffchaff"
+  },
+  "Phylloscopus coronatus": {
+   "de": "Kronenlaubsänger",
+   "en": "Eastern Crowned Warbler"
+  },
+  "Phylloscopus fuscatus": {
+   "de": "Dunkellaubsänger",
+   "en": "Dusky Warbler"
+  },
+  "Phylloscopus humei": {
+   "de": "Tienschan-Laubsänger",
+   "en": "Hume's Leaf Warbler"
+  },
+  "Phylloscopus ibericus": {
+   "de": "Iberienzilpzalp",
+   "en": "Iberian Chiffchaff"
+  },
+  "Phylloscopus inornatus": {
+   "de": "Gelbbrauen-Laubsänger",
+   "en": "Yellow-browed Warbler"
+  },
+  "Phylloscopus nitidus": {
+   "de": "Wacholderlaubsänger",
+   "en": "Green Warbler"
+  },
+  "Phylloscopus orientalis": {
+   "de": "Balkanlaubsänger",
+   "en": "Eastern Bonelli's Warbler"
+  },
+  "Phylloscopus plumbeitarsus": {
+   "de": "Middendorfflaubsänger",
+   "en": "Two-barred Warbler"
+  },
+  "Phylloscopus proregulus": {
+   "de": "Goldhähnchen-Laubsänger",
+   "en": "Pallas's Leaf Warbler"
+  },
+  "Phylloscopus schwarzi": {
+   "de": "Bartlaubsänger",
+   "en": "Radde's Warbler"
+  },
+  "Phylloscopus sibilatrix": {
+   "de": "Waldlaubsänger",
+   "en": "Wood Warbler"
+  },
+  "Phylloscopus trochiloides": {
+   "de": "Grünlaubsänger",
+   "en": "Greenish Warbler"
+  },
+  "Phylloscopus trochilus": {
+   "de": "Fitis",
+   "en": "Willow Warbler"
+  },
+  "Pica pica": {
+   "de": "Elster",
+   "en": "Eurasian Magpie"
+  },
+  "Picoides tridactylus": {
+   "de": "Dreizehenspecht",
+   "en": "Eurasian Three-toed Woodpecker"
+  },
+  "Picus canus": {
+   "de": "Grauspecht",
+   "en": "Grey-headed Woodpecker"
+  },
+  "Picus viridis": {
+   "de": "Grünspecht",
+   "en": "European Green Woodpecker"
+  },
+  "Pinicola enucleator": {
+   "de": "Hakengimpel",
+   "en": "Pine Grosbeak"
+  },
+  "Platalea leucorodia": {
+   "de": "Löffler",
+   "en": "Eurasian Spoonbill"
+  },
+  "Platycercus adscitus": {
+   "de": "Blasskopfsittich (Blasskopfrosella)",
+   "en": "Pale-headed Rosella"
+  },
+  "Platycercus elegans": {
+   "de": "Pennantsittich",
+   "en": "Crimson Rosella"
+  },
+  "Platycercus eximius": {
+   "de": "Rosellasittich",
+   "en": "Eastern Rosella"
+  },
+  "Plectrophenax nivalis": {
+   "de": "Schneeammer",
+   "en": "Snow Bunting"
+  },
+  "Plegadis falcinellus": {
+   "de": "Sichler",
+   "en": "Glossy Ibis"
+  },
+  "Pluvialis apricaria": {
+   "de": "Goldregenpfeifer",
+   "en": "European Golden Plover"
+  },
+  "Pluvialis dominica": {
+   "de": "Prärie-Goldregenpfeifer (Amerikanischer)",
+   "en": "American Golden Plover"
+  },
+  "Pluvialis fulva": {
+   "de": "Tundra-Goldregenpfeifer (Pazifischer)",
+   "en": "Pacific Golden Plover"
+  },
+  "Pluvialis squatarola": {
+   "de": "Kiebitzregenpfeifer",
+   "en": "Grey Plover"
+  },
+  "Podiceps auritus": {
+   "de": "Ohrentaucher",
+   "en": "Horned Grebe"
+  },
+  "Podiceps cristatus": {
+   "de": "Haubentaucher",
+   "en": "Great Crested Grebe"
+  },
+  "Podiceps grisegena": {
+   "de": "Rothalstaucher",
+   "en": "Red-necked Grebe"
+  },
+  "Podiceps nigricollis": {
+   "de": "Schwarzhalstaucher",
+   "en": "Black-necked Grebe"
+  },
+  "Podilymbus podiceps": {
+   "de": "Bindentaucher",
+   "en": "Pied-billed Grebe"
+  },
+  "Poecile montanus": {
+   "de": "Weidenmeise",
+   "en": "Willow Tit"
+  },
+  "Poecile montanus montanus": {
+   "de": "Weidenmeise (ssp. montanus), Alpenmeise",
+   "en": "Alpine Willow Tit"
+  },
+  "Poecile palustris": {
+   "de": "Sumpfmeise",
+   "en": "Marsh Tit"
+  },
+  "Poicephalus senegalus": {
+   "de": "Senegalpapagei",
+   "en": "Senegal Parrot"
+  },
+  "Polysticta stelleri": {
+   "de": "Scheckente",
+   "en": "Steller's Eider"
+  },
+  "Porphyrio alleni": {
+   "de": "Bronzesultanshuhn",
+   "en": "Allen's Gallinule"
+  },
+  "Porphyrio poliocephalus": {
+   "de": "Graukopf-Purpurhuhn",
+   "en": "Grey-headed Swamphen"
+  },
+  "Porphyrio porphyrio": {
+   "de": "Purpurhuhn",
+   "en": "Purple Swamphen"
+  },
+  "Porzana parva": {
+   "de": "Kleinsumpfhuhn",
+   "en": "Little Crake"
+  },
+  "Porzana porzana": {
+   "de": "Tüpfelsumpfhuhn",
+   "en": "Spotted Crake"
+  },
+  "Porzana pusilla": {
+   "de": "Zwergsumpfhuhn",
+   "en": "Baillon's Crake"
+  },
+  "Prunella atrogularis": {
+   "de": "Schwarzkehlbraunelle",
+   "en": "Black-throated Accentor"
+  },
+  "Prunella collaris": {
+   "de": "Alpenbraunelle",
+   "en": "Alpine Accentor"
+  },
+  "Prunella modularis": {
+   "de": "Heckenbraunelle",
+   "en": "Dunnock"
+  },
+  "Prunella montanella": {
+   "de": "Bergbraunelle",
+   "en": "Siberian Accentor"
+  },
+  "Psephotus haematonotus": {
+   "de": "Singsittich",
+   "en": "Red-rumped Parrot"
+  },
+  "Psittacula eupatria": {
+   "de": "Alexandersittich",
+   "en": "Alexandrine Parakeet"
+  },
+  "Psittacula krameri": {
+   "de": "Halsbandsittich",
+   "en": "Rose-ringed Parakeet"
+  },
+  "Psittacus erithacus": {
+   "de": "Graupapagei",
+   "en": "Grey Parrot"
+  },
+  "Ptyonoprogne rupestris": {
+   "de": "Felsenschwalbe",
+   "en": "Eurasian Crag Martin"
+  },
+  "Puffinus baroli": {
+   "de": "Barolosturmtaucher",
+   "en": "Barolo Shearwater"
+  },
+  "Puffinus mauretanicus": {
+   "de": "Balearensturmtaucher",
+   "en": "Balearic Shearwater"
+  },
+  "Puffinus puffinus": {
+   "de": "Atlantiksturmtaucher",
+   "en": "Manx Shearwater"
+  },
+  "Pycnonotus jocosus": {
+   "de": "Rotohrbülbül",
+   "en": ""
+  },
+  "Pyrrhocorax graculus": {
+   "de": "Alpendohle",
+   "en": "Alpine Chough"
+  },
+  "Pyrrhula pyrrhula": {
+   "de": "Gimpel",
+   "en": "Eurasian Bullfinch"
+  },
+  "Pyrrhula pyrrhula pyrrhula": {
+   "de": "Gimpel (ssp. pyrrhula), Trompetergimpel",
+   "en": "Eurasian Bullfinch (ssp. pyrrhula)"
+  },
+  "Rallus aquaticus": {
+   "de": "Wasserralle",
+   "en": "Water Rail"
+  },
+  "Recurvirostra avosetta": {
+   "de": "Säbelschnäbler",
+   "en": "Pied Avocet"
+  },
+  "Regulus ignicapilla": {
+   "de": "Sommergoldhähnchen",
+   "en": "Common Firecrest"
+  },
+  "Regulus regulus": {
+   "de": "Wintergoldhähnchen",
+   "en": "Goldcrest"
+  },
+  "Remiz pendulinus": {
+   "de": "Beutelmeise",
+   "en": "Eurasian Penduline Tit"
+  },
+  "Rhea americana": {
+   "de": "Nandu",
+   "en": "Greater Rhea"
+  },
+  "Rhodostethia rosea": {
+   "de": "Rosenmöwe",
+   "en": "Ross's Gull"
+  },
+  "Riparia riparia": {
+   "de": "Uferschwalbe",
+   "en": "Sand Martin"
+  },
+  "Rissa tridactyla": {
+   "de": "Dreizehenmöwe",
+   "en": "Black-legged Kittiwake"
+  },
+  "Saxicola maurus": {
+   "de": "Pallasschwarzkehlchen",
+   "en": "Siberian Stonechat"
+  },
+  "Saxicola rubetra": {
+   "de": "Braunkehlchen",
+   "en": "Whinchat"
+  },
+  "Saxicola rubicola": {
+   "de": "Schwarzkehlchen",
+   "en": "European Stonechat"
+  },
+  "Saxicola stejnegeri": {
+   "de": "Stejnegerschwarzkehlchen",
+   "en": "Stejneger's Stonechat"
+  },
+  "Scolopax rusticola": {
+   "de": "Waldschnepfe",
+   "en": "Eurasian Woodcock"
+  },
+  "Serinus serinus": {
+   "de": "Girlitz",
+   "en": "European Serin"
+  },
+  "Setophaga americana": {
+   "de": "Meisenwaldsänger",
+   "en": "Northern Parula"
+  },
+  "Sibirionetta formosa": {
+   "de": "Gluckente",
+   "en": "Baikal Teal"
+  },
+  "Sitta canadensis": {
+   "de": "Rotbrustkleiber",
+   "en": "Red-breasted Nuthatch"
+  },
+  "Sitta europaea": {
+   "de": "Kleiber",
+   "en": "Eurasian Nuthatch"
+  },
+  "Somateria mollissima": {
+   "de": "Eiderente",
+   "en": "Common Eider"
+  },
+  "Somateria spectabilis": {
+   "de": "Prachteiderente",
+   "en": "King Eider"
+  },
+  "Spatula clypeata": {
+   "de": "Löffelente",
+   "en": "Northern Shoveler"
+  },
+  "Spatula cyanoptera": {
+   "de": "Zimtente",
+   "en": "Cinnamon Teal"
+  },
+  "Spatula discors": {
+   "de": "Blauflügelente",
+   "en": "Blue-winged Teal"
+  },
+  "Spatula hottentota": {
+   "de": "Pünktchenente",
+   "en": "Blue-billed Teal"
+  },
+  "Spatula querquedula": {
+   "de": "Knäkente",
+   "en": "Garganey"
+  },
+  "Spatula versicolor": {
+   "de": "Silberente",
+   "en": "Silver Teal"
+  },
+  "Spilopelia senegalensis": {
+   "de": "Palmtaube",
+   "en": "Laughing Dove"
+  },
+  "Spinus spinus": {
+   "de": "Erlenzeisig",
+   "en": "Eurasian Siskin"
+  },
+  "Stercorarius longicaudus": {
+   "de": "Falkenraubmöwe",
+   "en": "Long-tailed Jaeger"
+  },
+  "Stercorarius parasiticus": {
+   "de": "Schmarotzerraubmöwe",
+   "en": "Parasitic Jaeger"
+  },
+  "Stercorarius pomarinus": {
+   "de": "Spatelraubmöwe",
+   "en": "Pomarine Skua"
+  },
+  "Stercorarius skua": {
+   "de": "Skua",
+   "en": "Great Skua"
+  },
+  "Sterna dougallii": {
+   "de": "Rosenseeschwalbe",
+   "en": "Roseate Tern"
+  },
+  "Sterna hirundo": {
+   "de": "Flussseeschwalbe",
+   "en": "Common Tern"
+  },
+  "Sterna paradisaea": {
+   "de": "Küstenseeschwalbe",
+   "en": "Arctic Tern"
+  },
+  "Sternula albifrons": {
+   "de": "Zwergseeschwalbe",
+   "en": "Little Tern"
+  },
+  "Streptopelia decaocto": {
+   "de": "Türkentaube",
+   "en": "Eurasian Collared Dove"
+  },
+  "Streptopelia orientalis": {
+   "de": "Orientturteltaube",
+   "en": "Oriental Turtle Dove"
+  },
+  "Streptopelia roseogrisea": {
+   "de": "Lachtaube",
+   "en": "African Collared Dove"
+  },
+  "Streptopelia turtur": {
+   "de": "Turteltaube",
+   "en": "European Turtle Dove"
+  },
+  "Strix aluco": {
+   "de": "Waldkauz",
+   "en": "Tawny Owl"
+  },
+  "Strix uralensis": {
+   "de": "Habichtskauz",
+   "en": "Ural Owl"
+  },
+  "Sturnus vulgaris": {
+   "de": "Star",
+   "en": "Common Starling"
+  },
+  "Sula leucogaster": {
+   "de": "Weißbauchtölpel",
+   "en": "Brown Booby"
+  },
+  "Surnia ulula": {
+   "de": "Sperbereule",
+   "en": "Northern Hawk-Owl"
+  },
+  "Sylvia atricapilla": {
+   "de": "Mönchsgrasmücke",
+   "en": "Eurasian Blackcap"
+  },
+  "Sylvia borin": {
+   "de": "Gartengrasmücke",
+   "en": "Garden Warbler"
+  },
+  "Sylvia communis": {
+   "de": "Dorngrasmücke",
+   "en": "Common Whitethroat"
+  },
+  "Sylvia conspicillata": {
+   "de": "Brillengrasmücke",
+   "en": "Spectacled Warbler"
+  },
+  "Sylvia curruca": {
+   "de": "Klappergrasmücke",
+   "en": "Lesser Whitethroat"
+  },
+  "Sylvia hortensis": {
+   "de": "Orpheusgrasmücke",
+   "en": "Western Orphean Warbler"
+  },
+  "Sylvia iberiae": {
+   "de": "Iberien-Bartgrasmücke",
+   "en": "Western Subalpine Warbler"
+  },
+  "Sylvia melanocephala": {
+   "de": "Samtkopf-Grasmücke",
+   "en": "Sardinian Warbler"
+  },
+  "Sylvia nana": {
+   "de": "Wüstengrasmücke",
+   "en": "Asian Desert Warbler"
+  },
+  "Sylvia nisoria": {
+   "de": "Sperbergrasmücke",
+   "en": "Barred Warbler"
+  },
+  "Sylvia subalpina": {
+   "de": "Ligurien-Bartgrasmücke",
+   "en": "Moltoni's Warbler"
+  },
+  "Sylvia undata": {
+   "de": "Provencegrasmücke",
+   "en": "Dartford Warbler"
+  },
+  "Syrmaticus reevesii": {
+   "de": "Königsfasan",
+   "en": "Reeves's Pheasant"
+  },
+  "Syrrhaptes paradoxus": {
+   "de": "Steppenflughuhn",
+   "en": "Pallas's Sandgrouse"
+  },
+  "Tachybaptus ruficollis": {
+   "de": "Zwergtaucher",
+   "en": "Little Grebe"
+  },
+  "Tachymarptis melba": {
+   "de": "Alpensegler",
+   "en": "Alpine Swift"
+  },
+  "Tadorna cana": {
+   "de": "Kapgans (Graukopfkasarka)",
+   "en": "South African Shelduck"
+  },
+  "Tadorna ferruginea": {
+   "de": "Rostgans",
+   "en": "Ruddy Shelduck"
+  },
+  "Tadorna tadorna": {
+   "de": "Brandgans",
+   "en": "Common Shelduck"
+  },
+  "Tadorna tadornoides": {
+   "de": "Halsbandgans (Halsbandkasarka)",
+   "en": "Australian Shelduck"
+  },
+  "Tadorna variegata": {
+   "de": "Paradiesgans (Paradieskasarka)",
+   "en": "Paradise Shelduck"
+  },
+  "Taeniopygia guttata": {
+   "de": "Zebraamadine (Zebrafink)",
+   "en": "Zebra Finch"
+  },
+  "Tarsiger cyanurus": {
+   "de": "Blauschwanz",
+   "en": "Red-flanked Bluetail"
+  },
+  "Tetrao urogallus": {
+   "de": "Auerhuhn",
+   "en": "Western Capercaillie"
+  },
+  "Tetrastes bonasia": {
+   "de": "Haselhuhn",
+   "en": "Hazel Grouse"
+  },
+  "Tetrax tetrax": {
+   "de": "Zwergtrappe",
+   "en": "Little Bustard"
+  },
+  "Thalassarche melanophris": {
+   "de": "Schwarzbrauenalbatros",
+   "en": "Black-browed Albatross"
+  },
+  "Thalasseus bengalensis": {
+   "de": "Rüppellseeschwalbe",
+   "en": "Lesser Crested Tern"
+  },
+  "Thalasseus elegans": {
+   "de": "Schmuckseeschwalbe",
+   "en": "Elegant Tern"
+  },
+  "Thalasseus sandvicensis": {
+   "de": "Brandseeschwalbe",
+   "en": "Sandwich Tern"
+  },
+  "Threskiornis aethiopicus": {
+   "de": "Pharaonenibis (Heiliger Ibis)",
+   "en": "African Sacred Ibis"
+  },
+  "Tichodroma muraria": {
+   "de": "Mauerläufer",
+   "en": "Wallcreeper"
+  },
+  "Tringa erythropus": {
+   "de": "Dunkelwasserläufer",
+   "en": "Spotted Redshank"
+  },
+  "Tringa flavipes": {
+   "de": "Gelbschenkel (Kleiner)",
+   "en": "Lesser Yellowlegs"
+  },
+  "Tringa glareola": {
+   "de": "Bruchwasserläufer",
+   "en": "Wood Sandpiper"
+  },
+  "Tringa nebularia": {
+   "de": "Grünschenkel",
+   "en": "Common Greenshank"
+  },
+  "Tringa ochropus": {
+   "de": "Waldwasserläufer",
+   "en": "Green Sandpiper"
+  },
+  "Tringa stagnatilis": {
+   "de": "Teichwasserläufer",
+   "en": "Marsh Sandpiper"
+  },
+  "Tringa totanus": {
+   "de": "Rotschenkel",
+   "en": "Common Redshank"
+  },
+  "Troglodytes troglodytes": {
+   "de": "Zaunkönig",
+   "en": "Eurasian Wren"
+  },
+  "Turdus atrogularis": {
+   "de": "Schwarzkehldrossel",
+   "en": "Black-throated Thrush"
+  },
+  "Turdus eunomus": {
+   "de": "Rostflügeldrossel",
+   "en": "Dusky Thrush"
+  },
+  "Turdus iliacus": {
+   "de": "Rotdrossel",
+   "en": "Redwing"
+  },
+  "Turdus iliacus coburni": {
+   "de": "Rotdrossel (ssp. coburni)",
+   "en": "Redwing (ssp. coburni)"
+  },
+  "Turdus merula": {
+   "de": "Amsel",
+   "en": "Common Blackbird"
+  },
+  "Turdus migratorius": {
+   "de": "Wanderdrossel",
+   "en": "American Robin"
+  },
+  "Turdus obscurus": {
+   "de": "Weißbrauendrossel",
+   "en": "Eyebrowed Thrush"
+  },
+  "Turdus philomelos": {
+   "de": "Singdrossel",
+   "en": "Song Thrush"
+  },
+  "Turdus pilaris": {
+   "de": "Wacholderdrossel",
+   "en": "Fieldfare"
+  },
+  "Turdus torquatus": {
+   "de": "Ringdrossel",
+   "en": "Ring Ouzel"
+  },
+  "Turdus torquatus alpestris": {
+   "de": "Ringdrossel (ssp. alpestris)",
+   "en": "Ring Ouzel (ssp. alpestris)"
+  },
+  "Turdus torquatus torquatus": {
+   "de": "Ringdrossel (ssp. torquatus)",
+   "en": "Ring Ouzel (ssp. torquatus)"
+  },
+  "Turdus viscivorus": {
+   "de": "Misteldrossel",
+   "en": "Mistle Thrush"
+  },
+  "Tyto alba": {
+   "de": "Schleiereule",
+   "en": "Western Barn Owl"
+  },
+  "Upupa epops": {
+   "de": "Wiedehopf",
+   "en": "Eurasian Hoopoe"
+  },
+  "Uria aalge": {
+   "de": "Trottellumme",
+   "en": "Common Murre"
+  },
+  "Uria lomvia": {
+   "de": "Dickschnabellumme",
+   "en": "Thick-billed Murre"
+  },
+  "Vanellus gregarius": {
+   "de": "Steppenkiebitz",
+   "en": "Sociable Lapwing"
+  },
+  "Vanellus leucurus": {
+   "de": "Weißschwanzkiebitz",
+   "en": "White-tailed Lapwing"
+  },
+  "Vanellus vanellus": {
+   "de": "Kiebitz",
+   "en": "Northern Lapwing"
+  },
+  "Vireo flavifrons": {
+   "de": "Gelbkehlvireo",
+   "en": "Yellow-throated Vireo"
+  },
+  "Vireo olivaceus": {
+   "de": "Rotaugenvireo",
+   "en": "Red-eyed Vireo"
+  },
+  "Xema sabini": {
+   "de": "Schwalbenmöwe",
+   "en": "Sabine's Gull"
+  },
+  "Xenus cinereus": {
+   "de": "Terekwasserläufer",
+   "en": "Terek Sandpiper"
+  },
+  "Zenaida macroura": {
+   "de": "Carolinataube",
+   "en": "Mourning Dove"
+  },
+  "Zonotrichia albicollis": {
+   "de": "Weißkehlammer",
+   "en": "White-throated Sparrow"
+  },
+  "Zoothera aurea": {
+   "de": "Erddrossel",
+   "en": "White's Thrush"
+  }
+ },
+ "source": "ornitho-Referenzliste-Arten-v4-2025-11-27.xlsx",
+ "wishlist": [
+  {
+   "bzcEnd": "08-10",
+   "bzcStart": "04-11",
+   "de": "Alpenbraunelle",
+   "en": "Alpine Accentor",
+   "latin": "Prunella collaris"
+  },
+  {
+   "bzcEnd": "08-10",
+   "bzcStart": "04-01",
+   "de": "Alpendohle",
+   "en": "Alpine Chough",
+   "latin": "Pyrrhocorax graculus"
+  },
+  {
+   "bzcEnd": "08-31",
+   "bzcStart": "04-01",
+   "de": "Alpenschneehuhn",
+   "en": "Rock Ptarmigan",
+   "latin": "Lagopus muta"
+  },
+  {
+   "bzcEnd": "07-20",
+   "bzcStart": "04-21",
+   "de": "Alpensegler",
+   "en": "Alpine Swift",
+   "latin": "Tachymarptis melba"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Alpenstrandläufer",
+   "en": "Dunlin",
+   "latin": "Calidris alpina",
+   "occEnd": "10-31",
+   "occStart": "04-01"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "03-01",
+   "de": "Amsel",
+   "en": "Common Blackbird",
+   "latin": "Turdus merula"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Atlantiksturmtaucher",
+   "en": "Manx Shearwater",
+   "latin": "Puffinus puffinus",
+   "occEnd": "10-31",
+   "occStart": "05-01"
+  },
+  {
+   "bzcEnd": "08-31",
+   "bzcStart": "03-11",
+   "de": "Auerhuhn",
+   "en": "Western Capercaillie",
+   "latin": "Tetrao urogallus"
+  },
+  {
+   "bzcEnd": "06-30",
+   "bzcStart": "04-01",
+   "de": "Austernfischer",
+   "en": "Eurasian Oystercatcher",
+   "latin": "Haematopus ostralegus"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "03-21",
+   "de": "Bachstelze",
+   "en": "White Wagtail",
+   "latin": "Motacilla alba"
+  },
+  {
+   "bzcEnd": "06-10",
+   "bzcStart": "05-01",
+   "de": "Basstölpel",
+   "en": "Northern Gannet",
+   "latin": "Morus bassanus"
+  },
+  {
+   "bzcEnd": "08-20",
+   "bzcStart": "04-21",
+   "de": "Baumfalke",
+   "en": "Eurasian Hobby",
+   "latin": "Falco subbuteo"
+  },
+  {
+   "bzcEnd": "07-20",
+   "bzcStart": "04-11",
+   "de": "Baumpieper",
+   "en": "Tree Pipit",
+   "latin": "Anthus trivialis"
+  },
+  {
+   "bzcEnd": "06-30",
+   "bzcStart": "04-21",
+   "de": "Bekassine",
+   "en": "Common Snipe",
+   "latin": "Gallinago gallinago"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Bergente",
+   "en": "Greater Scaup",
+   "latin": "Aythya marila",
+   "occEnd": "03-31",
+   "occStart": "10-01"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Bergfink",
+   "en": "Brambling",
+   "latin": "Fringilla montifringilla",
+   "occEnd": "03-31",
+   "occStart": "10-01"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Berghänfling",
+   "en": "Twite",
+   "latin": "Linaria flavirostris",
+   "occEnd": "02-28",
+   "occStart": "10-01"
+  },
+  {
+   "bzcEnd": "07-10",
+   "bzcStart": "04-11",
+   "de": "Berglaubsänger",
+   "en": "Western Bonelli's Warbler",
+   "latin": "Phylloscopus bonelli"
+  },
+  {
+   "bzcEnd": "08-20",
+   "bzcStart": "04-21",
+   "de": "Bergpieper",
+   "en": "Water Pipit",
+   "latin": "Anthus spinoletta"
+  },
+  {
+   "bzcEnd": "06-30",
+   "bzcStart": "04-01",
+   "de": "Beutelmeise",
+   "en": "Eurasian Penduline Tit",
+   "latin": "Remiz pendulinus"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "05-01",
+   "de": "Bienenfresser",
+   "en": "European Bee-eater",
+   "latin": "Merops apiaster"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Bindenkreuzschnabel",
+   "en": "Two-barred Crossbill",
+   "latin": "Loxia leucoptera",
+   "occEnd": "11-30",
+   "occStart": "04-01"
+  },
+  {
+   "bzcEnd": "08-31",
+   "bzcStart": "03-21",
+   "de": "Birkhuhn",
+   "en": "Black Grouse",
+   "latin": "Lyrurus tetrix"
+  },
+  {
+   "bzcEnd": "07-10",
+   "bzcStart": "03-21",
+   "de": "Blaukehlchen",
+   "en": "Bluethroat",
+   "latin": "Luscinia svecica"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "02-11",
+   "de": "Blaumeise",
+   "en": "Eurasian Blue Tit",
+   "latin": "Cyanistes caeruleus"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Blaumerle",
+   "en": "Blue Rock Thrush",
+   "latin": "Monticola solitarius"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Blauracke",
+   "en": "European Roller",
+   "latin": "Coracias garrulus",
+   "occEnd": "09-30",
+   "occStart": "05-01"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "04-11",
+   "de": "Bluthänfling",
+   "en": "Common Linnet",
+   "latin": "Linaria cannabina"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Blutspecht",
+   "en": "Syrian Woodpecker",
+   "latin": "Dendrocopos syriacus",
+   "occEnd": "02-28",
+   "occStart": "11-01"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Blässgans",
+   "en": "Greater White-fronted Goose",
+   "latin": "Anser albifrons",
+   "occEnd": "03-31",
+   "occStart": "10-01"
+  },
+  {
+   "bzcEnd": "08-31",
+   "bzcStart": "03-01",
+   "de": "Blässhuhn",
+   "en": "Eurasian Coot",
+   "latin": "Fulica atra"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "05-01",
+   "de": "Brachpieper",
+   "en": "Tawny Pipit",
+   "latin": "Anthus campestris"
+  },
+  {
+   "bzcEnd": "06-20",
+   "bzcStart": "03-11",
+   "de": "Brachvogel (Großer)",
+   "en": "Eurasian Curlew",
+   "latin": "Numenius arquata"
+  },
+  {
+   "bzcEnd": "07-20",
+   "bzcStart": "04-01",
+   "de": "Brandgans",
+   "en": "Common Shelduck",
+   "latin": "Tadorna tadorna"
+  },
+  {
+   "bzcEnd": "06-10",
+   "bzcStart": "05-21",
+   "de": "Brandseeschwalbe",
+   "en": "Sandwich Tern",
+   "latin": "Thalasseus sandvicensis"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "05-11",
+   "de": "Braunkehlchen",
+   "en": "Whinchat",
+   "latin": "Saxicola rubetra"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Bruchwasserläufer",
+   "en": "Wood Sandpiper",
+   "latin": "Tringa glareola",
+   "occEnd": "08-31",
+   "occStart": "04-01"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "03-01",
+   "de": "Buchfink",
+   "en": "Common Chaffinch",
+   "latin": "Fringilla coelebs"
+  },
+  {
+   "bzcEnd": "06-20",
+   "bzcStart": "02-01",
+   "de": "Buntspecht",
+   "en": "Great Spotted Woodpecker",
+   "latin": "Dendrocopos major"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Corysturmtaucher",
+   "en": "Cory's Shearwater",
+   "latin": "Calonectris borealis"
+  },
+  {
+   "bzcEnd": "06-30",
+   "bzcStart": "02-21",
+   "de": "Dohle",
+   "en": "Western Jackdaw",
+   "latin": "Coloeus monedula"
+  },
+  {
+   "bzcEnd": "07-20",
+   "bzcStart": "04-11",
+   "de": "Dorngrasmücke",
+   "en": "Common Whitethroat",
+   "latin": "Curruca communis"
+  },
+  {
+   "bzcEnd": "06-20",
+   "bzcStart": "05-21",
+   "de": "Dreizehenmöwe",
+   "en": "Black-legged Kittiwake",
+   "latin": "Rissa tridactyla"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "03-01",
+   "de": "Dreizehenspecht",
+   "en": "Eurasian Three-toed Woodpecker",
+   "latin": "Picoides tridactylus"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "05-01",
+   "de": "Drosselrohrsänger",
+   "en": "Great Reed Warbler",
+   "latin": "Acrocephalus arundinaceus"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Dunkelwasserläufer",
+   "en": "Spotted Redshank",
+   "latin": "Tringa erythropus",
+   "occEnd": "09-30",
+   "occStart": "04-01"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Dünnschnabelmöwe",
+   "en": "Slender-billed Gull",
+   "latin": "Chroicocephalus genei",
+   "occEnd": "05-31",
+   "occStart": "05-01"
+  },
+  {
+   "bzcEnd": "07-10",
+   "bzcStart": "03-01",
+   "de": "Eichelhäher",
+   "en": "Eurasian Jay",
+   "latin": "Garrulus glandarius"
+  },
+  {
+   "bzcEnd": "06-30",
+   "bzcStart": "04-21",
+   "de": "Eiderente",
+   "en": "Common Eider",
+   "latin": "Somateria mollissima"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Eisente",
+   "en": "Long-tailed Duck",
+   "latin": "Clangula hyemalis",
+   "occEnd": "04-30",
+   "occStart": "12-01"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Eismöwe",
+   "en": "Glaucous Gull",
+   "latin": "Larus hyperboreus",
+   "occEnd": "04-30",
+   "occStart": "10-01"
+  },
+  {
+   "bzcEnd": "07-10",
+   "bzcStart": "06-11",
+   "de": "Eissturmvogel",
+   "en": "Northern Fulmar",
+   "latin": "Fulmarus glacialis"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Eistaucher",
+   "en": "Great Northern Loon",
+   "latin": "Gavia immer",
+   "occEnd": "02-28",
+   "occStart": "11-01"
+  },
+  {
+   "bzcEnd": "07-10",
+   "bzcStart": "03-11",
+   "de": "Eisvogel",
+   "en": "Common Kingfisher",
+   "latin": "Alcedo atthis"
+  },
+  {
+   "bzcEnd": "06-30",
+   "bzcStart": "02-11",
+   "de": "Elster",
+   "en": "Eurasian Magpie",
+   "latin": "Pica pica"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "03-11",
+   "de": "Erlenzeisig",
+   "en": "Eurasian Siskin",
+   "latin": "Spinus spinus"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Fahlsegler",
+   "en": "Pallid Swift",
+   "latin": "Apus pallidus",
+   "occEnd": "11-30",
+   "occStart": "10-01"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "03-11",
+   "de": "Fasan (Jagdfasan)",
+   "en": "Common Pheasant",
+   "latin": "Phasianus colchicus"
+  },
+  {
+   "bzcEnd": "07-20",
+   "bzcStart": "03-21",
+   "de": "Feldlerche",
+   "en": "Eurasian Skylark",
+   "latin": "Alauda arvensis"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "04-21",
+   "de": "Feldschwirl",
+   "en": "Common Grasshopper Warbler",
+   "latin": "Locustella naevia"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "03-21",
+   "de": "Feldsperling",
+   "en": "Eurasian Tree Sparrow",
+   "latin": "Passer montanus"
+  },
+  {
+   "bzcEnd": "08-31",
+   "bzcStart": "04-11",
+   "de": "Felsenschwalbe",
+   "en": "Eurasian Crag Martin",
+   "latin": "Ptyonoprogne rupestris"
+  },
+  {
+   "bzcEnd": "04-30",
+   "bzcStart": "10-01",
+   "de": "Fichtenkreuzschnabel",
+   "en": "Red Crossbill",
+   "latin": "Loxia curvirostra"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "03-21",
+   "de": "Fischadler",
+   "en": "Western Osprey",
+   "latin": "Pandion haliaetus"
+  },
+  {
+   "bzcEnd": "07-10",
+   "bzcStart": "04-11",
+   "de": "Fitis",
+   "en": "Willow Warbler",
+   "latin": "Phylloscopus trochilus"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "04-01",
+   "de": "Flussregenpfeifer",
+   "en": "Little Ringed Plover",
+   "latin": "Charadrius dubius"
+  },
+  {
+   "bzcEnd": "06-30",
+   "bzcStart": "05-01",
+   "de": "Flussseeschwalbe",
+   "en": "Common Tern",
+   "latin": "Sterna hirundo"
+  },
+  {
+   "bzcEnd": "06-30",
+   "bzcStart": "05-21",
+   "de": "Flussuferläufer",
+   "en": "Common Sandpiper",
+   "latin": "Actitis hypoleucos"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "02-11",
+   "de": "Gartenbaumläufer",
+   "en": "Short-toed Treecreeper",
+   "latin": "Certhia brachydactyla"
+  },
+  {
+   "bzcEnd": "07-20",
+   "bzcStart": "05-01",
+   "de": "Gartengrasmücke",
+   "en": "Garden Warbler",
+   "latin": "Sylvia borin"
+  },
+  {
+   "bzcEnd": "07-20",
+   "bzcStart": "04-11",
+   "de": "Gartenrotschwanz",
+   "en": "Common Redstart",
+   "latin": "Phoenicurus phoenicurus"
+  },
+  {
+   "bzcEnd": "07-20",
+   "bzcStart": "03-01",
+   "de": "Gebirgsstelze",
+   "en": "Grey Wagtail",
+   "latin": "Motacilla cinerea"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "05-01",
+   "de": "Gelbspötter",
+   "en": "Icterine Warbler",
+   "latin": "Hippolais icterina"
+  },
+  {
+   "bzcEnd": "07-20",
+   "bzcStart": "03-01",
+   "de": "Gimpel",
+   "en": "Eurasian Bullfinch",
+   "latin": "Pyrrhula pyrrhula"
+  },
+  {
+   "bzcEnd": "07-20",
+   "bzcStart": "03-11",
+   "de": "Girlitz",
+   "en": "European Serin",
+   "latin": "Serinus serinus"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "03-11",
+   "de": "Goldammer",
+   "en": "Yellowhammer",
+   "latin": "Emberiza citrinella"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Goldregenpfeifer",
+   "en": "European Golden Plover",
+   "latin": "Pluvialis apricaria",
+   "occEnd": "10-31",
+   "occStart": "03-01"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "03-01",
+   "de": "Grauammer",
+   "en": "Corn Bunting",
+   "latin": "Emberiza calandra"
+  },
+  {
+   "bzcEnd": "06-30",
+   "bzcStart": "02-11",
+   "de": "Graugans",
+   "en": "Greylag Goose",
+   "latin": "Anser anser"
+  },
+  {
+   "bzcEnd": "05-31",
+   "bzcStart": "04-01",
+   "de": "Graureiher",
+   "en": "Grey Heron",
+   "latin": "Ardea cinerea"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "05-01",
+   "de": "Grauschnäpper",
+   "en": "Spotted Flycatcher",
+   "latin": "Muscicapa striata"
+  },
+  {
+   "bzcEnd": "06-20",
+   "bzcStart": "02-01",
+   "de": "Grauspecht",
+   "en": "Grey-headed Woodpecker",
+   "latin": "Picus canus"
+  },
+  {
+   "bzcEnd": "08-31",
+   "bzcStart": "03-01",
+   "de": "Großtrappe",
+   "en": "Great Bustard",
+   "latin": "Otis tarda"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Gryllteiste",
+   "en": "Black Guillemot",
+   "latin": "Cepphus grylle",
+   "occEnd": "11-30",
+   "occStart": "04-01"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "03-11",
+   "de": "Grünfink",
+   "en": "European Greenfinch",
+   "latin": "Chloris chloris"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Grünschenkel",
+   "en": "Common Greenshank",
+   "latin": "Tringa nebularia",
+   "occEnd": "09-30",
+   "occStart": "04-01"
+  },
+  {
+   "bzcEnd": "06-20",
+   "bzcStart": "02-01",
+   "de": "Grünspecht",
+   "en": "European Green Woodpecker",
+   "latin": "Picus viridis"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Gänsegeier",
+   "en": "Griffon Vulture",
+   "latin": "Gyps fulvus",
+   "occEnd": "09-30",
+   "occStart": "04-01"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "03-11",
+   "de": "Gänsesäger",
+   "en": "Common Merganser",
+   "latin": "Mergus merganser"
+  },
+  {
+   "bzcEnd": "07-10",
+   "bzcStart": "02-21",
+   "de": "Habicht",
+   "en": "Northern Goshawk",
+   "latin": "Astur gentilis"
+  },
+  {
+   "bzcEnd": "08-10",
+   "bzcStart": "01-11",
+   "de": "Habichtskauz",
+   "en": "Ural Owl",
+   "latin": "Strix uralensis"
+  },
+  {
+   "bzcEnd": "07-10",
+   "bzcStart": "04-11",
+   "de": "Halsbandschnäpper",
+   "en": "Collared Flycatcher",
+   "latin": "Ficedula albicollis"
+  },
+  {
+   "bzcEnd": "08-31",
+   "bzcStart": "03-11",
+   "de": "Haselhuhn",
+   "en": "Hazel Grouse",
+   "latin": "Tetrastes bonasia"
+  },
+  {
+   "bzcEnd": "07-10",
+   "bzcStart": "03-11",
+   "de": "Haubenlerche",
+   "en": "Crested Lark",
+   "latin": "Galerida cristata"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "02-11",
+   "de": "Haubenmeise",
+   "en": "European Crested Tit",
+   "latin": "Lophophanes cristatus"
+  },
+  {
+   "bzcEnd": "08-31",
+   "bzcStart": "03-01",
+   "de": "Haubentaucher",
+   "en": "Great Crested Grebe",
+   "latin": "Podiceps cristatus"
+  },
+  {
+   "bzcEnd": "08-10",
+   "bzcStart": "04-01",
+   "de": "Hausrotschwanz",
+   "en": "Black Redstart",
+   "latin": "Phoenicurus ochruros"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "03-11",
+   "de": "Haussperling",
+   "en": "House Sparrow",
+   "latin": "Passer domesticus"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "03-01",
+   "de": "Heckenbraunelle",
+   "en": "Dunnock",
+   "latin": "Prunella modularis"
+  },
+  {
+   "bzcEnd": "06-30",
+   "bzcStart": "03-01",
+   "de": "Heidelerche",
+   "en": "Woodlark",
+   "latin": "Lullula arborea"
+  },
+  {
+   "bzcEnd": "06-30",
+   "bzcStart": "04-11",
+   "de": "Heringsmöwe",
+   "en": "Lesser Black-backed Gull",
+   "latin": "Larus fuscus"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "02-21",
+   "de": "Hohltaube",
+   "en": "Stock Dove",
+   "latin": "Columba oenas"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Häherkuckuck",
+   "en": "Great Spotted Cuckoo",
+   "latin": "Clamator glandarius"
+  },
+  {
+   "bzcEnd": "08-31",
+   "bzcStart": "03-01",
+   "de": "Höckerschwan",
+   "en": "Mute Swan",
+   "latin": "Cygnus olor"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Kalanderlerche",
+   "en": "Calandra Lark",
+   "latin": "Melanocorypha calandra",
+   "occEnd": "06-30",
+   "occStart": "04-01"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Kampfläufer",
+   "en": "Ruff",
+   "latin": "Calidris pugnax",
+   "occEnd": "09-30",
+   "occStart": "03-01"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "03-01",
+   "de": "Kanadagans",
+   "en": "Canada Goose",
+   "latin": "Branta canadensis"
+  },
+  {
+   "bzcEnd": "06-30",
+   "bzcStart": "03-01",
+   "de": "Kernbeißer",
+   "en": "Hawfinch",
+   "latin": "Coccothraustes coccothraustes"
+  },
+  {
+   "bzcEnd": "06-10",
+   "bzcStart": "03-11",
+   "de": "Kiebitz",
+   "en": "Northern Lapwing",
+   "latin": "Vanellus vanellus"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Kiebitzregenpfeifer",
+   "en": "Grey Plover",
+   "latin": "Pluvialis squatarola",
+   "occEnd": "10-31",
+   "occStart": "05-01"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Kiefernkreuzschnabel",
+   "en": "Parrot Crossbill",
+   "latin": "Loxia pytyopsittacus",
+   "occEnd": "02-28",
+   "occStart": "10-01"
+  },
+  {
+   "bzcEnd": "07-20",
+   "bzcStart": "04-21",
+   "de": "Klappergrasmücke",
+   "en": "Lesser Whitethroat",
+   "latin": "Curruca curruca"
+  },
+  {
+   "bzcEnd": "06-30",
+   "bzcStart": "02-01",
+   "de": "Kleiber",
+   "en": "Eurasian Nuthatch",
+   "latin": "Sitta europaea"
+  },
+  {
+   "bzcEnd": "06-20",
+   "bzcStart": "02-11",
+   "de": "Kleinspecht",
+   "en": "Lesser Spotted Woodpecker",
+   "latin": "Dryobates minor"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "04-21",
+   "de": "Kleinsumpfhuhn",
+   "en": "Little Crake",
+   "latin": "Zapornia parva"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Knutt",
+   "en": "Red Knot",
+   "latin": "Calidris canutus",
+   "occEnd": "10-31",
+   "occStart": "05-01"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "05-01",
+   "de": "Knäkente",
+   "en": "Garganey",
+   "latin": "Spatula querquedula"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "02-11",
+   "de": "Kohlmeise",
+   "en": "Great Tit",
+   "latin": "Parus major"
+  },
+  {
+   "bzcEnd": "08-31",
+   "bzcStart": "04-21",
+   "de": "Kolbenente",
+   "en": "Red-crested Pochard",
+   "latin": "Netta rufina"
+  },
+  {
+   "bzcEnd": "06-10",
+   "bzcStart": "01-01",
+   "de": "Kolkrabe",
+   "en": "Northern Raven",
+   "latin": "Corvus corax"
+  },
+  {
+   "bzcEnd": "06-20",
+   "bzcStart": "04-01",
+   "de": "Kormoran",
+   "en": "Great Cormorant",
+   "latin": "Phalacrocorax carbo"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "05-21",
+   "de": "Kornweihe",
+   "en": "Hen Harrier",
+   "latin": "Circus cyaneus"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "03-01",
+   "de": "Kranich",
+   "en": "Common Crane",
+   "latin": "Grus grus"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "05-01",
+   "de": "Krickente",
+   "en": "Eurasian Teal",
+   "latin": "Anas crecca"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Krähenscharbe",
+   "en": "European Shag",
+   "latin": "Phalacrocorax aristotelis",
+   "occEnd": "10-31",
+   "occStart": "04-01"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "04-21",
+   "de": "Kuckuck",
+   "en": "Common Cuckoo",
+   "latin": "Cuculus canorus"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Kuhreiher",
+   "en": "Western Cattle Egret",
+   "latin": "Bubulcus ibis",
+   "occEnd": "10-31",
+   "occStart": "03-01"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Kurzschnabelgans",
+   "en": "Pink-footed Goose",
+   "latin": "Anser brachyrhynchus",
+   "occEnd": "03-31",
+   "occStart": "09-01"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Kurzzehenlerche",
+   "en": "Greater Short-toed Lark",
+   "latin": "Calandrella brachydactyla",
+   "occEnd": "10-31",
+   "occStart": "09-01"
+  },
+  {
+   "bzcEnd": "06-10",
+   "bzcStart": "05-21",
+   "de": "Küstenseeschwalbe",
+   "en": "Arctic Tern",
+   "latin": "Sterna paradisaea"
+  },
+  {
+   "bzcEnd": "06-30",
+   "bzcStart": "04-21",
+   "de": "Lachmöwe",
+   "en": "Black-headed Gull",
+   "latin": "Chroicocephalus ridibundus"
+  },
+  {
+   "bzcEnd": "07-10",
+   "bzcStart": "05-01",
+   "de": "Lachseeschwalbe",
+   "en": "Gull-billed Tern",
+   "latin": "Gelochelidon nilotica"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "05-01",
+   "de": "Löffelente",
+   "en": "Northern Shoveler",
+   "latin": "Spatula clypeata"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "04-01",
+   "de": "Löffler",
+   "en": "Eurasian Spoonbill",
+   "latin": "Platalea leucorodia"
+  },
+  {
+   "bzcEnd": "06-30",
+   "bzcStart": "04-11",
+   "de": "Mantelmöwe",
+   "en": "Great Black-backed Gull",
+   "latin": "Larus marinus"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Mariskenrohrsänger",
+   "en": "Moustached Warbler",
+   "latin": "Acrocephalus melanopogon",
+   "occEnd": "06-30",
+   "occStart": "04-01"
+  },
+  {
+   "bzcEnd": "08-10",
+   "bzcStart": "04-01",
+   "de": "Mauerläufer",
+   "en": "Wallcreeper",
+   "latin": "Tichodroma muraria"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "05-11",
+   "de": "Mauersegler",
+   "en": "Common Swift",
+   "latin": "Apus apus"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Maurensteinschmätzer",
+   "en": "Western Black-eared Wheatear",
+   "latin": "Oenanthe hispanica"
+  },
+  {
+   "bzcEnd": "08-31",
+   "bzcStart": "05-21",
+   "de": "Mehlschwalbe",
+   "en": "Common House Martin",
+   "latin": "Delichon urbicum"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Merlin",
+   "en": "Merlin",
+   "latin": "Falco columbarius",
+   "occEnd": "03-31",
+   "occStart": "08-01"
+  },
+  {
+   "bzcEnd": "07-20",
+   "bzcStart": "02-21",
+   "de": "Misteldrossel",
+   "en": "Mistle Thrush",
+   "latin": "Turdus viscivorus"
+  },
+  {
+   "bzcEnd": "06-30",
+   "bzcStart": "04-01",
+   "de": "Mittelmeermöwe",
+   "en": "Yellow-legged Gull",
+   "latin": "Larus michahellis"
+  },
+  {
+   "bzcEnd": "06-20",
+   "bzcStart": "02-01",
+   "de": "Mittelspecht",
+   "en": "Middle Spotted Woodpecker",
+   "latin": "Dendrocoptes medius"
+  },
+  {
+   "bzcEnd": "08-20",
+   "bzcStart": "04-11",
+   "de": "Mittelsäger",
+   "en": "Red-breasted Merganser",
+   "latin": "Mergus serrator"
+  },
+  {
+   "bzcEnd": "08-31",
+   "bzcStart": "04-21",
+   "de": "Moorente",
+   "en": "Ferruginous Duck",
+   "latin": "Aythya nyroca"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Mornellregenpfeifer",
+   "en": "Eurasian Dotterel",
+   "latin": "Charadrius morinellus",
+   "occEnd": "09-30",
+   "occStart": "05-01"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "02-21",
+   "de": "Mäusebussard",
+   "en": "Common Buzzard",
+   "latin": "Buteo buteo"
+  },
+  {
+   "bzcEnd": "07-20",
+   "bzcStart": "03-21",
+   "de": "Mönchsgrasmücke",
+   "en": "Eurasian Blackcap",
+   "latin": "Sylvia atricapilla"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "04-01",
+   "de": "Nachtigall",
+   "en": "Common Nightingale",
+   "latin": "Luscinia megarhynchos"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "04-11",
+   "de": "Nachtreiher",
+   "en": "Black-crowned Night Heron",
+   "latin": "Nycticorax nycticorax"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "05-01",
+   "de": "Nachtschwalbe (Ziegenmelker)",
+   "en": "European Nightjar",
+   "latin": "Caprimulgus europaeus"
+  },
+  {
+   "bzcEnd": "06-30",
+   "bzcStart": "03-01",
+   "de": "Nebelkrähe",
+   "en": "Hooded Crow",
+   "latin": "Corvus cornix"
+  },
+  {
+   "bzcEnd": "07-20",
+   "bzcStart": "05-11",
+   "de": "Neuntöter",
+   "en": "Red-backed Shrike",
+   "latin": "Lanius collurio"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Odinshühnchen",
+   "en": "Red-necked Phalarope",
+   "latin": "Phalaropus lobatus",
+   "occEnd": "10-31",
+   "occStart": "07-01"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Ohrenlerche",
+   "en": "Horned Lark",
+   "latin": "Eremophila alpestris",
+   "occEnd": "01-31",
+   "occStart": "10-01"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Ohrentaucher",
+   "en": "Horned Grebe",
+   "latin": "Podiceps auritus",
+   "occEnd": "04-30",
+   "occStart": "10-01"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Orpheusgrasmücke",
+   "en": "Western Orphean Warbler",
+   "latin": "Curruca hortensis",
+   "occEnd": "03-31",
+   "occStart": "01-01"
+  },
+  {
+   "bzcEnd": "07-20",
+   "bzcStart": "05-01",
+   "de": "Orpheusspötter",
+   "en": "Melodious Warbler",
+   "latin": "Hippolais polyglotta"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "04-11",
+   "de": "Ortolan",
+   "en": "Ortolan Bunting",
+   "latin": "Emberiza hortulana"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Papageitaucher",
+   "en": "Atlantic Puffin",
+   "latin": "Fratercula arctica",
+   "occEnd": "05-31",
+   "occStart": "10-01"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "05-01",
+   "de": "Pfeifente",
+   "en": "Eurasian Wigeon",
+   "latin": "Mareca penelope"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Pfuhlschnepfe",
+   "en": "Bar-tailed Godwit",
+   "latin": "Limosa lapponica",
+   "occEnd": "10-31",
+   "occStart": "05-01"
+  },
+  {
+   "bzcEnd": "07-20",
+   "bzcStart": "04-11",
+   "de": "Pirol",
+   "en": "Eurasian Golden Oriole",
+   "latin": "Oriolus oriolus"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Prachttaucher",
+   "en": "Black-throated Loon",
+   "latin": "Gavia arctica",
+   "occEnd": "04-30",
+   "occStart": "10-01"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "04-21",
+   "de": "Purpurreiher",
+   "en": "Purple Heron",
+   "latin": "Ardea purpurea"
+  },
+  {
+   "bzcEnd": "06-30",
+   "bzcStart": "03-01",
+   "de": "Rabenkrähe",
+   "en": "Carrion Crow",
+   "latin": "Corvus corone"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Rallenreiher",
+   "en": "Squacco Heron",
+   "latin": "Ardeola ralloides",
+   "occEnd": "07-31",
+   "occStart": "05-01"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Raubseeschwalbe",
+   "en": "Caspian Tern",
+   "latin": "Hydroprogne caspia",
+   "occEnd": "09-30",
+   "occStart": "04-01"
+  },
+  {
+   "bzcEnd": "07-20",
+   "bzcStart": "04-01",
+   "de": "Raubwürger",
+   "en": "Great Grey Shrike",
+   "latin": "Lanius excubitor"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "04-21",
+   "de": "Rauchschwalbe",
+   "en": "Barn Swallow",
+   "latin": "Hirundo rustica"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Raufußbussard",
+   "en": "Rough-legged Buzzard",
+   "latin": "Buteo lagopus",
+   "occEnd": "03-31",
+   "occStart": "10-01"
+  },
+  {
+   "bzcEnd": "08-10",
+   "bzcStart": "02-01",
+   "de": "Raufußkauz",
+   "en": "Boreal Owl",
+   "latin": "Aegolius funereus"
+  },
+  {
+   "bzcEnd": "09-30",
+   "bzcStart": "02-21",
+   "de": "Rebhuhn",
+   "en": "Grey Partridge",
+   "latin": "Perdix perdix"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Regenbrachvogel",
+   "en": "Whimbrel",
+   "latin": "Numenius phaeopus",
+   "occEnd": "08-31",
+   "occStart": "04-01"
+  },
+  {
+   "bzcEnd": "08-31",
+   "bzcStart": "05-01",
+   "de": "Reiherente",
+   "en": "Tufted Duck",
+   "latin": "Aythya fuligula"
+  },
+  {
+   "bzcEnd": "08-20",
+   "bzcStart": "04-01",
+   "de": "Ringdrossel",
+   "en": "Ring Ouzel",
+   "latin": "Turdus torquatus"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Ringelgans, unbestimmt",
+   "en": "Brant Goose",
+   "latin": "Branta bernicla",
+   "occEnd": "05-31",
+   "occStart": "10-01"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "03-01",
+   "de": "Ringeltaube",
+   "en": "Common Wood Pigeon",
+   "latin": "Columba palumbus"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "03-21",
+   "de": "Rohrammer",
+   "en": "Common Reed Bunting",
+   "latin": "Emberiza schoeniclus"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "03-01",
+   "de": "Rohrdommel",
+   "en": "Eurasian Bittern",
+   "latin": "Botaurus stellaris"
+  },
+  {
+   "bzcEnd": "07-10",
+   "bzcStart": "04-11",
+   "de": "Rohrschwirl",
+   "en": "Savi's Warbler",
+   "latin": "Locustella luscinioides"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "04-01",
+   "de": "Rohrweihe",
+   "en": "Western Marsh Harrier",
+   "latin": "Circus aeruginosus"
+  },
+  {
+   "bzcEnd": "07-10",
+   "bzcStart": "03-11",
+   "de": "Rosaflamingo",
+   "en": "Greater Flamingo",
+   "latin": "Phoenicopterus roseus"
+  },
+  {
+   "bzcEnd": "07-10",
+   "bzcStart": "04-01",
+   "de": "Rostgans",
+   "en": "Ruddy Shelduck",
+   "latin": "Tadorna ferruginea"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Rotdrossel",
+   "en": "Redwing",
+   "latin": "Turdus iliacus",
+   "occEnd": "03-31",
+   "occStart": "10-01"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Rotflügel-Brachschwalbe",
+   "en": "Collared Pratincole",
+   "latin": "Glareola pratincola",
+   "occEnd": "05-31",
+   "occStart": "04-01"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Rotfußfalke",
+   "en": "Red-footed Falcon",
+   "latin": "Falco vespertinus",
+   "occEnd": "09-30",
+   "occStart": "05-01"
+  },
+  {
+   "bzcEnd": "08-10",
+   "bzcStart": "04-01",
+   "de": "Rothalstaucher",
+   "en": "Red-necked Grebe",
+   "latin": "Podiceps grisegena"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Rothuhn",
+   "en": "Red-legged Partridge",
+   "latin": "Alectoris rufa"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "03-21",
+   "de": "Rotkehlchen",
+   "en": "European Robin",
+   "latin": "Erithacus rubecula"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Rotkehlpieper",
+   "en": "Red-throated Pipit",
+   "latin": "Anthus cervinus",
+   "occEnd": "10-31",
+   "occStart": "05-01"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Rotkopfwürger",
+   "en": "Woodchat Shrike",
+   "latin": "Lanius senator",
+   "occEnd": "07-31",
+   "occStart": "04-01"
+  },
+  {
+   "bzcEnd": "07-20",
+   "bzcStart": "03-11",
+   "de": "Rotmilan",
+   "en": "Red Kite",
+   "latin": "Milvus milvus"
+  },
+  {
+   "bzcEnd": "06-30",
+   "bzcStart": "04-01",
+   "de": "Rotschenkel",
+   "en": "Common Redshank",
+   "latin": "Tringa totanus"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Rötelfalke",
+   "en": "Lesser Kestrel",
+   "latin": "Falco naumanni",
+   "occEnd": "08-31",
+   "occStart": "05-01"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Rötelschwalbe",
+   "en": "Red-rumped Swallow",
+   "latin": "Cecropis daurica"
+  },
+  {
+   "bzcEnd": "05-31",
+   "bzcStart": "03-11",
+   "de": "Saatkrähe",
+   "en": "Rook",
+   "latin": "Corvus frugilegus"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Samtente",
+   "en": "Velvet Scoter",
+   "latin": "Melanitta fusca",
+   "occEnd": "04-30",
+   "occStart": "11-01"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Samtkopf-Grasmücke",
+   "en": "Sardinian Warbler",
+   "latin": "Curruca melanocephala"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Sanderling",
+   "en": "Sanderling",
+   "latin": "Calidris alba",
+   "occEnd": "12-31",
+   "occStart": "04-01"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "04-11",
+   "de": "Sandregenpfeifer",
+   "en": "Common Ringed Plover",
+   "latin": "Charadrius hiaticula"
+  },
+  {
+   "bzcEnd": "07-20",
+   "bzcStart": "04-11",
+   "de": "Schafstelze (flava), Wiesenschafstelze",
+   "en": "Blue-headed Yellow Wagtail",
+   "latin": "Motacilla flava"
+  },
+  {
+   "bzcEnd": "08-10",
+   "bzcStart": "03-21",
+   "de": "Schellente",
+   "en": "Common Goldeneye",
+   "latin": "Bucephala clangula"
+  },
+  {
+   "bzcEnd": "07-20",
+   "bzcStart": "04-21",
+   "de": "Schilfrohrsänger",
+   "en": "Sedge Warbler",
+   "latin": "Acrocephalus schoenobaenus"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "05-11",
+   "de": "Schlagschwirl",
+   "en": "River Warbler",
+   "latin": "Locustella fluviatilis"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Schlangenadler",
+   "en": "Short-toed Snake Eagle",
+   "latin": "Circaetus gallicus",
+   "occEnd": "09-30",
+   "occStart": "06-01"
+  },
+  {
+   "bzcEnd": "09-30",
+   "bzcStart": "02-01",
+   "de": "Schleiereule",
+   "en": "Western Barn Owl",
+   "latin": "Tyto alba"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Schmarotzerraubmöwe",
+   "en": "Parasitic Jaeger",
+   "latin": "Stercorarius parasiticus",
+   "occEnd": "10-31",
+   "occStart": "08-01"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Schmutzgeier",
+   "en": "Egyptian Vulture",
+   "latin": "Neophron percnopterus"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "05-01",
+   "de": "Schnatterente",
+   "en": "Gadwall",
+   "latin": "Mareca strepera"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Schneeammer",
+   "en": "Snow Bunting",
+   "latin": "Plectrophenax nivalis",
+   "occEnd": "01-31",
+   "occStart": "09-01"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Schneeeule",
+   "en": "Snowy Owl",
+   "latin": "Bubo scandiacus",
+   "occEnd": "09-30",
+   "occStart": "01-01"
+  },
+  {
+   "bzcEnd": "08-31",
+   "bzcStart": "04-01",
+   "de": "Schreiadler",
+   "en": "Lesser Spotted Eagle",
+   "latin": "Clanga pomarina"
+  },
+  {
+   "bzcEnd": "06-20",
+   "bzcStart": "02-21",
+   "de": "Schwanzmeise",
+   "en": "Long-tailed Tit",
+   "latin": "Aegithalos caudatus"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "04-11",
+   "de": "Schwarzhalstaucher",
+   "en": "Black-necked Grebe",
+   "latin": "Podiceps nigricollis"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "03-11",
+   "de": "Schwarzkehlchen",
+   "en": "European Stonechat",
+   "latin": "Saxicola rubicola"
+  },
+  {
+   "bzcEnd": "06-30",
+   "bzcStart": "04-21",
+   "de": "Schwarzkopfmöwe",
+   "en": "Mediterranean Gull",
+   "latin": "Ichthyaetus melanocephalus"
+  },
+  {
+   "bzcEnd": "07-20",
+   "bzcStart": "03-21",
+   "de": "Schwarzmilan",
+   "en": "Black Kite",
+   "latin": "Milvus migrans"
+  },
+  {
+   "bzcEnd": "06-20",
+   "bzcStart": "02-01",
+   "de": "Schwarzspecht",
+   "en": "Black Woodpecker",
+   "latin": "Dryocopus martius"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Schwarzstirnwürger",
+   "en": "Lesser Grey Shrike",
+   "latin": "Lanius minor",
+   "occEnd": "09-30",
+   "occStart": "05-01"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "03-01",
+   "de": "Schwarzstorch",
+   "en": "Black Stork",
+   "latin": "Ciconia nigra"
+  },
+  {
+   "bzcEnd": "07-10",
+   "bzcStart": "01-21",
+   "de": "Seeadler",
+   "en": "White-tailed Eagle",
+   "latin": "Haliaeetus albicilla"
+  },
+  {
+   "bzcEnd": "06-30",
+   "bzcStart": "05-21",
+   "de": "Seeregenpfeifer",
+   "en": "Kentish Plover",
+   "latin": "Charadrius alexandrinus"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Seidenreiher",
+   "en": "Little Egret",
+   "latin": "Egretta garzetta",
+   "occEnd": "10-31",
+   "occStart": "05-01"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Seidenschwanz",
+   "en": "Bohemian Waxwing",
+   "latin": "Bombycilla garrulus",
+   "occEnd": "03-31",
+   "occStart": "11-01"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Seidensänger",
+   "en": "Cetti's Warbler",
+   "latin": "Cettia cetti",
+   "occEnd": "08-31",
+   "occStart": "01-01"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Sichelstrandläufer",
+   "en": "Curlew Sandpiper",
+   "latin": "Calidris ferruginea",
+   "occEnd": "09-30",
+   "occStart": "06-01"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Sichler",
+   "en": "Glossy Ibis",
+   "latin": "Plegadis falcinellus",
+   "occEnd": "10-31",
+   "occStart": "03-01"
+  },
+  {
+   "bzcEnd": "06-30",
+   "bzcStart": "04-11",
+   "de": "Silbermöwe",
+   "en": "European Herring Gull",
+   "latin": "Larus argentatus"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Silberreiher",
+   "en": "Great Egret",
+   "latin": "Ardea alba",
+   "occEnd": "03-31",
+   "occStart": "08-01"
+  },
+  {
+   "bzcEnd": "07-10",
+   "bzcStart": "03-11",
+   "de": "Singdrossel",
+   "en": "Song Thrush",
+   "latin": "Turdus philomelos"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "03-01",
+   "de": "Singschwan",
+   "en": "Whooper Swan",
+   "latin": "Cygnus cygnus"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Skua",
+   "en": "Great Skua",
+   "latin": "Stercorarius skua",
+   "occEnd": "10-31",
+   "occStart": "05-01"
+  },
+  {
+   "bzcEnd": "07-20",
+   "bzcStart": "04-01",
+   "de": "Sommergoldhähnchen",
+   "en": "Common Firecrest",
+   "latin": "Regulus ignicapilla"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Spatelraubmöwe",
+   "en": "Pomarine Skua",
+   "latin": "Stercorarius pomarinus",
+   "occEnd": "10-31",
+   "occStart": "04-01"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "03-01",
+   "de": "Sperber",
+   "en": "Eurasian Sparrowhawk",
+   "latin": "Accipiter nisus"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Sperbereule",
+   "en": "Northern Hawk-Owl",
+   "latin": "Surnia ulula",
+   "occEnd": "03-31",
+   "occStart": "11-01"
+  },
+  {
+   "bzcEnd": "07-20",
+   "bzcStart": "05-01",
+   "de": "Sperbergrasmücke",
+   "en": "Barred Warbler",
+   "latin": "Curruca nisoria"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "02-21",
+   "de": "Sperlingskauz",
+   "en": "Eurasian Pygmy Owl",
+   "latin": "Glaucidium passerinum"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Spießente",
+   "en": "Northern Pintail",
+   "latin": "Anas acuta",
+   "occEnd": "04-30",
+   "occStart": "09-01"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Spornammer",
+   "en": "Lapland Longspur",
+   "latin": "Calcarius lapponicus",
+   "occEnd": "10-31",
+   "occStart": "09-01"
+  },
+  {
+   "bzcEnd": "07-20",
+   "bzcStart": "05-01",
+   "de": "Sprosser",
+   "en": "Thrush Nightingale",
+   "latin": "Luscinia luscinia"
+  },
+  {
+   "bzcEnd": "06-30",
+   "bzcStart": "03-01",
+   "de": "Star",
+   "en": "Common Starling",
+   "latin": "Sturnus vulgaris"
+  },
+  {
+   "bzcEnd": "08-31",
+   "bzcStart": "02-01",
+   "de": "Steinadler",
+   "en": "Golden Eagle",
+   "latin": "Aquila chrysaetos"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "03-21",
+   "de": "Steinhuhn",
+   "en": "Rock Partridge",
+   "latin": "Alectoris graeca"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "02-01",
+   "de": "Steinkauz",
+   "en": "Little Owl",
+   "latin": "Athene noctua"
+  },
+  {
+   "bzcEnd": "08-31",
+   "bzcStart": "04-21",
+   "de": "Steinrötel",
+   "en": "Common Rock Thrush",
+   "latin": "Monticola saxatilis"
+  },
+  {
+   "bzcEnd": "07-20",
+   "bzcStart": "05-11",
+   "de": "Steinschmätzer",
+   "en": "Northern Wheatear",
+   "latin": "Oenanthe oenanthe"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Steinsperling",
+   "en": "Rock Sparrow",
+   "latin": "Petronia petronia",
+   "occEnd": "08-31",
+   "occStart": "01-01"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Steinwälzer",
+   "en": "Ruddy Turnstone",
+   "latin": "Arenaria interpres",
+   "occEnd": "10-31",
+   "occStart": "02-01"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "05-01",
+   "de": "Stelzenläufer",
+   "en": "Black-winged Stilt",
+   "latin": "Himantopus himantopus"
+  },
+  {
+   "bzcEnd": "06-30",
+   "bzcStart": "04-11",
+   "de": "Steppenmöwe",
+   "en": "Caspian Gull",
+   "latin": "Larus cachinnans"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Sterntaucher",
+   "en": "Red-throated Loon",
+   "latin": "Gavia stellata",
+   "occEnd": "04-30",
+   "occStart": "10-01"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "04-01",
+   "de": "Stieglitz",
+   "en": "European Goldfinch",
+   "latin": "Carduelis carduelis"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "03-11",
+   "de": "Stockente",
+   "en": "Mallard",
+   "latin": "Anas platyrhynchos"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Strandpieper",
+   "en": "Eurasian Rock Pipit",
+   "latin": "Anthus petrosus",
+   "occEnd": "01-31",
+   "occStart": "09-01"
+  },
+  {
+   "bzcEnd": "08-20",
+   "bzcStart": "03-11",
+   "de": "Straßentaube (Haustaube)",
+   "en": "Feral Pigeon",
+   "latin": "Columba livia f. domestica"
+  },
+  {
+   "bzcEnd": "06-30",
+   "bzcStart": "04-21",
+   "de": "Sturmmöwe",
+   "en": "Mew Gull",
+   "latin": "Larus canus"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Sturmwellenläufer (Sturmschwalbe)",
+   "en": "European Storm Petrel",
+   "latin": "Hydrobates pelagicus",
+   "occEnd": "12-31",
+   "occStart": "08-01"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "02-11",
+   "de": "Sumpfmeise",
+   "en": "Marsh Tit",
+   "latin": "Poecile palustris"
+  },
+  {
+   "bzcEnd": "08-31",
+   "bzcStart": "03-21",
+   "de": "Sumpfohreule",
+   "en": "Short-eared Owl",
+   "latin": "Asio flammeus"
+  },
+  {
+   "bzcEnd": "07-20",
+   "bzcStart": "05-11",
+   "de": "Sumpfrohrsänger",
+   "en": "Marsh Warbler",
+   "latin": "Acrocephalus palustris"
+  },
+  {
+   "bzcEnd": "06-30",
+   "bzcStart": "04-21",
+   "de": "Säbelschnäbler",
+   "en": "Pied Avocet",
+   "latin": "Recurvirostra avosetta"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "04-21",
+   "de": "Tafelente",
+   "en": "Common Pochard",
+   "latin": "Aythya ferina"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Taigabirkenzeisig",
+   "en": "Common Redpoll (ssp. flammea), Mealy Redpoll",
+   "latin": "Acanthis flammea",
+   "occEnd": "05-31",
+   "occStart": "10-01"
+  },
+  {
+   "bzcEnd": "07-20",
+   "bzcStart": "03-01",
+   "de": "Tannenhäher",
+   "en": "Spotted Nutcracker",
+   "latin": "Nucifraga caryocatactes"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "02-11",
+   "de": "Tannenmeise",
+   "en": "Coal Tit",
+   "latin": "Periparus ater"
+  },
+  {
+   "bzcEnd": "08-31",
+   "bzcStart": "03-01",
+   "de": "Teichhuhn",
+   "en": "Common Moorhen",
+   "latin": "Gallinula chloropus"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "05-01",
+   "de": "Teichrohrsänger",
+   "en": "Eurasian Reed Warbler",
+   "latin": "Acrocephalus scirpaceus"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Teichwasserläufer",
+   "en": "Marsh Sandpiper",
+   "latin": "Tringa stagnatilis",
+   "occEnd": "08-31",
+   "occStart": "04-01"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Temminckstrandläufer",
+   "en": "Temminck's Stint",
+   "latin": "Calidris temminckii",
+   "occEnd": "08-31",
+   "occStart": "04-01"
+  },
+  {
+   "bzcEnd": "06-10",
+   "bzcStart": "05-11",
+   "de": "Tordalk",
+   "en": "Razorbill",
+   "latin": "Alca torda"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Trauerente",
+   "en": "Common Scoter",
+   "latin": "Melanitta nigra",
+   "occEnd": "04-30",
+   "occStart": "09-01"
+  },
+  {
+   "bzcEnd": "07-10",
+   "bzcStart": "04-01",
+   "de": "Trauerschnäpper",
+   "en": "European Pied Flycatcher",
+   "latin": "Ficedula hypoleuca"
+  },
+  {
+   "bzcEnd": "07-20",
+   "bzcStart": "05-11",
+   "de": "Trauerseeschwalbe",
+   "en": "Black Tern",
+   "latin": "Chlidonias niger"
+  },
+  {
+   "bzcEnd": "06-30",
+   "bzcStart": "04-01",
+   "de": "Triel",
+   "en": "Eurasian Stone-curlew",
+   "latin": "Burhinus oedicnemus"
+  },
+  {
+   "bzcEnd": "06-10",
+   "bzcStart": "05-11",
+   "de": "Trottellumme",
+   "en": "Common Murre",
+   "latin": "Uria aalge"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "03-01",
+   "de": "Turmfalke",
+   "en": "Common Kestrel",
+   "latin": "Falco tinnunculus"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "04-21",
+   "de": "Turteltaube",
+   "en": "European Turtle Dove",
+   "latin": "Streptopelia turtur"
+  },
+  {
+   "bzcEnd": "07-20",
+   "bzcStart": "04-01",
+   "de": "Tüpfelsumpfhuhn",
+   "en": "Spotted Crake",
+   "latin": "Porzana porzana"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "03-01",
+   "de": "Türkentaube",
+   "en": "Eurasian Collared Dove",
+   "latin": "Streptopelia decaocto"
+  },
+  {
+   "bzcEnd": "06-10",
+   "bzcStart": "03-21",
+   "de": "Uferschnepfe",
+   "en": "Black-tailed Godwit",
+   "latin": "Limosa limosa"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "05-21",
+   "de": "Uferschwalbe",
+   "en": "Sand Martin",
+   "latin": "Riparia riparia"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "01-11",
+   "de": "Uhu",
+   "en": "Eurasian Eagle-Owl",
+   "latin": "Bubo bubo"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "04-01",
+   "de": "Wacholderdrossel",
+   "en": "Fieldfare",
+   "latin": "Turdus pilaris"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "05-11",
+   "de": "Wachtel",
+   "en": "Common Quail",
+   "latin": "Coturnix coturnix"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "05-01",
+   "de": "Wachtelkönig",
+   "en": "Corn Crake",
+   "latin": "Crex crex"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "02-11",
+   "de": "Waldbaumläufer",
+   "en": "Eurasian Treecreeper",
+   "latin": "Certhia familiaris"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "01-11",
+   "de": "Waldkauz",
+   "en": "Tawny Owl",
+   "latin": "Strix aluco"
+  },
+  {
+   "bzcEnd": "07-20",
+   "bzcStart": "04-01",
+   "de": "Waldlaubsänger",
+   "en": "Wood Warbler",
+   "latin": "Phylloscopus sibilatrix"
+  },
+  {
+   "bzcEnd": "08-20",
+   "bzcStart": "02-01",
+   "de": "Waldohreule",
+   "en": "Long-eared Owl",
+   "latin": "Asio otus"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Waldsaatgans",
+   "en": "Taiga Bean Goose",
+   "latin": "Anser fabalis",
+   "occEnd": "02-28",
+   "occStart": "10-01"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "04-01",
+   "de": "Waldschnepfe",
+   "en": "Eurasian Woodcock",
+   "latin": "Scolopax rusticola"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Waldwasserläufer",
+   "en": "Green Sandpiper",
+   "latin": "Tringa ochropus",
+   "occEnd": "09-30",
+   "occStart": "03-01"
+  },
+  {
+   "bzcEnd": "06-30",
+   "bzcStart": "01-11",
+   "de": "Wanderfalke",
+   "en": "Peregrine Falcon",
+   "latin": "Falco peregrinus"
+  },
+  {
+   "bzcEnd": "06-20",
+   "bzcStart": "02-01",
+   "de": "Wasseramsel",
+   "en": "White-throated Dipper",
+   "latin": "Cinclus cinclus"
+  },
+  {
+   "bzcEnd": "08-31",
+   "bzcStart": "03-21",
+   "de": "Wasserralle",
+   "en": "Water Rail",
+   "latin": "Rallus aquaticus"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "02-11",
+   "de": "Weidenmeise",
+   "en": "Willow Tit",
+   "latin": "Poecile montanus"
+  },
+  {
+   "bzcEnd": "07-20",
+   "bzcStart": "05-21",
+   "de": "Weißbart-Seeschwalbe",
+   "en": "Whiskered Tern",
+   "latin": "Chlidonias hybrida"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Weißkopf-Ruderente",
+   "en": "White-headed Duck",
+   "latin": "Oxyura leucocephala",
+   "occEnd": "03-31",
+   "occStart": "09-01"
+  },
+  {
+   "bzcEnd": "06-30",
+   "bzcStart": "02-01",
+   "de": "Weißrückenspecht",
+   "en": "White-backed Woodpecker",
+   "latin": "Dendrocopos leucotos"
+  },
+  {
+   "bzcEnd": "07-20",
+   "bzcStart": "03-11",
+   "de": "Weißstorch",
+   "en": "White Stork",
+   "latin": "Ciconia ciconia"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "04-01",
+   "de": "Weißwangengans (Nonnengans)",
+   "en": "Barnacle Goose",
+   "latin": "Branta leucopsis"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "04-11",
+   "de": "Wendehals",
+   "en": "Eurasian Wryneck",
+   "latin": "Jynx torquilla"
+  },
+  {
+   "bzcEnd": "08-10",
+   "bzcStart": "05-11",
+   "de": "Wespenbussard",
+   "en": "European Honey Buzzard",
+   "latin": "Pernis apivorus"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "04-11",
+   "de": "Wiedehopf",
+   "en": "Eurasian Hoopoe",
+   "latin": "Upupa epops"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "04-01",
+   "de": "Wiesenpieper",
+   "en": "Meadow Pipit",
+   "latin": "Anthus pratensis"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "05-01",
+   "de": "Wiesenweihe",
+   "en": "Montagu's Harrier",
+   "latin": "Circus pygargus"
+  },
+  {
+   "bzcEnd": "07-20",
+   "bzcStart": "03-21",
+   "de": "Wintergoldhähnchen",
+   "en": "Goldcrest",
+   "latin": "Regulus regulus"
+  },
+  {
+   "bzcEnd": "06-10",
+   "bzcStart": "03-01",
+   "de": "Zaunammer",
+   "en": "Cirl Bunting",
+   "latin": "Emberiza cirlus"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "03-11",
+   "de": "Zaunkönig",
+   "en": "Eurasian Wren",
+   "latin": "Troglodytes troglodytes"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "03-21",
+   "de": "Zilpzalp",
+   "en": "Common Chiffchaff",
+   "latin": "Phylloscopus collybita"
+  },
+  {
+   "bzcEnd": "06-10",
+   "bzcStart": "03-11",
+   "de": "Zippammer",
+   "en": "Rock Bunting",
+   "latin": "Emberiza cia"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Zistensänger (Cistensänger)",
+   "en": "Zitting Cisticola",
+   "latin": "Cisticola juncidis",
+   "occEnd": "08-31",
+   "occStart": "05-01"
+  },
+  {
+   "bzcEnd": "08-10",
+   "bzcStart": "05-01",
+   "de": "Zwergdommel",
+   "en": "Little Bittern",
+   "latin": "Botaurus minutus"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Zwerggans",
+   "en": "Lesser White-fronted Goose",
+   "latin": "Anser erythropus",
+   "occEnd": "04-30",
+   "occStart": "09-01"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Zwergmöwe",
+   "en": "Little Gull",
+   "latin": "Hydrocoloeus minutus",
+   "occEnd": "10-31",
+   "occStart": "03-01"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "04-21",
+   "de": "Zwergohreule",
+   "en": "Eurasian Scops Owl",
+   "latin": "Otus scops"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Zwergschnepfe",
+   "en": "Jack Snipe",
+   "latin": "Lymnocryptes minimus",
+   "occEnd": "03-31",
+   "occStart": "09-01"
+  },
+  {
+   "bzcEnd": "07-31",
+   "bzcStart": "04-21",
+   "de": "Zwergschnäpper",
+   "en": "Red-breasted Flycatcher",
+   "latin": "Ficedula parva"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Zwergschwan",
+   "en": "Bewick's Swan",
+   "latin": "Cygnus columbianus",
+   "occEnd": "03-31",
+   "occStart": "11-01"
+  },
+  {
+   "bzcEnd": "06-30",
+   "bzcStart": "05-01",
+   "de": "Zwergseeschwalbe",
+   "en": "Little Tern",
+   "latin": "Sternula albifrons"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Zwergstrandläufer",
+   "en": "Little Stint",
+   "latin": "Calidris minuta",
+   "occEnd": "09-30",
+   "occStart": "05-01"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Zwergsäger",
+   "en": "Smew",
+   "latin": "Mergellus albellus",
+   "occEnd": "03-31",
+   "occStart": "12-01"
+  },
+  {
+   "bzcEnd": "08-10",
+   "bzcStart": "04-01",
+   "de": "Zwergtaucher",
+   "en": "Little Grebe",
+   "latin": "Tachybaptus ruficollis"
+  },
+  {
+   "bzcEnd": null,
+   "bzcStart": null,
+   "de": "Zwergtrappe",
+   "en": "Little Bustard",
+   "latin": "Tetrax tetrax",
+   "occEnd": "10-31",
+   "occStart": "10-01"
+  }
+ ]
+}

@@ -16,6 +16,22 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 FLAG_ESCAPED = 1
 FLAG_COLLECTIVE = 2
 
+# Concatenation order for src/*.js -> the page's single <script> tag. There are no imports (the
+# page must work from file://, where <script type="module"> is blocked by CORS), so this fixed
+# order stands in for one: later files rely on function hoisting to see earlier consts/functions.
+APP_JS_FILES = [
+    "i18n.js", "data.js", "charts.js", "overview.js", "list.js",
+    "regions.js", "targets.js", "activity.js", "map.js", "app.js",
+]
+
+
+def build_app_js():
+    parts = []
+    for name in APP_JS_FILES:
+        with open(os.path.join(HERE, "src", name), encoding="utf-8") as fh:
+            parts.append(fh.read().rstrip("\n"))
+    return "\n".join(parts)
+
 
 def find_export():
     files = glob.glob(os.path.join(HERE, "export_*.json"))
@@ -59,7 +75,22 @@ def parse_municipality(text):
     return (text or "").strip(), "", ""
 
 
-def build_data(sightings):
+def load_species_reference():
+    """Latin-name lookups generated from the official ornitho.de species list, plus GBIF-derived
+    occurrence windows for non-breeding species; see tools/extract_species_reference.py and
+    tools/fetch_occurrence_windows.py. Returns (english_by_latin, wishlist_rows)."""
+    path = os.path.join(HERE, "species_reference.json")
+    with open(path, encoding="utf-8") as fh:
+        ref = json.load(fh)
+    english_by_latin = {latin: names["en"] for latin, names in ref["lifeListNames"].items() if names.get("en")}
+    wishlist_rows = [
+        [e["latin"], e["de"], e["en"], e["bzcStart"], e["bzcEnd"], e.get("occStart"), e.get("occEnd")]
+        for e in ref["wishlist"]
+    ]
+    return english_by_latin, wishlist_rows
+
+
+def build_data(sightings, english_by_latin):
     taxa = {}     # key -> dict
     places = {}   # ornitho place id -> index
     place_rows = []
@@ -107,7 +138,7 @@ def build_data(sightings):
     for key, t in taxa.items():
         flags = (FLAG_ESCAPED if t["escaped"] else 0) | (FLAG_COLLECTIVE if t["collective"] else 0)
         latin = key.split("|")[0]
-        sp_rows[t["idx"]] = [t["exact"] or t["names"][0], latin, min(t["order"]), flags]
+        sp_rows[t["idx"]] = [t["exact"] or t["names"][0], latin, min(t["order"]), flags, english_by_latin.get(latin, "")]
 
     return {"sp": sp_rows, "pl": place_rows, "obs": obs}
 
@@ -124,7 +155,9 @@ def main():
     with open(src, encoding="utf-8") as fh:
         sightings = json.load(fh)["data"]["sightings"]
 
-    data = build_data(sightings)
+    english_by_latin, wishlist_rows = load_species_reference()
+    data = build_data(sightings, english_by_latin)
+    data["euro"] = wishlist_rows
     if redact:  # remove place data from the file itself, not just from the display
         data["pl"] = [["", "", r[2], r[3], 0, 0] for r in data["pl"]]
     data["meta"] = {
@@ -135,7 +168,8 @@ def main():
     with open(os.path.join(HERE, "template.html"), encoding="utf-8") as fh:
         tpl = fh.read()
     blob = json.dumps(data, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
-    out = tpl.replace("__DATA_JSON__", blob)
+    app_js = build_app_js().replace("</script", "<\\/script")
+    out = tpl.replace("__DATA_JSON__", blob).replace("__APP_JS__", app_js)
     dst = os.path.join(HERE, "lifelist_redacted.html" if redact else "lifelist.html")
     with open(dst, "w", encoding="utf-8") as fh:
         fh.write(out)
