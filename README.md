@@ -1,55 +1,127 @@
 # OrnithoLifeList
 
-Baut aus einem [ornitho.de](https://www.ornitho.de/)-Export eine einzelne interaktive HTML-Seite mit der eigenen Vogel-Lebensliste – Übersicht, sortierbare Artenliste, Auswertung nach Regionen, eine Wunschliste "nie gesehener Arten" (offizielle ornitho-Artenliste plus eigene, frei pflegbare Liste, inkl. grobem Saison-Badge auf Basis des Brutzeitfensters bzw., für Zug- und Gastvögel, eines aus GBIF-Fundmeldungen abgeleiteten Beobachtungszeitraums) und eine Leaflet-Karte der Beobachtungsorte. Die Seite bietet Deutsch und Englisch als Sprache umschaltbar an, inklusive englischer Artnamen (Quelle: die offizielle ornitho-Artenliste, siehe `reference/`). Kein Server nötig, keine Internetverbindung: `lifelist.html` läuft direkt aus der Datei im Browser. Leaflet (für die Karte) und Chart.js (für die Diagramme in der Tagesaktivität) sind fest in die Seite eingebettet statt von einem CDN nachgeladen zu werden (siehe `vendor/`) – nur die Kartenkacheln selbst (Straßenkarte/Topografisch/Satellit) brauchen Internet, alles andere funktioniert auch offline.
+Aus einem [ornitho.de](https://www.ornitho.de/)-Export wird eine interaktive Vogel-Lebensliste als einzelne HTML-Datei.
 
-## Verwendung
+Die fertige `lifelist.html` kann direkt im Browser geöffnet werden – kein Server und keine Installation der Anwendung nötig.
 
-1. Auf ornitho.de einen JSON-Export der eigenen Beobachtungen herunterladen und als `export_*.json` neben `lifelist.py` legen (Schritt-für-Schritt-Anleitung mit Screenshots: [HOWTO.md](HOWTO.md)).
-2. Seite bauen:
+## Was bietet die Lebensliste?
 
-   ```bash
-   python lifelist.py
-   ```
+- Übersicht über die bisher beobachteten Arten
+- Sortierbare Artenliste
+- Auswertung nach Regionen
+- Wunschliste mit Arten, die bisher noch nicht beobachtet wurden
+- Tagesaktivität der eigenen Beobachtungen
+- Karte der Beobachtungsorte
+- Deutsch und Englisch, einschließlich englischer Artnamen
+- Saisonhinweise für Arten, die noch auf der Wunschliste stehen
 
-   Ohne `--source` wird automatisch der neueste `export_*.json` im Ordner verwendet. Ergebnis: `lifelist.html`.
+Leaflet (Karte) und Chart.js (Diagramme in der Tagesaktivität) sind fest in die Seite eingebettet statt von einem CDN nachgeladen zu werden (siehe `vendor/`) – die Lebensliste funktioniert komplett offline. Nur die Kartenkacheln selbst (Straßenkarte/Topografisch/Satellit) brauchen eine Internetverbindung; ohne sie bleibt die Karte nutzbar, nur ohne Hintergrundbild.
 
-3. Optional eine bestimmte Exportdatei angeben:
+## Schnellstart
 
-   ```bash
-   python lifelist.py --source export_12345_67890_20260919_002546.json
-   ```
+### 1. Beobachtungen von ornitho.de exportieren
 
-4. Optional eine Version ohne Ortsangaben (Beobachtungsorte, Gemeinden, Koordinaten) erzeugen, z. B. zum Teilen:
+Auf [ornitho.de](https://www.ornitho.de/) einen JSON-Export der eigenen Beobachtungen herunterladen (Schritt-für-Schritt-Anleitung mit Screenshots: [HOWTO.md](HOWTO.md)).
 
-   ```bash
-   python lifelist.py --redact
-   ```
+Die heruntergeladene Datei, zum Beispiel
 
-   Ergebnis: `lifelist_redacted.html`.
+```text
+export_12345_67890_20260919_002546.json
+```
 
-## Dateien
+in den Ordner von `lifelist.py` legen.
 
-- `lifelist.py` – wandelt den ornitho.de-Export in ein kompaktes JSON um und rendert es in `template.html`.
-- `template.html` – die Seiten-Vorlage (HTML/CSS) mit den Platzhaltern `__DATA_JSON__`, `__APP_JS__`, `__VENDOR_JS__` und `__VENDOR_CSS__`.
-- `src/*.js` – die App-Logik, aufgeteilt nach Tab/Thema (`i18n.js`, `data.js`, `charts.js`, `overview.js`, `list.js`, `regions.js`, `targets.js`, `activity.js`, `map.js`, `app.js`). `lifelist.py` fügt sie in dieser festen Reihenfolge zu einem einzigen `<script>` zusammen – es gibt keine `import`/`export`-Module, weil `<script type="module">` unter `file://` an Chromes CORS-Sperre scheitern würde. Die Reihenfolge steht als `APP_JS_FILES`-Liste in `lifelist.py`.
-- `export_*.json`, `lifelist.html`, `lifelist_redacted.html` – generiert bzw. heruntergeladen, enthalten persönliche Beobachtungsdaten und sind daher nicht Teil des Repos (siehe `.gitignore`).
-- `species_reference.json` – Latein/Deutsch/Englisch-Namen und Saisonfenster pro Art, wird von `lifelist.py` beim Bauen eingebettet (englische Artnamen, Wunschlisten-Daten). Zwei Quellen fließen ein: `bzcStart`/`bzcEnd` ist das offizielle Brutzeitfenster aus der ornitho-Artenliste (nur für in Deutschland/Luxemburg brütende Arten); `occStart`/`occEnd` ist ein aus öffentlichen GBIF-Fundmeldungen abgeleiteter typischer Beobachtungszeitraum für Zug- und Gastvögel, die hier nicht brüten.
-- `reference/` – die Original-Referenztabellen von ornitho.de (Artenliste, Brutzeitcodes, optionale Meldungsfelder), Quelle für die Brutzeitfenster in `species_reference.json`.
-- `tools/extract_species_reference.py` – erzeugt `species_reference.json` neu aus `reference/ornitho-Referenzliste-Arten-*.xlsx`; nur für die Datenpflege, benötigt `pip install openpyxl` (nicht für den normalen Build nötig).
-- `tools/fetch_occurrence_windows.py` – ergänzt `species_reference.json` um `occStart`/`occEnd` für Arten ohne Brutzeitfenster, per Abfrage der öffentlichen GBIF-Occurrence-API (Monatsverteilung der Fundmeldungen in Deutschland/Luxemburg). Läuft nach `extract_species_reference.py`, braucht Internetzugang, nur für die Datenpflege.
-- `vendor/` – Leaflet, das Leaflet.markercluster-Plugin und Chart.js als feste, mitgelieferte Dateien (keine CDN-Ladung zur Laufzeit); `lifelist.py` bettet sie beim Bauen direkt in `lifelist.html` ein. `tools/update_vendor.py` lädt sie bei Bedarf neu (z. B. für ein Versions-Update); für den normalen Build wird kein Internetzugang gebraucht, `lifelist.py` liest nur lokale Dateien.
+### 2. Lebensliste erstellen
 
-### Lizenzen der mitgelieferten Bibliotheken (`vendor/`)
+Im selben Ordner ausführen:
 
-- [Leaflet](https://leafletjs.com/) – BSD-2-Clause, © Vladimir Agafonkin, © 2010–2023 CloudMade
-- [Leaflet.markercluster](https://github.com/Leaflet/Leaflet.markercluster) – MIT, © Dave Leaver
-- [Chart.js](https://www.chartjs.org/) – MIT, © Chart.js Contributors
+```bash
+python lifelist.py
+```
 
-Alle drei erlauben Einbettung/Weitergabe; der jeweilige Copyright-Hinweis bleibt in den Dateien in `vendor/` erhalten.
+Danach liegt dort die fertige Datei:
+
+```text
+lifelist.html
+```
+
+Diese Datei einfach im Browser öffnen.
+
+Wenn mehrere `export_*.json`-Dateien vorhanden sind, wird automatisch die neueste verwendet.
+
+### Einen bestimmten Export verwenden
+
+Falls eine bestimmte Exportdatei verwendet werden soll:
+
+```bash
+python lifelist.py --source export_12345_67890_20260919_002546.json
+```
+
+### Eine Version ohne Ortsangaben erstellen
+
+Wenn die Lebensliste weitergegeben oder veröffentlicht werden soll, können persönliche Ortsangaben entfernt werden:
+
+```bash
+python lifelist.py --redact
+```
+
+Das erzeugt:
+
+```text
+lifelist_redacted.html
+```
+
+In dieser Version sind Beobachtungsorte, Gemeinden und Koordinaten entfernt. Die eigentlichen Beobachtungsdaten bleiben dabei natürlich erhalten – nur die Ortsinformationen werden ausgeblendet.
+
+## Voraussetzungen
+
+Für die normale Erstellung der Lebensliste wird lediglich benötigt:
+
+- Python 3
+- ein JSON-Export von ornitho.de
+
+Zusätzliche Python-Pakete sind für den normalen Build nicht erforderlich, und es wird keine Internetverbindung gebraucht (Leaflet/Chart.js sind bereits in `vendor/` enthalten, siehe unten).
+
+## Welche Daten werden verwendet?
+
+Die Artennamen stammen aus der offiziellen ornitho-Artenliste. Dadurch stehen neben den deutschen auch die lateinischen und englischen Namen zur Verfügung.
+
+Für die Saisonhinweise auf der Wunschliste werden – je nach Art – unterschiedliche Informationen verwendet:
+
+- Bei in Deutschland bzw. Luxemburg brütenden Arten wird das offizielle Brutzeitfenster von ornitho verwendet.
+- Bei Zug- und Gastvögeln, die hier nicht brüten, wird ein typischer Beobachtungszeitraum aus öffentlichen GBIF-Fundmeldungen abgeleitet.
+
+Die entsprechenden Referenzdaten liegen im Verzeichnis `reference/` bzw. in `species_reference.json`.
+
+## Dateien im Projekt
+
+### Für Anwender
+
+- `lifelist.py` – erstellt die fertige Lebensliste
+- `export_*.json` – eigener ornitho.de-Export
+- `lifelist.html` – fertige Lebensliste
+- `lifelist_redacted.html` – fertige Lebensliste ohne Ortsangaben
+- `HOWTO.md` – bebilderte Anleitung für den Datenexport von ornitho.de
+
+Die persönlichen Export- und HTML-Dateien gehören nicht ins Git-Repository und sind deshalb über `.gitignore` ausgeschlossen.
+
+### Für die Entwicklung
+
+- `template.html` – HTML-Vorlage der fertigen Seite, mit den Platzhaltern `__DATA_JSON__`, `__APP_JS__`, `__VENDOR_JS__` und `__VENDOR_CSS__`
+- `src/*.js` – JavaScript-Code der Anwendung, aufgeteilt nach Tab/Thema (`i18n.js`, `data.js`, `charts.js`, `overview.js`, `list.js`, `regions.js`, `targets.js`, `activity.js`, `map.js`, `app.js`)
+- `tsconfig.json`, `src/globals.d.ts` – für die optionale JSDoc-Typprüfung (siehe unten)
+- `species_reference.json` – Referenzdaten zu Arten, Namen und Saisonzeiträumen
+- `reference/` – originale Referenztabellen von ornitho.de, Quelle für `species_reference.json`
+- `tools/extract_species_reference.py` – aktualisiert die Arten-Referenzdaten aus `reference/ornitho-Referenzliste-Arten-*.xlsx`; benötigt `pip install openpyxl`
+- `tools/fetch_occurrence_windows.py` – ermittelt Beobachtungszeiträume für Zug- und Gastvögel über die öffentliche GBIF-API
+- `vendor/` – Leaflet, das Leaflet.markercluster-Plugin und Chart.js als mitgelieferte Dateien (siehe Lizenzen unten); `tools/update_vendor.py` lädt sie bei Bedarf neu, z. B. für ein Versions-Update
+- `howto/` – Screenshots für `HOWTO.md`
+
+Alle mit "benötigt"/"lädt neu" markierten Tools sind reine Entwicklungs-/Pflegewerkzeuge und für den normalen Build nicht nötig.
 
 ## Entwicklung
 
-Die Aufteilung in `src/*.js` ist nur für die Bearbeitung gedacht – ausgeliefert wird weiterhin ausschließlich die eine generierte HTML-Datei, kein Build-Schritt, keine Laufzeit-Abhängigkeit für Nutzer:innen.
+Die Aufteilung in `src/*.js` ist nur für die Bearbeitung gedacht. Beim Erstellen der Lebensliste fügt `lifelist.py` sie in fester Reihenfolge (`APP_JS_FILES`) zu einem einzigen `<script>` zusammen – es gibt keine `import`/`export`-Module, weil `<script type="module">` unter `file://` an Chromes CORS-Sperre scheitern würde. Ausgeliefert wird weiterhin ausschließlich die eine generierte HTML-Datei, kein Build-Schritt, keine Laufzeit-Abhängigkeit für Nutzer:innen.
 
 Optional lässt sich `src/*.js` per JSDoc-Kommentaren mit dem TypeScript-Compiler typprüfen (ohne dass daraus TypeScript-Syntax im ausgelieferten Code entsteht):
 
@@ -58,6 +130,14 @@ npx --package typescript -- tsc -p tsconfig.json
 ```
 
 (Einfaches `npx tsc` funktioniert nicht – auf npm existiert ein gleichnamiges, unrelated Paket `tsc`, das den echten TypeScript-Compiler überschattet.)
+
+### Lizenzen der mitgelieferten Bibliotheken (`vendor/`)
+
+- [Leaflet](https://leafletjs.com/) – BSD-2-Clause, © Vladimir Agafonkin, © 2010–2023 CloudMade
+- [Leaflet.markercluster](https://github.com/Leaflet/Leaflet.markercluster) – MIT, © Dave Leaver
+- [Chart.js](https://www.chartjs.org/) – MIT, © Chart.js Contributors
+
+Alle drei erlauben Einbettung/Weitergabe; der jeweilige Copyright-Hinweis bleibt in den Dateien in `vendor/` erhalten.
 
 ## Lizenz
 

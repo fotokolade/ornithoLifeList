@@ -74,7 +74,7 @@ function drawMap() {
     const dia = Math.round(2 * (5 + 17 * Math.sqrt(v / max)));
     const icon = L.divIcon({
       className: "value-marker",
-      html: `<div style="width:${dia}px;height:${dia}px;background:${heatColor(v / max)};opacity:.8;border:1.5px solid rgba(0,0,0,.35);border-radius:50%"></div>`,
+      html: `<div style="width:${dia}px;height:${dia}px;background:var(--k5);opacity:.85;border:1.5px solid rgba(0,0,0,.35);border-radius:50%"></div>`,
       iconSize: [dia, dia], iconAnchor: [dia / 2, dia / 2],
     });
     L.marker([p.lat, p.lon], { icon })
