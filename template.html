@@ -145,7 +145,7 @@ tr.detail td{background:var(--accent-soft)!important;padding:8px}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
 .chip{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:.74rem}
 .detailgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
-table.heat{table-layout:fixed}
+table.heat{table-layout:fixed;min-width:560px}
 .heat th:first-child{width:3.4rem}
 .heat td,.heat th{text-align:center;padding:3px 2px;font-size:.72rem}
 .heat td.y{text-align:left;font-weight:600;padding-left:4px}
@@ -204,7 +204,8 @@ svg.curve text{fill:var(--muted);font-size:11px}
 .value-marker .dot{border-radius:50%;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4);box-sizing:border-box}
 .map-legend{background:rgba(255,255,255,.94);color:#1d2521;padding:8px 12px;border-radius:10px;box-shadow:0 1px 6px rgba(0,0,0,.2);font:12px/1.3 system-ui,sans-serif}
 .map-legend b{display:block;margin-bottom:6px}
-.map-legend-row{display:flex;align-items:center;gap:12px}
+.map-legend-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px}
+.map-legend.no-cluster .cluster-key{display:none}
 .map-legend-row span{display:flex;align-items:center;gap:5px}
 .map-legend .dot{border-radius:50%;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.35);box-sizing:border-box}
 .map-legend-cluster{display:inline-block;width:18px;height:18px;border-radius:50%;background:var(--k3);border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.35);box-sizing:border-box}
