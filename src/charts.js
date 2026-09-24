@@ -7,7 +7,8 @@ function curveSvg(chrono) {
   const gradId = "curveGrad" + curveSvgSeq, lineId = "curveLine" + curveSvgSeq;
   curveSvgSeq++;
   const W = 720, H = 230, L = 38, R = 10, Tp = 10, B = 24;
-  const t0 = Date.UTC(MIN_Y, 0, 1), t1 = Date.UTC(Math.max(MAX_Y, TODAY_Y) + 1, 0, 1);
+  // the curve ends with the export's last observation, not today: an older export would otherwise trail off in a long flat line
+  const t0 = Date.UTC(MIN_Y, 0, 1), t1 = Date.UTC(MAX_Y + 1, 0, 1), tEnd = Date.parse(OBS[OBS.length - 1].d + "T00:00:00Z");
   const x = ms => L + (ms - t0) / (t1 - t0) * (W - L - R);
   const mag = Math.pow(10, Math.floor(Math.log10(pts.length)));
   const step = Math.max(1, mag / (pts.length / mag < 2.5 ? 2 : 1));
@@ -16,8 +17,8 @@ function curveSvg(chrono) {
   const yearColor = yr => `var(${CHART_PALETTE[(yr - MIN_Y) % CHART_PALETTE.length]})`;
   let g = "", d = `M${x(t0)},${y(0)}`, prev = 0, dots = "";
   for (let v = 0; v <= yMax; v += step) g += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${L - 6}" y="${y(v) + 4}" text-anchor="end">${v}</text>`;
-  const every = (Math.max(MAX_Y, TODAY_Y) - MIN_Y) > 8 ? 2 : 1;
-  for (let yr = MIN_Y; yr <= Math.max(MAX_Y, TODAY_Y); yr += every)
+  const every = (MAX_Y - MIN_Y) > 8 ? 2 : 1;
+  for (let yr = MIN_Y; yr <= MAX_Y; yr += every)
     g += `<text x="${x(Date.UTC(yr, 0, 1)) + 2}" y="${H - 6}">${yr}</text>`;
   pts.forEach((o, i) => {
     const ms = Date.parse(o.d + "T00:00:00Z");
@@ -26,9 +27,9 @@ function curveSvg(chrono) {
     const cur = o.y === S.year;
     dots += `<circle cx="${x(ms)}" cy="${y(i + 1)}" r="${cur ? 4.5 : 2.5}" fill="${cur ? "var(--accent)" : yearColor(o.y)}" stroke="var(--card)" stroke-width="${cur ? 1.5 : 1}"><title>${i + 1}. ${esc(speciesName(SP[o.s]))}, ${fmtD(o.d)}</title></circle>`;
   });
-  const baseline = ` L${x(Date.now())},${y(0)} L${x(t0)},${y(0)} Z`;
-  const area = d + ` L${x(Date.now())},${y(prev)}` + baseline;
-  d += ` L${x(Date.now())},${y(prev)}`;
+  const baseline = ` L${x(tEnd)},${y(0)} L${x(t0)},${y(0)} Z`;
+  const area = d + ` L${x(tEnd)},${y(prev)}` + baseline;
+  d += ` L${x(tEnd)},${y(prev)}`;
   return `<svg class="curve" viewBox="0 0 ${W} ${H}" role="img" aria-label="${t("curve")}">
     <defs>
       <linearGradient id="${gradId}" x1="0" y1="0" x2="0" y2="1">
