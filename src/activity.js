@@ -27,13 +27,13 @@ function renderActivity() {
 
   const speciesRows = [...bySpecies].filter(([, a]) => a.length >= MIN_TIMED).map(([s, a]) => ({ s, med: median(a), n: a.length }));
   const speciesTable = rows => `<div class="card"><table><thead><tr><th>${t("name")}</th><th class="num">${t("colMedian")}</th><th class="num">${t("obsShort")}</th></tr></thead><tbody>${rows.map(r =>
-    `<tr><td>${speciesLine(SP[r.s])}</td><td class="num"><span class="time-chip" style="background:${heatColor(r.med / 1439)}"></span>${fmtTime(r.med)}</td><td class="num">${r.n}</td></tr>`).join("")}</tbody></table></div>`;
+    `<tr><td>${speciesLine(SP[r.s])}</td><td class="num"><span class="time-chip" style="background:${dayColor(r.med / 60)}"></span>${fmtTime(r.med)}</td><td class="num">${r.n}</td></tr>`).join("")}</tbody></table></div>`;
   const early = [...speciesRows].sort((a, b) => a.med - b.med).slice(0, 8), late = [...speciesRows].sort((a, b) => b.med - a.med).slice(0, 8);
 
   const heatMax = Math.max(1, ...monthHour.flat());
   const heat = `<table class="heat"><thead><tr><th></th>${hours.map(h => `<th>${h}</th>`).join("")}</tr></thead><tbody>${monthHour.map((row, m) =>
     `<tr><td class="y">${T.monthsShort[m].replace(".", "")}</td>${row.map((n, h) => n
-      ? `<td title="${esc(T.months[m] + ", " + hourLabel(h) + ": " + n)}" style="background:${heatColor(n / heatMax)}">&nbsp;</td>`
+      ? `<td title="${esc(T.months[m] + ", " + hourLabel(h) + ": " + n)}" style="background:${heatColor(n / heatMax)}"></td>`
       : `<td></td>`).join("")}</tr>`).join("")}</tbody></table>`;
 
   const metricOptions = [["obs", "actMObs"], ["species", "actMSpecies"], ["days", "actMDays"]]
@@ -48,7 +48,7 @@ function renderActivity() {
     <div class="card" id="hour-card">${barChartSvg(series, hours, hours.map(h => hourLabel(h) + ": " + series[h]), 3)}</div>
     <h2>${t("actWeekday")}<small>${t("actMDays")}</small></h2>
     ${infoText(t("actWeekdayHelp"))}
-    <div class="card" id="weekday-card">${barChartSvg(wdDays.map(s => s.size), T.weekdays, T.weekdays.map((w, i) => w + ": " + wdDays[i].size), 1, "--k6")}</div>
+    <div class="card" id="weekday-card">${barChartSvg(wdDays.map(s => s.size), T.weekdays, T.weekdays.map((w, i) => w + ": " + wdDays[i].size))}</div>
     <h2>${t("actHeat")}</h2>
     ${infoText(t("actHeatHelp"))}
     <div class="card">${heat}</div>
@@ -57,6 +57,6 @@ function renderActivity() {
     ${infoText(t("actSpeciesHelp", MIN_TIMED))}
     <div class="detailgrid"><div><b>${t("actEarly")}</b>${speciesTable(early)}</div><div><b>${t("actLate")}</b>${speciesTable(late)}</div></div>`;
   upgradeDayCurve($("hour-card"), series, hours.map(hourLabel), t({ obs: "actMObs", species: "actMSpecies", days: "actMDays" }[S.actMetric]));
-  upgradeBarChart($("weekday-card"), T.weekdays, wdDays.map(s => s.size), 3);
+  upgradeBarChart($("weekday-card"), T.weekdays, wdDays.map(s => s.size));
   updateToc();
 }

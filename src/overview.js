@@ -27,7 +27,7 @@ function renderYearBlock(rows, opts) {
     const tot = r.all.size, ytd = r.ytd.size;
     const cur = r.y === S.year ? " cur" : "";
     const wTot = tot / max * 100, wYtd = opts.showYtd ? ytd / max * 100 : wTot;
-    const c = r.y === S.year ? "var(--accent)" : `var(${CHART_PALETTE[(r.y - MIN_Y) % CHART_PALETTE.length]})`;
+    const c = r.y === S.year ? "var(--accent)" : "var(--bar)";
     const grad = `linear-gradient(90deg,color-mix(in srgb,${c} 45%,transparent),${c})`;
     return `<div class="yrow${cur}"><span class="y">${r.y}</span>
       <span class="ytd">${opts.showYtd ? ytd : ""}</span>
@@ -55,10 +55,8 @@ function topPlacesSection(list) {
   const max = rows[0].sp.size;
   return `<h2>${t("topPlaces")}</h2>
     ${infoText(t("topPlacesHelp"))}
-    <div class="card hbar">${rows.map((r, i) => {
-      const c = `var(${CHART_PALETTE[i % CHART_PALETTE.length]})`;
-      return `<div class="hbar-row"><span class="lbl">${esc(placeName(r.p))}</span><div class="bar"><i style="width:${r.sp.size / max * 100}%;background:linear-gradient(90deg,color-mix(in srgb,${c} 45%,transparent),${c})"></i></div><span class="num">${r.sp.size}</span></div>`;
-    }).join("")}</div>`;
+    <div class="card hbar">${rows.map(r =>
+      `<div class="hbar-row"><span class="lbl" title="${esc(placeName(r.p))}">${esc(placeName(r.p))}</span><div class="bar"><i style="width:${r.sp.size / max * 100}%"></i></div><span class="num">${r.sp.size}</span></div>`).join("")}</div>`;
 }
 function calendarSection(list, statsAll) {
   const year = S.year;
@@ -85,7 +83,7 @@ function calendarSection(list, statsAll) {
       const sp = dayData.get(dateStr);
       const n = sp ? sp.size : 0;
       const lifer = liferDays.has(dateStr);
-      const bg = n ? heatColor(n / max) : "var(--bar-soft)";
+      const bg = n ? heatColor(n / max) : "var(--line)";
       const title = n ? `${fmtD(dateStr)}: ${n} ${t("mapSpecies")}${lifer ? " · " + t("newBadge") : ""}` : fmtD(dateStr);
       cells += `<div class="cal-day${lifer ? " cal-lifer" : ""}" style="background:${bg}" title="${esc(title)}"></div>`;
     }

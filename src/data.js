@@ -92,7 +92,7 @@ if (initialTheme !== "system") document.documentElement.setAttribute("data-theme
  * @property {Object<string, boolean>} regAll - per region-level table "show all" toggle
  * @property {string} targetSrc - wishlist source filter: "all"|"euro"|"own"
  * @property {{name: string, latin: string|null}[]} customTargets - user-maintained wishlist entries
- * @property {{k: "name"|"season"|"breed"|"occ", d: 1|-1}} wishSort - wishlist table sort
+ * @property {{k: "name"|"season", d: 1|-1}} wishSort - wishlist table sort
  */
 const S = { tab: "overview", region: "all", year: Math.min(TODAY_Y, MAX_Y), month: TODAY_M, timeAll: true, lang: initialLang, theme: initialTheme,
   escaped: false, collective: false, atlasF: "all", actMetric: "obs", redact: !!RAW.meta.redacted, metric: "life", q: "", sort: "nr", dir: -1, open: new Set(),

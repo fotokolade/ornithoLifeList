@@ -44,9 +44,12 @@ function curveSvg(chrono) {
     ${g}<path d="${area}" fill="url(#${gradId})" stroke="none"/><path d="${d}" fill="none" stroke="url(#${lineId})" stroke-width="2.25" stroke-linejoin="round"/>${dots}</svg>`;
 }
 // shared cool-to-warm intensity scale, reused by the heatmaps and the map markers
+// sequential scale in one hue, light (few) to dark (many); --heat-lo/--heat-hi flip for the dark theme
 function heatColor(frac) {
-  return `color-mix(in srgb, var(--accent) ${Math.round(15 + Math.max(0, Math.min(1, frac)) * 85)}%, var(--k3))`;
+  return `color-mix(in srgb, var(--heat-hi) ${Math.round(8 + Math.max(0, Math.min(1, frac)) * 92)}%, var(--heat-lo))`;
 }
+// cells past this share of the maximum are dark enough to need the light --heat-ink text
+const HEAT_INK_FROM = 0.55;
 function heatLegend(max) {
   return `<div class="legend"><span>0</span><div class="grad"></div><span>${max}</span></div>`;
 }
@@ -64,7 +67,7 @@ function heatTable(list) {
     h += `<tr><td class="y">${y}</td>`;
     for (let m = 1; m <= 12; m++) {
       const n = (cell.get(y * 100 + m) || { size: 0 }).size;
-      h += n ? `<td style="background:${heatColor(n / max)}">${n}</td>` : `<td></td>`;
+      h += n ? `<td${n / max > HEAT_INK_FROM ? ' class="hot"' : ""} style="background:${heatColor(n / max)}">${n}</td>` : `<td></td>`;
     }
     h += `</tr>`;
   }
@@ -101,14 +104,28 @@ const DAY_STOPS = [[0, "#2b3a67", "#7d8fd0"], [4, "#3b4a7a", "#8797d4"], [5.5, "
 // [from hour, to hour, i18n key of the label, rgb of the band]
 const DAY_BANDS = [[0, 5, "dayNight", "43,58,103"], [5, 8, "dayMorning", "232,145,74"], [8, 17, "dayDay", "233,185,73"],
   [17, 21, "dayEvening", "176,88,143"], [21, 24, "dayNight", "43,58,103"]];
+const isDarkTheme = () => parseInt(getComputedStyle(document.documentElement).getPropertyValue("--card").trim().slice(1, 3), 16) < 0x80;
+/** @returns {[number, string][]} [hour, colour] for the active theme */
+const dayStops = () => { const dark = isDarkTheme(); return DAY_STOPS.map(([h, light, dk]) => /** @type {[number, string]} */ ([h, dark ? dk : light])); };
+/** Time-of-day colour at `hour` (0-24, fractional), interpolated between the DAY_STOPS. */
+function dayColor(hour, stops = dayStops()) {
+  const rgb = c => [1, 3, 5].map(i => parseInt(c.slice(i, i + 2), 16));
+  for (let i = 0; i < stops.length - 1; i++) {
+    const [h0, c0] = stops[i], [h1, c1] = stops[i + 1];
+    if (hour >= h0 && hour <= h1) {
+      const f = (hour - h0) / (h1 - h0), a = rgb(c0), b = rgb(c1);
+      return "#" + a.map((v, j) => Math.round(v + (b[j] - v) * f).toString(16).padStart(2, "0")).join("");
+    }
+  }
+  return stops[0][1];
+}
 // Replaces the SVG bar chart in `card` with a smoothed 24-hour curve over shaded night/morning/day/evening bands.
 function upgradeDayCurve(card, values, titles, valueName) {
   if (!card || typeof Chart === "undefined") return;
   if (BAR_CHARTS[card.id]) { BAR_CHARTS[card.id].destroy(); delete BAR_CHARTS[card.id]; }
   const style = getComputedStyle(document.documentElement);
   const cssVar = v => style.getPropertyValue(v).trim();
-  const dark = parseInt(cssVar("--card").slice(1, 3), 16) < 0x80;
-  const stops = DAY_STOPS.map(([h, light, dk]) => /** @type {[number, string]} */ ([h, dark ? dk : light]));
+  const dark = isDarkTheme(), stops = dayStops();
   const gradient = (chart, alpha) => {
     const a = chart.chartArea;
     if (!a) return stops[0][1];
@@ -156,7 +173,7 @@ function upgradeDayCurve(card, values, titles, valueName) {
       data: values.map((v, h) => ({ x: h + 0.5, y: v })),
       fill: "origin", cubicInterpolationMode: "monotone", borderWidth: 2,
       pointRadius: 0, pointHoverRadius: 5, pointHoverBorderWidth: 2, pointHoverBorderColor: cssVar("--card"),
-      pointHoverBackgroundColor: ctx => stops.reduce((c, [h, col]) => (h <= ctx.parsed.x ? col : c), stops[0][1]),
+      pointHoverBackgroundColor: ctx => dayColor(ctx.parsed.x, stops),
       borderColor: ctx => gradient(ctx.chart, ""),
       backgroundColor: ctx => gradient(ctx.chart, dark ? "55" : "40"),
     }] },
@@ -176,14 +193,14 @@ function upgradeDayCurve(card, values, titles, valueName) {
 // with a nicer Chart.js one. If Chart is somehow missing (a broken build), the SVG just stays as-is.
 const CHART_PALETTE = ["--k1", "--k2", "--k3", "--k4", "--k5", "--k6"];
 const BAR_CHARTS = {};  // card.id -> Chart instance; id stays stable across re-renders even though the DOM node is recreated each time
-function upgradeBarChart(card, labels, values, paletteOffset, tips) {
+// one colour for every bar; only the highest one stands out in the accent colour
+function upgradeBarChart(card, labels, values, tips) {
   if (!card || typeof Chart === "undefined") return;
   if (BAR_CHARTS[card.id]) { BAR_CHARTS[card.id].destroy(); delete BAR_CHARTS[card.id]; }
   const style = getComputedStyle(document.documentElement);
-  const palette = CHART_PALETTE.map(v => style.getPropertyValue(v).trim());
-  const accent = style.getPropertyValue("--accent").trim();
+  const bar = style.getPropertyValue("--bar").trim(), accent = style.getPropertyValue("--accent").trim();
   const max = Math.max(...values);
-  const hue = (v, i) => v === max && v > 0 ? accent : palette[(i + paletteOffset) % palette.length];
+  const hue = v => v === max && v > 0 ? accent : bar;
   card.innerHTML = "";
   const box = document.createElement("div");
   box.style.height = "220px";
@@ -194,15 +211,17 @@ function upgradeBarChart(card, labels, values, paletteOffset, tips) {
     type: "bar",
     data: { labels, datasets: [{
       data: values,
-      backgroundColor: values.map((v, i) => hue(v, i) + "cc"),
-      hoverBackgroundColor: values.map((v, i) => hue(v, i)),
-      borderColor: values.map((v, i) => hue(v, i)),
-      borderWidth: 1.5, borderRadius: 5, maxBarThickness: 34,
+      backgroundColor: values.map(v => hue(v) + "cc"),
+      hoverBackgroundColor: values.map(hue),
+      borderRadius: 4, maxBarThickness: 34,
     }] },
     options: {
       responsive: true, maintainAspectRatio: false, animation: { duration: 300 },
       plugins: { legend: { display: false }, tooltip: tips ? { callbacks: { title: items => tips[items[0].dataIndex] } } : {} },
-      scales: { y: { beginAtZero: true, ticks: { precision: 0 } }, x: { grid: { display: false } } },
+      scales: {
+        y: { beginAtZero: true, ticks: { precision: 0, color: style.getPropertyValue("--muted").trim() }, grid: { color: style.getPropertyValue("--line").trim() } },
+        x: { grid: { display: false }, ticks: { color: style.getPropertyValue("--muted").trim() } },
+      },
     },
   });
 }

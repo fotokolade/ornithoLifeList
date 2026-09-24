@@ -10,6 +10,7 @@
   --accent:#2f8f4e; --accent-soft:#eaf4ed; --bar:#4a86b6; --bar-soft:#dbe7f0;
   --hl:#fff7cc; --link:#3d6a8c; --stripe:#f6f8f5;
   --k1:#2f8f4e; --k2:#c98a1b; --k3:#3d78a8; --k4:#8659b3; --k5:#c1554a; --k6:#2f9e93;
+  --heat-lo:#dcefe2; --heat-hi:#1a6334; --heat-ink:#fff;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
@@ -17,6 +18,7 @@
     --accent:#4cc275; --accent-soft:#1f3327; --bar:#5b9bcf; --bar-soft:#2b3b48;
     --hl:#3b3717; --link:#8ab8dc; --stripe:#202622;
     --k1:#4cc275; --k2:#e0a23c; --k3:#5b9bcf; --k4:#b28ee0; --k5:#e08578; --k6:#4cc2b3;
+    --heat-lo:#1f3a2a; --heat-hi:#7ee0a2; --heat-ink:#0f2418;
   }
 }
 /* explicit override from the theme select in Einstellungen, regardless of OS preference */
@@ -25,6 +27,7 @@
   --accent:#4cc275; --accent-soft:#1f3327; --bar:#5b9bcf; --bar-soft:#2b3b48;
   --hl:#3b3717; --link:#8ab8dc; --stripe:#202622;
   --k1:#4cc275; --k2:#e0a23c; --k3:#5b9bcf; --k4:#b28ee0; --k5:#e08578; --k6:#4cc2b3;
+  --heat-lo:#1f3a2a; --heat-hi:#7ee0a2; --heat-ink:#0f2418;
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
@@ -117,7 +120,8 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 td.nr{color:var(--muted);width:2rem}
 table.rtable{table-layout:fixed}
 table.rtable .nr{width:2.2rem}
-table.rtable .num{width:4.5rem}
+table.rtable .num{width:6.5rem}
+table.rtable .rbar{width:28%;vertical-align:middle}
 table.rtable td:not(.nr):not(.num),table.rtable th:not(.nr):not(.num){overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .latin{color:var(--muted);font-style:italic;font-size:.74rem;display:block;line-height:1.2}
 .small{color:var(--muted);font-size:.74rem;display:block;line-height:1.2}
@@ -135,19 +139,30 @@ tr.detail td{background:var(--accent-soft)!important;padding:8px}
 .heat td,.heat th{text-align:center;padding:3px 2px;font-size:.72rem}
 .heat td.y{text-align:left;font-weight:600;padding-left:4px}
 .heat td{border:1px solid var(--card);border-radius:3px}
+.heat td.hot{color:var(--heat-ink)}
 .time-chip{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:middle}
-.season-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:middle}
-.season-dot.season-in{background:var(--accent)}
-.season-dot.season-soon30{background:var(--k2)}
-.season-dot.season-soon180{background:var(--k3)}
-.season-dot.season-out{background:var(--muted);opacity:.45}
+table.wtable td{vertical-align:middle}
+table.wtable .strip-cell{width:45%}
+.season-strip,.season-months{position:relative;display:block;max-width:300px}
+.season-strip{height:12px;border-radius:3px;background:var(--bar-soft);
+  background-image:repeating-linear-gradient(90deg,transparent 0 calc(100% / 12 - 1px),var(--card) calc(100% / 12 - 1px) calc(100% / 12))}
+.season-strip i{position:absolute;top:0;bottom:0;border-radius:2px;opacity:.9}
+.season-breed i,.season-key.season-breed{background:var(--accent)}
+.season-occ i,.season-key.season-occ{background:var(--k3)}
+.season-strip b,.season-key.season-today{position:absolute;top:-3px;bottom:-3px;width:2px;margin-left:-1px;background:var(--text)}
+.season-months{display:inline-grid;width:min(300px,calc(100% - 1.4em));vertical-align:middle;grid-template-columns:repeat(12,1fr);text-align:center;letter-spacing:0}
+.season-legend{margin:0 2px 8px}
+.season-key{display:inline-block;width:14px;height:8px;border-radius:2px;margin-left:8px}
+.season-key.season-today{position:static;width:2px;height:12px;margin-left:12px}
+tr.grp td{background:none!important;font-weight:600;padding-top:16px;color:var(--text);border-bottom:1px solid var(--line)}
+tr.grp td small{font-weight:400;color:var(--muted);margin-left:6px}
 .new-badge{background:var(--accent);color:#fff;border-radius:999px;padding:0 6px;font-size:.62rem;font-weight:700;margin-left:6px;vertical-align:middle}
 .cal-months-wrap{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:16px}
 .cal-month h4{margin:0 0 5px;font-size:.76rem;color:var(--muted);font-weight:600}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
 .cal-dow{font-size:.6rem;color:var(--muted);text-align:center;line-height:1.6}
 .cal-day{aspect-ratio:1;border-radius:2px;background:var(--bar-soft)}
-.cal-day.cal-lifer{box-shadow:0 0 0 1.5px var(--accent) inset}
+.cal-day.cal-lifer{box-shadow:0 0 0 2px var(--k2) inset}
 .cal-day.cal-empty{background:transparent}
 svg.curve{width:100%;height:auto;display:block}
 svg.curve text{fill:var(--muted);font-size:11px}
@@ -192,9 +207,9 @@ footer.meta-footer #h-sub{overflow:hidden;text-overflow:ellipsis;white-space:now
 footer.meta-footer .footer-actions{display:flex;align-items:center;gap:12px;flex:0 0 auto}
 footer.meta-footer .btn{flex:0 0 auto;padding:3px 10px}
 .legend{display:flex;align-items:center;gap:8px;margin:6px 2px 14px;font-size:.72rem;color:var(--muted)}
-.legend .grad{flex:0 0 90px;height:8px;border-radius:4px;background:linear-gradient(90deg,var(--k3),var(--accent))}
+.legend .grad{flex:0 0 90px;height:8px;border-radius:4px;background:linear-gradient(90deg,color-mix(in srgb,var(--heat-hi) 8%,var(--heat-lo)),var(--heat-hi))}
 .hbar{display:flex;flex-direction:column;gap:8px;padding:12px 14px}
-.hbar-row{display:grid;grid-template-columns:minmax(0,9rem) 1fr 2.4rem;gap:10px;align-items:center;font-size:.8rem}
+.hbar-row{display:grid;grid-template-columns:minmax(0,16rem) 1fr 2.4rem;gap:10px;align-items:center;font-size:.8rem}
 .hbar-row .lbl{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text)}
 .printonly{display:none}
 @page{size:A4;margin:14mm}
@@ -202,7 +217,8 @@ footer.meta-footer .btn{flex:0 0 auto;padding:3px 10px}
   /* the report is always light on paper, regardless of the UI theme (Einstellungen); !important
      beats the higher-specificity :root[data-theme="dark"] override */
   :root{--bg:#fff!important;--card:#fff!important;--text:#111!important;--muted:#555!important;--line:#ccc!important;--accent:#1f7a3d!important;--accent-soft:#eef6f0!important;
-    --bar:#3d78a8!important;--bar-soft:#d3e2ee!important;--hl:#fff!important;--link:#111!important;--stripe:#f5f5f5!important}
+    --bar:#3d78a8!important;--bar-soft:#d3e2ee!important;--hl:#fff!important;--link:#111!important;--stripe:#f5f5f5!important;
+    --heat-lo:#dcefe2!important;--heat-hi:#1a6334!important;--heat-ink:#fff!important}
   body{font-size:10pt}
   header.top{position:static;border:0}
   .filters,nav.tabs,.pick,.time-bar,#tab-map,.more{display:none!important}
@@ -219,7 +235,7 @@ footer.meta-footer .btn{flex:0 0 auto;padding:3px 10px}
   tr.row{cursor:auto}
   .hide-sm{display:revert!important}
   th.hide-sm,td.hide-sm{display:table-cell!important}
-  .bar,.bar i,.heat td,.pheno div{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .bar,.bar i,.heat td,.pheno div,.cal-day,.season-strip,.season-strip *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   details.info summary{display:none!important}
   h2 .ctl select{appearance:none;border:0;padding:0;background:none;font-weight:600;color:var(--text)}
   details.info p.prose{display:block!important;font-size:8pt;text-align:left}

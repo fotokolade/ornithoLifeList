@@ -22,11 +22,11 @@ function regionTable(lv, list) {
   const maxLife = Math.max(1, ...rows.map(r => r.life.size));
   const th = (k, label, cls) => `<th class="sortable ${cls}${sort.k === k ? " sorted" : ""}" data-lvl="${lv.lvl}" data-k="${k}">${label}${sort.k === k ? (sort.d > 0 ? " ▲" : " ▼") : ""}</th>`;
   return `<h2 data-toc="${esc(t(lv.title))}">${t("regionsBy", t(lv.title))}<small>${rows.length}</small></h2><div class="card"><table class="rtable"><thead><tr>
-    <th class="nr">#</th>${th("name", t("name"), "")}${th("life", t("colLife"), "num")}${th("year", t("colYearShort") + " " + S.year, "num")}${th("month", T.monthsShort[S.month - 1].replace(".", "") + " " + S.year, "num")}</tr></thead><tbody>` +
+    <th class="nr">#</th>${th("name", t(lv.title), "")}<th class="rbar"></th>${th("life", t("colLife"), "num")}${th("year", t("colYearShort") + " " + S.year, "num")}${th("month", T.monthsShort[S.month - 1].replace(".", "") + " " + S.year, "num")}</tr></thead><tbody>` +
     shown.map((r, i) => {
-      const pct = Math.round(r.life.size / maxLife * 100);
-      return `<tr><td class="nr">${i + 1}</td><td><button class="lnk" data-region="${lv.lvl}:${esc(r.key)}">${esc(r.name)}</button></td>
-      <td class="num" style="background:linear-gradient(90deg,color-mix(in srgb,var(--accent) 16%,transparent) ${pct}%,transparent ${pct}%)">${r.life.size}</td><td class="num">${r.year.size}</td><td class="num">${r.month.size}</td></tr>`;
+      const pct = r.life.size / maxLife * 100;
+      return `<tr><td class="nr">${i + 1}</td><td><button class="lnk" data-region="${lv.lvl}:${esc(r.key)}" title="${esc(r.name)}">${esc(r.name)}</button></td>
+      <td class="rbar"><div class="bar"><i style="width:${pct}%"></i></div></td><td class="num">${r.life.size}</td><td class="num">${r.year.size}</td><td class="num">${r.month.size}</td></tr>`;
     }).join("") +
     `</tbody></table>${rows.length > 10 ? `<p class="more"><button class="lnk" data-more="${lv.lvl}">${showAll ? t("showLess") : t("showAll", rows.length)}</button></p>` : ""}</div>`;
 }

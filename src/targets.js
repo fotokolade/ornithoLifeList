@@ -18,7 +18,7 @@ const doyOf = md => Math.floor((Date.UTC(2001, +md.slice(0, 2) - 1, +md.slice(3)
  * visitors that don't breed here — see species_reference.json / wishSeasonHelp.
  * @param {string|null} bzcStart @param {string|null} bzcEnd
  * @param {string|null} [occStart] @param {string|null} [occEnd]
- * @returns {{state: "none"|"in"|"soon30"|"soon180"|"out", daysUntil?: number, kind: "breed"|"occ"|"none"}}
+ * @returns {{state: "none"|"in"|"soon30"|"soon180"|"out", daysUntil?: number, kind: "breed"|"occ"|"none", start?: string, end?: string}}
  */
 function seasonStatus(bzcStart, bzcEnd, occStart, occEnd) {
   const kind = bzcStart ? "breed" : occStart ? "occ" : "none";
@@ -26,12 +26,11 @@ function seasonStatus(bzcStart, bzcEnd, occStart, occEnd) {
   if (!start || !end) return { state: "none", kind };
   const todayDoy = doyOf(TODAY_MD), startDoy = doyOf(start), endDoy = doyOf(end);
   const inRange = startDoy <= endDoy ? (todayDoy >= startDoy && todayDoy <= endDoy) : (todayDoy >= startDoy || todayDoy <= endDoy);
-  if (inRange) return { state: "in", kind };
+  if (inRange) return { state: "in", kind, start, end };
   let daysUntil = startDoy - todayDoy;
   if (daysUntil < 0) daysUntil += 365;
-  if (daysUntil <= 30) return { state: "soon30", daysUntil, kind };
-  if (daysUntil <= 180) return { state: "soon180", daysUntil, kind };
-  return { state: "out", daysUntil, kind };
+  const state = daysUntil <= 30 ? "soon30" : daysUntil <= 180 ? "soon180" : "out";
+  return { state, daysUntil, kind, start, end };
 }
 // sort key: species already in season first, then soonest-to-start first, "no data" species last
 function seasonSortKey(season) {
@@ -39,33 +38,38 @@ function seasonSortKey(season) {
   if (season.state === "none") return Infinity;
   return season.daysUntil;
 }
-// called only for kind "breed"/"occ" rows, i.e. season.state is never "none" here
-function seasonBadge(season) {
-  const label = season.state === "in" ? t("wishSeasonIn")
-    : season.state === "out" ? t("wishSeasonOut")
-    : t("wishSeasonSoon", season.daysUntil);
-  return `<span class="season-dot season-${season.state}" title="${esc(label)}"></span><span class="small">${esc(label)}</span>`;
+function seasonText(season) {
+  if (season.state === "none") return "";
+  const kind = t(season.kind === "breed" ? "wishSeasonKindBreed" : "wishSeasonKindOcc");
+  const when = season.state === "in" ? t("wishSeasonNowUntil", shortMD(season.end))
+    : season.state === "soon30" ? t("wishSeasonSoon", season.daysUntil)
+    : t("wishSeasonFrom", shortMD(season.start));
+  return `${esc(when)}<span class="small">${esc(kind)}</span>`;
 }
-// sort value for the Brutzeit/Zug-Gast columns: null (rows without that kind of data) always sorts last, in either direction
-function wishColSortValue(row, k) {
-  if (k === "name") return null;
-  if (k === "season") return seasonSortKey(row.season);
-  return row.season.kind === k ? seasonSortKey(row.season) : null;
+// Jan-Dec strip with the season window filled in and a tick at today; the window may wrap over New Year
+function seasonStrip(season) {
+  if (season.state === "none") return "";
+  const pos = md => doyOf(md) / 365 * 100;
+  const from = pos(season.start), to = pos(season.end) + 100 / 365;
+  const seg = (a, b) => `<i style="left:${a.toFixed(2)}%;width:${(b - a).toFixed(2)}%"></i>`;
+  const title = `${t(season.kind === "breed" ? "wishSeasonKindBreed" : "wishSeasonKindOcc")}: ${shortMD(season.start)} – ${shortMD(season.end)}`;
+  return `<span class="season-strip season-${season.kind}" title="${esc(title)}">${from <= to ? seg(from, to) : seg(0, to) + seg(from, 100)}<b style="left:${pos(TODAY_MD).toFixed(2)}%"></b></span>`;
 }
+const WISH_GROUPS = [["in", "wishGrpIn"], ["soon30", "wishGrpSoon"], ["later", "wishGrpLater"], ["none", "wishGrpNone"]];
+const wishGroup = season => season.state === "soon180" || season.state === "out" ? "later" : season.state;
+// sorted by season: already in season first, then soonest to start, rows without season data last in either direction
 function wishSortRows(rows) {
   const { k, d } = S.wishSort;
   rows.sort((a, b) => {
     if (k === "name") return d * collator.compare(a.name, b.name);
-    const av = wishColSortValue(a, k), bv = wishColSortValue(b, k);
-    if (av === null && bv === null) return collator.compare(a.name, b.name);
-    if (av === null) return 1;
-    if (bv === null) return -1;
+    const av = seasonSortKey(a.season), bv = seasonSortKey(b.season);
+    if (av === Infinity || bv === Infinity) return (av === Infinity ? 1 : 0) - (bv === Infinity ? 1 : 0) || collator.compare(a.name, b.name);
     return d * (av - bv) || collator.compare(a.name, b.name);
   });
 }
-function wishTh(k, label) {
+function wishTh(k, label, cls = "") {
   const s = S.wishSort;
-  return `<th class="sortable${s.k === k ? " sorted" : ""}" data-k="${k}">${label}${s.k === k ? (s.d > 0 ? " ▲" : " ▼") : ""}</th>`;
+  return `<th class="sortable ${cls}${s.k === k ? " sorted" : ""}" data-k="${k}">${label}${s.k === k ? (s.d > 0 ? " ▲" : " ▼") : ""}</th>`;
 }
 function renderTargets() {
   // deliberately unscoped by S.region: "never seen" means never seen anywhere, not just in the currently filtered region
@@ -97,14 +101,27 @@ function renderTargets() {
         `<span class="chip">${esc(x.name)}${x.latin ? `<i class="latin" style="display:inline;font-style:italic"> ${esc(x.latin)}</i>` : ""}
          <button class="lnk" data-remove="${i}" aria-label="${t("wishRemove")}" style="margin-left:4px">×</button></span>`).join("")}</div>`
     : `<p class="empty">${t("wishEmpty")}</p>`;
+  const row = r => {
+    const name = S.lang === "en" && r.english ? r.english : r.name;
+    const sub = S.lang === "en" && r.english ? `${r.name}${r.latin ? " · " + r.latin : ""}` : r.latin;
+    return `<tr><td>${esc(name)}${sub ? `<span class="latin">${esc(sub)}</span>` : ""}</td>
+      <td class="strip-cell">${seasonStrip(r.season)}</td><td>${seasonText(r.season)}</td></tr>`;
+  };
+  let body;
+  if (S.wishSort.k === "season") {
+    // grouped by how soon the season starts; the group order follows the sort direction
+    const groups = S.wishSort.d > 0 ? WISH_GROUPS : [...WISH_GROUPS.slice(0, 3).reverse(), WISH_GROUPS[3]];
+    body = groups.map(([g, label]) => {
+      const inGroup = rows.filter(r => wishGroup(r.season) === g);
+      return inGroup.length ? `<tr class="grp"><td colspan="3">${t(label)}<small>${inGroup.length}</small></td></tr>` + inGroup.map(row).join("") : "";
+    }).join("");
+  } else {
+    body = rows.map(row).join("");
+  }
+  const monthHead = `<span class="season-months">${T.monthsShort.map(m => `<span>${esc(m.replace(".", "").slice(0, 1))}</span>`).join("")}</span>`;
   const resultTable = rows.length
-    ? `<div class="card"><table><thead><tr>${wishTh("name", t("name"))}${wishTh("breed", t("wishSeasonKindBreed"))}${wishTh("occ", t("wishSeasonKindOcc"))}</tr></thead><tbody>${rows.map(r => {
-        const name = S.lang === "en" && r.english ? r.english : r.name;
-        const sub = S.lang === "en" && r.english ? `${r.name}${r.latin ? " · " + r.latin : ""}` : r.latin;
-        return `<tr><td>${esc(name)}${sub ? `<span class="latin">${esc(sub)}</span>` : ""}</td>
-          <td>${r.season.kind === "breed" ? seasonBadge(r.season) : ""}</td>
-          <td>${r.season.kind === "occ" ? seasonBadge(r.season) : ""}</td></tr>`;
-      }).join("")}</tbody></table></div>`
+    ? `<div class="legend season-legend"><span class="season-key season-breed"></span>${t("wishSeasonKindBreed")}<span class="season-key season-occ"></span>${t("wishSeasonKindOcc")}<span class="season-key season-today"></span>${t("wishToday")}</div>
+      <div class="card"><table class="wtable"><thead><tr>${wishTh("name", t("name"))}${wishTh("season", monthHead, "strip-cell")}<th></th></tr></thead><tbody>${body}</tbody></table></div>`
     : `<p class="empty">${pool.length ? t("wishDone") : t("wishEmpty")}</p>`;
 
   $("tab-targets").innerHTML = `
