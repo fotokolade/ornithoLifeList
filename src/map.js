@@ -1,4 +1,8 @@
-let MAP = null, MAP_LAYER = null;
+let MAP = null, MAP_LAYER = null, MAP_LEGEND = null;
+const markerDia = frac => Math.round(2 * (5 + 17 * Math.sqrt(frac)));
+// warm sequential scale (light amber = low, burnt orange = high) that stays visible on every tile layer
+const markerColor = frac => `color-mix(in srgb, var(--mk-hi) ${Math.round(15 + frac * 85)}%, var(--mk-lo))`;
+const markerDot = (frac, extra = "") => `<div class="dot" style="width:${markerDia(frac)}px;height:${markerDia(frac)}px;background:${markerColor(frac)}${extra}"></div>`;
 // Leaflet and the marker-cluster plugin are vendored into the page (see lifelist.py's vendor-JS embedding),
 // not fetched from a CDN, so they're always present; this is just a defensive check against a broken build.
 function renderMap() {
@@ -22,13 +26,17 @@ function drawMap() {
     L.control.layers(layers, null, { position: "topright" }).addTo(MAP);
     MAP_LAYER = L.markerClusterGroup
       ? L.markerClusterGroup({
-          maxClusterRadius: 45,
-          iconCreateFunction: cl => L.divIcon({
-            html: `<div>${cl.getChildCount()}</div>`, className: "marker-cluster-custom", iconSize: [36, 36],
-          }),
+          maxClusterRadius: 40, disableClusteringAtZoom: 13, showCoverageOnHover: false,
+          iconCreateFunction: cl => {
+            const n = cl.getChildCount(), size = Math.round(24 + 4 * Math.log2(n));
+            return L.divIcon({ html: `<div>${n}</div>`, className: "marker-cluster-custom", iconSize: [size, size] });
+          },
         })
       : L.layerGroup();
     MAP_LAYER.addTo(MAP);
+    MAP_LEGEND = L.control({ position: "bottomleft" });
+    MAP_LEGEND.onAdd = () => L.DomUtil.create("div", "map-legend");
+    MAP_LEGEND.addTo(MAP);
   }
   $("m-metric").options[0].text = cutoffLabel("mapLiferAll", "mapLifer");
   $("m-metric").options[1].text = t("mapYear", timePeriodLabel());
@@ -62,8 +70,13 @@ function drawMap() {
   const value = r => S.metric === "year" ? r.ySp.size : S.metric === "obs" ? r.yn : S.metric === "lifer" ? r.lifer : r.cum.size;
   const pts = [...byPlace.values()].filter(r => PL[r.p].lat && value(r) > 0).sort((a, b) => value(b) - value(a));
   $("map-note").textContent = t("mapNote", pts.length);
-  if (!pts.length) return;
+  const legend = MAP_LEGEND.getContainer();
+  if (!pts.length) { legend.hidden = true; return; }
   const max = value(pts[0]);
+  const steps = [...new Set([max, Math.round(max / 2), 1])].filter(v => v > 0);
+  legend.hidden = false;
+  legend.innerHTML = `<b>${esc($("m-metric").selectedOptions[0].text)}</b><div class="map-legend-row">${steps.map(v =>
+    `<span>${markerDot(v / max)}${fmtN(v)}</span>`).join("")}<span><i class="map-legend-cluster"></i>${t("mapClusterKey")}</span></div>`;
   const bounds = [];
   for (const r of pts) {
     const p = PL[r.p], v = value(r);
@@ -71,18 +84,18 @@ function drawMap() {
     const visitList = visits.map(([d, obs]) => `<details><summary>${fmtD(d)} (${obs.length})</summary><ul>${obs
       .map(o => `<li>${esc(speciesName(SP[o.s]))}${o.c ? ` (${o.c})` : ""}${o.ph ? " 📷" : ""}</li>`).join("")}</ul></details>`).join("");
     // a plain div-icon marker (not circleMarker) so the cluster plugin, which only understands L.Marker, can group these
-    const dia = Math.round(2 * (5 + 17 * Math.sqrt(v / max)));
-    const icon = L.divIcon({
-      className: "value-marker",
-      html: `<div style="width:${dia}px;height:${dia}px;background:var(--k5);opacity:.85;border:1.5px solid rgba(0,0,0,.35);border-radius:50%"></div>`,
-      iconSize: [dia, dia], iconAnchor: [dia / 2, dia / 2],
-    });
-    L.marker([p.lat, p.lon], { icon })
-      .bindPopup(`<b>${esc(p.name)}</b><br>${esc(p.muni)}<br>${t("mapSpecies")}: ${r.sp.size}, ${t("observations")}: ${r.n}${r.lifer ? `, ${t("mapLifeHere")}: ${r.lifer}` : ""}<br>${fmtD(r.first)} ${t("to")} ${fmtD(r.last)}
+    const dia = markerDia(v / max);
+    const icon = L.divIcon({ className: "value-marker", html: markerDot(v / max), iconSize: [dia, dia], iconAnchor: [dia / 2, dia / 2] });
+    const stat = (n, label) => `<span><b>${fmtN(n)}</b>${esc(label)}</span>`;
+    const marker = L.marker([p.lat, p.lon], { icon, zIndexOffset: Math.round(v / max * 1000) })
+      .bindPopup(`<div class="pop-h">${esc(p.name)}</div><div class="pop-sub">${esc(p.muni)}</div>
+        <div class="pop-stats">${stat(r.sp.size, t("mapSpecies"))}${stat(r.n, t("obsShort"))}${r.lifer ? stat(r.lifer, t("mapLifeHere")) : ""}</div>
+        <div class="pop-sub">${fmtD(r.first)} ${t("to")} ${fmtD(r.last)}</div>
         <div class="visits">${visitList}</div>
-        <button class="lnk" data-region="p:${p.i}">${t("mapFilter")}</button>`, { maxWidth: 280 })
-      .bindTooltip(`${esc(p.name)}: ${v}`)
+        <button class="lnk" data-region="p:${p.i}">${t("mapFilter")}</button>`, { maxWidth: 300, minWidth: 220 })
+      .bindTooltip(`${esc(p.name)}: ${fmtN(v)}`, { direction: "top", offset: [0, -dia / 2] })
       .addTo(MAP_LAYER);
+    marker.on("popupopen", () => marker.closeTooltip());
     bounds.push([p.lat, p.lon]);
   }
   MAP.fitBounds(bounds, { padding: [30, 30], maxZoom: 15 });

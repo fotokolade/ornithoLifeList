@@ -12,6 +12,7 @@
   --k1:#2f8f4e; --k2:#c98a1b; --k3:#3d78a8; --k4:#8659b3; --k5:#c1554a; --k6:#2f9e93;
   --heat-lo:#dcefe2; --heat-hi:#1a6334; --heat-ink:#fff;
   --shadow:0 1px 2px rgba(20,32,26,.05),0 3px 10px rgba(20,32,26,.04);
+  --mk-lo:#f6c36b; --mk-hi:#b8420f;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
@@ -182,15 +183,31 @@ svg.curve text{fill:var(--muted);font-size:11px}
 .empty{color:var(--muted);padding:10px 4px}
 .more{margin:8px 0 2px}
 /* own stacking context: Leaflet's panes/controls use z-index 400-1000 and would otherwise cover the fixed footer */
-#map{height:66vh;min-height:340px;border-radius:8px;border:1px solid var(--line);isolation:isolate}
-.leaflet-popup-content{font:13px/1.35 system-ui,sans-serif;color:#1d2521}
-.leaflet-popup-content .visits{max-height:190px;overflow:auto;margin-top:6px;border-top:1px solid #e4e8e4;padding-top:4px}
+#map{height:70vh;min-height:360px;border-radius:12px;border:1px solid var(--line);isolation:isolate;box-shadow:var(--shadow)}
+/* map furniture stays light in both themes, like the tiles underneath */
+.leaflet-popup-content-wrapper{border-radius:10px;box-shadow:0 6px 24px rgba(0,0,0,.18)}
+.leaflet-popup-content{font:13px/1.4 system-ui,sans-serif;color:#1d2521;margin:12px 14px}
+.leaflet-popup-content .pop-h{font-weight:700;font-size:14px;line-height:1.25;padding-right:10px}
+.leaflet-popup-content .pop-sub{color:#6a746e;font-size:12px}
+.leaflet-popup-content .pop-stats{display:flex;gap:6px;margin:8px 0 6px}
+.leaflet-popup-content .pop-stats span{flex:1;background:#f1f5f2;border-radius:7px;padding:5px 8px;font-size:11px;color:#6a746e;line-height:1.2}
+.leaflet-popup-content .pop-stats b{display:block;font-size:15px;color:#1d2521}
+.leaflet-popup-content .visits{max-height:190px;overflow:auto;margin:8px 0 6px;border-top:1px solid #e4e8e4;padding-top:6px}
 .leaflet-popup-content .visits details{margin:2px 0}
 .leaflet-popup-content .visits summary{cursor:pointer}
 .leaflet-popup-content .visits ul{margin:2px 0 4px;padding-left:18px}
-.marker-cluster-custom{background:color-mix(in srgb,var(--k3) 22%,transparent)}
-.marker-cluster-custom div{background:var(--k3);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font:600 12px/1 system-ui,sans-serif;width:100%;height:100%;transition:transform .12s ease}
+.leaflet-popup-content .lnk{color:#3d6a8c}
+.leaflet-tooltip{font:12px/1.3 system-ui,sans-serif;border-radius:6px}
+.marker-cluster-custom div{background:var(--k3);color:#fff;border:2px solid #fff;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font:700 12px/1 system-ui,sans-serif;width:100%;height:100%;box-shadow:0 1px 4px rgba(0,0,0,.35);transition:transform .12s ease}
 .marker-cluster-custom:hover div{transform:scale(1.12)}
+.value-marker .dot{border-radius:50%;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4);box-sizing:border-box}
+.map-legend{background:rgba(255,255,255,.94);color:#1d2521;padding:8px 12px;border-radius:10px;box-shadow:0 1px 6px rgba(0,0,0,.2);font:12px/1.3 system-ui,sans-serif}
+.map-legend b{display:block;margin-bottom:6px}
+.map-legend-row{display:flex;align-items:center;gap:12px}
+.map-legend-row span{display:flex;align-items:center;gap:5px}
+.map-legend .dot{border-radius:50%;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.35);box-sizing:border-box}
+.map-legend-cluster{display:inline-block;width:18px;height:18px;border-radius:50%;background:var(--k3);border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.35);box-sizing:border-box}
 /* hover targets the inner circle div, not the outer .value-marker wrapper: Leaflet positions that
    wrapper via its own inline transform, and a competing CSS transform there would fight it */
 .value-marker > div{transition:transform .12s ease,filter .12s ease}
