@@ -93,6 +93,84 @@ function barChartSvg(values, labels, tips, every = 1, color = "--bar") {
   });
   return `<svg class="curve" viewBox="0 0 ${W} ${H}" role="img">${g}</svg>`;
 }
+// colour follows the time of day (night, dawn, morning, midday, evening, dusk); [hour, light theme, dark theme]
+/** @type {[number, string, string][]} */
+const DAY_STOPS = [[0, "#2b3a67", "#7d8fd0"], [4, "#3b4a7a", "#8797d4"], [5.5, "#c46a8a", "#d98aa6"], [7, "#e8914a", "#eda066"],
+  [9, "#e9b949", "#ecc462"], [12, "#6fb3d9", "#7cbde0"], [15, "#5a9fd0", "#6aaad8"], [17.5, "#e8914a", "#eda066"],
+  [19.5, "#b0588f", "#c877a8"], [21, "#4a3f7a", "#9a8bd0"], [24, "#2b3a67", "#7d8fd0"]];
+// [from hour, to hour, i18n key of the label, rgb of the band]
+const DAY_BANDS = [[0, 5, "dayNight", "43,58,103"], [5, 8, "dayMorning", "232,145,74"], [8, 17, "dayDay", "233,185,73"],
+  [17, 21, "dayEvening", "176,88,143"], [21, 24, "dayNight", "43,58,103"]];
+// Replaces the SVG bar chart in `card` with a smoothed 24-hour curve over shaded night/morning/day/evening bands.
+function upgradeDayCurve(card, values, titles, valueName) {
+  if (!card || typeof Chart === "undefined") return;
+  if (BAR_CHARTS[card.id]) { BAR_CHARTS[card.id].destroy(); delete BAR_CHARTS[card.id]; }
+  const style = getComputedStyle(document.documentElement);
+  const cssVar = v => style.getPropertyValue(v).trim();
+  const dark = parseInt(cssVar("--card").slice(1, 3), 16) < 0x80;
+  const stops = DAY_STOPS.map(([h, light, dk]) => /** @type {[number, string]} */ ([h, dark ? dk : light]));
+  const gradient = (chart, alpha) => {
+    const a = chart.chartArea;
+    if (!a) return stops[0][1];
+    const g = chart.ctx.createLinearGradient(chart.scales.x.getPixelForValue(0), 0, chart.scales.x.getPixelForValue(24), 0);
+    for (const [h, c] of stops) g.addColorStop(h / 24, c + alpha);
+    return g;
+  };
+  const bands = {
+    id: "dayBands",
+    beforeDatasetsDraw(chart) {
+      const { ctx, chartArea: a, scales: { x } } = chart;
+      ctx.save();
+      for (const [h0, h1, key, rgb] of DAY_BANDS) {
+        const x0 = x.getPixelForValue(h0), x1 = x.getPixelForValue(h1);
+        ctx.fillStyle = `rgba(${rgb},${dark ? 0.1 : 0.09})`;
+        ctx.fillRect(x0, a.top, x1 - x0, a.bottom - a.top);
+        ctx.fillStyle = cssVar("--muted");
+        ctx.font = "11px system-ui, sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText(t(key), (x0 + x1) / 2, a.top + 13);
+      }
+      ctx.restore();
+    },
+    afterDatasetsDraw(chart) {
+      const active = chart.tooltip && chart.tooltip.getActiveElements();
+      if (!active || !active.length) return;
+      const { ctx, chartArea: a } = chart, px = active[0].element.x;
+      ctx.save();
+      ctx.strokeStyle = cssVar("--muted");
+      ctx.setLineDash([3, 3]);
+      ctx.beginPath(); ctx.moveTo(px, a.top); ctx.lineTo(px, a.bottom); ctx.stroke();
+      ctx.restore();
+    },
+  };
+  card.innerHTML = "";
+  const box = document.createElement("div");
+  box.style.height = "240px";
+  const canvas = document.createElement("canvas");
+  box.append(canvas);
+  card.append(box);
+  BAR_CHARTS[card.id] = new Chart(canvas, {
+    type: "line",
+    plugins: [bands],
+    data: { datasets: [{
+      data: values.map((v, h) => ({ x: h + 0.5, y: v })),
+      fill: "origin", cubicInterpolationMode: "monotone", borderWidth: 2,
+      pointRadius: 0, pointHoverRadius: 5, pointHoverBorderWidth: 2, pointHoverBorderColor: cssVar("--card"),
+      pointHoverBackgroundColor: ctx => stops.reduce((c, [h, col]) => (h <= ctx.parsed.x ? col : c), stops[0][1]),
+      borderColor: ctx => gradient(ctx.chart, ""),
+      backgroundColor: ctx => gradient(ctx.chart, dark ? "55" : "40"),
+    }] },
+    options: {
+      responsive: true, maintainAspectRatio: false, animation: { duration: 300 }, parsing: false,
+      interaction: { mode: "index", intersect: false },
+      plugins: { legend: { display: false }, tooltip: { displayColors: false, callbacks: { title: items => titles[items[0].dataIndex], label: item => `${valueName}: ${fmtN(item.parsed.y)}` } } },
+      scales: {
+        x: { type: "linear", min: 0, max: 24, ticks: { stepSize: 3, color: cssVar("--muted") }, grid: { display: false } },
+        y: { beginAtZero: true, ticks: { precision: 0, color: cssVar("--muted") }, grid: { color: cssVar("--line") } },
+      },
+    },
+  });
+}
 // Chart.js is vendored into the page (see lifelist.py's vendor-JS embedding), not fetched from a CDN, so
 // it's always present; upgradeBarChart() replaces the hand-drawn SVG bar chart already in the card
 // with a nicer Chart.js one. If Chart is somehow missing (a broken build), the SVG just stays as-is.

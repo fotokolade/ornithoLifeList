@@ -56,7 +56,7 @@ function renderActivity() {
     <h2 data-toc="${esc(t("tocActSpecies"))}">${t("actSpecies")}</h2>
     ${infoText(t("actSpeciesHelp", MIN_TIMED))}
     <div class="detailgrid"><div><b>${t("actEarly")}</b>${speciesTable(early)}</div><div><b>${t("actLate")}</b>${speciesTable(late)}</div></div>`;
-  upgradeBarChart($("hour-card"), hours.map(String), series, 0, hours.map(h => hourLabel(h)));
+  upgradeDayCurve($("hour-card"), series, hours.map(hourLabel), t({ obs: "actMObs", species: "actMSpecies", days: "actMDays" }[S.actMetric]));
   upgradeBarChart($("weekday-card"), T.weekdays, wdDays.map(s => s.size), 3);
   updateToc();
 }
