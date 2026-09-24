@@ -144,6 +144,7 @@ function applyTheme(theme) {
   if (theme === "system") document.documentElement.removeAttribute("data-theme");
   else document.documentElement.setAttribute("data-theme", theme);
   try { localStorage.setItem("lifelist-theme", theme); } catch (e) { /* private mode may refuse */ }
+  renderActive();  // canvas charts bake their colours in when drawn
 }
 function init() {
   document.documentElement.lang = S.lang;
@@ -161,6 +162,7 @@ function init() {
   $("f-lang").addEventListener("change", e => { applyLang(e.target.value); });
   $("f-region").addEventListener("change", e => { S.region = e.target.value; renderActive(); });
   $("o-theme").addEventListener("change", e => { applyTheme(e.target.value); });
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { if (S.theme === "system") renderActive(); });
   $("o-escaped").addEventListener("change", e => { S.escaped = e.target.checked; refreshAll(); });
   $("o-collective").addEventListener("change", e => { S.collective = e.target.checked; refreshAll(); });
   $("o-redact").addEventListener("change", e => { applyRedact(e.target.checked); });
@@ -188,13 +190,19 @@ function init() {
   let printBackup = null;
   window.addEventListener("beforeprint", () => {
     // the report contains every section in full: no open detail rows, search, atlas filter, truncated region tables or wishlist source filter
-    printBackup = { q: S.q, open: S.open, atlasF: S.atlasF, regAll: S.regAll, targetSrc: S.targetSrc };
+    printBackup = { q: S.q, open: S.open, atlasF: S.atlasF, regAll: S.regAll, targetSrc: S.targetSrc, theme: document.documentElement.getAttribute("data-theme") };
+    document.documentElement.setAttribute("data-theme", "light");  // paper is always light, also for the canvas charts
     S.q = ""; S.open = new Set(); S.atlasF = "all"; S.regAll = Object.fromEntries(LEVELS.map(lv => [lv.lvl, true])); S.targetSrc = "all";
     $("h-print").textContent = t("printed", new Date().toLocaleDateString(S.lang === "en" ? "en-GB" : "de-DE")) + (S.region === "all" ? "" : ", " + $("f-region").selectedOptions[0].text);
     renderOverview(); renderList(); renderTargets(); renderActivity(); renderRegions();
   });
   window.addEventListener("afterprint", () => {
-    if (printBackup) { Object.assign(S, printBackup); printBackup = null; }
+    if (printBackup) {
+      const { theme, ...state } = printBackup;
+      if (theme) document.documentElement.setAttribute("data-theme", theme); else document.documentElement.removeAttribute("data-theme");
+      Object.assign(S, state);
+      printBackup = null;
+    }
     renderActive();
   });
   $("m-metric").addEventListener("change", e => { S.metric = e.target.value; renderMap(); });

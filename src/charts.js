@@ -43,7 +43,6 @@ function curveSvg(chrono) {
     </defs>
     ${g}<path d="${area}" fill="url(#${gradId})" stroke="none"/><path d="${d}" fill="none" stroke="url(#${lineId})" stroke-width="2.25" stroke-linejoin="round"/>${dots}</svg>`;
 }
-// shared cool-to-warm intensity scale, reused by the heatmaps and the map markers
 // sequential scale in one hue, light (few) to dark (many); --heat-lo/--heat-hi flip for the dark theme
 function heatColor(frac) {
   return `color-mix(in srgb, var(--heat-hi) ${Math.round(8 + Math.max(0, Math.min(1, frac)) * 92)}%, var(--heat-lo))`;
@@ -79,19 +78,15 @@ function niceStep(max) {
   return mag;
 }
 // Vertical bars with a light grid; `tips[i]` becomes the hover text of bar i.
-function barChartSvg(values, labels, tips, every = 1, color = "--bar") {
+function barChartSvg(values, labels, tips, every = 1) {
   const W = 720, H = 200, L = 36, R = 8, Tp = 10, B = 22, n = values.length;
   const max = Math.max(1, ...values), step = niceStep(max), yMax = Math.ceil(max / step) * step;
   const y = v => H - B - v / yMax * (H - B - Tp), slot = (W - L - R) / n, top = Math.max(...values);
-  const gid = "barGrad" + color.replace(/[^a-z0-9]/gi, "");
-  let g = `<defs>
-    <linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(${color})"/><stop offset="100%" stop-color="var(${color})" stop-opacity="0.6"/></linearGradient>
-    <linearGradient id="${gid}Top" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--accent)"/><stop offset="100%" stop-color="var(--accent)" stop-opacity="0.65"/></linearGradient>
-  </defs>`;
+  let g = "";
   for (let v = 0; v <= yMax; v += step) g += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${L - 6}" y="${y(v) + 4}" text-anchor="end">${v}</text>`;
   values.forEach((v, i) => {
     const x = L + i * slot + slot * 0.15;
-    g += `<rect x="${x}" y="${y(v)}" width="${slot * 0.7}" height="${H - B - y(v)}" rx="2" fill="url(#${v === top && v > 0 ? gid + "Top" : gid})"><title>${esc(tips[i])}</title></rect>`;
+    g += `<rect x="${x}" y="${y(v)}" width="${slot * 0.7}" height="${H - B - y(v)}" rx="2" fill="var(${v === top && v > 0 ? "--accent" : "--bar"})"><title>${esc(tips[i])}</title></rect>`;
     if (i % every === 0) g += `<text x="${x + slot * 0.35}" y="${H - 6}" text-anchor="middle">${esc(labels[i])}</text>`;
   });
   return `<svg class="curve" viewBox="0 0 ${W} ${H}" role="img">${g}</svg>`;
@@ -104,11 +99,16 @@ const DAY_STOPS = [[0, "#2b3a67", "#7d8fd0"], [4, "#3b4a7a", "#8797d4"], [5.5, "
 // [from hour, to hour, i18n key of the label, rgb of the band]
 const DAY_BANDS = [[0, 5, "dayNight", "43,58,103"], [5, 8, "dayMorning", "232,145,74"], [8, 17, "dayDay", "233,185,73"],
   [17, 21, "dayEvening", "176,88,143"], [21, 24, "dayNight", "43,58,103"]];
-const isDarkTheme = () => parseInt(getComputedStyle(document.documentElement).getPropertyValue("--card").trim().slice(1, 3), 16) < 0x80;
+// canvas charts read their colours once when drawn, so they follow the explicit theme attribute (set to
+// "light" while printing, see app.js) or the OS preference; every theme change redraws the active tab
+const isDarkTheme = () => {
+  const attr = document.documentElement.getAttribute("data-theme");
+  return attr ? attr === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+};
 /** @returns {[number, string][]} [hour, colour] for the active theme */
 const dayStops = () => { const dark = isDarkTheme(); return DAY_STOPS.map(([h, light, dk]) => /** @type {[number, string]} */ ([h, dark ? dk : light])); };
-/** Time-of-day colour at `hour` (0-24, fractional), interpolated between the DAY_STOPS. */
-function dayColor(hour, stops = dayStops()) {
+/** Time-of-day colour at `hour` (0-24, fractional), interpolated between `stops`. */
+function dayColor(hour, stops) {
   const rgb = c => [1, 3, 5].map(i => parseInt(c.slice(i, i + 2), 16));
   for (let i = 0; i < stops.length - 1; i++) {
     const [h0, c0] = stops[i], [h1, c1] = stops[i + 1];
@@ -119,16 +119,54 @@ function dayColor(hour, stops = dayStops()) {
   }
   return stops[0][1];
 }
-// Replaces the SVG bar chart in `card` with a smoothed 24-hour curve over shaded night/morning/day/evening bands.
-function upgradeDayCurve(card, values, titles, valueName) {
-  if (!card || typeof Chart === "undefined") return;
+
+// Chart.js is vendored into the page (see lifelist.py's vendor-JS embedding), not fetched from a CDN, so
+// it's always present; the upgrade functions replace the hand-drawn SVG chart already in the card with a
+// nicer Chart.js one. If Chart is somehow missing (a broken build), the SVG just stays as-is.
+const CHART_PALETTE = ["--k1", "--k2", "--k3", "--k4", "--k5", "--k6"];
+const BAR_CHARTS = {};  // card.id -> Chart instance; id stays stable across re-renders even though the DOM node is recreated each time
+const cssVar = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+/** Swaps the card's content for a canvas of the given height and draws `config` on it; false without Chart.js. */
+function mountChart(card, height, config) {
+  if (!card || typeof Chart === "undefined") return false;
   if (BAR_CHARTS[card.id]) { BAR_CHARTS[card.id].destroy(); delete BAR_CHARTS[card.id]; }
-  const style = getComputedStyle(document.documentElement);
-  const cssVar = v => style.getPropertyValue(v).trim();
-  const dark = isDarkTheme(), stops = dayStops();
+  card.innerHTML = "";
+  const box = document.createElement("div");
+  box.style.height = height + "px";
+  const canvas = document.createElement("canvas");
+  box.append(canvas);
+  card.append(box);
+  BAR_CHARTS[card.id] = new Chart(canvas, config);
+  return true;
+}
+const axisTicks = extra => ({ color: cssVar("--muted"), ...extra });
+// one colour for every bar; only the highest one stands out in the accent colour
+function upgradeBarChart(card, labels, values, tips) {
+  const bar = cssVar("--bar"), accent = cssVar("--accent"), max = Math.max(...values);
+  const hue = v => v === max && v > 0 ? accent : bar;
+  mountChart(card, 220, {
+    type: "bar",
+    data: { labels, datasets: [{
+      data: values,
+      backgroundColor: values.map(v => hue(v) + "cc"),
+      hoverBackgroundColor: values.map(hue),
+      borderRadius: 4, maxBarThickness: 34,
+    }] },
+    options: {
+      responsive: true, maintainAspectRatio: false, animation: { duration: 300 },
+      plugins: { legend: { display: false }, tooltip: { displayColors: false, callbacks: { title: () => "", label: item => tips[item.dataIndex] } } },
+      scales: {
+        y: { beginAtZero: true, ticks: axisTicks({ precision: 0 }), grid: { color: cssVar("--line") } },
+        x: { grid: { display: false }, ticks: axisTicks() },
+      },
+    },
+  });
+}
+// Replaces the SVG bar chart in `card` with a smoothed 24-hour curve over shaded night/morning/day/evening bands.
+function upgradeDayCurve(card, values, titles, valueName, stops) {
+  const dark = isDarkTheme(), muted = cssVar("--muted");
   const gradient = (chart, alpha) => {
-    const a = chart.chartArea;
-    if (!a) return stops[0][1];
+    if (!chart.chartArea) return stops[0][1];
     const g = chart.ctx.createLinearGradient(chart.scales.x.getPixelForValue(0), 0, chart.scales.x.getPixelForValue(24), 0);
     for (const [h, c] of stops) g.addColorStop(h / 24, c + alpha);
     return g;
@@ -142,7 +180,7 @@ function upgradeDayCurve(card, values, titles, valueName) {
         const x0 = x.getPixelForValue(h0), x1 = x.getPixelForValue(h1);
         ctx.fillStyle = `rgba(${rgb},${dark ? 0.1 : 0.09})`;
         ctx.fillRect(x0, a.top, x1 - x0, a.bottom - a.top);
-        ctx.fillStyle = cssVar("--muted");
+        ctx.fillStyle = muted;
         ctx.font = "11px system-ui, sans-serif";
         ctx.textAlign = "center";
         ctx.fillText(t(key), (x0 + x1) / 2, a.top + 13);
@@ -154,19 +192,13 @@ function upgradeDayCurve(card, values, titles, valueName) {
       if (!active || !active.length) return;
       const { ctx, chartArea: a } = chart, px = active[0].element.x;
       ctx.save();
-      ctx.strokeStyle = cssVar("--muted");
+      ctx.strokeStyle = muted;
       ctx.setLineDash([3, 3]);
       ctx.beginPath(); ctx.moveTo(px, a.top); ctx.lineTo(px, a.bottom); ctx.stroke();
       ctx.restore();
     },
   };
-  card.innerHTML = "";
-  const box = document.createElement("div");
-  box.style.height = "240px";
-  const canvas = document.createElement("canvas");
-  box.append(canvas);
-  card.append(box);
-  BAR_CHARTS[card.id] = new Chart(canvas, {
+  mountChart(card, 240, {
     type: "line",
     plugins: [bands],
     data: { datasets: [{
@@ -182,45 +214,8 @@ function upgradeDayCurve(card, values, titles, valueName) {
       interaction: { mode: "index", intersect: false },
       plugins: { legend: { display: false }, tooltip: { displayColors: false, callbacks: { title: items => titles[items[0].dataIndex], label: item => `${valueName}: ${fmtN(item.parsed.y)}` } } },
       scales: {
-        x: { type: "linear", min: 0, max: 24, ticks: { stepSize: 3, color: cssVar("--muted") }, grid: { display: false } },
-        y: { beginAtZero: true, ticks: { precision: 0, color: cssVar("--muted") }, grid: { color: cssVar("--line") } },
-      },
-    },
-  });
-}
-// Chart.js is vendored into the page (see lifelist.py's vendor-JS embedding), not fetched from a CDN, so
-// it's always present; upgradeBarChart() replaces the hand-drawn SVG bar chart already in the card
-// with a nicer Chart.js one. If Chart is somehow missing (a broken build), the SVG just stays as-is.
-const CHART_PALETTE = ["--k1", "--k2", "--k3", "--k4", "--k5", "--k6"];
-const BAR_CHARTS = {};  // card.id -> Chart instance; id stays stable across re-renders even though the DOM node is recreated each time
-// one colour for every bar; only the highest one stands out in the accent colour
-function upgradeBarChart(card, labels, values, tips) {
-  if (!card || typeof Chart === "undefined") return;
-  if (BAR_CHARTS[card.id]) { BAR_CHARTS[card.id].destroy(); delete BAR_CHARTS[card.id]; }
-  const style = getComputedStyle(document.documentElement);
-  const bar = style.getPropertyValue("--bar").trim(), accent = style.getPropertyValue("--accent").trim();
-  const max = Math.max(...values);
-  const hue = v => v === max && v > 0 ? accent : bar;
-  card.innerHTML = "";
-  const box = document.createElement("div");
-  box.style.height = "220px";
-  const canvas = document.createElement("canvas");
-  box.append(canvas);
-  card.append(box);
-  BAR_CHARTS[card.id] = new Chart(canvas, {
-    type: "bar",
-    data: { labels, datasets: [{
-      data: values,
-      backgroundColor: values.map(v => hue(v) + "cc"),
-      hoverBackgroundColor: values.map(hue),
-      borderRadius: 4, maxBarThickness: 34,
-    }] },
-    options: {
-      responsive: true, maintainAspectRatio: false, animation: { duration: 300 },
-      plugins: { legend: { display: false }, tooltip: tips ? { callbacks: { title: items => tips[items[0].dataIndex] } } : {} },
-      scales: {
-        y: { beginAtZero: true, ticks: { precision: 0, color: style.getPropertyValue("--muted").trim() }, grid: { color: style.getPropertyValue("--line").trim() } },
-        x: { grid: { display: false }, ticks: { color: style.getPropertyValue("--muted").trim() } },
+        x: { type: "linear", min: 0, max: 24, ticks: axisTicks({ stepSize: 3 }), grid: { display: false } },
+        y: { beginAtZero: true, ticks: axisTicks({ precision: 0 }), grid: { color: cssVar("--line") } },
       },
     },
   });

@@ -25,9 +25,10 @@ function renderActivity() {
   const wdDays = Array.from({ length: 7 }, () => new Set());
   for (const o of scoped) wdDays[(new Date(o.d + "T00:00:00Z").getUTCDay() + 6) % 7].add(o.d);
 
+  const stops = dayStops();
   const speciesRows = [...bySpecies].filter(([, a]) => a.length >= MIN_TIMED).map(([s, a]) => ({ s, med: median(a), n: a.length }));
   const speciesTable = rows => `<div class="card"><table><thead><tr><th>${t("name")}</th><th class="num">${t("colMedian")}</th><th class="num">${t("obsShort")}</th></tr></thead><tbody>${rows.map(r =>
-    `<tr><td>${speciesLine(SP[r.s])}</td><td class="num"><span class="time-chip" style="background:${dayColor(r.med / 60)}"></span>${fmtTime(r.med)}</td><td class="num">${r.n}</td></tr>`).join("")}</tbody></table></div>`;
+    `<tr><td>${speciesLine(SP[r.s])}</td><td class="num"><span class="time-chip" style="background:${dayColor(r.med / 60, stops)}"></span>${fmtTime(r.med)}</td><td class="num">${r.n}</td></tr>`).join("")}</tbody></table></div>`;
   const early = [...speciesRows].sort((a, b) => a.med - b.med).slice(0, 8), late = [...speciesRows].sort((a, b) => b.med - a.med).slice(0, 8);
 
   const heatMax = Math.max(1, ...monthHour.flat());
@@ -56,7 +57,7 @@ function renderActivity() {
     <h2 data-toc="${esc(t("tocActSpecies"))}">${t("actSpecies")}</h2>
     ${infoText(t("actSpeciesHelp", MIN_TIMED))}
     <div class="detailgrid"><div><b>${t("actEarly")}</b>${speciesTable(early)}</div><div><b>${t("actLate")}</b>${speciesTable(late)}</div></div>`;
-  upgradeDayCurve($("hour-card"), series, hours.map(hourLabel), t({ obs: "actMObs", species: "actMSpecies", days: "actMDays" }[S.actMetric]));
-  upgradeBarChart($("weekday-card"), T.weekdays, wdDays.map(s => s.size));
+  upgradeDayCurve($("hour-card"), series, hours.map(hourLabel), t({ obs: "actMObs", species: "actMSpecies", days: "actMDays" }[S.actMetric]), stops);
+  upgradeBarChart($("weekday-card"), T.weekdays, wdDays.map(s => s.size), T.weekdays.map((w, i) => w + ": " + wdDays[i].size));
   updateToc();
 }

@@ -51,9 +51,11 @@ function seasonStrip(season) {
   if (season.state === "none") return "";
   const pos = md => doyOf(md) / 365 * 100;
   const from = pos(season.start), to = pos(season.end) + 100 / 365;
+  // same wrap test as seasonStatus(): a window whose start lies after its end runs over New Year
+  const wraps = doyOf(season.start) > doyOf(season.end);
   const seg = (a, b) => `<i style="left:${a.toFixed(2)}%;width:${(b - a).toFixed(2)}%"></i>`;
   const title = `${t(season.kind === "breed" ? "wishSeasonKindBreed" : "wishSeasonKindOcc")}: ${shortMD(season.start)} – ${shortMD(season.end)}`;
-  return `<span class="season-strip season-${season.kind}" title="${esc(title)}">${from <= to ? seg(from, to) : seg(0, to) + seg(from, 100)}<b style="left:${pos(TODAY_MD).toFixed(2)}%"></b></span>`;
+  return `<span class="season-strip season-${season.kind}" title="${esc(title)}">${wraps ? seg(0, to) + seg(from, 100) : seg(from, to)}<b style="left:${pos(TODAY_MD).toFixed(2)}%"></b></span>`;
 }
 const WISH_GROUPS = [["in", "wishGrpIn"], ["soon30", "wishGrpSoon"], ["later", "wishGrpLater"], ["none", "wishGrpNone"]];
 const wishGroup = season => season.state === "soon180" || season.state === "out" ? "later" : season.state;
