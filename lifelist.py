@@ -188,6 +188,34 @@ def build_data(sightings, english_by_latin):
     return {"sp": sp_rows, "pl": place_rows, "obs": obs}
 
 
+def build_page_data(sightings, source_name, redact):
+    english_by_latin, wishlist_rows = load_species_reference()
+    data = build_data(sightings, english_by_latin)
+    data["euro"] = wishlist_rows
+    if redact:  # remove place data from the file itself, not just from the display
+        data["pl"] = [["", "", r[2], r[3], 0, 0] for r in data["pl"]]
+    data["meta"] = {
+        "redacted": redact,
+        "source": source_name,
+    }
+    return data
+
+
+def render_html(data):
+    with open(os.path.join(RESOURCES, "template.html"), encoding="utf-8") as fh:
+        tpl = fh.read()
+    blob = json.dumps(data, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
+    app_js = build_app_js().replace("</script", "<\\/script")
+    vendor_js = build_vendor_js().replace("</script", "<\\/script")
+    vendor_css = build_vendor_css().replace("</style", "<\\/style")
+    # vendor/data/app placeholders first, in increasing order of "how likely is this blob to
+    # accidentally contain another placeholder's literal text" — str.replace() replaces every
+    # occurrence, so once a large blob is substituted in, any later replace() pass would also hit
+    # a stray match inside *that* blob (this bit us once: a JS comment mentioning "__VENDOR_JS__")
+    return (tpl.replace("__VENDOR_CSS__", vendor_css).replace("__VENDOR_JS__", vendor_js)
+            .replace("__DATA_JSON__", blob).replace("__APP_JS__", app_js))
+
+
 def main():
     parser = argparse.ArgumentParser(description="Builds lifelist.html from an ornitho.de JSON export.")
     parser.add_argument("--source", "-s", help="export JSON file (default: newest export_*.json)")
@@ -200,31 +228,10 @@ def main():
     with open(src, encoding="utf-8") as fh:
         sightings = json.load(fh)["data"]["sightings"]
 
-    english_by_latin, wishlist_rows = load_species_reference()
-    data = build_data(sightings, english_by_latin)
-    data["euro"] = wishlist_rows
-    if redact:  # remove place data from the file itself, not just from the display
-        data["pl"] = [["", "", r[2], r[3], 0, 0] for r in data["pl"]]
-    data["meta"] = {
-        "redacted": redact,
-        "source": os.path.basename(src),
-    }
-
-    with open(os.path.join(RESOURCES, "template.html"), encoding="utf-8") as fh:
-        tpl = fh.read()
-    blob = json.dumps(data, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
-    app_js = build_app_js().replace("</script", "<\\/script")
-    vendor_js = build_vendor_js().replace("</script", "<\\/script")
-    vendor_css = build_vendor_css().replace("</style", "<\\/style")
-    # vendor/data/app placeholders first, in increasing order of "how likely is this blob to
-    # accidentally contain another placeholder's literal text" — str.replace() replaces every
-    # occurrence, so once a large blob is substituted in, any later replace() pass would also hit
-    # a stray match inside *that* blob (this bit us once: a JS comment mentioning "__VENDOR_JS__")
-    out = (tpl.replace("__VENDOR_CSS__", vendor_css).replace("__VENDOR_JS__", vendor_js)
-           .replace("__DATA_JSON__", blob).replace("__APP_JS__", app_js))
+    data = build_page_data(sightings, os.path.basename(src), redact)
     dst = os.path.join(HERE, "lifelist_redacted.html" if redact else "lifelist.html")
     with open(dst, "w", encoding="utf-8") as fh:
-        fh.write(out)
+        fh.write(render_html(data))
 
     counted = {r[0] for r in data["obs"] if data["sp"][r[0]][3] == 0}
     print(f"Observations: {len(data['obs'])}, taxa: {len(data['sp'])}, "

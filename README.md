@@ -126,6 +126,7 @@ Die persönlichen Export- und HTML-Dateien gehören nicht ins Git-Repository und
 - `tools/fetch_occurrence_windows.py`: ermittelt Beobachtungszeiträume für Zug- und Gastvögel über die öffentliche GBIF-API
 - `vendor/`: Leaflet, das Leaflet.markercluster-Plugin und Chart.js als mitgelieferte Dateien (siehe Lizenzen unten); `tools/update_vendor.py` lädt sie bei Bedarf neu, z. B. für ein Versions-Update
 - `howto/`: Screenshots für `HOWTO.md`
+- `tests/`: automatische Tests (siehe unten)
 - `lifelist.spec`: Bauanleitung für PyInstaller, erzeugt die `lifelist.exe` für die Releases-Seite (siehe unten)
 
 Diese Werkzeuge dienen nur der Datenpflege, für den normalen Build werden sie nicht gebraucht.
@@ -141,6 +142,21 @@ npx --package typescript -- tsc -p tsconfig.json
 ```
 
 (Einfaches `npx tsc` funktioniert nicht: Auf npm existiert ein gleichnamiges, fremdes Paket `tsc`, das den echten TypeScript-Compiler überschattet.)
+
+### Tests
+
+Die Tests in `tests/` arbeiten mit erfundenen Beispieldaten (`tests/fixtures.py`), nicht mit dem eigenen Export, und überschreiben keine `lifelist.html`.
+
+```bash
+python -m unittest discover -s tests -t .
+```
+
+`tests/test_build.py` prüft die Datenaufbereitung und braucht nur Python. `tests/test_page.py` öffnet die fertige Seite in einem unsichtbaren Chromium, klickt alle Tabs in beiden Sprachen durch und meldet JavaScript-Fehler. Dafür wird Playwright gebraucht, sonst werden diese Tests übersprungen:
+
+```bash
+pip install playwright
+playwright install chromium
+```
 
 ### Lizenzen der mitgelieferten Bibliotheken (`vendor/`)
 
