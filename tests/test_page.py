@@ -112,6 +112,18 @@ class PageTest(unittest.TestCase):
         }""")
         self.assertEqual(covered, [])
 
+    def test_map_legend_cluster_key_follows_clusters(self):
+        page = self.open(hash="#map")
+        state = """() => [!!document.querySelector("#map .marker-cluster-custom"),
+                          document.querySelector(".map-legend").classList.contains("no-cluster")]"""
+        for zoom in (5, 15):
+            page.evaluate(f"MAP.setZoom({zoom}, {{ animate: false }})")
+            page.wait_for_timeout(600)
+            has_cluster, key_hidden = page.evaluate(state)
+            self.assertEqual(has_cluster, zoom == 5)
+            self.assertEqual(key_hidden, not has_cluster)
+        self.assertEqual(self.errors, [])
+
     def test_redacted_build_hides_map_and_places(self):
         page = self.open(redact=True)
         self.assertFalse(page.is_visible('#tabs button[data-tab="map"]'))

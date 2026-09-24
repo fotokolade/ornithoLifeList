@@ -201,6 +201,8 @@ svg.curve text{fill:var(--muted);font-size:11px}
 .marker-cluster-custom div{background:var(--k3);color:#fff;border:2px solid #fff;border-radius:50%;display:flex;align-items:center;justify-content:center;
   font:700 12px/1 system-ui,sans-serif;width:100%;height:100%;box-shadow:0 1px 4px rgba(0,0,0,.35);transition:transform .12s ease}
 .marker-cluster-custom:hover div{transform:scale(1.12)}
+/* Leaflet sets marker z-index inline (small places are lifted above big ones); clusters stay on top of both */
+.leaflet-marker-icon.marker-cluster-custom{z-index:5000!important}
 .value-marker .dot{border-radius:50%;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4);box-sizing:border-box}
 .map-legend{background:rgba(255,255,255,.94);color:#1d2521;padding:8px 12px;border-radius:10px;box-shadow:0 1px 6px rgba(0,0,0,.2);font:12px/1.3 system-ui,sans-serif}
 .map-legend b{display:block;margin-bottom:6px}
@@ -268,7 +270,7 @@ footer.meta-footer .btn{flex:0 0 auto;padding:3px 10px}
   details.info summary{display:none!important}
   h2 + details.info{margin-top:0;text-align:left}
   h2 .ctl select{appearance:none;border:0;padding:0;background:none;font-weight:600;color:var(--text)}
-  details.info p.prose{display:block!important;font-size:8pt;text-align:left}
+  details.info p.prose{font-size:8pt;text-align:left}
 }
 </style>
 <style id="vendor-css">__VENDOR_CSS__</style>

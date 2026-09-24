@@ -195,10 +195,11 @@ function init() {
     S.q = ""; S.open = new Set(); S.atlasF = "all"; S.regAll = Object.fromEntries(LEVELS.map(lv => [lv.lvl, true])); S.targetSrc = "all";
     $("h-print").textContent = t("printed", new Date().toLocaleDateString(S.lang === "en" ? "en-GB" : "de-DE")) + (S.region === "all" ? "" : ", " + $("f-region").selectedOptions[0].text);
     renderOverview(); renderList(); renderTargets(); renderActivity(); renderRegions();
-    // closed <details> keep their text hidden even from print CSS; afterprint re-renders them closed again
+    // closed <details> keep their text hidden even from print CSS
     for (const d of $$all("details.info")) d.open = true;
   });
   window.addEventListener("afterprint", () => {
+    for (const d of $$all("details.info")) d.open = false;
     if (printBackup) {
       const { theme, ...state } = printBackup;
       if (theme) document.documentElement.setAttribute("data-theme", theme); else document.documentElement.removeAttribute("data-theme");

@@ -5,6 +5,10 @@ const markerColor = frac => `color-mix(in srgb, var(--mk-hi) ${Math.round(15 + f
 const markerDot = (frac, dia = markerDia(frac)) => `<div class="dot" style="width:${dia}px;height:${dia}px;background:${markerColor(frac)}"></div>`;
 const popupStat = (n, label) => `<span><b>${fmtN(n)}</b>${esc(label)}</span>`;
 const CLUSTER_OFF_ZOOM = 13;
+// the cluster key only makes sense while a cluster is actually drawn
+const syncClusterKey = () => {
+  if (MAP_LEGEND) MAP_LEGEND.getContainer().classList.toggle("no-cluster", !MAP.getContainer().querySelector(".marker-cluster-custom"));
+};
 // Leaflet and the marker-cluster plugin are vendored into the page (see lifelist.py's vendor-JS embedding),
 // not fetched from a CDN, so they're always present; this is just a defensive check against a broken build.
 function renderMap() {
@@ -44,10 +48,8 @@ function drawMap() {
       return div;
     };
     MAP_LEGEND.addTo(MAP);
-    // the cluster key only makes sense while clusters can appear at all
-    const syncClusterKey = () => MAP_LEGEND.getContainer().classList.toggle("no-cluster", !L.markerClusterGroup || MAP.getZoom() >= CLUSTER_OFF_ZOOM);
-    MAP.on("zoomend", syncClusterKey);
-    MAP.whenReady(syncClusterKey);
+    MAP.on("zoomend moveend", syncClusterKey);
+    MAP_LAYER.on("animationend", syncClusterKey);
   }
   $("m-metric").options[0].text = cutoffLabel("mapLiferAll", "mapLifer");
   $("m-metric").options[1].text = t("mapYear", timePeriodLabel());
@@ -110,4 +112,5 @@ function drawMap() {
     bounds.push([p.lat, p.lon]);
   }
   MAP.fitBounds(bounds, { padding: [30, 30], maxZoom: 15 });
+  syncClusterKey();
 }
