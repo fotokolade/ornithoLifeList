@@ -36,15 +36,17 @@ function renderActivity() {
       ? `<td title="${esc(T.months[m] + ", " + hourLabel(h) + ": " + n)}" style="background:${heatColor(n / heatMax)}">&nbsp;</td>`
       : `<td></td>`).join("")}</tr>`).join("")}</tbody></table>`;
 
+  const metricOptions = [["obs", "actMObs"], ["species", "actMSpecies"], ["days", "actMDays"]]
+    .map(([k, l]) => `<option value="${k}"${k === S.actMetric ? " selected" : ""}>${t(l)}</option>`).join("");
   $("act-out").innerHTML = `
     ${infoText(t("actHelp", fmtN(timed.length), fmtN(scoped.length)))}
     <div class="kpis">
       <div class="kpi main"><b>${fmtN(timed.length)}</b><span>${t("actKTimed")}</span></div>
       <div class="kpi"><b>${hourLabel(peak)}</b><span>${t("actKPeak")}</span></div>
     </div>
-    <h2 data-toc="${esc(t("tocActHour"))}">${t("actHourTitle")}</h2>
+    <h2 data-toc="${esc(t("tocActHour"))}">${t("actHourTitle")}<label class="ctl">${t("actCountBy")}<select id="a-metric" aria-label="${esc(t("ariaMetric"))}">${metricOptions}</select></label></h2>
     <div class="card" id="hour-card">${barChartSvg(series, hours, hours.map(h => hourLabel(h) + ": " + series[h]), 3)}</div>
-    <h2>${t("actWeekday")}</h2>
+    <h2>${t("actWeekday")}<small>${t("actMDays")}</small></h2>
     ${infoText(t("actWeekdayHelp"))}
     <div class="card" id="weekday-card">${barChartSvg(wdDays.map(s => s.size), T.weekdays, T.weekdays.map((w, i) => w + ": " + wdDays[i].size), 1, "--k6")}</div>
     <h2>${t("actHeat")}</h2>

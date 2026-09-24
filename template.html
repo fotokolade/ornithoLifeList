@@ -60,6 +60,8 @@ section.tab{display:none;padding-top:16px}
 section.tab.on{display:block}
 h2{font-size:.92rem;margin:26px 0 8px;scroll-margin-top:calc(var(--header-h, 167px) + 14px)}
 h2 small{font-weight:400;color:var(--muted);margin-left:6px}
+h2 .ctl{font-weight:400;font-size:.8rem;color:var(--muted);margin-left:10px}
+h2 .ctl select{margin-left:4px}
 .prose{color:var(--muted);font-size:.78rem;text-align:justify;hyphens:auto;margin:3px 0 12px}
 details.info{margin:2px 0 10px}
 details.info summary{cursor:pointer;color:var(--muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.03em;list-style:none;display:inline-block;transition:color .12s ease}
@@ -219,6 +221,7 @@ footer.meta-footer .btn{flex:0 0 auto;padding:3px 10px}
   th.hide-sm,td.hide-sm{display:table-cell!important}
   .bar,.bar i,.heat td,.pheno div{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   details.info summary{display:none!important}
+  h2 .ctl select{appearance:none;border:0;padding:0;background:none;font-weight:600;color:var(--text)}
   details.info p.prose{display:block!important;font-size:8pt;text-align:left}
 }
 </style>
@@ -260,9 +263,6 @@ footer.meta-footer .btn{flex:0 0 auto;padding:3px 10px}
   </section>
   <section class="tab" id="tab-targets"></section>
   <section class="tab" id="tab-activity">
-    <div class="pick">
-      <select id="a-metric" aria-label="Wert"></select>
-    </div>
     <div id="act-out"></div>
   </section>
   <section class="tab" id="tab-regions"></section>

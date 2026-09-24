@@ -112,7 +112,6 @@ function renderChrome() {
   $("f-region").setAttribute("aria-label", t("ariaRegion"));
   $("q-sort").setAttribute("aria-label", t("ariaSort"));
   $("q-atlas").setAttribute("aria-label", t("ariaAtlas"));
-  $("a-metric").setAttribute("aria-label", t("ariaMetric"));
   $("m-metric").setAttribute("aria-label", t("ariaMapMetric"));
   $("t-all").textContent = t("timeAll");
   $("t-range").min = 0; $("t-range").max = timeYMIndex(MAX_Y, 12);
@@ -120,8 +119,6 @@ function renderChrome() {
   updateTimeBar();
   $("q-sort").innerHTML = ["nr", "taxon", "name"].map(k => `<option value="${k}">${t("sort" + k[0].toUpperCase() + k.slice(1))}</option>`).join("") + `<option value="" disabled>${t("sortColumn")}</option>`;
   $("q-sort").value = ["nr", "taxon", "name"].includes(S.sort) ? S.sort : "";
-  $("a-metric").innerHTML = [["obs", "actMObs"], ["species", "actMSpecies"], ["days", "actMDays"]].map(([k, l]) => `<option value="${k}">${t(l)}</option>`).join("");
-  $("a-metric").value = S.actMetric;
   $("q-atlas").innerHTML = Object.entries(T.atlasFilter).map(([k, v]) => `<option value="${k}">${v}</option>`).join("");
   $("q-atlas").value = S.atlasF;
   $("b-pdf").textContent = t("pdf");
@@ -169,7 +166,9 @@ function init() {
   $("o-redact").addEventListener("change", e => { applyRedact(e.target.checked); });
   $("q").addEventListener("input", e => { S.q = e.target.value; renderList(); });
   $("q-sort").addEventListener("change", e => { S.sort = e.target.value; S.dir = S.sort === "nr" ? -1 : 1; renderList(); });
-  $("a-metric").addEventListener("change", e => { S.actMetric = e.target.value; renderActivity(); });
+  $("act-out").addEventListener("change", e => {
+    if (e.target.id === "a-metric") { S.actMetric = e.target.value; renderActivity(); }
+  });
   $("q-atlas").addEventListener("change", e => { S.atlasF = e.target.value; renderList(); });
   $("t-all").addEventListener("click", () => {
     if (S.timeAll) return;
