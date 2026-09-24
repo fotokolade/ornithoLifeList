@@ -119,7 +119,7 @@ function renderOverview() {
   for (const [d, sp] of dayMap) if (sp.size > bestCount) { bestCount = sp.size; bestDay = d; }
   const heatT = heatTable(list);
   $("tab-overview").innerHTML = `
-    <div class="kpis">
+    <div class="kpis k8">
       <div class="kpi main"><b>${fmtN(stats.size)}</b><span>${t("speciesLife")}</span></div>
       <div class="kpi"><b>${fmtN(list.length)}</b><span>${t("observations")}</span></div>
       <div class="kpi"><b>${fmtN(days)}</b><span>${t("days")}</span></div>

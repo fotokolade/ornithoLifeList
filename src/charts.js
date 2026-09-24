@@ -14,7 +14,6 @@ function curveSvg(chrono) {
   const step = Math.max(1, mag / (pts.length / mag < 2.5 ? 2 : 1));
   const yMax = Math.ceil(pts.length / step) * step;
   const y = n => H - B - n / yMax * (H - B - Tp);
-  const yearColor = yr => `var(${CHART_PALETTE[(yr - MIN_Y) % CHART_PALETTE.length]})`;
   let g = "", d = `M${x(t0)},${y(0)}`, prev = 0, dots = "";
   for (let v = 0; v <= yMax; v += step) g += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${L - 6}" y="${y(v) + 4}" text-anchor="end">${v}</text>`;
   const every = (MAX_Y - MIN_Y) > 8 ? 2 : 1;
@@ -25,7 +24,7 @@ function curveSvg(chrono) {
     d += ` L${x(ms)},${y(prev)} L${x(ms)},${y(i + 1)}`;
     prev = i + 1;
     const cur = o.y === S.year;
-    dots += `<circle cx="${x(ms)}" cy="${y(i + 1)}" r="${cur ? 4.5 : 2.5}" fill="${cur ? "var(--accent)" : yearColor(o.y)}" stroke="var(--card)" stroke-width="${cur ? 1.5 : 1}"><title>${i + 1}. ${esc(speciesName(SP[o.s]))}, ${fmtD(o.d)}</title></circle>`;
+    dots += `<circle cx="${x(ms)}" cy="${y(i + 1)}" r="${cur ? 4.5 : 2.5}" fill="${cur ? "var(--accent)" : "var(--bar)"}" stroke="var(--card)" stroke-width="${cur ? 1.5 : 1}"><title>${i + 1}. ${esc(speciesName(SP[o.s]))}, ${fmtD(o.d)}</title></circle>`;
   });
   const baseline = ` L${x(tEnd)},${y(0)} L${x(t0)},${y(0)} Z`;
   const area = d + ` L${x(tEnd)},${y(prev)}` + baseline;
@@ -123,7 +122,6 @@ function dayColor(hour, stops) {
 // Chart.js is vendored into the page (see lifelist.py's vendor-JS embedding), not fetched from a CDN, so
 // it's always present; the upgrade functions replace the hand-drawn SVG chart already in the card with a
 // nicer Chart.js one. If Chart is somehow missing (a broken build), the SVG just stays as-is.
-const CHART_PALETTE = ["--k1", "--k2", "--k3", "--k4", "--k5", "--k6"];
 const BAR_CHARTS = {};  // card.id -> Chart instance; id stays stable across re-renders even though the DOM node is recreated each time
 const cssVar = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 /** Swaps the card's content for a canvas of the given height and draws `config` on it; false without Chart.js. */
