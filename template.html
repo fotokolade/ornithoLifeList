@@ -153,7 +153,8 @@ svg.curve text{fill:var(--muted);font-size:11px}
 .pick{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}
 .empty{color:var(--muted);padding:10px 4px}
 .more{margin:8px 0 2px}
-#map{height:66vh;min-height:340px;border-radius:8px;border:1px solid var(--line)}
+/* own stacking context: Leaflet's panes/controls use z-index 400-1000 and would otherwise cover the fixed footer */
+#map{height:66vh;min-height:340px;border-radius:8px;border:1px solid var(--line);isolation:isolate}
 .leaflet-popup-content{font:13px/1.35 system-ui,sans-serif;color:#1d2521}
 .leaflet-popup-content .visits{max-height:190px;overflow:auto;margin-top:6px;border-top:1px solid #e4e8e4;padding-top:4px}
 .leaflet-popup-content .visits details{margin:2px 0}
