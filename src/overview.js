@@ -83,7 +83,7 @@ function calendarSection(list, statsAll) {
       const sp = dayData.get(dateStr);
       const n = sp ? sp.size : 0;
       const lifer = liferDays.has(dateStr);
-      const bg = n ? heatColor(n / max) : "var(--line)";
+      const bg = n ? heatColor(n / max) : "var(--cal-empty)";
       const title = n ? `${fmtD(dateStr)}: ${n} ${t("mapSpecies")}${lifer ? " · " + t("newBadge") : ""}` : fmtD(dateStr);
       cells += `<div class="cal-day${lifer ? " cal-lifer" : ""}" style="background:${bg}" title="${esc(title)}"></div>`;
     }

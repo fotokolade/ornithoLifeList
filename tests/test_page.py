@@ -126,6 +126,22 @@ class PageTest(unittest.TestCase):
         for tab in TABS[:-1]:
             self.assertTrue(page.inner_text(f"#tab-{tab}").strip(), tab)
         self.assertEqual(self.errors, [])
+        self.assertTrue(page.eval_on_selector_all("details.info", "ds => ds.length > 0 && ds.every(d => d.open)"))
+
+    def test_charts_follow_theme_and_print_light(self):
+        page = self.open(hash="#activity")
+        grid = lambda: page.evaluate("BAR_CHARTS['weekday-card'].options.scales.y.grid.color")
+        light = grid()
+        page.click("#o-sum")
+        page.select_option("#o-theme", "dark")
+        dark = grid()
+        self.assertNotEqual(light, dark)
+        page.evaluate("window.dispatchEvent(new Event('beforeprint'))")
+        self.assertEqual(grid(), light)
+        page.evaluate("window.dispatchEvent(new Event('afterprint'))")
+        self.assertEqual(grid(), dark)
+        self.assertEqual(page.get_attribute("html", "data-theme"), "dark")
+        self.assertEqual(self.errors, [])
 
 
 if __name__ == "__main__":

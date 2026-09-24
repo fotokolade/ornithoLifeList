@@ -12,7 +12,7 @@
   --k1:#2f8f4e; --k2:#c98a1b; --k3:#3d78a8; --k4:#8659b3; --k5:#c1554a; --k6:#2f9e93;
   --heat-lo:#dcefe2; --heat-hi:#1a6334; --heat-ink:#fff;
   --shadow:0 1px 2px rgba(20,32,26,.05),0 3px 10px rgba(20,32,26,.04);
-  --mk-lo:#f6c36b; --mk-hi:#b8420f;
+  --mk-lo:#f6c36b; --mk-hi:#b8420f; --cal-empty:#e8ece8;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
@@ -21,7 +21,7 @@
     --hl:#3b3717; --link:#8ab8dc; --stripe:#202622;
     --k1:#4cc275; --k2:#e0a23c; --k3:#5b9bcf; --k4:#b28ee0; --k5:#e08578; --k6:#4cc2b3;
     --heat-lo:#1f3a2a; --heat-hi:#7ee0a2; --heat-ink:#0f2418;
-    --shadow:none;
+    --shadow:none; --cal-empty:#252c28;
   }
 }
 /* explicit override from the theme select in Einstellungen, regardless of OS preference */
@@ -31,7 +31,7 @@
   --hl:#3b3717; --link:#8ab8dc; --stripe:#202622;
   --k1:#4cc275; --k2:#e0a23c; --k3:#5b9bcf; --k4:#b28ee0; --k5:#e08578; --k6:#4cc2b3;
   --heat-lo:#1f3a2a; --heat-hi:#7ee0a2; --heat-ink:#0f2418;
-  --shadow:none;
+  --shadow:none; --cal-empty:#252c28;
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
@@ -247,7 +247,7 @@ footer.meta-footer .btn{flex:0 0 auto;padding:3px 10px}
      beats the higher-specificity :root[data-theme="dark"] override */
   :root{--bg:#fff!important;--card:#fff!important;--text:#111!important;--muted:#555!important;--line:#ccc!important;--accent:#1f7a3d!important;--accent-soft:#eef6f0!important;
     --bar:#3d78a8!important;--bar-soft:#d3e2ee!important;--hl:#fff!important;--link:#111!important;--stripe:#f5f5f5!important;
-    --heat-lo:#dcefe2!important;--heat-hi:#1a6334!important;--heat-ink:#fff!important}
+    --heat-lo:#dcefe2!important;--heat-hi:#1a6334!important;--heat-ink:#fff!important;--cal-empty:#eef0ee!important}
   body{font-size:10pt}
   header.top{position:static;border:0}
   .filters,nav.tabs,.pick,.time-bar,#tab-map,.more{display:none!important}
@@ -266,6 +266,7 @@ footer.meta-footer .btn{flex:0 0 auto;padding:3px 10px}
   th.hide-sm,td.hide-sm{display:table-cell!important}
   .bar,.bar i,.heat td,.pheno div,.cal-day,.season-strip,.season-strip *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   details.info summary{display:none!important}
+  h2 + details.info{margin-top:0;text-align:left}
   h2 .ctl select{appearance:none;border:0;padding:0;background:none;font-weight:600;color:var(--text)}
   details.info p.prose{display:block!important;font-size:8pt;text-align:left}
 }
