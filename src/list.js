@@ -58,6 +58,8 @@ function renderList() {
 function openSpecies(s) {
   S.q = ""; $("q").value = "";
   S.atlasF = "all"; $("q-atlas").value = "all";
+  // from the regions tab a species can come from outside the page's region filter: show all regions then, or it has no row
+  if (!regionObs(baseObs()).some(o => o.s === s)) { S.region = "all"; buildRegionSelect(); }
   S.open = new Set([s]);
   S.focusSp = s;
   if (S.tab === "list") renderList(); else setTab("list");

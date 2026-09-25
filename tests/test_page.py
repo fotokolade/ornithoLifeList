@@ -212,6 +212,26 @@ class PageTest(unittest.TestCase):
         self.assertEqual(width(), 720)
         self.assertEqual(self.errors, [])
 
+    def test_region_month_table(self):
+        page = self.open(hash="#regions")
+        rows = page.locator("table.heat.rm tbody tr")
+        self.assertGreater(rows.count(), 0)
+        cell = page.locator("td[data-rm]").first
+        days = int(cell.inner_text())
+        cell.click()
+        self.assertIn(f"{days} Tage", page.inner_text("#rm-cell"))
+        page.select_option("#rm-level", "s")
+        self.assertEqual(page.locator("#rm-cell .cal-panel").count(), 0)  # a new level closes the open cell
+        self.assertEqual(rows.count(), 2)  # the fixture's two states
+        # a species from the panel opens in the life list even when the page is filtered to another region
+        page.select_option("#f-region", page.eval_on_selector_all("#f-region option", "os => os.map(o => o.value)")[1])
+        page.click('#tabs button[data-tab="regions"]')
+        page.locator("td[data-rm]").last.click()
+        page.locator("#rm-cell .chip-sp").first.click()
+        page.wait_for_function("S.tab === 'list'")
+        self.assertEqual(page.locator("#list-out tr.detail").count(), 1)
+        self.assertEqual(self.errors, [])
+
     def test_phone_width_has_no_sideways_scroll(self):
         page = self.open(width=390)
         for tab in TABS:

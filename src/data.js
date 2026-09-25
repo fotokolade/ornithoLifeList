@@ -98,12 +98,14 @@ if (initialTheme !== "system") document.documentElement.setAttribute("data-theme
  * @property {string|null} calDay - "YYYY-MM-DD" of the day opened in the overview calendar
  * @property {string|null} heatCell - "Y-M" of the open cell in the overview's species-per-year-and-month table
  * @property {string|null} actCell - open cell of the activity tab's hour tables: "m:M-H" (month 0-11, hour) or "w:W-H" (weekday 0-6 from Monday, hour)
+ * @property {string} regMonthLvl - level of the region x month table's rows: "s"|"c"|"m"|"p"
+ * @property {string|null} regMonthCell - "row-month" (row index in regMonthRows, month 0-11) of its open cell
  * @property {number|null} focusSp - species index the life list scrolls to and highlights once, after a jump from another view
  */
 const S = { tab: "overview", region: "all", year: Math.min(TODAY_Y, MAX_Y), month: TODAY_M, timeAll: true, lang: initialLang, theme: initialTheme,
   escaped: false, collective: false, atlasF: "all", actMetric: "obs", redact: !!RAW.meta.redacted, metric: "life", q: "", sort: "nr", dir: -1, open: new Set(),
   regSort: {}, regAll: {}, targetSrc: "all", customTargets: loadCustomTargets(), wishSort: { k: "season", d: 1 },
-  wishOpen: null, wishQ: "", calDay: null, heatCell: null, actCell: null, focusSp: null };
+  wishOpen: null, wishQ: "", calDay: null, heatCell: null, actCell: null, regMonthLvl: "c", regMonthCell: null, focusSp: null };
 T = STR[S.lang];
 
 /* ---------- helpers ---------- */

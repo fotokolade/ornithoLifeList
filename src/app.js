@@ -271,8 +271,13 @@ function init() {
   });
   $("tab-regions").addEventListener("change", e => {
     if (e.target.id === "reg-cov") { S.region = e.target.value; $("f-region").value = S.region; renderRegions(); }
+    if (e.target.id === "rm-level") { S.regMonthLvl = e.target.value; S.regMonthCell = null; renderRegions(); }
   });
   $("tab-regions").addEventListener("click", e => {
+    const rm = e.target.closest("[data-rm]");
+    if (rm) { toggleRegMonthCell(rm.dataset.rm); return; }
+    const sp = e.target.closest("[data-sp]");
+    if (sp) { openSpecies(+sp.dataset.sp); return; }
     const th = e.target.closest("th[data-lvl]");
     if (th) {
       const cur = S.regSort[th.dataset.lvl] || { k: "life", d: -1 };
