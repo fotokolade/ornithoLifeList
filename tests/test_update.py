@@ -62,9 +62,20 @@ class UpdateTest(unittest.TestCase):
         self.release("0.2.0")
         with self.assertRaises(update.UpdateError) as ctx:
             self.run_update()
-        self.assertIn("src/i18n.js", str(ctx.exception))
+        self.assertIn("src/i18n.js (changed)", str(ctx.exception))
         with open(os.path.join(self.user, "src", "i18n.js"), encoding="utf-8") as fh:
             self.assertEqual(fh.read(), "// edited\n")
+
+    def test_names_own_files_that_are_in_the_way(self):
+        write(os.path.join(self.dev, "howto", "01.png"), "new")
+        git(self.dev, "add", "-A")
+        git(self.dev, "commit", "-m", "new screenshot")
+        git(self.dev, "push", "origin", "HEAD:master")
+        write(os.path.join(self.user, "howto", "01.png"), "copied in by hand")
+        with self.assertRaises(update.UpdateError) as ctx:
+            self.run_update()
+        self.assertIn("howto/01.png", str(ctx.exception))
+        self.assertIn("in the way", str(ctx.exception))
 
     def test_stops_on_own_commits(self):
         write(os.path.join(self.user, "notes.txt"), "mine")

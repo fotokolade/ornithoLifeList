@@ -21,7 +21,9 @@ class UpdateError(Exception):
 
 def git(repo, *args, check=True):
     try:
-        res = subprocess.run(["git", "-C", repo, *args], capture_output=True, text=True, encoding="utf-8")
+        # English messages whatever the system language: update() recognises some of them
+        env = {**os.environ, "LC_ALL": "C", "LANGUAGE": "C"}
+        res = subprocess.run(["git", "-C", repo, *args], capture_output=True, text=True, encoding="utf-8", env=env)
     except FileNotFoundError:
         raise UpdateError("git is not installed or not on the PATH. Install it from https://git-scm.com/ "
                           "or download the new version from the GitHub releases page instead.")
@@ -56,9 +58,11 @@ def update(repo=HERE, out=print):
                           f"Run `git branch --set-upstream-to=origin/{branch}` first.")
     changed = git(repo, "status", "--porcelain", "--untracked-files=no").stdout.splitlines()
     if changed:
-        files = "\n".join("  " + line[3:] for line in changed)
+        kinds = {"D": "deleted", "M": "changed", "A": "added", "R": "renamed", "T": "type changed"}
+        files = "\n".join(f"  {line[3:]} ({kinds.get(line[:2].strip()[:1], 'changed')})" for line in changed)
         raise UpdateError(f"These files of the program were changed locally, so the update stops to keep them:\n{files}\n"
-                          "Undo the changes (`git checkout -- <file>`) or put them aside (`git stash`), then run the update again.")
+                          "Undo the changes (`git checkout -- <file>`, or `git checkout -- .` for all of them) "
+                          "or put them aside (`git stash`), then run the update again.")
 
     old = app_version(repo)
     out(f"Checking GitHub for updates to '{branch}' ...")
@@ -73,7 +77,17 @@ def update(repo=HERE, out=print):
         raise UpdateError(f"This copy has its own commits that are not on GitHub, so it can't simply be fast-forwarded. "
                           f"Merge or rebase onto {upstream} by hand.")
     log = git(repo, "log", "--format=  %s", f"HEAD..{upstream}").stdout.rstrip()
-    git(repo, "merge", "--ff-only", upstream)
+    res = git(repo, "merge", "--ff-only", upstream, check=False)
+    if res.returncode:
+        # files you put there yourself that the update brings as well, e.g. new screenshots copied in by hand
+        err = res.stderr
+        if "untracked working tree files would be overwritten" in err:
+            files = [ln.strip() for ln in err.split("overwritten by merge:", 1)[1].splitlines()
+                     if ln.startswith(("\t", " ")) and ln.strip()]
+            raise UpdateError("These files are in the way because the update brings its own copies of them:\n"
+                              + "\n".join("  " + f for f in files)
+                              + "\nMove or delete them, then run the update again.")
+        raise UpdateError(f"git merge failed:\n{err.strip()}")
     new = app_version(repo)
     out(f"Updated with {incoming} new change{'s' if incoming != 1 else ''}:\n{log}")
     out(f"Version {old} -> {new}." if new != old else f"Version {new}.")
