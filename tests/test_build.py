@@ -145,5 +145,16 @@ class UpdateCheckTest(unittest.TestCase):
             self.assertIsNone(lifelist.latest_release())
 
 
+
+class DemoExportTest(unittest.TestCase):
+    def test_demo_export_builds(self):
+        sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "tools"))
+        import make_demo_export
+        sightings = make_demo_export.generate()
+        self.assertEqual(len(sightings), len(make_demo_export.generate()))  # same seed, same data
+        data = lifelist.build_page_data(sightings, "export_demo.json", False)
+        self.assertGreater(len(data["sp"]), 100)
+
+
 if __name__ == "__main__":
     unittest.main()

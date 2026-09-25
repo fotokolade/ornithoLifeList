@@ -13,6 +13,34 @@ Macht aus deinem [ornitho.de](https://www.ornitho.de/)-Export eine interaktive V
 
 Fast alles ist anklickbar: ein Tag im Kalender, eine Zelle in einer Tabelle oder ein Punkt auf der Kurve zeigt die Arten dahinter, und jede Art führt zu ihrem Eintrag in der Lebensliste. Die Seite gibt es auf Deutsch und Englisch (mit englischen Artnamen), hell und dunkel, und sie lässt sich als PDF speichern.
 
+## So sieht es aus
+
+Die Bilder zeigen eine Lebensliste aus erfundenen Beispieldaten.
+
+**Übersicht** mit Kennzahlen und Kalender; ein Klick auf einen Tag zeigt, was wo beobachtet wurde:
+
+![Übersicht mit Kennzahlen, Kalender und geöffnetem Tag](docs/screenshots/overview.png)
+
+**Lebensliste** mit Kurve, Suche und den Details einer Art:
+
+![Lebenslistenkurve und Suche nach Spechten mit aufgeklapptem Buntspecht](docs/screenshots/lifelist.png)
+
+**Ziele:** Arten, die noch fehlen, mit ihrer Saison:
+
+![Nie gesehene Arten mit Saisonstreifen](docs/screenshots/targets.png)
+
+**Tagesaktivität** über den Tag und nach Wochentagen:
+
+![Tagesverlauf als Kurve und Wochentage mit Werktag/Wochenende-Ring](docs/screenshots/activity.png)
+
+**Regionen:** wann du dich wo aufhältst, mit den Arten einer Zelle:
+
+![Tabelle Landkreis × Monat mit geöffneter Zelle](docs/screenshots/regions.png)
+
+**Dunkles Design** und **Handy**:
+
+<p><img src="docs/screenshots/dark.png" alt="Übersicht im dunklen Design" width="68%"> <img src="docs/screenshots/phone.png" alt="Übersicht auf dem Handy" width="28%"></p>
+
 ## Schnellstart
 
 1. **Export herunterladen:** Auf ornitho.de einen JSON-Export deiner Beobachtungen erstellen. Wie das geht, zeigt die [bebilderte Anleitung](HOWTO.md).
@@ -89,7 +117,8 @@ Beides steckt fertig aufbereitet in `species_reference.json`.
 | `build.py`, `build.bat`, `lifelist.spec` | bauen die `lifelist.exe` |
 | `.github/workflows/release.yml` | baut die exe und veröffentlicht das Release, sobald ein Versions-Tag gepusht wird |
 | `verify.ps1`, `verify.bat` | prüfen die Prüfsumme der `lifelist.exe` |
-| `tools/` | Werkzeuge zur Pflege der Referenzdaten und Bibliotheken |
+| `tools/` | Werkzeuge zur Pflege der Referenzdaten und Bibliotheken, für Beispieldaten und Screenshots |
+| `docs/screenshots/` | Bilder für diese README |
 | `HOWTO.md`, `howto/` | Anleitung zum Export mit Screenshots |
 
 ### Aufbau des JavaScript
@@ -130,6 +159,11 @@ Die Tests nutzen erfundene Beispieldaten aus `tests/fixtures.py` und überschrei
 Den Rest erledigt GitHub Actions (`.github/workflows/release.yml`) auf einem Windows-Rechner: Es legt beim Start von Hand das Tag aus der Versionsnummer an (ein gepushtes Tag prüft es gegen die Versionsnummer), lässt die Tests laufen, baut die `lifelist.exe` und legt das Release an, mit `lifelist.exe`, `lifelist.exe.sha256`, `verify.bat` und `verify.ps1` und der Prüfsumme in den Notizen. Das Tag muss zur Versionsnummer passen, sonst meldet `--check-update` keine neue Version.
 
 Zum Ausprobieren lässt sich die exe auch selbst bauen: unter Windows `python build.py` (oder `build.bat` doppelklicken), nach `pip install pyinstaller`. Das Skript lässt zuerst die Tests laufen und schreibt dann `dist\lifelist.exe` samt `dist\lifelist.exe.sha256`. PyInstaller baut immer für das System, auf dem es läuft.
+
+### Beispieldaten und Screenshots
+
+- `tools/make_demo_export.py` erzeugt einen erfundenen, aber realistisch wirkenden Export (`export_demo.json`): ein fiktiver Beobachter an echten sächsischen Beobachtungsorten, über mehrere Jahre. Gut zum Ausprobieren ohne eigene Daten: `python tools/make_demo_export.py`, dann `python lifelist.py --source export_demo.json`.
+- `tools/make_screenshots.py` erstellt daraus die Bilder in `docs/screenshots/` (braucht Playwright, siehe Tests). Mit `--map` kommt ein Bild der Karte dazu, dafür braucht es Internet für die Kartenkacheln.
 
 ### Referenzdaten und Bibliotheken pflegen
 
