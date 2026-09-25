@@ -1,190 +1,148 @@
 # OrnithoLifeList
 
-Aus einem [ornitho.de](https://www.ornitho.de/)-Export wird eine interaktive Vogel-Lebensliste als einzelne HTML-Datei.
+Macht aus deinem [ornitho.de](https://www.ornitho.de/)-Export eine interaktive Vogel-Lebensliste: eine einzige HTML-Datei, die du direkt im Browser öffnest, ohne Server und ohne Installation.
 
-Die fertige `lifelist.html` lässt sich direkt im Browser öffnen, ganz ohne Server oder Installation.
+## Was zeigt die Lebensliste?
 
-## Was bietet die Lebensliste?
+- **Übersicht:** Kennzahlen, Kalender deines Birding-Jahres, Lebenslistenkurve, neueste Lifer, Arten pro Jahr und Monat
+- **Lebensliste:** alle Arten, durchsuchbar und sortierbar, mit Details zu jeder Art
+- **Ziele:** Arten, die dir noch fehlen, mit Saisonhinweis, wann sie hier vorkommen, und eigener Wunschliste
+- **Tagesaktivität:** zu welcher Uhrzeit, an welchen Wochentagen und in welchen Monaten du unterwegs bist
+- **Regionen:** Arten nach Bundesland, Landkreis, Gemeinde und Ort, und wann du dich wo aufhältst
+- **Karte** deiner Beobachtungsorte
 
-- Übersicht über die bisher beobachteten Arten
-- Sortierbare Artenliste
-- Auswertung nach Regionen
-- Wunschliste mit Arten, die bisher noch nicht beobachtet wurden
-- Tagesaktivität der eigenen Beobachtungen
-- Karte der Beobachtungsorte
-- Deutsch und Englisch, einschließlich englischer Artnamen
-- Saisonhinweise für Arten, die noch auf der Wunschliste stehen
-
-Internet braucht die Lebensliste nur für die Kartenansicht, alles andere funktioniert offline.
+Fast alles ist anklickbar: ein Tag im Kalender, eine Zelle in einer Tabelle oder ein Punkt auf der Kurve zeigt die Arten dahinter, und jede Art führt zu ihrem Eintrag in der Lebensliste. Die Seite gibt es auf Deutsch und Englisch (mit englischen Artnamen), hell und dunkel, und sie lässt sich als PDF speichern.
 
 ## Schnellstart
 
-### 1. Beobachtungen von ornitho.de exportieren
+1. **Export herunterladen:** Auf ornitho.de einen JSON-Export deiner Beobachtungen erstellen. Wie das geht, zeigt die [bebilderte Anleitung](HOWTO.md).
+2. **Datei ablegen:** Die heruntergeladene Datei (zum Beispiel `export_12345_67890_20260919_002546.json`) in denselben Ordner wie `lifelist.py` legen.
+3. **Lebensliste erstellen:** In diesem Ordner ausführen:
 
-Auf [ornitho.de](https://www.ornitho.de/) einen JSON-Export der eigenen Beobachtungen herunterladen (Schritt-für-Schritt-Anleitung mit Screenshots: [HOWTO.md](HOWTO.md)).
+   ```bash
+   python lifelist.py
+   ```
 
-Die heruntergeladene Datei, zum Beispiel
+4. **Öffnen:** Die neue Datei `lifelist.html` im Browser öffnen.
 
-```text
-export_12345_67890_20260919_002546.json
-```
+Liegen mehrere `export_*.json` im Ordner, nimmt das Programm automatisch die neueste.
 
-in den Ordner von `lifelist.py` legen.
+Du brauchst dafür nur Python 3. Ohne Python geht es unter Windows mit der fertigen `lifelist.exe`, siehe [unten](#ohne-python-lifelistexe-für-windows).
 
-### 2. Lebensliste erstellen
+## Optionen
 
-Im selben Ordner ausführen:
+| Aufruf | Was passiert |
+| --- | --- |
+| `python lifelist.py` | erstellt `lifelist.html` aus dem neuesten Export |
+| `python lifelist.py --source export_….json` | nimmt genau diese Exportdatei |
+| `python lifelist.py --redact` | erstellt `lifelist_redacted.html` ohne Ortsangaben, zum Weitergeben |
+| `python lifelist.py --check-update` | sieht auf GitHub nach, ob es eine neuere Version gibt, und erstellt nichts |
+| `python lifelist.py --version` | zeigt die installierte Version |
 
-```bash
-python lifelist.py
-```
+In der Version mit `--redact` fehlen Beobachtungsorte, Gemeinden, Koordinaten und die Karte. Alle Arten, Daten und Auswertungen bleiben erhalten.
 
-Danach liegt dort die fertige Datei:
+## Ohne Python: lifelist.exe für Windows
 
-```text
-lifelist.html
-```
+Auf der [Releases-Seite](../../releases) gibt es eine fertige `lifelist.exe`. Sie macht dasselbe wie `python lifelist.py` und versteht dieselben Optionen. Lege sie wie oben beschrieben in denselben Ordner wie deinen Export und starte sie per Doppelklick.
 
-Diese Datei einfach im Browser öffnen.
+**Vor dem ersten Start prüfen, ob die Datei echt ist:** Lade vom Release auch `lifelist.exe.sha256`, `verify.bat` und `verify.ps1` in denselben Ordner und starte `verify.bat` per Doppelklick. Es vergleicht die Prüfsumme (SHA256) der exe mit der veröffentlichten und meldet „OK“ oder eine Warnung. Fehlt die `.sha256`-Datei, fragt es nach der Prüfsumme aus den Release-Notizen. Bei einer Warnung die exe nicht starten: Sie stammt dann nicht aus diesem Release.
 
-Wenn mehrere `export_*.json`-Dateien vorhanden sind, wird automatisch die neueste verwendet.
+Ohne die Skripte geht es auch von Hand in PowerShell: `Get-FileHash lifelist.exe -Algorithm SHA256` ausführen und das Ergebnis mit der Prüfsumme auf der Releases-Seite vergleichen.
 
-### Ohne Python: fertige exe verwenden
+## Aktualisieren
 
-Wer kein Python installieren möchte, findet auf der [Releases-Seite](../../releases) eine fertige `lifelist.exe` für Windows. Sie tut dasselbe wie `python lifelist.py`, versteht dieselben Optionen und braucht die exportierte `export_*.json` im selben Ordner.
+- **Mit git** (Projekt per `git clone` heruntergeladen): `python update.py` ausführen, unter Windows reicht ein Doppelklick auf `update.bat`. Das Skript holt die neue Version von GitHub und zeigt, was sich geändert hat. Deine Exporte und HTML-Dateien bleiben unberührt. Hast du Dateien des Programms selbst geändert, hält das Skript an und nennt sie, statt etwas zu überschreiben.
+- **Ohne git:** die neue Version von der [Releases-Seite](../../releases) herunterladen.
 
-Vor der ersten Ausführung lohnt sich ein Abgleich der SHA256-Prüfsumme mit der auf der Releases-Seite angegebenen, zum Beispiel in PowerShell:
+Ob es eine neue Version gibt, zeigt `python lifelist.py --check-update`.
 
-```powershell
-Get-FileHash lifelist.exe -Algorithm SHA256
-```
+## Datenschutz und Internet
 
-Stimmt der Hash nicht mit dem veröffentlichten überein, stammt die Datei nicht von diesem Release und sollte nicht ausgeführt werden.
+- Das Erstellen der Lebensliste läuft komplett auf deinem Rechner und geht nie ins Internet.
+- Die fertige Seite funktioniert offline, nur die Karte lädt ihre Kartenkacheln aus dem Internet.
+- `--check-update` und `update.py` fragen GitHub nach der neuesten Version. Dabei werden keine Beobachtungsdaten gesendet.
+- Deine eigene Wunschliste (Tab „Ziele“) speichert nur dein Browser. Sie bleibt erhalten, wenn du die Lebensliste neu erstellst. Zum Sichern oder für einen anderen Rechner kannst du sie dort als Datei speichern und wieder laden.
+- Export und HTML-Dateien enthalten deine Beobachtungsorte. Sie sind per `.gitignore` vom Git-Repository ausgeschlossen. Zum Weitergeben ist die Version mit `--redact` gedacht.
 
-### Einen bestimmten Export verwenden
+## Woher kommen die Artdaten?
 
-Falls eine bestimmte Exportdatei verwendet werden soll:
+- **Artnamen** (deutsch, wissenschaftlich, englisch) stammen aus der offiziellen ornitho-Artenliste.
+- **Saisonhinweise** auf der Wunschliste:
+  - Für Arten, die in Deutschland oder Luxemburg brüten, gilt das offizielle Brutzeitfenster von ornitho.de.
+  - Für Zug- und Gastvögel, die hier nicht brüten, wird ein typischer Beobachtungszeitraum aus öffentlichen Fundmeldungen bei [GBIF](https://www.gbif.org/) abgeleitet.
 
-```bash
-python lifelist.py --source export_12345_67890_20260919_002546.json
-```
+Beides steckt fertig aufbereitet in `species_reference.json`.
 
-### Eine Version ohne Ortsangaben erstellen
+## Für Entwickler
 
-Wenn die Lebensliste weitergegeben oder veröffentlicht werden soll, können persönliche Ortsangaben entfernt werden:
+### Projektaufbau
 
-```bash
-python lifelist.py --redact
-```
+| Datei / Ordner | Inhalt |
+| --- | --- |
+| `lifelist.py` | liest den Export und erstellt die HTML-Seite |
+| `template.html` | Vorlage der Seite (HTML und CSS) mit den Platzhaltern `__DATA_JSON__`, `__APP_JS__`, `__VENDOR_JS__`, `__VENDOR_CSS__` |
+| `src/*.js` | JavaScript der Seite, aufgeteilt nach Tab und Thema |
+| `vendor/` | mitgelieferte Bibliotheken Leaflet, Leaflet.markercluster und Chart.js |
+| `species_reference.json` | Artnamen und Saisonzeiträume |
+| `tests/` | automatische Tests mit erfundenen Beispieldaten |
+| `update.py`, `update.bat` | aktualisieren eine git-Kopie |
+| `build.py`, `build.bat`, `lifelist.spec` | bauen die `lifelist.exe` |
+| `verify.ps1`, `verify.bat` | prüfen die Prüfsumme der `lifelist.exe` |
+| `tools/` | Werkzeuge zur Pflege der Referenzdaten und Bibliotheken |
+| `HOWTO.md`, `howto/` | Anleitung zum Export mit Screenshots |
 
-Das erzeugt:
+### Aufbau des JavaScript
 
-```text
-lifelist_redacted.html
-```
+Die Aufteilung in `src/*.js` dient nur der Bearbeitung. `lifelist.py` fügt die Dateien in fester Reihenfolge (`APP_JS_FILES`) zu einem einzigen `<script>` zusammen, ausgeliefert wird immer nur die eine HTML-Datei. Echte Module mit `import`/`export` gibt es bewusst nicht: `<script type="module">` scheitert unter `file://` an der CORS-Sperre von Chrome.
 
-In dieser Version sind Beobachtungsorte, Gemeinden und Koordinaten entfernt. Die eigentlichen Beobachtungsdaten bleiben dabei natürlich erhalten, nur die Ortsinformationen werden ausgeblendet.
-
-### Neue Versionen
-
-Wer das Projekt mit `git clone` heruntergeladen hat, holt sich neue Versionen mit dem Update-Skript (unter Windows reicht ein Doppelklick auf `update.bat`):
-
-```bash
-python update.py
-```
-
-Es holt die Änderungen von GitHub und zeigt, was neu ist. Eigene `export_*.json`- und HTML-Dateien bleiben unberührt. Wurden Dateien des Programms selbst lokal verändert, bricht das Skript ab und nennt sie, statt etwas zu überschreiben. Dafür muss [git](https://git-scm.com/) installiert sein; ohne git lädt man die neue Version einfach von der Releases-Seite.
-
-Ob es eine neuere Version gibt, lässt sich bei Bedarf nachsehen:
-
-```bash
-python lifelist.py --check-update   # fragt GitHub nach dem neuesten Release, erstellt nichts
-python lifelist.py --version        # installierte Version anzeigen
-```
-
-Gibt es eine neuere Version, erscheint ein Hinweis mit Link zur [Releases-Seite](../../releases). Dabei wird nur die Versionsnummer des neuesten Releases abgerufen; es werden keine Beobachtungs- oder sonstigen Daten gesendet. Beim normalen Erstellen der Lebensliste geht das Programm nie ins Internet.
-
-## Voraussetzungen
-
-- Python 3 (oder, unter Windows, die fertige `lifelist.exe` von der [Releases-Seite](../../releases) statt Python)
-- ein JSON-Export von ornitho.de
-
-Mehr wird nicht gebraucht, auch keine Internetverbindung (sie wird nur für die Kartenansicht und für `--check-update` genutzt).
-
-## Welche Daten werden verwendet?
-
-Die Artennamen stammen aus der offiziellen ornitho-Artenliste. Dadurch stehen neben den deutschen auch die lateinischen und englischen Namen zur Verfügung.
-
-Für die Saisonhinweise auf der Wunschliste werden je nach Art unterschiedliche Informationen verwendet:
-
-- Bei in Deutschland bzw. Luxemburg brütenden Arten wird das offizielle Brutzeitfenster von ornitho verwendet.
-- Bei Zug- und Gastvögeln, die hier nicht brüten, wird ein typischer Beobachtungszeitraum aus öffentlichen GBIF-Fundmeldungen abgeleitet.
-
-Die entsprechenden Referenzdaten liegen im Verzeichnis `reference/` bzw. in `species_reference.json`.
-
-## Dateien im Projekt
-
-### Für Anwender
-
-- `lifelist.py`: erstellt die fertige Lebensliste
-- `export_*.json`: eigener ornitho.de-Export
-- `lifelist.html`: fertige Lebensliste
-- `lifelist_redacted.html`: fertige Lebensliste ohne Ortsangaben
-- `HOWTO.md`: bebilderte Anleitung für den Datenexport von ornitho.de
-- `update.py`, `update.bat`: aktualisiert eine mit git geklonte Kopie von GitHub
-
-Die persönlichen Export- und HTML-Dateien gehören nicht ins Git-Repository und sind deshalb über `.gitignore` ausgeschlossen.
-
-### Für die Entwicklung
-
-- `template.html`: HTML-Vorlage der fertigen Seite, mit den Platzhaltern `__DATA_JSON__`, `__APP_JS__`, `__VENDOR_JS__` und `__VENDOR_CSS__`
-- `src/*.js`: JavaScript-Code der Anwendung, aufgeteilt nach Tab/Thema (`i18n.js`, `data.js`, `charts.js`, `overview.js`, `list.js`, `regions.js`, `targets.js`, `activity.js`, `map.js`, `app.js`)
-- `tsconfig.json`, `src/globals.d.ts`: für die optionale JSDoc-Typprüfung (siehe unten)
-- `species_reference.json`: Referenzdaten zu Arten, Namen und Saisonzeiträumen
-- `reference/`: originale Referenztabellen von ornitho.de, Quelle für `species_reference.json`; wegen unklarer Weitergaberechte nicht Teil des Git-Repositorys
-- `tools/extract_species_reference.py`: aktualisiert die Arten-Referenzdaten aus `reference/ornitho-Referenzliste-Arten-*.xlsx`; benötigt `pip install openpyxl`
-- `tools/fetch_occurrence_windows.py`: ermittelt Beobachtungszeiträume für Zug- und Gastvögel über die öffentliche GBIF-API
-- `vendor/`: Leaflet, das Leaflet.markercluster-Plugin und Chart.js als mitgelieferte Dateien (siehe Lizenzen unten); `tools/update_vendor.py` lädt sie bei Bedarf neu, z. B. für ein Versions-Update
-- `howto/`: Screenshots für `HOWTO.md`
-- `tests/`: automatische Tests (siehe unten)
-- `lifelist.spec`: Bauanleitung für PyInstaller, erzeugt die `lifelist.exe` für die Releases-Seite (siehe unten)
-
-Diese Werkzeuge dienen nur der Datenpflege, für den normalen Build werden sie nicht gebraucht.
-
-## Entwicklung
-
-Die Aufteilung in `src/*.js` ist nur für die Bearbeitung gedacht. Beim Erstellen der Lebensliste fügt `lifelist.py` sie in fester Reihenfolge (`APP_JS_FILES`) zu einem einzigen `<script>` zusammen. Es gibt keine `import`/`export`-Module, weil `<script type="module">` unter `file://` an Chromes CORS-Sperre scheitern würde. Ausgeliefert wird weiterhin nur die eine generierte HTML-Datei.
-
-Optional lässt sich `src/*.js` per JSDoc-Kommentaren mit dem TypeScript-Compiler typprüfen (ohne dass daraus TypeScript-Syntax im ausgelieferten Code entsteht):
+Optional lässt sich der Code anhand seiner JSDoc-Kommentare mit dem TypeScript-Compiler prüfen, ohne dass TypeScript im ausgelieferten Code landet:
 
 ```bash
 npx --package typescript -- tsc -p tsconfig.json
 ```
 
-(Einfaches `npx tsc` funktioniert nicht: Auf npm existiert ein gleichnamiges, fremdes Paket `tsc`, das den echten TypeScript-Compiler überschattet.)
+Einfaches `npx tsc` funktioniert nicht, weil ein fremdes npm-Paket namens `tsc` den echten Compiler verdeckt.
 
 ### Tests
-
-Die Tests in `tests/` arbeiten mit erfundenen Beispieldaten (`tests/fixtures.py`), nicht mit dem eigenen Export, und überschreiben keine `lifelist.html`.
 
 ```bash
 python -m unittest discover -s tests -t .
 ```
 
-`tests/test_build.py` prüft die Datenaufbereitung und braucht nur Python. `tests/test_page.py` öffnet die fertige Seite in einem unsichtbaren Chromium, klickt alle Tabs in beiden Sprachen durch und meldet JavaScript-Fehler. Dafür wird Playwright gebraucht, sonst werden diese Tests übersprungen:
+Die Tests nutzen erfundene Beispieldaten aus `tests/fixtures.py` und überschreiben keine eigene `lifelist.html`.
 
-```bash
-pip install playwright
-playwright install chromium
-```
+- `tests/test_build.py` prüft die Datenaufbereitung und braucht nur Python.
+- `tests/test_update.py` prüft `update.py` an Test-Repositories und braucht git.
+- `tests/test_page.py` öffnet die Seite in einem unsichtbaren Chromium, klickt sich durch alle Tabs und Funktionen und meldet JavaScript-Fehler. Dafür wird Playwright gebraucht, sonst werden diese Tests übersprungen:
 
-### Lizenzen der mitgelieferten Bibliotheken (`vendor/`)
+  ```bash
+  pip install playwright
+  playwright install chromium
+  ```
+
+### lifelist.exe bauen und veröffentlichen
+
+1. Die Versionsnummer `APP_VERSION` in `src/i18n.js` erhöhen.
+2. Unter Windows `python build.py` ausführen (oder `build.bat` doppelklicken). Es braucht `pip install pyinstaller`, lässt zuerst die Tests laufen und baut dann `dist\lifelist.exe` samt `dist\lifelist.exe.sha256`. PyInstaller baut immer für das System, auf dem es läuft; die Windows-exe entsteht also nur unter Windows.
+3. Auf GitHub ein Release mit dem Tag `v` plus Versionsnummer anlegen (zum Beispiel `v0.3.0`). Daran `lifelist.exe`, `lifelist.exe.sha256`, `verify.bat` und `verify.ps1` anhängen und die Prüfsumme in die Release-Notizen schreiben.
+
+Das Tag muss zur Versionsnummer passen, sonst meldet `--check-update` keine neue Version.
+
+### Referenzdaten und Bibliotheken pflegen
+
+- `tools/extract_species_reference.py` aktualisiert `species_reference.json` aus der ornitho-Referenzliste (`reference/ornitho-Referenzliste-Arten-*.xlsx`, braucht `pip install openpyxl`). Der Ordner `reference/` ist wegen unklarer Weitergaberechte nicht im Repository.
+- `tools/fetch_occurrence_windows.py` ermittelt die Beobachtungszeiträume der Zug- und Gastvögel über die öffentliche GBIF-API.
+- `tools/update_vendor.py` lädt die Bibliotheken in `vendor/` neu, zum Beispiel für ein Versions-Update.
+
+Für das normale Erstellen der Lebensliste werden diese Werkzeuge nicht gebraucht.
+
+### Lizenzen der mitgelieferten Bibliotheken
 
 - [Leaflet](https://leafletjs.com/): BSD-2-Clause, © Vladimir Agafonkin, © 2010–2023 CloudMade
 - [Leaflet.markercluster](https://github.com/Leaflet/Leaflet.markercluster): MIT, © Dave Leaver
 - [Chart.js](https://www.chartjs.org/): MIT, © Chart.js Contributors
 
-Alle drei erlauben Einbettung/Weitergabe; der jeweilige Copyright-Hinweis bleibt in den Dateien in `vendor/` erhalten.
+Alle drei erlauben Einbettung und Weitergabe. Ihre Copyright-Hinweise bleiben in den Dateien in `vendor/` erhalten.
 
 ## Lizenz
 
