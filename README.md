@@ -170,6 +170,10 @@ Zum Ausprobieren lässt sich die exe auch selbst bauen: unter Windows `python bu
 - `tools/make_demo_export.py` erzeugt einen erfundenen, aber realistisch wirkenden Export (`export_demo.json`): ein fiktiver Beobachter aus der Nähe von Dresden, über mehrere Jahre an echten Beobachtungsorten, mit Reisen quer durch Deutschland. Gut zum Ausprobieren ohne eigene Daten: `python tools/make_demo_export.py`, dann `python lifelist.py --source export_demo.json`.
 - `tools/make_screenshots.py` erstellt daraus die Bilder in `docs/screenshots/` (braucht Playwright, siehe Tests). Mit `--map` kommt ein Bild der Karte dazu, dafür braucht es Internet für die Kartenkacheln.
 
+### Welche Felder hat ein Export?
+
+`python tools/export_fields.py` listet auf, welche Felder im neuesten `export_*.json` vorkommen, wie oft und mit welcher Art von Wert, und ob Meldungen eigene Koordinaten haben. Es gibt dabei keine Werte aus (keine Namen, Orte, Daten oder Koordinaten), die Ausgabe lässt sich also gefahrlos weitergeben, etwa um neue Funktionen zu planen.
+
 ### Referenzdaten und Bibliotheken pflegen
 
 - `tools/extract_species_reference.py` aktualisiert `species_reference.json` aus der ornitho-Referenzliste (`reference/ornitho-Referenzliste-Arten-*.xlsx`, braucht `pip install openpyxl`). Der Ordner `reference/` ist wegen unklarer Weitergaberechte nicht im Repository.
