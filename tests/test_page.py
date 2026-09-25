@@ -276,7 +276,7 @@ class PageTest(unittest.TestCase):
     def test_tours_are_rebuilt_from_close_records(self):
         page = self.open(redact="tours", hash="#tours")
         # the fixture's tours are short: test the rules with small limits (the defaults are for real walks)
-        page.evaluate("S.tourCfg = { gap: 10, step: 1, stop: 150, minKm: 0.5 }; renderTours()")
+        page.evaluate("S.tourCfg = { gap: 10, step: 1, stop: 150, minKm: 0.5, minDur: 0 }; renderTours()")
         tours = page.evaluate("findTours(baseObs()).map(t => ({ stops: t.stops.map(s => [s.name, s.obs.length, s.lat, s.lon]), km: t.km }))")
         self.assertEqual(len(tours), 2)
         gps_tour = tours[0]  # newest first
@@ -288,6 +288,13 @@ class PageTest(unittest.TestCase):
         self.assertAlmostEqual(a_lat, (51.1000 + 51.1004 + 51.1000) / 3, places=6)
         self.assertAlmostEqual(a_lon, (14.5000 + 14.5000 + 14.5012) / 3, places=6)
         self.assertAlmostEqual(tours[0]["km"], 0.59, delta=0.02)
+        # sortable: longest first puts the 0.59 km tour above the 0.56 km one
+        page.click('th[data-tour-sort="km"]')
+        self.assertIn("▼", page.inner_text('th[data-tour-sort="km"]'))
+        self.assertEqual(page.evaluate("sortTours(visibleTours()).map(t => t.d)"), ["2024-05-01", "2024-05-02"])
+        page.click('th[data-tour-sort="km"]')
+        self.assertEqual(page.evaluate("sortTours(visibleTours()).map(t => t.d)"), ["2024-05-02", "2024-05-01"])
+        page.click('th[data-tour-sort="date"]')
         page.locator("#tab-tours tr.row").nth(1).click()
         self.assertIn("Punkt A (3) → Punkt B (1)", page.inner_text("#tab-tours"))
         page.click("[data-route]")
@@ -304,11 +311,17 @@ class PageTest(unittest.TestCase):
         page.fill('[data-tour-cfg="minKm"]', "1")
         page.press('[data-tour-cfg="minKm"]', "Enter")
         self.assertEqual(page.evaluate("findTours(baseObs()).length"), 1)
+        # and a minimum duration: the joined tour runs 07:00-07:29
+        page.fill('[data-tour-cfg="minDur"]', "30")
+        page.press('[data-tour-cfg="minDur"]', "Enter")
+        self.assertEqual(page.evaluate("findTours(baseObs()).length"), 0)
+        page.fill('[data-tour-cfg="minDur"]', "0")
+        page.press('[data-tour-cfg="minDur"]', "Enter")
         page.reload()
         self.assertEqual(page.evaluate("[S.tourCfg.gap, S.tourCfg.step, S.tourCfg.minKm]"), [30, 5, 1])
         page.click('#tabs button[data-tab="tours"]')
         page.click("[data-tour-reset]")
-        self.assertEqual(page.evaluate("S.tourCfg"), {"gap": 30, "step": 0.5, "stop": 250, "minKm": 3})
+        self.assertEqual(page.evaluate("S.tourCfg"), {"gap": 30, "step": 0.5, "stop": 250, "minKm": 1, "minDur": 60})
         # no tours without place data
         page.click("#o-sum")
         page.check("#o-redact")

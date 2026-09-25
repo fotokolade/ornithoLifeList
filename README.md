@@ -42,7 +42,7 @@ Die Bilder zeigen eine Lebensliste aus erfundenen Beispieldaten.
 
 ![Karte mit den Beobachtungsorten in ganz Deutschland](docs/screenshots/map.png)
 
-**Touren**, zusammengesetzt aus Meldungen, die zeitlich und räumlich nah beieinanderliegen. Wie nah (Standard: 30 Minuten Pause, 500 m Abstand, Halte im Umkreis von 250 m, mindestens 3 km lang), stellst du im Tab selbst ein:
+**Touren**, zusammengesetzt aus Meldungen, die zeitlich und räumlich nah beieinanderliegen. Wie nah (Standard: 30 Minuten Pause, 500 m Abstand, Halte im Umkreis von 250 m, mindestens 1 km und 1 Stunde), stellst du im Tab selbst ein:
 
 ![Liste der Touren mit Kennzahlen und einer geöffneten Tour](docs/screenshots/tours.png)
 

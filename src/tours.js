@@ -3,11 +3,12 @@
 // other within `gap` minutes and `step` km belong to the same walk or ride. Records in a row within
 // `stop` metres of each other are one stop (several species reported at one spot): the stop sits at the
 // mean position of its records. A chain with a single stop is a stay, not a tour, and tours shorter than
-// `minKm` are left out. The viewer can change all four in the tab; they are kept in localStorage.
-const TOUR_DEFAULTS = { gap: 30, step: 0.5, stop: 250, minKm: 3 };
+// `minKm` or `minDur` minutes are left out (an hour is also the span a Beobachtungsliste covers a quadrant
+// in). The viewer can change all five in the tab; they are kept in localStorage.
+const TOUR_DEFAULTS = { gap: 30, step: 0.5, stop: 250, minKm: 1, minDur: 60 };
 // [key, min, max, step of the input]
-/** @type {["gap"|"step"|"stop"|"minKm", number, number, number][]} */
-const TOUR_LIMITS = [["gap", 1, 240, 1], ["step", 0.1, 50, 0.1], ["stop", 10, 2000, 10], ["minKm", 0, 50, 0.1]];
+/** @type {["gap"|"step"|"stop"|"minKm"|"minDur", number, number, number][]} */
+const TOUR_LIMITS = [["gap", 1, 240, 1], ["step", 0.1, 50, 0.1], ["stop", 10, 2000, 10], ["minKm", 0, 50, 0.1], ["minDur", 0, 720, 5]];
 const TOURS_SHOWN = 30;
 /** @returns {typeof TOUR_DEFAULTS} */
 function loadTourCfg() {
@@ -83,7 +84,7 @@ function findTours(list) {
     byDay.get(o.d).push(o);
   }
   const tours = [];
-  const { gap, step, minKm } = S.tourCfg;
+  const { gap, step, minKm, minDur } = S.tourCfg;
   const close = (a, b) => b.tm - a.tm <= gap && distM(obsPos(a), obsPos(b)) <= step * 1000;
   for (const [d, day] of byDay) {
     day.sort((a, b) => a.tm - b.tm);
@@ -93,7 +94,7 @@ function findTours(list) {
       if (stops.length < 2) return;
       let km = 0;
       for (let i = 1; i < stops.length; i++) km += distM(stops[i - 1], stops[i]) / 1000;
-      if (km < minKm) return;
+      if (km < minKm || chain[chain.length - 1].tm - chain[0].tm < minDur) return;
       tours.push({ key: `${d}-${chain[0].tm}-${chain[0].p}`, d, y: chain[0].y, start: chain[0].tm, end: chain[chain.length - 1].tm, stops, km, obs: chain });
     };
     for (let i = 1; i < day.length; i++) {
@@ -113,22 +114,44 @@ const fmtKm = km => km.toLocaleString(S.lang === "en" ? "en-GB" : "de-DE", { min
 const fmtDuration = min => `${Math.floor(min / 60)}:${pad(min % 60)} h`;
 // the four limits as inputs; a change re-renders the tab (see the "change" handler in app.js)
 function tourSettingsHtml() {
-  const unit = { gap: "min", step: "km", stop: "m", minKm: "km" };
+  const unit = { gap: "min", step: "km", stop: "m", minKm: "km", minDur: "min" };
   return `<div class="tour-cfg">${TOUR_LIMITS.map(([k, min, max, step]) =>
     `<label>${t("tourCfg_" + k)} <input type="number" data-tour-cfg="${k}" min="${min}" max="${max}" step="${step}" value="${S.tourCfg[k]}"> ${unit[k]}</label>`).join("")}
     <button class="lnk" type="button" data-tour-reset>${t("tourCfgReset")}</button></div>`;
 }
+// sortable columns, like the life list: a click sorts, a second click turns the order round
+const TOUR_SORT = {
+  date: tr => tr.d + String(tr.start).padStart(4, "0"),
+  time: tr => tr.start,
+  dur: tr => tr.end - tr.start,
+  km: tr => tr.km,
+  stops: tr => tr.stops.length,
+  species: tr => new Set(tr.obs.map(o => o.s)).size,
+};
+/** @param {Tour[]} tours */
+function sortTours(tours) {
+  const { k, d } = S.tourSort, key = TOUR_SORT[k];
+  return [...tours].sort((a, b) => {
+    const va = key(a), vb = key(b);
+    return d * (va < vb ? -1 : va > vb ? 1 : 0) || byDateDesc(a.d, b.d);
+  });
+}
+function tourTh(k, label, cls = "") {
+  const s = S.tourSort;
+  return `<th class="sortable ${cls}${s.k === k ? " sorted" : ""}" data-tour-sort="${k}">${label}${s.k === k ? (s.d > 0 ? " ▲" : " ▼") : ""}</th>`;
+}
 function renderTours() {
   const tours = visibleTours();
-  const { gap, step, stop, minKm } = S.tourCfg;
-  const help = infoText(t("toursHelp", gap, fmtKm(step), stop, fmtKm(minKm))) + tourSettingsHtml();
+  const { gap, step, stop, minKm, minDur } = S.tourCfg;
+  const help = infoText(t("toursHelp", gap, fmtKm(step), stop, fmtKm(minKm), minDur)) + tourSettingsHtml();
   if (!tours.length) { $("tab-tours").innerHTML = help + `<p class="empty">${t("toursNone")}</p>`; updateToc(); return; }
   const stats = speciesStats(baseObs());
   const isLifer = tr => s => tr.obs.includes(stats.get(s)?.first);
   const km = tours.reduce((a, tr) => a + tr.km, 0);
   const longest = tours.reduce((a, tr) => tr.km > a.km ? tr : a);
   const richest = tours.reduce((a, tr) => new Set(tr.obs.map(o => o.s)).size > new Set(a.obs.map(o => o.s)).size ? tr : a);
-  const shown = S.tourAll ? tours : tours.slice(0, TOURS_SHOWN);
+  const sorted = sortTours(tours);
+  const shown = S.tourAll ? sorted : sorted.slice(0, TOURS_SHOWN);
   const rows = shown.map(tr => {
     const species = new Set(tr.obs.map(o => o.s));
     const open = S.tourOpen.has(tr.key);
@@ -151,8 +174,8 @@ function renderTours() {
       <div class="kpi"><b>${new Set(richest.obs.map(o => o.s)).size}</b><span>${t("toursKRichest", fmtD(richest.d))}</span></div>
     </div>
     <h2>${t("toursTitle")}<small>${tours.length}</small></h2>
-    <div class="card"><table><thead><tr><th>${t("colDate")}</th><th class="hide-sm">${t("colTime")}</th><th class="num">${t("colDuration")}</th>
-      <th class="num">${t("colDistance")}</th><th class="num hide-sm">${t("colPlaces")}</th><th class="num">${t("mapSpecies")}</th></tr></thead><tbody>${rows}</tbody></table>
+    <div class="card"><table><thead><tr>${tourTh("date", t("colDate"))}${tourTh("time", t("colTime"), "hide-sm")}${tourTh("dur", t("colDuration"), "num")}
+      ${tourTh("km", t("colDistance"), "num")}${tourTh("stops", t("colPlaces"), "num hide-sm")}${tourTh("species", t("mapSpecies"), "num")}</tr></thead><tbody>${rows}</tbody></table>
       ${tours.length > TOURS_SHOWN ? `<p class="more"><button class="lnk" data-tours-all>${S.tourAll ? t("showLess") : t("showAll", tours.length)}</button></p>` : ""}</div>`;
   updateToc();
 }

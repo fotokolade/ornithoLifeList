@@ -239,6 +239,13 @@ function init() {
     $$(`[data-tour-cfg="${k}"]`)?.focus();
   });
   $("tab-tours").addEventListener("click", e => {
+    const th = e.target.closest("th[data-tour-sort]");
+    if (th) {
+      const k = th.dataset.tourSort;
+      // a new column starts with the biggest (or, for the time of day, earliest) first
+      S.tourSort = S.tourSort.k === k ? { k, d: /** @type {1|-1} */ (-S.tourSort.d) } : { k, d: k === "time" ? 1 : -1 };
+      renderTours(); return;
+    }
     if (e.target.closest("[data-tour-reset]")) { S.tourCfg = { ...TOUR_DEFAULTS }; saveTourCfg(); renderTours(); return; }
     const route = e.target.closest("[data-route]");
     if (route) { S.tourRoute = route.dataset.route; setTab("map"); return; }
