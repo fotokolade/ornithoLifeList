@@ -151,6 +151,10 @@ table.heat{table-layout:fixed;min-width:560px}
 .heat td.y{text-align:left;font-weight:600;padding-left:4px}
 .heat td{border:1px solid var(--card);border-radius:3px}
 .heat td.hot{color:var(--heat-ink)}
+.heat .m-short{display:none}
+.show-sm{display:none}
+/* on a phone the twelve months fit without scrolling once their headings shrink to one letter */
+@media (max-width:560px){table.heat.months{min-width:0}.heat.months th:first-child{width:2.6rem}.heat.months .m-long{display:none}.heat.months .m-short{display:inline}}
 .time-chip{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:middle}
 table.wtable td{vertical-align:middle}
 table.wtable .strip-cell{width:45%}
@@ -167,6 +171,11 @@ table.wtable .strip-cell{width:45%}
 .season-key.season-today{position:static;width:2px;height:12px;margin-left:12px}
 tr.grp td{background:none!important;font-weight:600;padding-top:16px;color:var(--text);border-bottom:1px solid var(--line)}
 tr.grp td small{font-weight:400;color:var(--muted);margin-left:6px}
+tr.grp .grp-t{all:unset;cursor:pointer;display:inline-flex;align-items:baseline;border-radius:5px;padding:2px 6px;margin:-2px -6px;transition:background-color .12s ease,color .12s ease}
+tr.grp .grp-t:hover{background:var(--stripe);color:var(--accent)}
+tr.grp .grp-t:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+tr.grp .grp-t::before{content:"▸";display:inline-block;width:1em;color:var(--muted);transition:transform .12s ease}
+tr.grp .grp-t[aria-expanded=true]::before{transform:rotate(90deg)}
 .new-badge{background:var(--accent);color:#fff;border-radius:999px;padding:0 6px;font-size:.62rem;font-weight:700;margin-left:6px;vertical-align:middle}
 .cal-months-wrap{display:grid;grid-template-columns:repeat(6,1fr);gap:18px 14px}
 @media (max-width:900px){.cal-months-wrap{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}}
@@ -224,7 +233,11 @@ svg.curve text{fill:var(--muted);font-size:11px}
 .time-label{font-weight:700;font-size:1rem;min-width:9ch;text-align:right;color:var(--text);text-shadow:0 1px 1px rgba(0,0,0,.12);flex:0 0 auto}
 @media (max-width:700px){
   .hide-sm{display:none}
+  .show-sm{display:block}
   header.top{position:static}
+  /* all tabs stay in view instead of running off the right edge */
+  nav.tabs{flex-wrap:wrap;overflow-x:visible}
+  nav.tabs button{padding:7px 10px}
   #h-sub{display:none}
   .yhead,.yrow{grid-template-columns:2.4rem 2.8rem 1fr 2.6rem 2.2rem;gap:4px}
 }
@@ -256,6 +269,7 @@ footer.meta-footer .btn{flex:0 0 auto;padding:3px 10px}
   footer.meta-footer{position:static;border:0;padding:10px 0 0;justify-content:flex-start}
   footer.meta-footer .footer-actions{display:none!important}
   .toc{display:none!important}
+  tr.grp .grp-t::before{display:none}
   .printonly{display:block}
   section.tab{display:block!important;padding-top:0}
   .wrap{max-width:none;padding:0}
@@ -266,6 +280,7 @@ footer.meta-footer .btn{flex:0 0 auto;padding:3px 10px}
   tr.row{cursor:auto}
   .hide-sm{display:revert!important}
   th.hide-sm,td.hide-sm{display:table-cell!important}
+  .show-sm{display:none!important}
   .bar,.bar i,.heat td,.pheno div,.cal-day,.season-strip,.season-strip *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   details.info summary{display:none!important}
   h2 + details.info{margin-top:0;text-align:left}

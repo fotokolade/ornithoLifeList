@@ -40,8 +40,8 @@ class PageTest(unittest.TestCase):
         cls.pw.stop()
         cls.tmp.cleanup()
 
-    def open(self, redact=False, hash="", height=900):
-        page = self.browser.new_page(viewport={"width": 1400, "height": height})
+    def open(self, redact=False, hash="", height=900, width=1400):
+        page = self.browser.new_page(viewport={"width": width, "height": height})
         self.errors = []
         page.on("pageerror", lambda e: self.errors.append(str(e)))
         # map tiles need the network; block them so the test is offline and fast
@@ -88,6 +88,44 @@ class PageTest(unittest.TestCase):
         self.assertEqual(rows.count(), 2)
         rows.first.click()
         self.assertEqual(page.locator("#list-out tr.detail").count(), 1)
+        self.assertEqual(self.errors, [])
+
+    def test_wishlist_groups_fold_and_search(self):
+        page = self.open(hash="#targets")
+        species_rows = "#wish-out tbody tr:not(.grp)"
+        total = int(page.inner_text("#tab-targets h2:last-of-type small"))
+        # only the groups worth acting on now start open
+        self.assertEqual(page.get_attribute('[data-grp="later"]', "aria-expanded"), "false")
+        folded = page.locator(species_rows).count()
+        self.assertLess(folded, total)
+        page.click('[data-grp="later"]')
+        self.assertGreater(page.locator(species_rows).count(), folded)
+        # searching redraws only the table, so the field keeps its focus, and shows hits from folded groups too
+        page.click('[data-grp="later"]')
+        page.fill("#wish-q", "adler")
+        self.assertEqual(page.evaluate("document.activeElement.id"), "wish-q")
+        names = page.locator(f"{species_rows} td:first-child").all_inner_texts()
+        self.assertTrue(names)
+        self.assertTrue(all("adler" in n.lower() for n in names), names)
+        page.fill("#wish-q", "zzzz")
+        self.assertIn("Keine passende Art", page.inner_text("#wish-out"))
+        # the printed report has every group open and no search
+        page.evaluate("window.dispatchEvent(new Event('beforeprint'))")
+        self.assertEqual(page.locator(species_rows).count(), total)
+        self.assertEqual(self.errors, [])
+
+    def test_phone_width_has_no_sideways_scroll(self):
+        page = self.open(width=390)
+        for tab in TABS:
+            page.click(f'#tabs button[data-tab="{tab}"]')
+            page.wait_for_timeout(150)
+            self.assertEqual(page.evaluate("document.documentElement.scrollWidth"), 390, tab)
+        # every tab stays in view instead of running off the right edge
+        right = page.eval_on_selector_all("#tabs button", "bs => Math.max(...bs.map(b => b.getBoundingClientRect().right))")
+        self.assertLessEqual(right, 390)
+        # the year/month table fits into its card without its own scrollbar
+        page.click('#tabs button[data-tab="overview"]')
+        self.assertTrue(page.eval_on_selector("table.heat.months", "t => t.scrollWidth <= t.parentElement.clientWidth"))
         self.assertEqual(self.errors, [])
 
     def test_footer_stays_on_top_of_map(self):

@@ -38,13 +38,14 @@ function seasonSortKey(season) {
   if (season.state === "none") return Infinity;
   return season.daysUntil;
 }
-function seasonText(season) {
+function seasonText(season, inline = false) {
   if (season.state === "none") return "";
   const kind = t(season.kind === "breed" ? "wishSeasonKindBreed" : "wishSeasonKindOcc");
   const when = season.state === "in" ? t("wishSeasonNowUntil", shortMD(season.end))
     : season.state === "soon30" ? t("wishSeasonSoon", season.daysUntil)
     : t("wishSeasonFrom", shortMD(season.start));
-  return `${esc(when)}<span class="small">${esc(kind)}</span>`;
+  // inline (phone) form leaves out the kind: the strip's colour and the legend already tell it
+  return inline ? esc(when) : `${esc(when)}<span class="small">${esc(kind)}</span>`;
 }
 // Jan-Dec strip with the season window filled in and a tick at today; the window may wrap over New Year
 function seasonStrip(season) {
@@ -72,6 +73,59 @@ function wishSortRows(rows) {
 function wishTh(k, label, cls = "") {
   const s = S.wishSort;
   return `<th class="sortable ${cls}${s.k === k ? " sorted" : ""}" data-k="${k}">${label}${s.k === k ? (s.d > 0 ? " ▲" : " ▼") : ""}</th>`;
+}
+// the rows of the last renderTargets(), so search and group toggles only redraw the table and keep the search field's focus
+/** @type {any[]} */
+let wishRows = [];
+let wishPoolLen = 0;
+// before the user toggles a group, the ones worth acting on now start open; if both are empty, the next one does
+function wishOpenGroups() {
+  if (S.wishOpen) return S.wishOpen;
+  const open = new Set(["in", "soon30"]);
+  if (!wishRows.some(r => open.has(wishGroup(r.season)))) open.add("later");
+  return open;
+}
+function toggleWishGroup(g) {
+  const open = new Set(wishOpenGroups());
+  open.has(g) ? open.delete(g) : open.add(g);
+  S.wishOpen = open;
+  $("wish-out").innerHTML = wishTableHtml();
+}
+function wishTableHtml() {
+  const rows = wishRows;
+  if (!rows.length) return `<p class="empty">${wishPoolLen ? t("wishDone") : t("wishEmpty")}</p>`;
+  const q = S.wishQ.trim().toLowerCase();
+  const hits = q ? rows.filter(r => [r.name, r.latin, r.english].some(v => v && v.toLowerCase().includes(q))) : rows;
+  if (!hits.length) return `<p class="empty">${t("wishNoHits")}</p>`;
+  const row = r => {
+    const name = S.lang === "en" && r.english ? r.english : r.name;
+    const sub = S.lang === "en" && r.english ? `${r.name}${r.latin ? " · " + r.latin : ""}` : r.latin;
+    // on a phone the season text moves under the name, the third column would be too narrow for it
+    const inline = r.season.state === "none" ? "" : `<span class="small show-sm">${seasonText(r.season, true)}</span>`;
+    return `<tr><td>${esc(name)}${sub ? `<span class="latin">${esc(sub)}</span>` : ""}${inline}</td>
+      <td class="strip-cell">${seasonStrip(r.season)}</td><td class="hide-sm">${seasonText(r.season)}</td></tr>`;
+  };
+  let body;
+  if (S.wishSort.k === "season") {
+    // grouped by how soon the season starts; the group order follows the sort direction.
+    // Groups fold away, except while searching: then every hit is shown.
+    const groups = S.wishSort.d > 0 ? WISH_GROUPS : [...WISH_GROUPS.slice(0, 3).reverse(), WISH_GROUPS[3]];
+    const open = wishOpenGroups();
+    body = groups.map(([g, label]) => {
+      const inGroup = hits.filter(r => wishGroup(r.season) === g);
+      if (!inGroup.length) return "";
+      if (q) return `<tr class="grp"><td colspan="3">${t(label)}<small>${inGroup.length}</small></td></tr>` + inGroup.map(row).join("");
+      const isOpen = open.has(g);
+      return `<tr class="grp"><td colspan="3"><button type="button" class="grp-t" data-grp="${g}" aria-expanded="${isOpen}">${t(label)}<small>${inGroup.length}</small></button></td></tr>`
+        + (isOpen ? inGroup.map(row).join("") : "");
+    }).join("");
+  } else {
+    body = hits.map(row).join("");
+  }
+  const monthHead = `<span class="season-months">${T.monthsShort.map(m => `<span>${esc(m.replace(".", "").slice(0, 1))}</span>`).join("")}</span>`;
+  return `${q ? `<p class="sub" style="margin:0 2px 6px">${t("hits", hits.length, rows.length)}</p>` : ""}
+    <div class="legend season-legend"><span class="season-key season-breed"></span>${t("wishSeasonKindBreed")}<span class="season-key season-occ"></span>${t("wishSeasonKindOcc")}<span class="season-key season-today"></span>${t("wishToday")}</div>
+    <div class="card"><table class="wtable"><thead><tr>${wishTh("name", t("name"))}${wishTh("season", monthHead, "strip-cell")}<th class="hide-sm"></th></tr></thead><tbody>${body}</tbody></table></div>`;
 }
 function renderTargets() {
   // deliberately unscoped by S.region: "never seen" means never seen anywhere, not just in the currently filtered region
@@ -103,29 +157,7 @@ function renderTargets() {
         `<span class="chip">${esc(x.name)}${x.latin ? `<i class="latin" style="display:inline;font-style:italic"> ${esc(x.latin)}</i>` : ""}
          <button class="lnk" data-remove="${i}" aria-label="${t("wishRemove")}" style="margin-left:4px">×</button></span>`).join("")}</div>`
     : `<p class="empty">${t("wishEmpty")}</p>`;
-  const row = r => {
-    const name = S.lang === "en" && r.english ? r.english : r.name;
-    const sub = S.lang === "en" && r.english ? `${r.name}${r.latin ? " · " + r.latin : ""}` : r.latin;
-    return `<tr><td>${esc(name)}${sub ? `<span class="latin">${esc(sub)}</span>` : ""}</td>
-      <td class="strip-cell">${seasonStrip(r.season)}</td><td>${seasonText(r.season)}</td></tr>`;
-  };
-  let body;
-  if (S.wishSort.k === "season") {
-    // grouped by how soon the season starts; the group order follows the sort direction
-    const groups = S.wishSort.d > 0 ? WISH_GROUPS : [...WISH_GROUPS.slice(0, 3).reverse(), WISH_GROUPS[3]];
-    body = groups.map(([g, label]) => {
-      const inGroup = rows.filter(r => wishGroup(r.season) === g);
-      return inGroup.length ? `<tr class="grp"><td colspan="3">${t(label)}<small>${inGroup.length}</small></td></tr>` + inGroup.map(row).join("") : "";
-    }).join("");
-  } else {
-    body = rows.map(row).join("");
-  }
-  const monthHead = `<span class="season-months">${T.monthsShort.map(m => `<span>${esc(m.replace(".", "").slice(0, 1))}</span>`).join("")}</span>`;
-  const resultTable = rows.length
-    ? `<div class="legend season-legend"><span class="season-key season-breed"></span>${t("wishSeasonKindBreed")}<span class="season-key season-occ"></span>${t("wishSeasonKindOcc")}<span class="season-key season-today"></span>${t("wishToday")}</div>
-      <div class="card"><table class="wtable"><thead><tr>${wishTh("name", t("name"))}${wishTh("season", monthHead, "strip-cell")}<th></th></tr></thead><tbody>${body}</tbody></table></div>`
-    : `<p class="empty">${pool.length ? t("wishDone") : t("wishEmpty")}</p>`;
-
+  wishRows = rows; wishPoolLen = pool.length;
   $("tab-targets").innerHTML = `
     ${infoText(`${t("wishHelp")}<br><br>${t("wishSeasonHelp")}`)}
     <p class="sub">${t("wishProgress", seenCount, totalDistinct, progressPct)}</p>
@@ -148,7 +180,8 @@ function renderTargets() {
       ${chips}
     </div>
     <h2>${t("wishTitle")}<small>${rows.length}</small></h2>
-    ${resultTable}`;
+    ${rows.length ? `<div class="pick"><input type="search" id="wish-q" placeholder="${t("wishFilterPh")}" autocomplete="off" value="${esc(S.wishQ)}"></div>` : ""}
+    <div id="wish-out">${wishTableHtml()}</div>`;
   $("tgt-src").value = src;
   updateToc();
 }

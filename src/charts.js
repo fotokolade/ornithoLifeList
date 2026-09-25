@@ -6,7 +6,8 @@ function curveSvg(chrono) {
   // <linearGradient> ids must be unique in the document or url(#id) can resolve to the wrong (or a hidden, non-rendering) one
   const gradId = "curveGrad" + curveSvgSeq, lineId = "curveLine" + curveSvgSeq;
   curveSvgSeq++;
-  const W = 720, H = 230, L = 38, R = 10, Tp = 10, B = 24;
+  // drawn at roughly the width it is shown at, so the axis text stays legible on a phone instead of shrinking with the whole picture
+  const W = Math.round(Math.max(320, Math.min(720, document.documentElement.clientWidth - 66))), H = 230, L = 38, R = 10, Tp = 10, B = 24;
   // the curve ends with the export's last observation, not today: an older export would otherwise trail off in a long flat line
   const t0 = Date.UTC(MIN_Y, 0, 1), t1 = Date.UTC(MAX_Y + 1, 0, 1), tEnd = Date.parse(OBS[OBS.length - 1].d + "T00:00:00Z");
   const x = ms => L + (ms - t0) / (t1 - t0) * (W - L - R);
@@ -16,7 +17,8 @@ function curveSvg(chrono) {
   const y = n => H - B - n / yMax * (H - B - Tp);
   let g = "", d = `M${x(t0)},${y(0)}`, prev = 0, dots = "";
   for (let v = 0; v <= yMax; v += step) g += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${L - 6}" y="${y(v) + 4}" text-anchor="end">${v}</text>`;
-  const every = (MAX_Y - MIN_Y) > 8 ? 2 : 1;
+  // a year label needs about 40 units of width; thin them out when the years get too narrow for that
+  const every = Math.max(1, Math.ceil(40 / ((W - L - R) / (MAX_Y - MIN_Y + 1))));
   for (let yr = MIN_Y; yr <= MAX_Y; yr += every)
     g += `<text x="${x(Date.UTC(yr, 0, 1)) + 2}" y="${H - 6}">${yr}</text>`;
   pts.forEach((o, i) => {
@@ -60,7 +62,7 @@ function heatTable(list) {
   }
   let max = 1;
   for (const s of cell.values()) max = Math.max(max, s.size);
-  let h = `<table class="heat"><thead><tr><th></th>${T.monthsShort.map(m => `<th>${m.replace(".", "")}</th>`).join("")}</tr></thead><tbody>`;
+  let h = `<table class="heat months"><thead><tr><th></th>${T.monthsShort.map(m => `<th><span class="m-long">${m.replace(".", "")}</span><span class="m-short">${m.slice(0, 1)}</span></th>`).join("")}</tr></thead><tbody>`;
   for (let y = MAX_Y; y >= MIN_Y; y--) {
     h += `<tr><td class="y">${y}</td>`;
     for (let m = 1; m <= 12; m++) {

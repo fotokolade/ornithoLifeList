@@ -189,10 +189,11 @@ function init() {
   $("b-pdf").addEventListener("click", () => window.print());
   let printBackup = null;
   window.addEventListener("beforeprint", () => {
-    // the report contains every section in full: no open detail rows, search, atlas filter, truncated region tables or wishlist source filter
-    printBackup = { q: S.q, open: S.open, atlasF: S.atlasF, regAll: S.regAll, targetSrc: S.targetSrc, theme: document.documentElement.getAttribute("data-theme") };
+    // the report contains every section in full: no open detail rows, search, atlas filter, truncated region tables, wishlist source filter, search or folded groups
+    printBackup = { q: S.q, open: S.open, atlasF: S.atlasF, regAll: S.regAll, targetSrc: S.targetSrc, wishQ: S.wishQ, wishOpen: S.wishOpen, theme: document.documentElement.getAttribute("data-theme") };
     document.documentElement.setAttribute("data-theme", "light");  // paper is always light, also for the canvas charts
     S.q = ""; S.open = new Set(); S.atlasF = "all"; S.regAll = Object.fromEntries(LEVELS.map(lv => [lv.lvl, true])); S.targetSrc = "all";
+    S.wishQ = ""; S.wishOpen = new Set(WISH_GROUPS.map(([g]) => g));
     $("h-print").textContent = t("printed", new Date().toLocaleDateString(S.lang === "en" ? "en-GB" : "de-DE")) + (S.region === "all" ? "" : ", " + $("f-region").selectedOptions[0].text);
     renderOverview(); renderList(); renderTargets(); renderActivity(); renderRegions();
     // closed <details> keep their text hidden even from print CSS
@@ -244,7 +245,12 @@ function init() {
   $("tab-targets").addEventListener("change", e => {
     if (e.target.id === "tgt-src") { S.targetSrc = e.target.value; renderTargets(); }
   });
+  $("tab-targets").addEventListener("input", e => {
+    if (e.target.id === "wish-q") { S.wishQ = e.target.value; $("wish-out").innerHTML = wishTableHtml(); }
+  });
   $("tab-targets").addEventListener("click", e => {
+    const grp = e.target.closest("[data-grp]");
+    if (grp) { toggleWishGroup(grp.dataset.grp); return; }
     const th = e.target.closest("th[data-k]");
     if (th) {
       const k = th.dataset.k;

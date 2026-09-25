@@ -93,10 +93,13 @@ if (initialTheme !== "system") document.documentElement.setAttribute("data-theme
  * @property {string} targetSrc - wishlist source filter: "all"|"euro"|"own"
  * @property {{name: string, latin: string|null}[]} customTargets - user-maintained wishlist entries
  * @property {{k: "name"|"season", d: 1|-1}} wishSort - wishlist table sort
+ * @property {Set<string>|null} wishOpen - expanded wishlist season groups; null until the user toggles one (see wishOpenGroups())
+ * @property {string} wishQ - wishlist search text
  */
 const S = { tab: "overview", region: "all", year: Math.min(TODAY_Y, MAX_Y), month: TODAY_M, timeAll: true, lang: initialLang, theme: initialTheme,
   escaped: false, collective: false, atlasF: "all", actMetric: "obs", redact: !!RAW.meta.redacted, metric: "life", q: "", sort: "nr", dir: -1, open: new Set(),
-  regSort: {}, regAll: {}, targetSrc: "all", customTargets: loadCustomTargets(), wishSort: { k: "season", d: 1 } };
+  regSort: {}, regAll: {}, targetSrc: "all", customTargets: loadCustomTargets(), wishSort: { k: "season", d: 1 },
+  wishOpen: null, wishQ: "" };
 T = STR[S.lang];
 
 /* ---------- helpers ---------- */
