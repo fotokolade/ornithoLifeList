@@ -23,6 +23,8 @@ const TOUR_MAX_GAP_MIN = 10, TOUR_MAX_STEP_M = 1000, TOUR_STOP_RADIUS_M = 150, T
  * @property {number} km - length of the path through the stops
  * @property {Observation[]} obs
  */
+// where a record was made: its own position if the export has one (GPS or a point set by hand), else its place's
+const obsPos = o => o.la ? { lat: o.la, lon: o.lo } : PL[o.p];
 // great-circle distance in metres
 function distM(p, q) {
   const rad = Math.PI / 180, dLat = (q.lat - p.lat) * rad, dLon = (q.lon - p.lon) * rad;
@@ -38,7 +40,7 @@ function tourStops(chain) {
   /** @type {(TourStop & {sumLat: number, sumLon: number})[]} */
   const stops = [];
   for (const o of chain) {
-    const p = PL[o.p], cur = stops[stops.length - 1];
+    const p = obsPos(o), cur = stops[stops.length - 1];
     if (cur && distM(cur, p) <= TOUR_STOP_RADIUS_M) {
       cur.obs.push(o);
       cur.sumLat += p.lat; cur.sumLon += p.lon;
@@ -58,12 +60,12 @@ function tourStops(chain) {
 function findTours(list) {
   const byDay = new Map();
   for (const o of list) {
-    if (o.tm < 0 || !PL[o.p].lat) continue;  // needs a time and coordinates (a --redact build has none)
+    if (o.tm < 0 || !obsPos(o).lat) continue;  // needs a time and coordinates (a --redact build has none)
     if (!byDay.has(o.d)) byDay.set(o.d, []);
     byDay.get(o.d).push(o);
   }
   const tours = [];
-  const close = (a, b) => b.tm - a.tm <= TOUR_MAX_GAP_MIN && (a.p === b.p || distM(PL[a.p], PL[b.p]) <= TOUR_MAX_STEP_M);
+  const close = (a, b) => b.tm - a.tm <= TOUR_MAX_GAP_MIN && distM(obsPos(a), obsPos(b)) <= TOUR_MAX_STEP_M;
   for (const [d, day] of byDay) {
     day.sort((a, b) => a.tm - b.tm);
     let chain = [day[0]];

@@ -146,6 +146,23 @@ class UpdateCheckTest(unittest.TestCase):
 
 
 
+class OwnPositionTest(unittest.TestCase):
+    def test_prefers_gps_then_precise_point(self):
+        gps = {"gps_lat": "51.123456", "gps_lon": "13.654321", "coord_lat": "51.2", "coord_lon": "13.7", "precision": "precise"}
+        self.assertEqual(lifelist.own_position(gps), (51.12346, 13.65432))
+        self.assertEqual(lifelist.own_position({"coord_lat": "51.2", "coord_lon": "13.7", "precision": "precise"}), (51.2, 13.7))
+        # a record tied to its place or a grid square has no position of its own
+        self.assertIsNone(lifelist.own_position({"coord_lat": "51.2", "coord_lon": "13.7", "precision": "square"}))
+        self.assertIsNone(lifelist.own_position({"coord_lat": "51.2", "coord_lon": "13.7", "precision": "place"}))
+        self.assertIsNone(lifelist.own_position({"gps_lat": "", "gps_lon": ""}))
+
+    def test_redact_drops_own_positions(self):
+        s = sighting("Parus major", "Kohlmeise", "2024-05-01")
+        s["observers"][0].update({"gps_lat": "51.1", "gps_lon": "14.5"})
+        self.assertEqual(lifelist.build_page_data([s], "x.json", False)["obs"][0][7:], [51.1, 14.5])
+        self.assertEqual(lifelist.build_page_data([s], "x.json", True)["obs"][0][7:], [])
+
+
 class MunicipalityTest(unittest.TestCase):
     def test_county_codes(self):
         self.assertEqual(lifelist.parse_municipality("Görlitz (SN, GR)"), ("Görlitz", "SN", "GR"))

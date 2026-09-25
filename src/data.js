@@ -45,10 +45,12 @@ const atlasRank = ac => /^[ABC]/.test(ac) ? (parseInt(ac.slice(1), 10) || { A: 1
  * @property {string} ac - atlas/breeding code, e.g. "C13a", or "" if none
  * @property {number} tm - minute of day, or -1 if the export has no time
  * @property {number} ar - numeric breeding-evidence rank derived from ac, 0 if none
+ * @property {number} la - the record's own latitude (GPS or a point set by hand), 0 if it only has its place's
+ * @property {number} lo - the record's own longitude, 0 if none
  */
-const OBS = RAW.obs.map(([s, d, p, c, ph, ac, tm]) => {
+const OBS = RAW.obs.map(([s, d, p, c, ph, ac, tm, la = 0, lo = 0]) => {
   const md = d.slice(5);
-  return { s, d, y: +d.slice(0, 4), m: +d.slice(5, 7), md, p, c, ph, ac, tm, ar: ac ? atlasRank(ac) : 0 };
+  return { s, d, y: +d.slice(0, 4), m: +d.slice(5, 7), md, p, c, ph, ac, tm, ar: ac ? atlasRank(ac) : 0, la, lo };
 });
 const YEARS = [...new Set(OBS.map(o => o.y))].sort((a, b) => a - b);
 const MIN_Y = YEARS[0], MAX_Y = YEARS[YEARS.length - 1];

@@ -50,6 +50,11 @@ class PageTest(unittest.TestCase):
             sighting("Sitta europaea", "Kleiber", "2024-05-01", place_id="C", place="Punkt C", lat="51.1324", lon="14.5000", time="07:09", **near),
             sighting("Buteo buteo", "Mäusebussard", "2024-05-01", place_id="D", place="Punkt D", lat="51.1324", lon="14.5050", time="07:29", **near),
         ]
+        # a second day, all records at one big place but reported with GPS along a 500 m walk: the GPS makes it a tour
+        for i, (lat, tm) in enumerate([("51.2000", "08:00"), ("51.2045", "08:06")]):
+            walk.append(sighting(["Parus major", "Turdus merula"][i], ["Kohlmeise", "Amsel"][i], "2024-05-02", place_id="E",
+                                 place="Großes Gebiet", lat="51.2100", lon="14.6000", time=tm, **near))
+            walk[-1]["observers"][0].update({"gps_lat": lat, "gps_lon": "14.6000"})
         path = os.path.join(cls.tmp.name, "tours.html")
         with open(path, "w", encoding="utf-8") as fh:
             fh.write(lifelist.render_html(lifelist.build_page_data(walk, "export_test.json", False)))
@@ -271,13 +276,17 @@ class PageTest(unittest.TestCase):
     def test_tours_are_rebuilt_from_close_records(self):
         page = self.open(redact="tours", hash="#tours")
         tours = page.evaluate("findTours(baseObs()).map(t => ({ stops: t.stops.map(s => [s.name, s.obs.length, s.lat, s.lon]), km: t.km }))")
-        self.assertEqual(len(tours), 1)
+        self.assertEqual(len(tours), 2)
+        gps_tour = tours[0]  # newest first
+        self.assertEqual([st[0] for st in gps_tour["stops"]], ["Großes Gebiet", "Großes Gebiet"])
+        self.assertAlmostEqual(gps_tour["km"], 0.5, delta=0.02)
+        tours = tours[1:]
         (a_name, a_n, a_lat, a_lon), (b_name, b_n, _, _) = tours[0]["stops"]
         self.assertEqual((a_name, a_n, b_name, b_n), ("Punkt A", 3, "Punkt B", 1))
         self.assertAlmostEqual(a_lat, (51.1000 + 51.1004 + 51.1000) / 3, places=6)
         self.assertAlmostEqual(a_lon, (14.5000 + 14.5000 + 14.5012) / 3, places=6)
         self.assertAlmostEqual(tours[0]["km"], 0.59, delta=0.02)
-        page.locator("#tab-tours tr.row").first.click()
+        page.locator("#tab-tours tr.row").nth(1).click()
         self.assertIn("Punkt A (3) → Punkt B (1)", page.inner_text("#tab-tours"))
         page.click("[data-route]")
         page.wait_for_function("S.tab === 'map'")

@@ -123,6 +123,20 @@ def atlas_code(o):
     return (ac.get("#text") if isinstance(ac, dict) else ac) or ""
 
 
+def own_position(o):
+    """Where this record was made, when the export knows it more precisely than its place: the phone's
+    GPS position (gps_lat/gps_lon, where the observer stood), else a point set by hand (coord_lat/
+    coord_lon with precision "precise"). None for records tied to a place or a grid square."""
+    for lat, lon, ok in (("gps_lat", "gps_lon", True), ("coord_lat", "coord_lon", o.get("precision") == "precise")):
+        try:
+            la, lo = float(o.get(lat) or 0), float(o.get(lon) or 0)
+        except (TypeError, ValueError):
+            continue
+        if ok and la and lo:
+            return round(la, 5), round(lo, 5)
+    return None
+
+
 def parse_municipality(text):
     # county codes may end in "*": ornitho's mark for the district around a city of the same code (BY, A*)
     m = re.match(r"^(.*?)\s*\((\w+),\s*([\w*]+)\)$", text or "")
@@ -186,6 +200,7 @@ def build_data(sightings, english_by_latin):
         obs.append([
             t["idx"], s["date"]["@ISO8601"][:10], places[pid], count,
             1 if any(m.get("type") == "PHOTO" for m in o.get("medias") or []) else 0, atlas_code(o), minute_of_day(o),
+            *(own_position(o) or ()),  # only when there is one: keeps the page small
         ])
 
     obs.sort(key=lambda r: r[1])  # stable: keeps export order within a day
@@ -205,6 +220,7 @@ def build_page_data(sightings, source_name, redact):
     data["euro"] = wishlist_rows
     if redact:  # remove place data from the file itself, not just from the display
         data["pl"] = [["", "", r[2], r[3], 0, 0] for r in data["pl"]]
+        data["obs"] = [r[:7] for r in data["obs"]]
     data["meta"] = {
         "redacted": redact,
         "source": source_name,

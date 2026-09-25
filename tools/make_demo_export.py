@@ -271,18 +271,24 @@ def in_season(season, month):
             "p": month in (3, 4, 5, 8, 9, 10)}[season]
 
 
-def sighting(sp, day, place, minutes, count, atlas, photo):
+def sighting(sp, day, place, minutes, count, atlas, photo, gps=None):
+    """gps: (lat, lon) where the birder stood when reporting from the phone; without it the record is tied to its place."""
     latin, name, order, rarity = sp
     observer = {
         "count": str(count), "estimation_code": "EXACT_VALUE",
         "timing": {"@notime": "0" if minutes >= 0 else "1",
                    "@ISO8601": f"{day}T{max(minutes, 0) // 60:02d}:{max(minutes, 0) % 60:02d}:00+02:00"},
     }
+    pid, pname, muni, lat, lon = place[:5]
+    if gps:
+        observer.update({"gps_lat": f"{gps[0]:.6f}", "gps_lon": f"{gps[1]:.6f}", "precision": "precise",
+                         "coord_lat": f"{gps[0]:.6f}", "coord_lon": f"{gps[1]:.6f}"})
+    else:
+        observer.update({"precision": "place", "coord_lat": str(lat), "coord_lon": str(lon)})
     if atlas:
         observer["atlas_code"] = {"@id": "1", "#text": atlas}
     if photo:
         observer["medias"] = [{"type": "PHOTO"}]
-    pid, pname, muni, lat, lon = place[:5]
     return {
         "date": {"@ISO8601": f"{day}T00:00:00+02:00"},
         "species": {"name": name, "latin_name": latin, "sys_order": str(order), "rarity": rarity},
@@ -342,13 +348,14 @@ def generate():
                 breeding = 4 <= d.month <= 7 and season in "rs" and rnd.random() < 0.25
                 atlas = rnd.choice(["A2", "B4", "B7", "C13", "C14"]) if breeding else None
                 count = max(1, int(rnd.expovariate(1 / (6 if tier <= 2 and "water" in sp_hab else 2))))
-                where = place
-                if walk:  # move on to the next point every few records
+                where, gps = place, None
+                if walk:  # move on to the next point every few records, reporting from the phone with its GPS
                     wid, wname, wlat, wlon = walk[min(len(walk) - 1, seen // 4)]
                     where = (wid, wname, place[2], wlat, wlon)
+                    gps = (wlat + rnd.uniform(-0.0003, 0.0003), wlon + rnd.uniform(-0.0004, 0.0004))  # some 30 m around
                 seen += 1
                 out.append(sighting(sp, d.isoformat(), where, min(minute, 1439) if walk or rnd.random() < 0.8 else -1,
-                                    count, atlas, rnd.random() < 0.12))
+                                    count, atlas, rnd.random() < 0.12, gps))
         d += timedelta(days=1)
     return out
 
