@@ -86,8 +86,8 @@ function calendarSection(list, statsAll) {
       const bg = n ? heatColor(n / max) : "var(--cal-empty)";
       const title = n ? `${fmtD(dateStr)}: ${n} ${t("mapSpecies")}${lifer ? " · " + t("newBadge") : ""}` : fmtD(dateStr);
       cells += n
-        ? `<button type="button" class="cal-day${lifer ? " cal-lifer" : ""}${S.calDay === dateStr ? " cal-sel" : ""}" data-day="${dateStr}" style="background:${bg}" title="${esc(title)}" aria-label="${esc(title)}" aria-pressed="${S.calDay === dateStr}"></button>`
-        : `<div class="cal-day" style="background:${bg}" title="${esc(title)}"></div>`;
+        ? `<button type="button" class="cal-day${lifer ? " cal-lifer" : ""}${S.calDay === dateStr ? " cal-sel" : ""}" data-day="${dateStr}" style="background:${bg}" data-tip="${esc(title)}" aria-label="${esc(title)}" aria-pressed="${S.calDay === dateStr}"></button>`
+        : `<div class="cal-day" style="background:${bg}" data-tip="${esc(title)}"></div>`;
     }
     // always pad to 6 full weeks (42 cells): keeps every month's grid the same height, so the
     // section doesn't jump as S.year changes (some years need 6 rows for a month, others only 4-5)
@@ -115,17 +115,6 @@ function calDayPanel(list, statsAll, day) {
       speciesChip(s, "", statsAll.get(s)?.first.d === day)).join("")}</div></div>`).join("");
   return cellPanel(fmtD(day), t("calDaySummary", all.size, byPlace.size) + (lifers ? " · " + t("calDayLifers", lifers) : ""), `data-day="${day}"`, places);
 }
-// the species of one year/month cell of the "species per year and month" table
-function heatCellPanel(list, statsAll, key) {
-  const [y, m] = key.split("-").map(Number);
-  const obs = list.filter(o => o.y === y && o.m === m);
-  if (!obs.length) return "";
-  const isNew = s => { const f = statsAll.get(s)?.first; return !!f && f.y === y && f.m === m; };
-  const species = new Set(obs.map(o => o.s));
-  const lifers = [...species].filter(isNew).length;
-  return cellPanel(`${T.months[m - 1]} ${y}`, t("cellSummary", species.size, fmtN(obs.length)) + (lifers ? " · " + t("calDayLifers", lifers) : ""),
-    `data-ym="${key}"`, speciesChipsOf(obs, isNew));
-}
 function renderOverview() {
   const list = regionObs(baseObs());
   if (!list.length) { $("tab-overview").innerHTML = `<p class="empty">${t("noData")}</p>`; updateToc(); return; }
@@ -145,7 +134,7 @@ function renderOverview() {
   for (const o of list) { if (!dayMap.has(o.d)) dayMap.set(o.d, new Set()); dayMap.get(o.d).add(o.s); }
   let bestDay = list[0].d, bestCount = 0;
   for (const [d, sp] of dayMap) if (sp.size > bestCount) { bestCount = sp.size; bestDay = d; }
-  const heatT = heatTable(list);
+  const years = Array.from({ length: MAX_Y - MIN_Y + 1 }, (_, i) => String(MAX_Y - i));
   $("tab-overview").innerHTML = `
     <div class="kpis k8">
       ${kpiTile(fmtN(stats.size), t("speciesLife"), "species", { main: true })}
@@ -172,9 +161,9 @@ function renderOverview() {
     ${renderYearBlock(rows, { showYtd: true, showNew: true })}
     <h2 data-toc="${esc(t("tocPerMonth"))}">${t("perMonth", monthLabel)}</h2>
     ${renderYearBlock(monthRows(list), { showYtd: S.month === TODAY_M, showNew: false })}
-    <h2 data-toc="${esc(t("tocHeat"))}">${t("heat")}</h2>
+    <h2 data-toc="${esc(t("tocHeat"))}">${t("heat")}${heatMetricPick("ym")}</h2>
     ${infoText(t("heatHelp"))}
-    <div class="card">${heatT.html}${S.heatCell ? heatCellPanel(list, stats, S.heatCell) : ""}</div>
-    ${heatLegend(heatT.max)}`;
+    ${heatSection("ym", { obs: list, rows: years, rowLabels: years, rowNames: years, colLabels: monthColLabels(), colNames: T.months,
+      rowOf: o => MAX_Y - o.y, colOf: o => o.m - 1, numbers: true, cls: "months" })}`;
   updateToc();
 }

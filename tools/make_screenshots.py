@@ -70,6 +70,8 @@ def main():
                 page.wait_for_timeout(500)
 
             def shot(page, name, clip):
+                page.mouse.move(0, 0)  # no tooltip or crosshair left over from a click
+                page.wait_for_timeout(100)
                 page.screenshot(path=os.path.join(OUT, name), clip=clip, full_page=True)
                 print("Written:", os.path.join("docs", "screenshots", name))
 
@@ -108,9 +110,9 @@ def main():
             # Regionen: where you are out in which month, with a cell opened
             page = open_page(hash="#regions")
             # the Alps trip: a short panel with species you only see there
-            page.locator("table.heat.rm tr", has_text="Berchtesgadener Land").locator("td[data-rm]").first.click()
+            page.locator("table.heat.rm tr", has_text="Berchtesgadener Land").locator("td[data-heat]:not(.tot)").first.click()
             page.wait_for_timeout(200)
-            shot(page, "regions.png", section(page, "h2:has(#rm-level)", "#rm-cell"))
+            shot(page, "regions.png", section(page, "h2:has(#rm-level)", "#heat-rm .legend"))
 
             # Touren: tours rebuilt from the records, one opened
             page = open_page(hash="#tours")

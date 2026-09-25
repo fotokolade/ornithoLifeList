@@ -178,7 +178,7 @@ class PageTest(unittest.TestCase):
         page = self.open()
         day = page.locator("button.cal-day").first
         day.click()
-        self.assertIn(page.locator(".cal-panel b").first.inner_text(), day.get_attribute("title"))
+        self.assertIn(page.locator(".cal-panel b").first.inner_text(), day.get_attribute("data-tip"))
         name = page.locator(".cal-panel .chip-sp").first.inner_text().split("\n")[0]
         page.locator(".cal-panel .chip-sp").first.click()
         page.wait_for_function("S.tab === 'list'")
@@ -197,27 +197,55 @@ class PageTest(unittest.TestCase):
 
     def test_heat_cells_open_their_species(self):
         page = self.open()
-        cell = page.locator("td[data-ym]").first
+        cells = '#heat-ym tbody td[data-heat]:not(.tot)'
+        cell = page.locator(cells).first
         cell.click()
-        self.assertEqual(page.locator("#tab-overview .cal-panel").count(), 1)
-        self.assertEqual(page.locator("#tab-overview .cal-panel .chip-sp").count(), int(cell.inner_text()))
-        page.locator("td[data-ym]").first.click()  # the same cell again closes it
-        self.assertEqual(page.locator("#tab-overview .cal-panel").count(), 0)
+        self.assertEqual(page.locator("#heat-ym .cal-panel").count(), 1)
+        # counted by species by default: the cell's number is the number of species in its panel
+        self.assertEqual(page.locator("#heat-ym .cal-panel .chip-sp").count(), int(cell.inner_text()))
+        page.locator(cells).first.click()  # the same cell again closes it
+        self.assertEqual(page.locator("#heat-ym .cal-panel").count(), 0)
         page.click('#tabs button[data-tab="activity"]')
         # keyboard works too, and the charts above are not redrawn
         page.wait_for_selector("#hour-card canvas")
         canvas = page.evaluate_handle("document.querySelector('#hour-card canvas')")
-        page.locator('td[data-mh^="m:"]').first.focus()
+        page.locator('#heat-m tbody td[data-heat]:not(.tot)').first.focus()
         page.keyboard.press("Enter")
-        self.assertGreater(page.locator("#act-cell-m .chip-sp").count(), 0)
+        self.assertGreater(page.locator("#heat-m .chip-sp").count(), 0)
         self.assertTrue(page.evaluate("c => c.isConnected", canvas))
-        # only one hour-table cell is open at a time: the weekday table takes over the panel
-        page.locator('td[data-mh^="w:"]').first.click()
-        self.assertEqual(page.locator("#act-cell-m .chip-sp").count(), 0)
-        self.assertGreater(page.locator("#act-cell-w .chip-sp").count(), 0)
-        page.locator("#act-cell-w .chip-sp").first.click()
+        # each table keeps its own open cell
+        page.locator('#heat-w tbody td[data-heat]:not(.tot)').first.click()
+        self.assertGreater(page.locator("#heat-m .chip-sp").count(), 0)
+        self.assertGreater(page.locator("#heat-w .chip-sp").count(), 0)
+        page.locator("#heat-w .chip-sp").first.click()
         page.wait_for_function("S.tab === 'list'")
         self.assertEqual(page.locator("#list-out tr.detail").count(), 1)
+        self.assertEqual(self.errors, [])
+
+    def test_heat_tooltip_crosshair_totals_and_metric(self):
+        page = self.open()
+        cell = page.locator('#heat-ym tbody td[data-heat]:not(.tot)').first
+        cell.hover()  # scrolls the cell into view, which hides the tooltip again ...
+        page.wait_for_timeout(100)
+        cell.hover(position={"x": 3, "y": 3})  # ... until the mouse moves on
+        # a tooltip with all three counts, and the cell's row and column lit up
+        self.assertTrue(page.is_visible("#tip"))
+        self.assertRegex(page.inner_text("#tip"), r"\d+ Beobachtungen · \d+ Arten · \d+ Tage")
+        self.assertGreater(page.locator("#heat-ym td.xh").count(), 12)
+        # a row total opens the species of the whole row (a year), a column total those of a month in all years
+        total = page.locator("#heat-ym tbody td.tot").first
+        n = int(total.locator(".tot-n").inner_text().replace(".", ""))
+        total.click()
+        self.assertIn("gesamt", page.inner_text("#heat-ym .cal-panel-h"))
+        self.assertEqual(page.locator("#heat-ym .cal-panel .chip-sp").count(), n)
+        page.locator("#heat-ym tfoot td[data-heat]").first.click()
+        self.assertIn("Januar, gesamt", page.inner_text("#heat-ym .cal-panel-h"))
+        # the table counts what the picker says: observations are at least as many as species
+        species = int(page.locator('#heat-ym tbody td[data-heat]:not(.tot)').first.inner_text())
+        page.select_option('[data-heat-metric="ym"]', "obs")
+        obs = int(page.locator('#heat-ym tbody td[data-heat]:not(.tot)').first.inner_text())
+        self.assertGreater(obs, species)
+        self.assertEqual(page.locator("#heat-ym .cal-panel").count(), 0)  # a new metric closes the open cell
         self.assertEqual(self.errors, [])
 
     def test_region_coverage_has_its_own_picker(self):
@@ -255,18 +283,19 @@ class PageTest(unittest.TestCase):
         page = self.open(hash="#regions")
         rows = page.locator("table.heat.rm tbody tr")
         self.assertGreater(rows.count(), 0)
-        cell = page.locator("td[data-rm]").first
-        days = int(cell.inner_text())
+        cells = '#heat-rm tbody td[data-heat]:not(.tot)'
+        cell = page.locator(cells).first
+        days = int(cell.inner_text())  # counted by days by default
         cell.click()
-        self.assertIn(f"{days} Tage", page.inner_text("#rm-cell"))
+        self.assertIn(f"{days} Tage", page.inner_text("#heat-rm .cal-panel-h"))
         page.select_option("#rm-level", "s")
-        self.assertEqual(page.locator("#rm-cell .cal-panel").count(), 0)  # a new level closes the open cell
+        self.assertEqual(page.locator("#heat-rm .cal-panel").count(), 0)  # a new level closes the open cell
         self.assertEqual(rows.count(), 2)  # the fixture's two states
         # a species from the panel opens in the life list even when the page is filtered to another region
         page.select_option("#f-region", page.eval_on_selector_all("#f-region option", "os => os.map(o => o.value)")[1])
         page.click('#tabs button[data-tab="regions"]')
-        page.locator("td[data-rm]").last.click()
-        page.locator("#rm-cell .chip-sp").first.click()
+        page.locator(cells).last.click()
+        page.locator("#heat-rm .chip-sp").first.click()
         page.wait_for_function("S.tab === 'list'")
         self.assertEqual(page.locator("#list-out tr.detail").count(), 1)
         self.assertEqual(self.errors, [])
@@ -277,8 +306,8 @@ class PageTest(unittest.TestCase):
         page.select_option("#f-region", sachsen)
         page.select_option("#rm-level", "s")
         row = page.locator("table.heat.rm tr", has_text="Brandenburg")
-        row.locator('td[data-rm^="2:"]').click()  # March
-        page.locator("#rm-cell .chip-sp", has_text="Elster").click()
+        row.locator('td[data-key$="|2"]').click()  # March
+        page.locator("#heat-rm .chip-sp", has_text="Elster").click()
         page.wait_for_function("S.tab === 'list'")
         self.assertEqual(page.evaluate("S.region"), "all")
         self.assertIn("Elster", page.inner_text("#list-out tr.row.flash"))

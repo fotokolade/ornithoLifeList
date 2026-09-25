@@ -76,34 +76,6 @@ function speciesChipsOf(obs, isNew = () => false) {
   for (const o of obs) n.set(o.s, (n.get(o.s) || 0) + 1);
   return `<div class="chips">${[...n].sort((a, b) => SP[a[0]].order - SP[b[0]].order).map(([s, c]) => speciesChip(s, fmtN(c), isNew(s))).join("")}</div>`;
 }
-// cell attributes that make a heat table cell a keyboard-reachable toggle for its details panel
-const cellAttrs = (attr, key, selected, label) =>
-  ` ${attr}="${key}" role="button" tabindex="0" aria-pressed="${selected}" aria-label="${esc(label)}"`;
-// the header row of a table with a label column and one column per month (one letter on a phone)
-const monthHeadRow = () => `<tr><th></th>${T.monthsShort.map(m =>
-  `<th><span class="m-long">${m.replace(".", "")}</span><span class="m-short">${m.slice(0, 1)}</span></th>`).join("")}</tr>`;
-function heatTable(list) {
-  const cell = new Map();
-  for (const o of list) {
-    const k = o.y * 100 + o.m;
-    if (!cell.has(k)) cell.set(k, new Set());
-    cell.get(k).add(o.s);
-  }
-  let max = 1;
-  for (const s of cell.values()) max = Math.max(max, s.size);
-  let h = `<table class="heat months"><thead>${monthHeadRow()}</thead><tbody>`;
-  for (let y = MAX_Y; y >= MIN_Y; y--) {
-    h += `<tr><td class="y">${y}</td>`;
-    for (let m = 1; m <= 12; m++) {
-      const n = (cell.get(y * 100 + m) || { size: 0 }).size;
-      const key = `${y}-${m}`, sel = S.heatCell === key;
-      const cls = [n / max > HEAT_INK_FROM ? "hot" : "", sel ? "sel" : ""].join(" ").trim();
-      h += n ? `<td${cellAttrs("data-ym", key, sel, `${T.months[m - 1]} ${y}: ${n} ${t("mapSpecies")}`)} class="${cls}" style="background:${heatColor(n / max)}">${n}</td>` : `<td></td>`;
-    }
-    h += `</tr>`;
-  }
-  return { html: h + `</tbody></table>`, max };
-}
 function niceStep(max) {
   const mag = Math.pow(10, Math.floor(Math.log10(max)));
   for (const m of [1, 2, 5, 10]) if (max / (m * mag) <= 5) return Math.max(1, m * mag);

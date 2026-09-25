@@ -43,48 +43,16 @@ function weekendRing(wdDays, totals) {
     <div class="legend wd-legend"><span class="season-key" style="background:var(--bar)"></span>${t("wdWork")}<span class="season-key" style="background:var(--k2)"></span>${t("wdWeekend")}</div>
     <p class="sub">${t("wdRingNote", share, calShare)}</p></div>`;
 }
-// an hour-of-day heat table (rows x 24 hours) whose cells open their species; `kind` prefixes the cell keys ("m" month, "w" weekday)
-function hourHeatTable(kind, rows, rowLabel, rowName) {
-  const max = Math.max(1, ...rows.flat());
-  const html = `<table class="heat"><thead><tr><th></th>${[...Array(24).keys()].map(h => `<th>${h}</th>`).join("")}</tr></thead><tbody>${rows.map((row, i) =>
-    `<tr><td class="y">${esc(rowLabel(i))}</td>${row.map((n, h) => {
-      if (!n) return `<td></td>`;
-      const key = `${kind}:${i}-${h}`, sel = S.actCell === key, label = `${rowName(i)}, ${hourLabel(h)}: ${n}`;
-      return `<td title="${esc(label)}"${cellAttrs("data-mh", key, sel, label)}${sel ? ' class="sel"' : ""} style="background:${heatColor(n / max)}"></td>`;
-    }).join("")}</tr>`).join("")}</tbody></table>`;
-  return { html, max };
-}
-// the species of the open cell of one of the hour tables ("m:5-7" = June 7-8 h, "w:5-7" = Saturday 7-8 h)
-function actCellPanel(kind) {
-  if (!S.actCell || !S.actCell.startsWith(kind + ":")) return "";
-  const [i, h] = S.actCell.slice(2).split("-").map(Number);
-  const inRow = kind === "m" ? o => o.m === i + 1 : o => weekdayOf(o.d) === i;
-  const obs = activityScope().filter(o => o.tm >= 0 && inRow(o) && Math.floor(o.tm / 60) === h);
-  if (!obs.length) return "";
-  const title = `${kind === "m" ? T.months[i] : T.weekdays[i]}, ${hourLabel(h)}`;
-  return cellPanel(title, t("cellSummary", new Set(obs.map(o => o.s)).size, fmtN(obs.length)), `data-mh="${S.actCell}"`, speciesChipsOf(obs));
-}
-// toggles an hour-table cell without redrawing the tab (and with it the charts above)
-function toggleActCell(key) {
-  S.actCell = S.actCell === key ? null : key;
-  for (const td of $$all("#act-out td[data-mh]")) {
-    const on = td.dataset.mh === S.actCell;
-    td.classList.toggle("sel", on);
-    td.setAttribute("aria-pressed", on);
-  }
-  $("act-cell-w").innerHTML = actCellPanel("w");
-  $("act-cell-m").innerHTML = actCellPanel("m");
-}
 function renderActivity() {
   const scoped = activityScope();
   const timed = scoped.filter(o => o.tm >= 0);
   if (!timed.length) { $("act-out").innerHTML = `<p class="empty">${t("noData")}</p>`; updateToc(); return; }
 
   const obsH = Array(24).fill(0), spH = Array.from({ length: 24 }, () => new Set()), dayH = Array.from({ length: 24 }, () => new Set());
-  const bySpecies = new Map(), monthHour = Array.from({ length: 12 }, () => Array(24).fill(0)), weekdayHour = Array.from({ length: 7 }, () => Array(24).fill(0));
+  const bySpecies = new Map();
   for (const o of timed) {
     const h = Math.floor(o.tm / 60);
-    obsH[h]++; spH[h].add(o.s); dayH[h].add(o.d); monthHour[o.m - 1][h]++; weekdayHour[weekdayOf(o.d)][h]++;
+    obsH[h]++; spH[h].add(o.s); dayH[h].add(o.d);
     if (!bySpecies.has(o.s)) bySpecies.set(o.s, []);
     bySpecies.get(o.s).push(o.tm);
   }
@@ -105,8 +73,9 @@ function renderActivity() {
     `<tr><td>${speciesLine(SP[r.s])}</td><td class="num"><span class="time-chip" style="background:${dayColor(r.med / 60, stops)}"></span>${fmtTime(r.med)}</td><td class="num">${r.n}</td></tr>`).join("")}</tbody></table></div>`;
   const early = [...speciesRows].sort((a, b) => a.med - b.med).slice(0, 8), late = [...speciesRows].sort((a, b) => b.med - a.med).slice(0, 8);
 
-  const monthHeat = hourHeatTable("m", monthHour, i => T.monthsShort[i].replace(".", ""), i => T.months[i]);
-  const weekdayHeat = hourHeatTable("w", weekdayHour, i => T.weekdays[i], i => T.weekdays[i]);
+  // month x hour and weekday x hour, over the records with a time
+  const hourSpec = (names, labels, rowOf) => ({ obs: timed, rows: names.map((_, i) => String(i)), rowLabels: labels.map(esc), rowNames: names,
+    colLabels: hours.map(String), colNames: hours.map(hourLabel), rowOf, colOf: o => Math.floor(o.tm / 60) });
 
   const metricOptions = [["obs", "actMObs"], ["species", "actMSpecies"], ["days", "actMDays"]]
     .map(([k, l]) => `<option value="${k}"${k === S.actMetric ? " selected" : ""}>${t(l)}</option>`).join("");
@@ -124,14 +93,12 @@ function renderActivity() {
       <div class="card" id="weekday-card">${barChartSvg(wdPct, T.weekdays, wdTips)}</div>
       ${weekendRing(wdDays, wdTotals)}
     </div>
-    <h2 data-toc="${esc(t("tocWdHeat"))}">${t("wdHeat")}</h2>
+    <h2 data-toc="${esc(t("tocWdHeat"))}">${t("wdHeat")}${heatMetricPick("w")}</h2>
     ${infoText(t("wdHeatHelp"))}
-    <div class="card">${weekdayHeat.html}<div id="act-cell-w">${actCellPanel("w")}</div></div>
-    ${heatLegend(weekdayHeat.max)}
-    <h2>${t("actHeat")}</h2>
+    ${heatSection("w", hourSpec(T.weekdays, T.weekdays, o => weekdayOf(o.d)))}
+    <h2>${t("actHeat")}${heatMetricPick("m")}</h2>
     ${infoText(t("actHeatHelp"))}
-    <div class="card">${monthHeat.html}<div id="act-cell-m">${actCellPanel("m")}</div></div>
-    ${heatLegend(monthHeat.max)}
+    ${heatSection("m", hourSpec(T.months, T.monthsShort.map(m => m.replace(".", "")), o => o.m - 1))}
     <h2 data-toc="${esc(t("tocActSpecies"))}">${t("actSpecies")}</h2>
     ${infoText(t("actSpeciesHelp", MIN_TIMED))}
     <div class="detailgrid"><div><b>${t("actEarly")}</b>${speciesTable(early)}</div><div><b>${t("actLate")}</b>${speciesTable(late)}</div></div>`;

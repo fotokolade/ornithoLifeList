@@ -299,20 +299,67 @@ function init() {
       S.calDay = S.calDay === day.dataset.day ? null : day.dataset.day; renderOverview();
       refocus(`#tab-overview .cal-day[data-day="${day.dataset.day}"]`); return;
     }
-    const ym = e.target.closest("[data-ym]");
-    if (ym) {
-      S.heatCell = S.heatCell === ym.dataset.ym ? null : ym.dataset.ym; renderOverview();
-      refocus(`#tab-overview td[data-ym="${ym.dataset.ym}"]`); return;
-    }
     const sp = e.target.closest("[data-sp]");
     if (sp) openSpecies(+sp.dataset.sp);
   });
   $("act-out").addEventListener("click", e => {
-    const mh = e.target.closest("[data-mh]");
-    if (mh) { toggleActCell(mh.dataset.mh); return; }
     const sp = e.target.closest("[data-sp]");
     if (sp) openSpecies(+sp.dataset.sp);
   });
+  // heat tables (heat.js): a cell or total opens its species, a second click closes them; the picker changes what they count
+  $$("main").addEventListener("click", e => {
+    const cell = e.target.closest("[data-heat]");
+    if (!cell) return;
+    const kind = cell.dataset.heat, key = cell.dataset.key;
+    S.heatSel[kind] = S.heatSel[kind] === key ? null : key;
+    redrawHeat(kind);
+    refocus(`td[data-heat="${kind}"][data-key="${CSS.escape(key)}"]`);
+  });
+  $$("main").addEventListener("change", e => {
+    const kind = e.target.dataset?.heatMetric;
+    if (!kind) return;
+    S.heatMetric[kind] = e.target.value;
+    S.heatSel[kind] = null;
+    redrawHeat(kind);
+  });
+  // a styled tooltip for everything with a data-tip (heat cells, calendar days), and a crosshair on the
+  // hovered heat cell's row and column
+  const tip = document.createElement("div");
+  tip.id = "tip"; tip.hidden = true; tip.setAttribute("role", "tooltip");
+  document.body.append(tip);
+  let crossed = [];
+  const placeTip = (x, y) => {
+    const w = tip.offsetWidth, h = tip.offsetHeight;
+    tip.style.left = Math.max(6, Math.min(innerWidth - w - 6, x + 14)) + "px";
+    tip.style.top = (y + h + 22 > innerHeight ? y - h - 12 : y + 18) + "px";
+  };
+  // shown from the element under the mouse on every move, so it comes back after a scroll hid it
+  const showTip = e => {
+    const el = /** @type {any} */ (e.target).closest?.("[data-tip]");
+    if (!el) { tip.hidden = true; return; }
+    if (tip.textContent !== el.dataset.tip) tip.textContent = el.dataset.tip;
+    tip.hidden = false;
+    placeTip(e.clientX, e.clientY);
+  };
+  document.addEventListener("mousemove", showTip);
+  document.addEventListener("mouseover", e => {
+    showTip(e);
+    for (const c of crossed) c.classList.remove("xh");
+    crossed = [];
+    const cell = /** @type {any} */ (e.target).closest?.("table.heat-x td, table.heat-x th");
+    if (cell) {
+      if (cell.parentElement.parentElement.tagName !== "THEAD") crossed.push(...cell.parentElement.children);
+      if (cell.dataset.c !== undefined) crossed.push(...cell.closest("table").querySelectorAll(`[data-c="${cell.dataset.c}"]`));
+      for (const c of crossed) c.classList.add("xh");
+    }
+  });
+  document.addEventListener("focusin", e => {
+    const el = /** @type {any} */ (e.target).closest?.("[data-tip]");
+    if (!el) { tip.hidden = true; return; }
+    const r = el.getBoundingClientRect();
+    tip.textContent = el.dataset.tip; tip.hidden = false; placeTip(r.left, r.bottom - 10);
+  });
+  document.addEventListener("scroll", () => { tip.hidden = true; }, true);
   // table cells that open a details panel (role="button") react to Enter/Space like real buttons
   document.addEventListener("keydown", e => {
     const el = /** @type {any} */ (e.target);
@@ -334,11 +381,9 @@ function init() {
   });
   $("tab-regions").addEventListener("change", e => {
     if (e.target.id === "reg-cov") { S.region = e.target.value; $("f-region").value = S.region; renderRegions(); }
-    if (e.target.id === "rm-level") { S.regMonthLvl = e.target.value; S.regMonthCell = null; renderRegions(); }
+    if (e.target.id === "rm-level") { S.regMonthLvl = e.target.value; S.heatSel.rm = null; renderRegions(); }
   });
   $("tab-regions").addEventListener("click", e => {
-    const rm = e.target.closest("[data-rm]");
-    if (rm) { toggleRegMonthCell(rm.dataset.rm); return; }
     const sp = e.target.closest("[data-sp]");
     if (sp) { openSpecies(+sp.dataset.sp); return; }
     const th = e.target.closest("th[data-lvl]");
