@@ -51,7 +51,7 @@ class PageTest(unittest.TestCase):
             sighting("Buteo buteo", "Mäusebussard", "2024-05-01", place_id="D", place="Punkt D", lat="51.1324", lon="14.5050", time="07:29", **near),
         ]
         # a second day, all records at one big place but reported with GPS along a 500 m walk: the GPS makes it a tour
-        for i, (lat, tm) in enumerate([("51.2000", "08:00"), ("51.2045", "08:06")]):
+        for i, (lat, tm) in enumerate([("51.2000", "08:00"), ("51.2050", "08:06")]):
             walk.append(sighting(["Parus major", "Turdus merula"][i], ["Kohlmeise", "Amsel"][i], "2024-05-02", place_id="E",
                                  place="Großes Gebiet", lat="51.2100", lon="14.6000", time=tm, **near))
             walk[-1]["observers"][0].update({"gps_lat": lat, "gps_lon": "14.6000"})
@@ -275,11 +275,13 @@ class PageTest(unittest.TestCase):
 
     def test_tours_are_rebuilt_from_close_records(self):
         page = self.open(redact="tours", hash="#tours")
+        # the fixture's tours are short: test the rules with small limits (the defaults are for real walks)
+        page.evaluate("S.tourCfg = { gap: 10, step: 1, stop: 150, minKm: 0.5 }; renderTours()")
         tours = page.evaluate("findTours(baseObs()).map(t => ({ stops: t.stops.map(s => [s.name, s.obs.length, s.lat, s.lon]), km: t.km }))")
         self.assertEqual(len(tours), 2)
         gps_tour = tours[0]  # newest first
         self.assertEqual([st[0] for st in gps_tour["stops"]], ["Großes Gebiet", "Großes Gebiet"])
-        self.assertAlmostEqual(gps_tour["km"], 0.5, delta=0.02)
+        self.assertAlmostEqual(gps_tour["km"], 0.56, delta=0.02)
         tours = tours[1:]
         (a_name, a_n, a_lat, a_lon), (b_name, b_n, _, _) = tours[0]["stops"]
         self.assertEqual((a_name, a_n, b_name, b_n), ("Punkt A", 3, "Punkt B", 1))
@@ -291,6 +293,22 @@ class PageTest(unittest.TestCase):
         page.click("[data-route]")
         page.wait_for_function("S.tab === 'map'")
         self.assertEqual(page.locator(".route-stop").count(), 2)
+        # the limits can be changed: a longer pause and distance join C and D into the A-B tour
+        page.click('#tabs button[data-tab="tours"]')
+        page.fill('[data-tour-cfg="gap"]', "30")
+        page.press('[data-tour-cfg="gap"]', "Enter")
+        page.fill('[data-tour-cfg="step"]', "5")
+        page.press('[data-tour-cfg="step"]', "Enter")
+        self.assertEqual(page.evaluate("findTours(baseObs()).map(t => t.stops.length)"), [2, 4])
+        # a minimum length drops the short ones, and the settings survive a reload
+        page.fill('[data-tour-cfg="minKm"]', "1")
+        page.press('[data-tour-cfg="minKm"]', "Enter")
+        self.assertEqual(page.evaluate("findTours(baseObs()).length"), 1)
+        page.reload()
+        self.assertEqual(page.evaluate("[S.tourCfg.gap, S.tourCfg.step, S.tourCfg.minKm]"), [30, 5, 1])
+        page.click('#tabs button[data-tab="tours"]')
+        page.click("[data-tour-reset]")
+        self.assertEqual(page.evaluate("S.tourCfg"), {"gap": 30, "step": 0.5, "stop": 250, "minKm": 3})
         # no tours without place data
         page.click("#o-sum")
         page.check("#o-redact")

@@ -102,6 +102,7 @@ if (initialTheme !== "system") document.documentElement.setAttribute("data-theme
  * @property {string|null} actCell - open cell of the activity tab's hour tables: "m:M-H" (month 0-11, hour) or "w:W-H" (weekday 0-6 from Monday, hour)
  * @property {string} regMonthLvl - level of the region x month table's rows: "s"|"c"|"m"|"p"
  * @property {string|null} regMonthCell - "M:regionKey" (month 0-11, region key at the table's level) of its open cell
+ * @property {{gap: number, step: number, stop: number, minKm: number}} tourCfg - tour limits (see TOUR_DEFAULTS), kept in localStorage
  * @property {Set<string>} tourOpen - keys of tours with an open detail row
  * @property {boolean} tourAll - show every tour instead of the newest ones
  * @property {string|null} tourRoute - key of the tour drawn on the map
@@ -110,7 +111,7 @@ if (initialTheme !== "system") document.documentElement.setAttribute("data-theme
 const S = { tab: "overview", region: "all", year: Math.min(TODAY_Y, MAX_Y), month: TODAY_M, timeAll: true, lang: initialLang, theme: initialTheme,
   escaped: false, collective: false, atlasF: "all", actMetric: "obs", redact: !!RAW.meta.redacted, metric: "life", q: "", sort: "nr", dir: -1, open: new Set(),
   regSort: {}, regAll: {}, targetSrc: "all", customTargets: loadCustomTargets(), wishSort: { k: "season", d: 1 },
-  wishOpen: null, wishQ: "", calDay: null, heatCell: null, actCell: null, regMonthLvl: "c", regMonthCell: null, tourOpen: new Set(), tourAll: false, tourRoute: null, focusSp: null };
+  wishOpen: null, wishQ: "", calDay: null, heatCell: null, actCell: null, regMonthLvl: "c", regMonthCell: null, tourCfg: null, tourOpen: new Set(), tourAll: false, tourRoute: null, focusSp: null };
 T = STR[S.lang];
 
 /* ---------- helpers ---------- */

@@ -10,6 +10,7 @@ common it is.
 The same seed always gives the same file.
 """
 import json
+import math
 import os
 import random
 import sys
@@ -34,16 +35,19 @@ PLACES = [
     ("11", "Fichtelberg", "Oberwiesenthal (SN, ERZ)", 50.429, 12.954, "mountain forest", 1, 2025),
 ]
 
-# rounds at some home spots: the birder walks (or rides along the Elbe) past these points and reports
-# on the way, which the page's Touren tab turns back into tours; (id, name, lat, lon), a few hundred metres apart
+# rounds at some home spots: the birder walks a loop (or rides along the Elbe) and reports on the way,
+# which the page's Touren tab turns back into tours: ten points some 380 m apart, a little under 4 km
+def _loop(pid, name, lat, lon, r_m=600, n=10):
+    dlat, dlon = r_m / 111320, r_m / (111320 * math.cos(math.radians(lat)))
+    return [(f"{pid}-{i + 1}", f"{name}, Rundweg {i + 1}", round(lat + dlat * math.sin(2 * math.pi * i / n), 5),
+             round(lon + dlon * math.cos(2 * math.pi * i / n), 5)) for i in range(n)] + [(f"{pid}-1", f"{name}, Rundweg 1", round(lat, 5), round(lon + dlon, 5))]
+
+
 WALKS = {
-    "2": [("2-1", "Moritzburger Teiche, Großteich Süd", 51.1585, 13.6795), ("2-2", "Moritzburger Teiche, Großteich Ost", 51.1630, 13.6850),
-          ("2-3", "Moritzburger Teiche, Mittelteich", 51.1668, 13.6800), ("2-4", "Moritzburger Teiche, Frauenteich", 51.1690, 13.6735),
-          ("2-5", "Moritzburger Teiche, Schlossteich", 51.1655, 13.6690)],
-    "3": [("3-1", "Elbwiesen Übigau", 51.0780, 13.7050), ("3-2", "Elbwiesen Mickten", 51.0790, 13.7170),
-          ("3-3", "Elbwiesen Pieschen", 51.0760, 13.7280), ("3-4", "Elbwiesen Neustadt", 51.0690, 13.7390)],
-    "4": [("4-1", "Großer Garten, Carolasee", 51.0385, 13.7600), ("4-2", "Großer Garten, Palaisteich", 51.0365, 13.7640),
-          ("4-3", "Großer Garten, Neuer Teich", 51.0340, 13.7700), ("4-4", "Großer Garten, Südpark", 51.0325, 13.7625)],
+    "2": _loop("2", "Moritzburger Teiche", 51.1640, 13.6780),
+    "3": [(f"3-{i + 1}", f"Elbwiesen, Radweg km {i * 0.39:.1f}".replace(".", ","), round(51.0780 - 0.0015 * i, 5), round(13.7050 + 0.0050 * i, 5))
+          for i in range(10)],
+    "4": _loop("4", "Großer Garten", 51.0355, 13.7640),
 }
 
 # birding trips: first day, number of days, places (id, name, municipality, lat, lon, habitats)
@@ -350,7 +354,7 @@ def generate():
                 count = max(1, int(rnd.expovariate(1 / (6 if tier <= 2 and "water" in sp_hab else 2))))
                 where, gps = place, None
                 if walk:  # move on to the next point every few records, reporting from the phone with its GPS
-                    wid, wname, wlat, wlon = walk[min(len(walk) - 1, seen // 4)]
+                    wid, wname, wlat, wlon = walk[min(len(walk) - 1, seen // 2)]
                     where = (wid, wname, place[2], wlat, wlon)
                     gps = (wlat + rnd.uniform(-0.0003, 0.0003), wlon + rnd.uniform(-0.0004, 0.0004))  # some 30 m around
                 seen += 1

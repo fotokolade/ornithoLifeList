@@ -1,10 +1,28 @@
 /* ---------- tours ---------- */
 // Tours are reconstructed from the records themselves: on one day, records with a time that follow each
-// other within TOUR_MAX_GAP_MIN minutes and TOUR_MAX_STEP_M metres belong to the same walk or ride.
-// Records in a row within TOUR_STOP_RADIUS_M of each other are one stop (several species reported at
-// one spot): the stop sits at the mean position of its records. A chain with a single stop is a stay,
-// not a tour.
-const TOUR_MAX_GAP_MIN = 10, TOUR_MAX_STEP_M = 1000, TOUR_STOP_RADIUS_M = 150, TOURS_SHOWN = 30;
+// other within `gap` minutes and `step` km belong to the same walk or ride. Records in a row within
+// `stop` metres of each other are one stop (several species reported at one spot): the stop sits at the
+// mean position of its records. A chain with a single stop is a stay, not a tour, and tours shorter than
+// `minKm` are left out. The viewer can change all four in the tab; they are kept in localStorage.
+const TOUR_DEFAULTS = { gap: 30, step: 0.5, stop: 250, minKm: 3 };
+// [key, min, max, step of the input]
+/** @type {["gap"|"step"|"stop"|"minKm", number, number, number][]} */
+const TOUR_LIMITS = [["gap", 1, 240, 1], ["step", 0.1, 50, 0.1], ["stop", 10, 2000, 10], ["minKm", 0, 50, 0.1]];
+const TOURS_SHOWN = 30;
+/** @returns {typeof TOUR_DEFAULTS} */
+function loadTourCfg() {
+  const cfg = { ...TOUR_DEFAULTS };
+  try {
+    const saved = JSON.parse(localStorage.getItem("lifelist-tour-settings") || "{}");
+    for (const [k, min, max] of TOUR_LIMITS) if (typeof saved[k] === "number" && saved[k] >= min && saved[k] <= max) cfg[k] = saved[k];
+  } catch (e) { /* no or broken settings: defaults */ }
+  return cfg;
+}
+// data.js builds S before this file's constants exist, so the settings are filled in here
+S.tourCfg = loadTourCfg();
+function saveTourCfg() {
+  try { localStorage.setItem("lifelist-tour-settings", JSON.stringify(S.tourCfg)); } catch (e) { /* private mode may refuse */ }
+}
 /**
  * @typedef {Object} TourStop
  * @property {number} lat - mean latitude of its records
@@ -32,7 +50,7 @@ function distM(p, q) {
   return 12742000 * Math.asin(Math.sqrt(a));
 }
 /**
- * Groups a tour's records in a row into stops: a record within TOUR_STOP_RADIUS_M of the current stop's
+ * Groups a tour's records in a row into stops: a record within the stop radius of the current stop's
  * mean position joins it and moves that mean, weighted by records; a farther one starts the next stop.
  * @param {Observation[]} chain @returns {TourStop[]}
  */
@@ -41,7 +59,7 @@ function tourStops(chain) {
   const stops = [];
   for (const o of chain) {
     const p = obsPos(o), cur = stops[stops.length - 1];
-    if (cur && distM(cur, p) <= TOUR_STOP_RADIUS_M) {
+    if (cur && distM(cur, p) <= S.tourCfg.stop) {
       cur.obs.push(o);
       cur.sumLat += p.lat; cur.sumLon += p.lon;
       cur.lat = cur.sumLat / cur.obs.length; cur.lon = cur.sumLon / cur.obs.length;
@@ -65,7 +83,8 @@ function findTours(list) {
     byDay.get(o.d).push(o);
   }
   const tours = [];
-  const close = (a, b) => b.tm - a.tm <= TOUR_MAX_GAP_MIN && distM(obsPos(a), obsPos(b)) <= TOUR_MAX_STEP_M;
+  const { gap, step, minKm } = S.tourCfg;
+  const close = (a, b) => b.tm - a.tm <= gap && distM(obsPos(a), obsPos(b)) <= step * 1000;
   for (const [d, day] of byDay) {
     day.sort((a, b) => a.tm - b.tm);
     let chain = [day[0]];
@@ -74,6 +93,7 @@ function findTours(list) {
       if (stops.length < 2) return;
       let km = 0;
       for (let i = 1; i < stops.length; i++) km += distM(stops[i - 1], stops[i]) / 1000;
+      if (km < minKm) return;
       tours.push({ key: `${d}-${chain[0].tm}-${chain[0].p}`, d, y: chain[0].y, start: chain[0].tm, end: chain[chain.length - 1].tm, stops, km, obs: chain });
     };
     for (let i = 1; i < day.length; i++) {
@@ -91,9 +111,18 @@ function visibleTours() {
 }
 const fmtKm = km => km.toLocaleString(S.lang === "en" ? "en-GB" : "de-DE", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 const fmtDuration = min => `${Math.floor(min / 60)}:${pad(min % 60)} h`;
+// the four limits as inputs; a change re-renders the tab (see the "change" handler in app.js)
+function tourSettingsHtml() {
+  const unit = { gap: "min", step: "km", stop: "m", minKm: "km" };
+  return `<div class="tour-cfg">${TOUR_LIMITS.map(([k, min, max, step]) =>
+    `<label>${t("tourCfg_" + k)} <input type="number" data-tour-cfg="${k}" min="${min}" max="${max}" step="${step}" value="${S.tourCfg[k]}"> ${unit[k]}</label>`).join("")}
+    <button class="lnk" type="button" data-tour-reset>${t("tourCfgReset")}</button></div>`;
+}
 function renderTours() {
   const tours = visibleTours();
-  if (!tours.length) { $("tab-tours").innerHTML = infoText(t("toursHelp", TOUR_MAX_GAP_MIN, fmtKm(TOUR_MAX_STEP_M / 1000), TOUR_STOP_RADIUS_M)) + `<p class="empty">${t("toursNone")}</p>`; updateToc(); return; }
+  const { gap, step, stop, minKm } = S.tourCfg;
+  const help = infoText(t("toursHelp", gap, fmtKm(step), stop, fmtKm(minKm))) + tourSettingsHtml();
+  if (!tours.length) { $("tab-tours").innerHTML = help + `<p class="empty">${t("toursNone")}</p>`; updateToc(); return; }
   const stats = speciesStats(baseObs());
   const isLifer = tr => s => tr.obs.includes(stats.get(s)?.first);
   const km = tours.reduce((a, tr) => a + tr.km, 0);
@@ -114,7 +143,7 @@ function renderTours() {
     return h;
   }).join("");
   $("tab-tours").innerHTML = `
-    ${infoText(t("toursHelp", TOUR_MAX_GAP_MIN, fmtKm(TOUR_MAX_STEP_M / 1000), TOUR_STOP_RADIUS_M))}
+    ${help}
     <div class="kpis k4">
       <div class="kpi main"><b>${fmtN(tours.length)}</b><span>${t("toursKCount")}</span></div>
       <div class="kpi"><b>${fmtKm(km)}</b><span>${t("toursKKm")}</span></div>

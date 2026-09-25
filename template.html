@@ -87,6 +87,8 @@ details.info p.prose{margin:5px 0 0}
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
 .kpis.k8,.kpis.k4{grid-template-columns:repeat(4,1fr)}
 @media (max-width:700px){.kpis.k8,.kpis.k4{grid-template-columns:repeat(2,1fr)}}
+.tour-cfg{display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;margin:4px 0 16px;font-size:.8rem;color:var(--muted)}
+.tour-cfg input{font:inherit;width:5em;padding:3px 6px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--text)}
 .tour-path{font-size:.8rem;color:var(--muted);margin:2px 0 8px}
 .route-stop div{background:var(--accent);color:#fff;border:2px solid #fff;border-radius:50%;width:100%;height:100%;display:flex;align-items:center;justify-content:center;
   font:700 11px/1 system-ui,sans-serif;box-shadow:0 1px 4px rgba(0,0,0,.35)}
@@ -306,7 +308,7 @@ footer.meta-footer .btn{flex:0 0 auto;padding:3px 10px}
   .toc{display:none!important}
   tr.grp .grp-t::before{display:none}
   .wish-io{display:none!important}
-  .cal-panel{display:none!important}
+  .cal-panel,.tour-cfg{display:none!important}
   .heat td.sel,.cal-day.cal-sel{outline:none!important}
   .printonly{display:block}
   section.tab{display:block!important;padding-top:0}

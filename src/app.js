@@ -228,7 +228,18 @@ function init() {
     renderActive();
   });
   $("m-metric").addEventListener("change", e => { S.metric = e.target.value; renderMap(); });
+  $("tab-tours").addEventListener("change", e => {
+    const k = e.target.dataset?.tourCfg;
+    if (!k) return;
+    const [, min, max] = TOUR_LIMITS.find(l => l[0] === k);
+    const v = parseFloat(String(e.target.value).replace(",", "."));
+    if (Number.isFinite(v)) { S.tourCfg[k] = Math.min(max, Math.max(min, v)); saveTourCfg(); }
+    S.tourOpen = new Set(); S.tourRoute = null;
+    renderTours();
+    $$(`[data-tour-cfg="${k}"]`)?.focus();
+  });
   $("tab-tours").addEventListener("click", e => {
+    if (e.target.closest("[data-tour-reset]")) { S.tourCfg = { ...TOUR_DEFAULTS }; saveTourCfg(); renderTours(); return; }
     const route = e.target.closest("[data-route]");
     if (route) { S.tourRoute = route.dataset.route; setTab("map"); return; }
     if (e.target.closest("[data-tours-all]")) { S.tourAll = !S.tourAll; renderTours(); return; }
