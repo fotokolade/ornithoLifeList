@@ -77,6 +77,22 @@ class UpdateTest(unittest.TestCase):
         self.assertIn("howto/01.png", str(ctx.exception))
         self.assertIn("in the way", str(ctx.exception))
 
+    def test_can_discard_local_changes_when_asked(self):
+        write(os.path.join(self.user, "src", "i18n.js"), "// regenerated\n")
+        write(os.path.join(self.user, "export_1.json"), "{}")  # own files stay
+        self.release("0.2.0")
+        questions = []
+        self.assertEqual(update.update(self.user, out=self.lines.append, ask=lambda q: questions.append(q) or True), 1)
+        self.assertIn("src/i18n.js (changed)", questions[0])
+        self.assertEqual(update.app_version(self.user), "0.2.0")
+        self.assertTrue(os.path.exists(os.path.join(self.user, "export_1.json")))
+        # answering no keeps the changes and stops
+        write(os.path.join(self.user, "src", "i18n.js"), "// edited again\n")
+        with self.assertRaises(update.UpdateError):
+            update.update(self.user, out=self.lines.append, ask=lambda q: False)
+        with open(os.path.join(self.user, "src", "i18n.js"), encoding="utf-8") as fh:
+            self.assertEqual(fh.read(), "// edited again\n")
+
     def test_stops_on_own_commits(self):
         write(os.path.join(self.user, "notes.txt"), "mine")
         git(self.user, "add", "-A")

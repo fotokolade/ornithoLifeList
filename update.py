@@ -4,8 +4,9 @@ Usage:  python update.py        (on Windows also: double-click update.bat)
 
 Needs git and a copy made with `git clone`. Fetches the latest changes of the current branch and
 applies them, but only as a fast-forward: nothing is merged, rebased or overwritten. Your own
-export_*.json and lifelist*.html are untracked (.gitignore) and never touched. If files that belong
-to the repository were changed locally, the update stops and says which ones.
+export_*.json and lifelist*.html are untracked (.gitignore) and never touched. If files that belong to
+the repository were changed locally, it names them and asks whether to discard the changes
+(without an answer, e.g. when not run in a console, it stops instead).
 """
 import os
 import re
@@ -40,8 +41,9 @@ def app_version(repo):
         return "?"
 
 
-def update(repo=HERE, out=print):
-    """Fast-forwards `repo` to its upstream branch. Returns the number of new commits applied."""
+def update(repo=HERE, out=print, ask=None):
+    """Fast-forwards `repo` to its upstream branch. Returns the number of new commits applied.
+    `ask(question)` -> bool may allow discarding local changes to program files; without it they stop the update."""
     # the folder itself must be the clone's top level: a downloaded copy unpacked somewhere inside
     # another git repository must not update that other repository
     top = git(repo, "rev-parse", "--show-toplevel", check=False).stdout.strip()
@@ -60,6 +62,13 @@ def update(repo=HERE, out=print):
     if changed:
         kinds = {"D": "deleted", "M": "changed", "A": "added", "R": "renamed", "T": "type changed"}
         files = "\n".join(f"  {line[3:]} ({kinds.get(line[:2].strip()[:1], 'changed')})" for line in changed)
+        # e.g. screenshots regenerated with tools/make_screenshots.py: offer to put the originals back
+        if ask and ask(f"These files of the program were changed locally:\n{files}\n"
+                       "Discard these changes and update anyway? Your own new files are kept. [y/N] "):
+            git(repo, "reset", "--quiet", "HEAD", "--", ".")
+            git(repo, "checkout", "--", ".")
+            changed = []
+    if changed:
         raise UpdateError(f"These files of the program were changed locally, so the update stops to keep them:\n{files}\n"
                           "Undo the changes (`git checkout -- <file>`, or `git checkout -- .` for all of them) "
                           "or put them aside (`git stash`), then run the update again.")
@@ -95,9 +104,17 @@ def update(repo=HERE, out=print):
     return incoming
 
 
+def ask_user(question):
+    try:
+        return input(question).strip().lower() in ("y", "yes", "j", "ja")
+    except EOFError:
+        return False
+
+
 def main():
     try:
-        update()
+        # only ask when someone is there to answer
+        update(ask=ask_user if sys.stdin.isatty() else None)
     except UpdateError as e:
         print(e, file=sys.stderr)
         sys.exit(1)
