@@ -120,5 +120,30 @@ class RenderTest(unittest.TestCase):
         self.assertTrue(blob["euro"])
 
 
+
+class UpdateCheckTest(unittest.TestCase):
+    def test_version_matches_page(self):
+        self.assertIsNotNone(lifelist.parse_version(lifelist.app_version()))
+
+    def test_parse_version(self):
+        self.assertEqual(lifelist.parse_version("v1.10.2"), (1, 10, 2))
+        self.assertEqual(lifelist.parse_version("0.2.0"), (0, 2, 0))
+        self.assertIsNone(lifelist.parse_version("v1.0.0-beta"))
+        self.assertIsNone(lifelist.parse_version(None))
+
+    def test_update_message(self):
+        url = "https://example.invalid/r"
+        self.assertIn("v0.10.0", lifelist.update_message("0.9.1", ("v0.10.0", url)))
+        self.assertIn(url, lifelist.update_message("0.9.1", ("v0.10.0", url)))
+        for tag in ("v0.9.1", "v0.9.0", "nightly"):
+            self.assertIsNone(lifelist.update_message("0.9.1", (tag, url)), tag)
+        self.assertIsNone(lifelist.update_message("0.9.1", None))
+
+    def test_offline_is_silent(self):
+        from unittest import mock
+        with mock.patch("urllib.request.urlopen", side_effect=OSError("offline")):
+            self.assertIsNone(lifelist.latest_release())
+
+
 if __name__ == "__main__":
     unittest.main()
