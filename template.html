@@ -190,6 +190,14 @@ table.heat{table-layout:fixed;min-width:560px}
 .heat-x td.tot-c .tot-n{display:block;margin:2px 0 0;text-align:center}
 .heat-x td.tot,.heat-x td.tot-c{cursor:pointer}
 .heat-x td.tot.sel,.heat-x td.tot-c.sel{outline:2px solid var(--text);outline-offset:-2px}
+.heat-x tbody td[data-r]{user-select:none}
+.heat-x td.rng{outline:2px dashed var(--text);outline-offset:-2px}
+.heat-x td.in-rng{box-shadow:inset 0 0 0 2px var(--text)}
+.heat-steps{flex-wrap:wrap;gap:4px 12px}
+.heat-steps .hs{display:inline-flex;align-items:center;gap:4px;font-variant-numeric:tabular-nums}
+.heat-steps .hs i{display:inline-block;width:14px;height:10px;border-radius:2px}
+.heat-steps .hs-note{color:var(--muted)}
+h2 .ctl input[type=checkbox]{margin:0 2px 0 0;vertical-align:-2px;accent-color:var(--accent)}
 #tip{position:fixed;z-index:60;pointer-events:none;max-width:300px;padding:5px 9px;border-radius:7px;font-size:.75rem;line-height:1.35;
   background:var(--text);color:var(--card);box-shadow:0 4px 14px rgba(0,0,0,.25)}
 table.heat.rm th:first-child{width:11rem}
@@ -340,7 +348,7 @@ footer.meta-footer .btn{flex:0 0 auto;padding:3px 10px}
   .toc{display:none!important}
   tr.grp .grp-t::before{display:none}
   .wish-io{display:none!important}
-  .cal-panel,details.tour-settings,#tip,h2 .ctl select{display:none!important}
+  .cal-panel,details.tour-settings,#tip,h2 .ctl{display:none!important}
   .heat td.sel,.cal-day.cal-sel{outline:none!important}
   .printonly{display:block}
   section.tab{display:block!important;padding-top:0}
@@ -353,7 +361,7 @@ footer.meta-footer .btn{flex:0 0 auto;padding:3px 10px}
   .hide-sm{display:revert!important}
   th.hide-sm,td.hide-sm{display:table-cell!important}
   .show-sm{display:none!important}
-  .wd-ring circle,.bar,.bar i,.heat td,.pheno div,.cal-day,.season-strip,.season-strip *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .heat-steps .hs i,.wd-ring circle,.bar,.bar i,.heat td,.pheno div,.cal-day,.season-strip,.season-strip *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   details.info summary{display:none!important}
   h2 + details.info{margin-top:0;text-align:left}
   h2 .ctl select{appearance:none;border:0;padding:0;background:none;font-weight:600;color:var(--text)}

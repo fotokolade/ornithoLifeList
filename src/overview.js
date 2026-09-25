@@ -69,6 +69,7 @@ function calendarSection(list, statsAll) {
   if (!dayData.size) return "";
   let max = 1;
   for (const sp of dayData.values()) max = Math.max(max, sp.size);
+  const scale = heatScale(max);
   const liferDays = new Set([...statsAll.values()].filter(r => r.first.y === year).map(r => r.first.d));
   const dowLetters = T.weekdays.map(w => w[0]);
   const months = T.months.map((name, mi) => {
@@ -83,7 +84,7 @@ function calendarSection(list, statsAll) {
       const sp = dayData.get(dateStr);
       const n = sp ? sp.size : 0;
       const lifer = liferDays.has(dateStr);
-      const bg = n ? heatColor(n / max) : "var(--cal-empty)";
+      const bg = n ? scale.color(scale.step(n)) : "var(--cal-empty)";
       const title = n ? `${fmtD(dateStr)}: ${n} ${t("mapSpecies")}${lifer ? " · " + t("newBadge") : ""}` : fmtD(dateStr);
       cells += n
         ? `<button type="button" class="cal-day${lifer ? " cal-lifer" : ""}${S.calDay === dateStr ? " cal-sel" : ""}" data-day="${dateStr}" style="background:${bg}" data-tip="${esc(title)}" aria-label="${esc(title)}" aria-pressed="${S.calDay === dateStr}"></button>`
@@ -98,7 +99,7 @@ function calendarSection(list, statsAll) {
   return `<h2 data-toc="${esc(t("tocCal"))}">${t("calTitle", year)}</h2>
     ${infoText(t("calHelp"))}
     <div class="card"><div class="cal-months-wrap">${months}</div>${dayData.has(S.calDay || "") ? calDayPanel(list, statsAll, S.calDay) : ""}</div>
-    ${heatLegend(max)}`;
+    ${scale.legend}`;
 }
 // what was seen on one calendar day, grouped by place; each species opens its row in the life list
 function calDayPanel(list, statsAll, day) {

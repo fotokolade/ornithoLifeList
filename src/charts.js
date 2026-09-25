@@ -51,10 +51,30 @@ function curveSvg(chrono) {
 function heatColor(frac) {
   return `color-mix(in srgb, var(--heat-hi) ${Math.round(8 + Math.max(0, Math.min(1, frac)) * 92)}%, var(--heat-lo))`;
 }
-// cells past this share of the maximum are dark enough to need the light --heat-ink text
+// cells past this share of the scale are dark enough to need the light --heat-ink text
 const HEAT_INK_FROM = 0.55;
-function heatLegend(max) {
-  return `<div class="legend"><span>0</span><div class="grad"></div><span>${max}</span></div>`;
+/**
+ * A colour scale of at most five clearly different steps (easier to read, to print and for colour-blind
+ * eyes than a smooth gradient). For counts up to `max`, or, with `relative`, for shares of 20/40/60/80/100 %.
+ * @param {number} max @param {boolean} [relative]
+ * @returns {{step: (v: number) => number, color: (i: number) => string, hot: (i: number) => boolean, legend: string}}
+ */
+function heatScale(max, relative = false) {
+  /** @type {number[]} */
+  const bounds = [];
+  if (relative) bounds.push(0.2, 0.4, 0.6, 0.8, 1);
+  else if (max <= 5) for (let v = 1; v <= max; v++) bounds.push(v);
+  else for (let k = 1; k <= 5; k++) { const b = k === 5 ? max : Math.round(max * k / 5); if (!bounds.length || b > bounds[bounds.length - 1]) bounds.push(b); }
+  const n = bounds.length;
+  const color = i => heatColor((i + 1) / n);
+  const labels = bounds.map((b, i) => relative ? t("heatUpTo", Math.round(b * 100))
+    : (i ? bounds[i - 1] + 1 : 1) === b ? fmtN(b) : `${fmtN(i ? bounds[i - 1] + 1 : 1)}–${fmtN(b)}`);
+  return {
+    step: v => v <= 0 ? -1 : bounds.findIndex(b => v <= b + 1e-9),
+    color,
+    hot: i => (i + 1) / n > HEAT_INK_FROM,
+    legend: `<div class="legend heat-steps">${labels.map((l, i) => `<span class="hs"><i style="background:${color(i)}"></i>${l}</span>`).join("")}${relative ? `<span class="hs-note">${t("heatRelNote")}</span>` : ""}</div>`,
+  };
 }
 // a species as a chip that opens it in the life list; `note` is e.g. a count, `isNew` adds the NEU badge
 function speciesChip(s, note = "", isNew = false) {

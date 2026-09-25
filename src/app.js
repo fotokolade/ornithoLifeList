@@ -307,7 +307,9 @@ function init() {
     if (sp) openSpecies(+sp.dataset.sp);
   });
   // heat tables (heat.js): a cell or total opens its species, a second click closes them; the picker changes what they count
+  let heatDragged = false;  // a drag just selected a range: the click that ends it opens nothing else
   $$("main").addEventListener("click", e => {
+    if (heatDragged) { heatDragged = false; return; }
     const cell = e.target.closest("[data-heat]");
     if (!cell) return;
     const kind = cell.dataset.heat, key = cell.dataset.key;
@@ -316,11 +318,46 @@ function init() {
     refocus(`td[data-heat="${kind}"][data-key="${CSS.escape(key)}"]`);
   });
   $$("main").addEventListener("change", e => {
+    const norm = e.target.dataset?.heatNorm;
+    if (norm) { S.heatNorm[norm] = e.target.checked; redrawHeat(norm); return; }
     const kind = e.target.dataset?.heatMetric;
     if (!kind) return;
     S.heatMetric[kind] = e.target.value;
     S.heatSel[kind] = null;
     redrawHeat(kind);
+  });
+  // dragging across heat cells with the mouse selects a range and opens its species
+  let drag = null;
+  const cellAt = el => el?.closest?.("table.heat-x tbody td[data-r]");
+  const markDrag = () => {
+    for (const td of drag.table.querySelectorAll("td.rng")) td.classList.remove("rng");
+    const [r0, r1] = [Math.min(drag.r0, drag.r1), Math.max(drag.r0, drag.r1)], [c0, c1] = [Math.min(drag.c0, drag.c1), Math.max(drag.c0, drag.c1)];
+    for (const td of drag.table.querySelectorAll("tbody td[data-r]"))
+      if (+td.dataset.r >= r0 && +td.dataset.r <= r1 && +td.dataset.c >= c0 && +td.dataset.c <= c1) td.classList.add("rng");
+  };
+  $$("main").addEventListener("pointerdown", e => {
+    const td = cellAt(e.target);
+    if (!td || e.pointerType !== "mouse" || e.button !== 0) return;
+    drag = { kind: td.closest(".heat-wrap").id.slice(5), table: td.closest("table"), r0: +td.dataset.r, c0: +td.dataset.c, r1: +td.dataset.r, c1: +td.dataset.c };
+    e.preventDefault();  // no text selection while dragging
+  });
+  document.addEventListener("pointermove", e => {
+    if (!drag) return;
+    const td = cellAt(document.elementFromPoint(e.clientX, e.clientY));
+    if (!td || td.closest("table") !== drag.table || (+td.dataset.r === drag.r1 && +td.dataset.c === drag.c1)) return;
+    drag.r1 = +td.dataset.r; drag.c1 = +td.dataset.c;
+    markDrag();
+  });
+  document.addEventListener("pointerup", () => {
+    if (!drag) return;
+    const d = drag;
+    drag = null;
+    if (d.r0 === d.r1 && d.c0 === d.c1) return;  // a plain click: the click handler opens the cell
+    const rows = HEATS[d.kind].rows;
+    S.heatSel[d.kind] = heatRangeKey(rows[d.r0], rows[d.r1], d.c0, d.c1);
+    heatDragged = true;
+    setTimeout(() => { heatDragged = false; });  // in case no click follows (the mouse left the table)
+    redrawHeat(d.kind);
   });
   // a styled tooltip for everything with a data-tip (heat cells, calendar days), and a crosshair on the
   // hovered heat cell's row and column

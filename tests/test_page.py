@@ -248,6 +248,31 @@ class PageTest(unittest.TestCase):
         self.assertEqual(page.locator("#heat-ym .cal-panel").count(), 0)  # a new metric closes the open cell
         self.assertEqual(self.errors, [])
 
+    def test_heat_steps_compare_rows_and_range(self):
+        page = self.open()
+        cells = '#heat-ym tbody td[data-heat]:not(.tot)'
+        # at most five colour steps, with a legend for each
+        colours = set(page.eval_on_selector_all(cells, "tds => tds.map(td => td.style.background)"))
+        self.assertLessEqual(len(colours), 5)
+        steps = page.locator("#heat-ym .heat-steps .hs").count()
+        self.assertTrue(len(colours) <= steps <= 5, (len(colours), steps))
+        # comparing rows recolours, but keeps the numbers
+        numbers = page.eval_on_selector_all(cells, "tds => tds.map(td => td.textContent)")
+        page.check('[data-heat-norm="ym"]')
+        self.assertEqual(page.eval_on_selector_all(cells, "tds => tds.map(td => td.textContent)"), numbers)
+        self.assertIn("bis 100 %", page.inner_text("#heat-ym .heat-steps"))
+        # dragging across cells opens the species of the whole range
+        first, last = page.locator(cells).nth(0), page.locator(cells).nth(13)  # two rows, two months
+        first.scroll_into_view_if_needed()
+        a, b = first.bounding_box(), last.bounding_box()
+        page.mouse.move(a["x"] + 5, a["y"] + 5)
+        page.mouse.down()
+        page.mouse.move(b["x"] + 5, b["y"] + 5, steps=5)
+        page.mouse.up()
+        self.assertIn(" – ", page.inner_text("#heat-ym .cal-panel-h"))
+        self.assertEqual(page.locator("#heat-ym td.in-rng").count(), 4)
+        self.assertEqual(self.errors, [])
+
     def test_region_coverage_has_its_own_picker(self):
         page = self.open(hash="#regions")
         region = page.eval_on_selector_all("#reg-cov option", "os => os.map(o => o.value)")[1]
