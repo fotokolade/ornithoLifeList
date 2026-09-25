@@ -156,6 +156,15 @@ function init() {
   document.title = t("title");
   renderChrome();
   window.addEventListener("resize", syncHeaderHeight);
+  // the bird in the header pecks now and then, at random intervals of 6-16 s
+  const logo = $("logo");
+  const peck = () => {
+    logo.classList.remove("peck");
+    void logo.getBoundingClientRect();  // restart the animation even if the class was just there
+    logo.classList.add("peck");
+    setTimeout(peck, 6000 + Math.random() * 10000);
+  };
+  setTimeout(peck, 3000);
   // the life list curve is drawn for the window's width: redraw it once a resize or phone rotation settles
   // (only on a real width change, not when a phone's address bar merely changes the height)
   let curveW = curveWidth(), resizeTimer = 0;
