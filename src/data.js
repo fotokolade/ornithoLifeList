@@ -102,7 +102,7 @@ if (initialTheme !== "system") document.documentElement.setAttribute("data-theme
  * @property {string|null} actCell - open cell of the activity tab's hour tables: "m:M-H" (month 0-11, hour) or "w:W-H" (weekday 0-6 from Monday, hour)
  * @property {string} regMonthLvl - level of the region x month table's rows: "s"|"c"|"m"|"p"
  * @property {string|null} regMonthCell - "M:regionKey" (month 0-11, region key at the table's level) of its open cell
- * @property {{gap: number, step: number, stop: number, minKm: number, minDur: number}} tourCfg - tour limits (see TOUR_DEFAULTS), kept in localStorage
+ * @property {{gap: number, step: number, win: number, stop: number, minKm: number, minDur: number}} tourCfg - tour limits (see TOUR_DEFAULTS), kept in localStorage
  * @property {{k: string, d: 1|-1}} tourSort - tours table sort (see TOUR_SORT)
  * @property {Set<string>} tourOpen - keys of tours with an open detail row
  * @property {boolean} tourAll - show every tour instead of the newest ones

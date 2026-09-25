@@ -9,7 +9,7 @@ import unittest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 import lifelist  # noqa: E402
-from tests.fixtures import sample_export, sighting  # noqa: E402
+from tests.fixtures import SPECIES, sample_export, sighting  # noqa: E402
 
 try:
     from playwright.sync_api import sync_playwright
@@ -55,6 +55,11 @@ class PageTest(unittest.TestCase):
             walk.append(sighting(["Parus major", "Turdus merula"][i], ["Kohlmeise", "Amsel"][i], "2024-05-02", place_id="E",
                                  place="Großes Gebiet", lat="51.2100", lon="14.6000", time=tm, **near))
             walk[-1]["observers"][0].update({"gps_lat": lat, "gps_lon": "14.6000"})
+        # a third day: an hour's walk 1.2 km north, with the birds' points 150 m left and right of the way in turn
+        for i in range(30):
+            lat, lon = 51.3 + 0.0108 * i / 29, 14.7 + (0.0022 if i % 2 else -0.0022)
+            walk.append(sighting(SPECIES[i % len(SPECIES)][0], SPECIES[i % len(SPECIES)][1], "2024-05-03", place_id=f"Z{i}",
+                                 place="Zickzack", lat=f"{lat:.5f}", lon=f"{lon:.5f}", time=f"08:{2 * i:02d}", **near))
         path = os.path.join(cls.tmp.name, "tours.html")
         with open(path, "w", encoding="utf-8") as fh:
             fh.write(lifelist.render_html(lifelist.build_page_data(walk, "export_test.json", False)))
@@ -276,8 +281,14 @@ class PageTest(unittest.TestCase):
     def test_tours_are_rebuilt_from_close_records(self):
         page = self.open(redact="tours", hash="#tours")
         # the fixture's tours are short: test the rules with small limits (the defaults are for real walks)
-        page.evaluate("S.tourCfg = { gap: 10, step: 1, stop: 150, minKm: 0.5, minDur: 0 }; renderTours()")
-        tours = page.evaluate("findTours(baseObs()).map(t => ({ stops: t.stops.map(s => [s.name, s.obs.length, s.lat, s.lon]), km: t.km }))")
+        page.evaluate("S.tourCfg = { gap: 10, step: 1, win: 3, stop: 150, minKm: 0.5, minDur: 0 }; renderTours()")
+        tours = page.evaluate("findTours(baseObs()).map(t => ({ d: t.d, stops: t.stops.map(s => [s.name, s.obs.length, s.lat, s.lon]), km: t.km }))")
+        # the zigzag day: time windows follow the walk instead of hopping from bird to bird
+        km = lambda win: page.evaluate(f"(S.tourCfg.win = {win}, findTours(baseObs()).find(t => t.d === '2024-05-03').km)")
+        self.assertLess(km(15), 1.6)
+        self.assertGreater(km(1), 5)
+        page.evaluate("S.tourCfg.win = 3")
+        tours = [t for t in tours if t["d"] != "2024-05-03"]
         self.assertEqual(len(tours), 2)
         gps_tour = tours[0]  # newest first
         self.assertEqual([st[0] for st in gps_tour["stops"]], ["Großes Gebiet", "Großes Gebiet"])
@@ -291,11 +302,12 @@ class PageTest(unittest.TestCase):
         # sortable: longest first puts the 0.59 km tour above the 0.56 km one
         page.click('th[data-tour-sort="km"]')
         self.assertIn("▼", page.inner_text('th[data-tour-sort="km"]'))
-        self.assertEqual(page.evaluate("sortTours(visibleTours()).map(t => t.d)"), ["2024-05-01", "2024-05-02"])
+        two = "sortTours(visibleTours()).map(t => t.d).filter(d => d !== '2024-05-03')"
+        self.assertEqual(page.evaluate(two), ["2024-05-01", "2024-05-02"])
         page.click('th[data-tour-sort="km"]')
-        self.assertEqual(page.evaluate("sortTours(visibleTours()).map(t => t.d)"), ["2024-05-02", "2024-05-01"])
+        self.assertEqual(page.evaluate(two), ["2024-05-02", "2024-05-01"])
         page.click('th[data-tour-sort="date"]')
-        page.locator("#tab-tours tr.row").nth(1).click()
+        page.locator("#tab-tours tr.row", has_text="01.05.2024").click()
         self.assertIn("Punkt A (3) → Punkt B (1)", page.inner_text("#tab-tours"))
         page.click("[data-route]")
         page.wait_for_function("S.tab === 'map'")
@@ -306,22 +318,22 @@ class PageTest(unittest.TestCase):
         page.press('[data-tour-cfg="gap"]', "Enter")
         page.fill('[data-tour-cfg="step"]', "5")
         page.press('[data-tour-cfg="step"]', "Enter")
-        self.assertEqual(page.evaluate("findTours(baseObs()).map(t => t.stops.length)"), [2, 4])
+        self.assertEqual(page.evaluate("findTours(baseObs()).filter(t => t.d !== '2024-05-03').map(t => t.stops.length)"), [2, 4])
         # a minimum length drops the short ones, and the settings survive a reload
         page.fill('[data-tour-cfg="minKm"]', "1")
         page.press('[data-tour-cfg="minKm"]', "Enter")
-        self.assertEqual(page.evaluate("findTours(baseObs()).length"), 1)
+        self.assertEqual(page.evaluate("findTours(baseObs()).filter(t => t.d !== '2024-05-03').length"), 1)
         # and a minimum duration: the joined tour runs 07:00-07:29
         page.fill('[data-tour-cfg="minDur"]', "30")
         page.press('[data-tour-cfg="minDur"]', "Enter")
-        self.assertEqual(page.evaluate("findTours(baseObs()).length"), 0)
+        self.assertEqual(page.evaluate("findTours(baseObs()).filter(t => t.d !== '2024-05-03').length"), 0)
         page.fill('[data-tour-cfg="minDur"]', "0")
         page.press('[data-tour-cfg="minDur"]', "Enter")
         page.reload()
         self.assertEqual(page.evaluate("[S.tourCfg.gap, S.tourCfg.step, S.tourCfg.minKm]"), [30, 5, 1])
         page.click('#tabs button[data-tab="tours"]')
         page.click("[data-tour-reset]")
-        self.assertEqual(page.evaluate("S.tourCfg"), {"gap": 30, "step": 0.5, "stop": 250, "minKm": 1, "minDur": 60})
+        self.assertEqual(page.evaluate("S.tourCfg"), {"gap": 30, "step": 0.5, "win": 15, "stop": 250, "minKm": 1, "minDur": 60})
         # no tours without place data
         page.click("#o-sum")
         page.check("#o-redact")

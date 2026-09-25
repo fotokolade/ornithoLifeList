@@ -4,11 +4,13 @@ Usage:  python tools/export_fields.py [export.json]      (default: the newest ex
 
 For every field path (e.g. observers[].coord_lat) it prints in how many sightings it occurs and what
 kind of value it holds. For fields that look like coordinates it also counts how often they differ
-from the place's own coordinates, which shows whether sightings carry a position of their own.
+from the place's own coordinates, which shows whether sightings carry a position of their own, and how
+far the phone's GPS position lies from the point set for the bird (distances only).
 Names, places, dates and coordinates themselves are never printed, so the output is safe to share.
 """
 import glob
 import json
+import math
 import os
 import sys
 from collections import Counter, defaultdict
@@ -57,6 +59,7 @@ def main():
 
     count, kinds = Counter(), defaultdict(Counter)
     own_position = Counter()  # coordinate-like observer fields that differ from the place's coordinates
+    gps_vs_coord = []  # metres between gps_* (phone) and coord_* (point set) of one record: only the distances
     for s in sightings:
         seen = set()
         walk(s, "", seen, kinds)
@@ -70,6 +73,14 @@ def main():
                             own_position[key] += 1
                     except (TypeError, ValueError):
                         pass
+            try:
+                g = float(o["gps_lat"]), float(o["gps_lon"])
+                c = float(o["coord_lat"]), float(o["coord_lon"])
+                if all(g) and all(c):
+                    dy, dx = (g[0] - c[0]) * 111320, (g[1] - c[1]) * 111320 * math.cos(math.radians(c[0]))
+                    gps_vs_coord.append(math.hypot(dx, dy))
+            except (KeyError, TypeError, ValueError):
+                pass
             for key, v in o.items():
                 if key in ("precision", "estimation_code") and isinstance(v, str):
                     kinds[f"observers[].{key} = {v}"]["value"] += 1  # a short code, not personal data
@@ -90,6 +101,11 @@ def main():
             print(f"  observers[].{key}: {n} sightings ({100 * n / total:.0f}%)")
     else:
         print("\nNo observer coordinates that differ from the place's coordinates.")
+    if gps_vs_coord:
+        d = sorted(gps_vs_coord)
+        same = sum(1 for x in d if x < 2)
+        print(f"\ngps_* next to coord_* in {len(d)} sightings: the same point (< 2 m) in {same} ({100 * same / len(d):.0f}%),"
+              f" otherwise typically {d[len(d) // 2]:.0f} m apart (90% within {d[int(len(d) * 0.9)]:.0f} m)")
 
 
 if __name__ == "__main__":
