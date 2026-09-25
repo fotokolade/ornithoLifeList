@@ -1,11 +1,13 @@
-# Builds lifelist.exe on Windows and publishes a GitHub release whenever a version tag is pushed.
-# Release steps: bump APP_VERSION in src/i18n.js, commit, then push an annotated tag whose message
-# holds the release notes:  git tag -a v0.3.0 -F notes.md && git push origin v0.3.0
+# Builds lifelist.exe on Windows and publishes a GitHub release.
+# Release steps: bump APP_VERSION in src/i18n.js, write the notes to .github/release-notes/v<version>.md,
+# commit, then either push the tag (git tag v0.3.0 && git push origin v0.3.0) or start this workflow
+# by hand ("Run workflow" on the Actions tab), which creates the tag from APP_VERSION itself.
 name: Release
 
 on:
   push:
     tags: ["v*"]
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -17,17 +19,19 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      # a tag checkout doesn't bring the annotated tag object; its message becomes the release notes
+      # a tag checkout doesn't bring the annotated tag object, whose message may hold the notes
       - run: git fetch --force --tags
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
       - run: pip install pyinstaller
-      - name: Check that the tag matches APP_VERSION
+      - name: Work out the tag and check it against APP_VERSION
         shell: bash
         run: |
           v=$(python -c "import lifelist; print(lifelist.app_version())")
-          if [ "v$v" != "$GITHUB_REF_NAME" ]; then echo "Tag $GITHUB_REF_NAME does not match APP_VERSION $v in src/i18n.js"; exit 1; fi
+          if [ "$GITHUB_EVENT_NAME" = "push" ]; then tag="$GITHUB_REF_NAME"; else tag="v$v"; fi
+          if [ "$tag" != "v$v" ]; then echo "Tag $tag does not match APP_VERSION $v in src/i18n.js"; exit 1; fi
+          echo "TAG=$tag" >> "$GITHUB_ENV"
       - name: Build (runs the tests first)
         run: python build.py
       - name: Publish the release
@@ -37,7 +41,8 @@ jobs:
         run: |
           sum=$(cut -d' ' -f1 dist/lifelist.exe.sha256)
           {
-            git tag -l --format='%(contents)' "$GITHUB_REF_NAME"
+            if [ -f ".github/release-notes/$TAG.md" ]; then cat ".github/release-notes/$TAG.md"
+            else git tag -l --format='%(contents)' "$TAG"; fi
             echo
             echo "### Prüfsumme"
             echo
@@ -45,5 +50,5 @@ jobs:
             echo
             echo "Zum Prüfen \`lifelist.exe\`, \`lifelist.exe.sha256\`, \`verify.bat\` und \`verify.ps1\` in einen Ordner legen und \`verify.bat\` doppelklicken (siehe README)."
           } > notes.md
-          gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --notes-file notes.md \
+          gh release create "$TAG" --target "$GITHUB_SHA" --title "$TAG" --notes-file notes.md \
             dist/lifelist.exe dist/lifelist.exe.sha256 verify.bat verify.ps1
