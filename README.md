@@ -87,20 +87,21 @@ In dieser Version sind Beobachtungsorte, Gemeinden und Koordinaten entfernt. Die
 
 ### Neue Versionen
 
-Beim Erstellen der Lebensliste fragt das Programm nebenbei bei GitHub nach, ob es eine neuere Version gibt, und zeigt dann am Ende einen Hinweis mit Link zur [Releases-Seite](../../releases). Dabei wird nur die Versionsnummer des neuesten Releases abgerufen; es werden keine Beobachtungs- oder sonstigen Daten gesendet. Ohne Internet entfällt der Hinweis einfach, die Lebensliste wird trotzdem erstellt.
+Ob es eine neuere Version gibt, lässt sich bei Bedarf nachsehen:
 
 ```bash
-python lifelist.py --check-update     # nur nachsehen, ob es eine neue Version gibt
-python lifelist.py --no-update-check  # Lebensliste erstellen, ohne GitHub zu fragen
-python lifelist.py --version          # installierte Version anzeigen
+python lifelist.py --check-update   # fragt GitHub nach dem neuesten Release, erstellt nichts
+python lifelist.py --version        # installierte Version anzeigen
 ```
+
+Gibt es eine neuere Version, erscheint ein Hinweis mit Link zur [Releases-Seite](../../releases). Dabei wird nur die Versionsnummer des neuesten Releases abgerufen; es werden keine Beobachtungs- oder sonstigen Daten gesendet. Beim normalen Erstellen der Lebensliste geht das Programm nie ins Internet.
 
 ## Voraussetzungen
 
 - Python 3 (oder, unter Windows, die fertige `lifelist.exe` von der [Releases-Seite](../../releases) statt Python)
 - ein JSON-Export von ornitho.de
 
-Mehr wird nicht gebraucht, auch keine Internetverbindung (sie wird nur für den Update-Hinweis und die Kartenansicht genutzt).
+Mehr wird nicht gebraucht, auch keine Internetverbindung (sie wird nur für die Kartenansicht und für `--check-update` genutzt).
 
 ## Welche Daten werden verwendet?
 

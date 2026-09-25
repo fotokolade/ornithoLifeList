@@ -1,12 +1,12 @@
 """Builds lifelist.html from an ornitho.de JSON export.
 
-Usage:  python lifelist.py [--source export.json] [--redact] [--no-update-check]
+Usage:  python lifelist.py [--source export.json] [--redact]
         python lifelist.py --check-update
         lifelist.exe [same options]
 Without --source, the newest export_*.json next to the script (or the exe) is used.
 --redact writes lifelist_redacted.html without any place names or coordinates.
-While building, GitHub is asked in the background whether a newer release exists (only the version
-number is fetched, nothing is sent); --no-update-check skips that, --check-update only checks.
+--check-update asks GitHub whether a newer release exists (only the version number is fetched,
+nothing is sent) and builds nothing. A normal build never goes online.
 """
 import argparse
 import base64
@@ -15,7 +15,6 @@ import json
 import os
 import re
 import sys
-import threading
 import urllib.request
 
 # Two different base directories are needed once this script can also run as a PyInstaller-frozen
@@ -32,7 +31,7 @@ else:
 REPO = "fotokolade/OrnithoLifeList"
 RELEASES_URL = f"https://github.com/{REPO}/releases"
 LATEST_RELEASE_API = f"https://api.github.com/repos/{REPO}/releases/latest"
-UPDATE_TIMEOUT = 4  # seconds; the check must never hold up a build noticeably, offline or behind a slow proxy
+UPDATE_TIMEOUT = 10  # seconds; enough for a slow connection, short enough not to hang offline or behind a stuck proxy
 
 FLAG_ESCAPED = 1
 FLAG_COLLECTIVE = 2
@@ -262,23 +261,8 @@ def update_message(current, release):
     return f"Update available: {tag} (you have v{current}). Download {what} from {url}"
 
 
-def start_update_check():
-    """Looks up the latest release on a background thread; returns a function that waits for the
-    answer (at most until the timeout) and prints a hint if a newer version exists."""
-    result = []
-    worker = threading.Thread(target=lambda: result.append(latest_release()), daemon=True)
-    worker.start()
-
-    def report():
-        worker.join(UPDATE_TIMEOUT)
-        msg = update_message(app_version(), result[0] if result else None)
-        if msg:
-            print("\n" + msg)
-    return report
-
-
 def check_update_now():
-    """--check-update: an explicit check, so it also says when all is well or GitHub can't be reached."""
+    """--check-update: says whether a newer release exists, all is well, or GitHub can't be reached."""
     current = app_version()
     release = latest_release()
     if release is None:
@@ -292,13 +276,11 @@ def main():
     parser.add_argument("--source", "-s", help="export JSON file (default: newest export_*.json)")
     parser.add_argument("--redact", action="store_true", help="write lifelist_redacted.html without place data")
     parser.add_argument("--check-update", action="store_true", help="only check GitHub for a newer version, build nothing")
-    parser.add_argument("--no-update-check", action="store_true", help="don't ask GitHub for a newer version while building")
     parser.add_argument("--version", action="version", version=f"%(prog)s {app_version()}")
     opts = parser.parse_args()  # unknown flags abort, so a typo cannot produce an unredacted file
     if opts.check_update:
         check_update_now()
         return
-    report_update = (lambda: None) if opts.no_update_check else start_update_check()
     redact = opts.redact
     src = opts.source or find_export()
     src = os.path.abspath(src)
@@ -315,7 +297,6 @@ def main():
     print(f"Observations: {len(data['obs'])}, taxa: {len(data['sp'])}, "
           f"species (excluding escapes and collective taxa): {len(counted)}")
     print("Written:", dst, f"({os.path.getsize(dst) / 1e6:.2f} MB)")
-    report_update()
 
 
 if __name__ == "__main__":
