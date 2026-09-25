@@ -31,14 +31,15 @@ function regionTable(lv, list) {
     `</tbody></table>${rows.length > 10 ? `<p class="more"><button class="lnk" data-more="${lv.lvl}">${showAll ? t("showLess") : t("showAll", rows.length)}</button></p>` : ""}</div>`;
 }
 function regionCoverageSection(list) {
-  if (S.region === "all") return `<p class="prose">${t("regCoverageHint")}</p>`;
+  // its own region picker right here (the same choice as the header's), so the section can't be missed or seem unusable
+  const picker = `<label class="ctl">${t("regCoveragePick")}<select id="reg-cov" aria-label="${esc(t("regCoveragePick"))}">${$("f-region").innerHTML}</select></label>`;
+  const head = `<h2 data-toc="${esc(t("tocRegCoverage"))}">${t("tocRegCoverage")}${picker}</h2>`;
+  if (S.region === "all") return head + `<p class="prose">${t("regCoverageHint")}</p>`;
   const here = regionObs(list);
   const fullSpecies = new Set(list.map(o => o.s));
   const hereSpecies = new Set(here.map(o => o.s));
   const missing = [...fullSpecies].filter(s => !hereSpecies.has(s)).sort((a, b) => collator.compare(speciesName(SP[a]), speciesName(SP[b])));
-  const label = $("f-region").selectedOptions[0] ? $("f-region").selectedOptions[0].text.replace(/\s*\(\d+\)$/, "") : "";
-  return `<h2 data-toc="${esc(t("tocRegCoverage"))}">${t("regCoverage", label)}</h2>
-    <p class="prose">${t("regCoverageHelp", hereSpecies.size, fullSpecies.size, missing.length)}</p>
+  return head + `<p class="prose">${t("regCoverageHelp", hereSpecies.size, fullSpecies.size, missing.length)}</p>
     ${missing.length ? `<div class="card" style="max-height:260px;overflow:auto"><div class="chips">${missing.map(s => `<span class="chip">${esc(speciesName(SP[s]))}</span>`).join("")}</div></div>` : `<p class="empty">${t("regCoverageDone")}</p>`}`;
 }
 function renderRegions() {
@@ -47,5 +48,6 @@ function renderRegions() {
     + topPlacesSection(regionObs(list))
     + regionCoverageSection(list)
     + LEVELS.filter(lv => !S.redact || lv.lvl === "s" || lv.lvl === "c").map(lv => regionTable(lv, list)).join("");
+  $("reg-cov").value = S.region;
   updateToc();
 }

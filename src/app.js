@@ -248,6 +248,9 @@ function init() {
     const tr = e.target.closest("tr.row");
     if (tr) { const s = +tr.dataset.sp; S.open.has(s) ? S.open.delete(s) : S.open.add(s); renderList(); }
   });
+  $("tab-regions").addEventListener("change", e => {
+    if (e.target.id === "reg-cov") { S.region = e.target.value; $("f-region").value = S.region; renderRegions(); }
+  });
   $("tab-regions").addEventListener("click", e => {
     const th = e.target.closest("th[data-lvl]");
     if (th) {

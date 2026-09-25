@@ -177,6 +177,16 @@ class PageTest(unittest.TestCase):
         self.assertEqual(page.locator("#list-out tr.detail").count(), 1)
         self.assertEqual(self.errors, [])
 
+    def test_region_coverage_has_its_own_picker(self):
+        page = self.open(hash="#regions")
+        region = page.eval_on_selector_all("#reg-cov option", "os => os.map(o => o.value)")[1]
+        page.select_option("#reg-cov", region)
+        # the choice is the header's too, and the section now lists what is missing there
+        self.assertEqual(page.input_value("#f-region"), region)
+        self.assertEqual(page.input_value("#reg-cov"), region)
+        self.assertIn("gesehen", page.inner_text("#tab-regions"))
+        self.assertEqual(self.errors, [])
+
     def test_phone_width_has_no_sideways_scroll(self):
         page = self.open(width=390)
         for tab in TABS:
