@@ -13,3 +13,6 @@ reference/
 # nicht im Repository versioniert
 build/
 dist/
+
+# Rohantworten von tools/fetch_gbif_planner.py (Cache zum Fortsetzen, nicht versionieren)
+tools/.gbif_cache/
