@@ -1,5 +1,5 @@
 "use strict";
-const APP_VERSION = "0.1.0";  // SemVer of this page's HTML/JS, independent of the ornitho.de export it was built from
+const APP_VERSION = "0.2.0";  // SemVer of this page's HTML/JS, independent of the ornitho.de export it was built from
 /* ---------- text resources ---------- */
 const COUNTIES = {"SN/BZ":"Bautzen","SN/GR":"Görlitz","SN/MEI":"Meißen","SN/DD":"Dresden","SN/PIR":"Sächsische Schweiz-Osterzgebirge",
   "SN/L":"Leipzig","SN/C":"Chemnitz","SN/ERZ":"Erzgebirgskreis"};
