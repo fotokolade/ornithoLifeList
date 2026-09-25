@@ -90,13 +90,18 @@ def update(repo=HERE, out=print, ask=None):
     if res.returncode:
         # files you put there yourself that the update brings as well, e.g. new screenshots copied in by hand
         err = res.stderr
-        if "untracked working tree files would be overwritten" in err:
-            files = [ln.strip() for ln in err.split("overwritten by merge:", 1)[1].splitlines()
-                     if ln.startswith(("\t", " ")) and ln.strip()]
-            raise UpdateError("These files are in the way because the update brings its own copies of them:\n"
-                              + "\n".join("  " + f for f in files)
-                              + "\nMove or delete them, then run the update again.")
-        raise UpdateError(f"git merge failed:\n{err.strip()}")
+        if "untracked working tree files would be overwritten" not in err:
+            raise UpdateError(f"git merge failed:\n{err.strip()}")
+        files = [ln.strip() for ln in err.split("overwritten by merge:", 1)[1].splitlines()
+                 if ln.startswith(("\t", " ")) and ln.strip()]
+        listed = "\n".join("  " + f for f in files)
+        if not (ask and ask(f"These files are in the way because the update brings its own copies of them:\n{listed}\n"
+                            "Replace them with the update's copies? [y/N] ")):
+            raise UpdateError(f"These files are in the way because the update brings its own copies of them:\n{listed}\n"
+                              "Move or delete them, then run the update again.")
+        for f in files:
+            os.remove(os.path.join(repo, f))
+        git(repo, "merge", "--ff-only", upstream)
     new = app_version(repo)
     out(f"Updated with {incoming} new change{'s' if incoming != 1 else ''}:\n{log}")
     out(f"Version {old} -> {new}." if new != old else f"Version {new}.")

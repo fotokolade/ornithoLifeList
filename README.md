@@ -88,7 +88,7 @@ Ohne die Skripte geht es auch von Hand in PowerShell: `Get-FileHash lifelist.exe
 
 ## Aktualisieren
 
-- **Mit git** (Projekt per `git clone` heruntergeladen): `python update.py` ausführen, unter Windows reicht ein Doppelklick auf `update.bat`. Das Skript holt die neue Version von GitHub und zeigt, was sich geändert hat. Deine Exporte und HTML-Dateien bleiben unberührt. Hast du Dateien des Programms selbst geändert (zum Beispiel die Screenshots neu erzeugt), nennt das Skript sie und fragt, ob es die Änderungen verwerfen soll. Ohne ein „y“ überschreibt es nichts. Deine eigenen neuen Dateien bleiben in jedem Fall erhalten.
+- **Mit git** (Projekt per `git clone` heruntergeladen): `python update.py` ausführen, unter Windows reicht ein Doppelklick auf `update.bat`. Das Skript holt die neue Version von GitHub und zeigt, was sich geändert hat. Deine Exporte und HTML-Dateien bleiben unberührt. Hast du Dateien des Programms selbst geändert (zum Beispiel die Screenshots neu erzeugt), nennt das Skript sie und fragt, ob es die Änderungen verwerfen soll. Genauso fragt es, wenn eigene Dateien einer Datei aus dem Update im Weg liegen. Ohne ein „y“ überschreibt es nichts. Deine eigenen neuen Dateien bleiben in jedem Fall erhalten.
 - **Ohne git:** die neue Version von der [Releases-Seite](../../releases) herunterladen.
 
 Ob es eine neue Version gibt, zeigt `python lifelist.py --check-update`.

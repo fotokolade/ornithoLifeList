@@ -93,6 +93,16 @@ class UpdateTest(unittest.TestCase):
         with open(os.path.join(self.user, "src", "i18n.js"), encoding="utf-8") as fh:
             self.assertEqual(fh.read(), "// edited again\n")
 
+    def test_can_replace_own_files_in_the_way_when_asked(self):
+        write(os.path.join(self.dev, "howto", "01.png"), "new")
+        git(self.dev, "add", "-A")
+        git(self.dev, "commit", "-m", "new screenshot")
+        git(self.dev, "push", "origin", "HEAD:master")
+        write(os.path.join(self.user, "howto", "01.png"), "copied in by hand")
+        self.assertEqual(update.update(self.user, out=self.lines.append, ask=lambda q: "in the way" in q), 1)
+        with open(os.path.join(self.user, "howto", "01.png"), encoding="utf-8") as fh:
+            self.assertEqual(fh.read(), "new")
+
     def test_stops_on_own_commits(self):
         write(os.path.join(self.user, "notes.txt"), "mine")
         git(self.user, "add", "-A")
