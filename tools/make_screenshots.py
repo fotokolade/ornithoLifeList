@@ -131,6 +131,12 @@ def main():
                 page = open_page(hash="#map")
                 page.wait_for_timeout(4000)
                 shot(page, "map.png", section(page, "#map"))
+                try:  # map tiles make a big PNG; 256 colours look the same at a third of the size
+                    from PIL import Image
+                    out = os.path.join(OUT, "map.png")
+                    Image.open(out).convert("RGB").quantize(colors=256).save(out, optimize=True)
+                except ImportError:
+                    pass
             browser.close()
 
 

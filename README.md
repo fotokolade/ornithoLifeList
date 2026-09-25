@@ -38,6 +38,10 @@ Die Bilder zeigen eine Lebensliste aus erfundenen Beispieldaten.
 
 ![Tabelle Landkreis × Monat mit geöffneter Zelle](docs/screenshots/regions.png)
 
+**Karte** aller Beobachtungsorte, Größe und Farbe nach Artenzahl:
+
+![Karte mit den Beobachtungsorten in ganz Deutschland](docs/screenshots/map.png)
+
 **Touren**, zusammengesetzt aus Meldungen, die höchstens 10 Minuten und 1 km auseinanderliegen:
 
 ![Liste der Touren mit Kennzahlen und einer geöffneten Tour](docs/screenshots/tours.png)
