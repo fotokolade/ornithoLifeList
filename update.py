@@ -40,7 +40,11 @@ def app_version(repo):
 
 def update(repo=HERE, out=print):
     """Fast-forwards `repo` to its upstream branch. Returns the number of new commits applied."""
-    if git(repo, "rev-parse", "--is-inside-work-tree", check=False).stdout.strip() != "true":
+    # the folder itself must be the clone's top level: a downloaded copy unpacked somewhere inside
+    # another git repository must not update that other repository
+    top = git(repo, "rev-parse", "--show-toplevel", check=False).stdout.strip()
+    same = lambda p: os.path.normcase(os.path.realpath(p))  # noqa: E731
+    if not top or same(top) != same(repo):
         raise UpdateError("This folder is not a git clone, so it can't be updated with git. "
                           "Download the new version from the GitHub releases page instead.")
     branch = git(repo, "rev-parse", "--abbrev-ref", "HEAD").stdout.strip()
@@ -58,7 +62,9 @@ def update(repo=HERE, out=print):
 
     old = app_version(repo)
     out(f"Checking GitHub for updates to '{branch}' ...")
-    git(repo, "fetch", "--prune", upstream.split("/", 1)[0])
+    # the branch's configured remote, not the text before the first "/" (remote names may contain one)
+    remote = git(repo, "config", "--get", f"branch.{branch}.remote", check=False).stdout.strip() or upstream.split("/", 1)[0]
+    git(repo, "fetch", "--prune", remote)
     incoming = int(git(repo, "rev-list", "--count", f"HEAD..{upstream}").stdout)
     if not incoming:
         out(f"Already up to date (version {old}).")

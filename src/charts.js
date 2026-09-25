@@ -1,4 +1,7 @@
 let curveSvgSeq = 0;
+let curveForPrint = false;  // set around printing: paper gets the full-size drawing, not the screen's width
+// the width the curve is drawn at: about its shown width, so the axis text stays legible on a phone instead of shrinking with the whole picture
+const curveWidth = () => curveForPrint ? 720 : Math.round(Math.max(320, Math.min(720, document.documentElement.clientWidth - 66)));
 function curveSvg(chrono) {
   const pts = chrono.map(r => r.first);
   if (!pts.length) return "";
@@ -6,8 +9,7 @@ function curveSvg(chrono) {
   // <linearGradient> ids must be unique in the document or url(#id) can resolve to the wrong (or a hidden, non-rendering) one
   const gradId = "curveGrad" + curveSvgSeq, lineId = "curveLine" + curveSvgSeq;
   curveSvgSeq++;
-  // drawn at roughly the width it is shown at, so the axis text stays legible on a phone instead of shrinking with the whole picture
-  const W = Math.round(Math.max(320, Math.min(720, document.documentElement.clientWidth - 66))), H = 230, L = 38, R = 10, Tp = 10, B = 24;
+  const W = curveWidth(), H = 230, L = 38, R = 10, Tp = 10, B = 24;
   // the curve ends with the export's last observation, not today: an older export would otherwise trail off in a long flat line
   const t0 = Date.UTC(MIN_Y, 0, 1), t1 = Date.UTC(MAX_Y + 1, 0, 1), tEnd = Date.parse(OBS[OBS.length - 1].d + "T00:00:00Z");
   const x = ms => L + (ms - t0) / (t1 - t0) * (W - L - R);

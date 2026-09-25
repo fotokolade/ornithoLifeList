@@ -97,7 +97,7 @@ if (initialTheme !== "system") document.documentElement.setAttribute("data-theme
  * @property {string} wishQ - wishlist search text
  * @property {string|null} calDay - "YYYY-MM-DD" of the day opened in the overview calendar
  * @property {string|null} heatCell - "Y-M" of the open cell in the overview's species-per-year-and-month table
- * @property {string|null} actCell - "M-H" (month 0-11, hour) of the open cell in the activity tab's month/hour table
+ * @property {string|null} actCell - open cell of the activity tab's hour tables: "m:M-H" (month 0-11, hour) or "w:W-H" (weekday 0-6 from Monday, hour)
  * @property {number|null} focusSp - species index the life list scrolls to and highlights once, after a jump from another view
  */
 const S = { tab: "overview", region: "all", year: Math.min(TODAY_Y, MAX_Y), month: TODAY_M, timeAll: true, lang: initialLang, theme: initialTheme,

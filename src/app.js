@@ -151,6 +151,17 @@ function init() {
   document.title = t("title");
   renderChrome();
   window.addEventListener("resize", syncHeaderHeight);
+  // the life list curve is drawn for the window's width: redraw it once a resize or phone rotation settles
+  // (only on a real width change, not when a phone's address bar merely changes the height)
+  let curveW = curveWidth(), resizeTimer = 0;
+  window.addEventListener("resize", () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      if (curveWidth() === curveW) return;
+      curveW = curveWidth();
+      if (S.tab === "overview" || S.tab === "list") renderActive();
+    }, 200);
+  });
 
   $("tabs").addEventListener("click", e => { const b = e.target.closest("button"); if (b) setTab(b.dataset.tab); });
   $("toc").addEventListener("click", e => {
@@ -195,11 +206,13 @@ function init() {
     S.q = ""; S.open = new Set(); S.atlasF = "all"; S.regAll = Object.fromEntries(LEVELS.map(lv => [lv.lvl, true])); S.targetSrc = "all";
     S.wishQ = ""; S.wishOpen = new Set(WISH_GROUPS.map(([g]) => g));
     $("h-print").textContent = t("printed", new Date().toLocaleDateString(S.lang === "en" ? "en-GB" : "de-DE")) + (S.region === "all" ? "" : ", " + $("f-region").selectedOptions[0].text);
+    curveForPrint = true;
     renderOverview(); renderList(); renderTargets(); renderActivity(); renderRegions();
     // closed <details> keep their text hidden even from print CSS
     for (const d of $$all("details.info")) d.open = true;
   });
   window.addEventListener("afterprint", () => {
+    curveForPrint = false;
     for (const d of $$all("details.info")) d.open = false;
     if (printBackup) {
       const { theme, ...state } = printBackup;
@@ -215,11 +228,19 @@ function init() {
     if (r) { S.region = r.dataset.region; buildRegionSelect(); renderMap(); }
   });
 
+  // the redraw replaces the clicked calendar day or table cell; put the keyboard focus back on its replacement
+  const refocus = sel => { const el = $$(sel); if (el) el.focus({ preventScroll: true }); };
   $("tab-overview").addEventListener("click", e => {
     const day = e.target.closest("[data-day]");
-    if (day) { S.calDay = S.calDay === day.dataset.day ? null : day.dataset.day; renderOverview(); return; }
+    if (day) {
+      S.calDay = S.calDay === day.dataset.day ? null : day.dataset.day; renderOverview();
+      refocus(`#tab-overview .cal-day[data-day="${day.dataset.day}"]`); return;
+    }
     const ym = e.target.closest("[data-ym]");
-    if (ym) { S.heatCell = S.heatCell === ym.dataset.ym ? null : ym.dataset.ym; renderOverview(); return; }
+    if (ym) {
+      S.heatCell = S.heatCell === ym.dataset.ym ? null : ym.dataset.ym; renderOverview();
+      refocus(`#tab-overview td[data-ym="${ym.dataset.ym}"]`); return;
+    }
     const sp = e.target.closest("[data-sp]");
     if (sp) openSpecies(+sp.dataset.sp);
   });
@@ -274,9 +295,10 @@ function init() {
       e.target.files[0].text().then(text => {
         const res = importCustomTargets(text);
         renderTargets();
-        $("tgt-io-msg").textContent = !res ? t("wishImportBad") : !res.added ? t("wishImportedNone")
+        // a file without a single usable species is no wishlist either, not "all already on the list"
+        $("tgt-io-msg").textContent = !res || !res.total ? t("wishImportBad") : !res.added ? t("wishImportedNone")
           : t(res.added === res.total ? "wishImported" : "wishImportedSome", res.added, res.total);
-      });
+      }, () => { $("tgt-io-msg").textContent = t("wishImportBad"); });
     }
   });
   // the "load" label acts as a button for the keyboard too

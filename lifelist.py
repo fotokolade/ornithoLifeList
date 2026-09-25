@@ -11,6 +11,7 @@ nothing is sent) and builds nothing. A normal build never goes online.
 import argparse
 import base64
 import glob
+import http.client
 import json
 import os
 import re
@@ -245,7 +246,7 @@ def latest_release(timeout=UPDATE_TIMEOUT):
         with urllib.request.urlopen(req, timeout=timeout) as resp:
             rel = json.load(resp)
         return rel["tag_name"], rel.get("html_url") or RELEASES_URL
-    except (OSError, ValueError, KeyError, TypeError):  # offline, timeout, HTTP error, unexpected JSON
+    except (OSError, http.client.HTTPException, ValueError, KeyError, TypeError):  # offline, timeout, HTTP error, cut-off response, unexpected JSON
         return None
 
 

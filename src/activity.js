@@ -7,9 +7,13 @@ const median = arr => {
 const hourLabel = h => t("hourRange", h, (h + 1) % 24);
 // the tab's observations: region filter, and the time bar's year unless "Gesamt" is on
 const activityScope = () => regionObs(baseObs()).filter(o => S.timeAll || o.y === S.year);
-// Monday-first weekday index of a "YYYY-MM-DD" date
-const weekdayOf = d => (new Date(d + "T00:00:00Z").getUTCDay() + 6) % 7;
-const isWeekend = wd => wd >= 5;
+// Monday-first weekday index of a "YYYY-MM-DD" date; cached, as it runs for every observation on each redraw
+const weekdayCache = new Map();
+const weekdayOf = d => {
+  let wd = weekdayCache.get(d);
+  if (wd === undefined) { wd = (new Date(d + "T00:00:00Z").getUTCDay() + 6) % 7; weekdayCache.set(d, wd); }
+  return wd;
+};
 // how often each weekday occurs in the period the export covers, limited to the time bar's year unless "Gesamt" is on;
 // the denominator for "share of all Saturdays you were out"
 function weekdayTotals() {

@@ -200,6 +200,18 @@ class PageTest(unittest.TestCase):
         self.assertIn("%", page.inner_text(".wd-ring"))
         self.assertEqual(self.errors, [])
 
+    def test_curve_follows_window_width_and_prints_full_size(self):
+        page = self.open(width=390)
+        width = lambda: page.eval_on_selector("#tab-overview svg.curve", "s => s.viewBox.baseVal.width")
+        self.assertEqual(width(), 324)
+        page.set_viewport_size({"width": 1400, "height": 900})
+        page.wait_for_function("document.querySelector('#tab-overview svg.curve').viewBox.baseVal.width === 720")
+        page.set_viewport_size({"width": 390, "height": 900})
+        page.wait_for_function("document.querySelector('#tab-overview svg.curve').viewBox.baseVal.width === 324")
+        page.evaluate("window.dispatchEvent(new Event('beforeprint'))")
+        self.assertEqual(width(), 720)
+        self.assertEqual(self.errors, [])
+
     def test_phone_width_has_no_sideways_scroll(self):
         page = self.open(width=390)
         for tab in TABS:
