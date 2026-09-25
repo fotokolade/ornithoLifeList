@@ -101,7 +101,9 @@ def main():
             print(f"  observers[].{key}: {n} sightings ({100 * n / total:.0f}%)")
     else:
         print("\nNo observer coordinates that differ from the place's coordinates.")
-    if gps_vs_coord:
+    if not gps_vs_coord:
+        print("\nNo sightings with both gps_* and coord_* to compare.")
+    else:
         d = sorted(gps_vs_coord)
         same = sum(1 for x in d if x < 2)
         print(f"\ngps_* next to coord_* in {len(d)} sightings: the same point (< 2 m) in {same} ({100 * same / len(d):.0f}%),"
