@@ -129,6 +129,10 @@ const $$ = sel => document.querySelector(sel);
 /** @param {string} sel @returns {any} */
 const $$all = sel => document.querySelectorAll(sel);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+// a key-figure tile; `theme` colours it by what it counts ("species", "activity", "places", "photos"), `zero` greys it out
+/** @param {string|number} value @param {string} label @param {string} theme @param {{main?: boolean, zero?: boolean}} [opts] */
+const kpiTile = (value, label, theme, { main = false, zero = false } = {}) =>
+  `<div class="kpi t-${theme}${main ? " main" : ""}${zero ? " zero" : ""}"><b>${value}</b><span>${label}</span></div>`;
 const fmtN = n => n.toLocaleString(S.lang === "en" ? "en-GB" : "de-DE");
 // rounds for display but never claims 100% unless truly complete, or 0% when something is actually there
 const pctDisplay = (count, total) => !total ? 0 : count === 0 ? 0 : count === total ? 100 : Math.min(99, Math.max(1, Math.round(count / total * 100)));

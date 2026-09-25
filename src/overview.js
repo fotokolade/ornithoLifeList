@@ -148,14 +148,14 @@ function renderOverview() {
   const heatT = heatTable(list);
   $("tab-overview").innerHTML = `
     <div class="kpis k8">
-      <div class="kpi main"><b>${fmtN(stats.size)}</b><span>${t("speciesLife")}</span></div>
-      <div class="kpi"><b>${fmtN(list.length)}</b><span>${t("observations")}</span></div>
-      <div class="kpi"><b>${fmtN(days)}</b><span>${t("days")}</span></div>
-      <div class="kpi"><b>${fmtN(places)}</b><span>${t("places")}</span></div>
-      <div class="kpi"><b>+${newYear}</b><span>${t("newInYear", S.year)}</span></div>
-      <div class="kpi"><b>+${new30}</b><span>${t("newLast30")}</span></div>
-      <div class="kpi"><b>${photoPct}%</b><span>${t("photoShare")}</span></div>
-      <div class="kpi"><b>${bestCount}</b><span>${t("bestDay", fmtD(bestDay))}</span></div>
+      ${kpiTile(fmtN(stats.size), t("speciesLife"), "species", { main: true })}
+      ${kpiTile(fmtN(list.length), t("observations"), "activity")}
+      ${kpiTile(fmtN(days), t("days"), "activity")}
+      ${kpiTile(fmtN(places), t("places"), "places")}
+      ${kpiTile(`+${newYear}`, t("newInYear", S.year), "species", { zero: !newYear })}
+      ${kpiTile(`+${new30}`, t("newLast30"), "species", { zero: !new30 })}
+      ${kpiTile(`${photoPct}%`, t("photoShare"), "photos", { zero: !photoPct })}
+      ${kpiTile(bestCount, t("bestDay", fmtD(bestDay)), "activity")}
     </div>
     <p class="sub" style="margin-top:8px">${t("period")}: ${fmtD(first)} ${t("to")} ${fmtD(last)}</p>
     ${calendarSection(list, stats)}

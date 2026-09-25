@@ -113,8 +113,8 @@ function renderActivity() {
   $("act-out").innerHTML = `
     ${infoText(t("actHelp", fmtN(timed.length), fmtN(scoped.length)))}
     <div class="kpis">
-      <div class="kpi main"><b>${fmtN(timed.length)}</b><span>${t("actKTimed")}</span></div>
-      <div class="kpi"><b>${hourLabel(peak)}</b><span>${t("actKPeak")}</span></div>
+      ${kpiTile(fmtN(timed.length), t("actKTimed"), "activity", { main: true })}
+      ${kpiTile(hourLabel(peak), t("actKPeak"), "activity")}
     </div>
     <h2 data-toc="${esc(t("tocActHour"))}">${t("actHourTitle")}<label class="ctl">${t("actCountBy")}<select id="a-metric" aria-label="${esc(t("ariaMetric"))}">${metricOptions}</select></label></h2>
     <div class="card" id="hour-card">${barChartSvg(series, hours, hours.map(h => hourLabel(h) + ": " + series[h]), 3)}</div>

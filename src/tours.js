@@ -224,10 +224,10 @@ function renderTourOut() {
   }).join("");
   out.innerHTML = `
     <div class="kpis k4">
-      <div class="kpi main"><b>${fmtN(tours.length)}</b><span>${t("toursKCount")}</span></div>
-      <div class="kpi"><b>${fmtKm(km)}</b><span>${t("toursKKm")}</span></div>
-      <div class="kpi"><b>${fmtKm(longest.km)}</b><span>${t("toursKLongest", fmtD(longest.d))}</span></div>
-      <div class="kpi"><b>${richest.sp}</b><span>${t("toursKRichest", fmtD(richest.d))}</span></div>
+      ${kpiTile(fmtN(tours.length), t("toursKCount"), "activity", { main: true })}
+      ${kpiTile(fmtKm(km), t("toursKKm"), "places")}
+      ${kpiTile(fmtKm(longest.km), t("toursKLongest", fmtD(longest.d)), "places")}
+      ${kpiTile(richest.sp, t("toursKRichest", fmtD(richest.d)), "species")}
     </div>
     <h2>${t("toursTitle")}<small>${tours.length}</small></h2>
     <div class="card"><table><thead><tr>${tourTh("date", t("colDate"))}${tourTh("time", t("colTime"), "hide-sm")}${tourTh("dur", t("colDuration"), "num")}
