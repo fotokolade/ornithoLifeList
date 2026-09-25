@@ -108,8 +108,8 @@ def main():
 
             # Regionen: where you are out in which month, with a cell opened
             page = open_page(hash="#regions")
-            # a cell with a handful of species, so the panel stays short
-            page.evaluate("""() => [...document.querySelectorAll('td[data-rm]')].find(td => +td.textContent >= 3 && +td.textContent <= 4).click()""")
+            # the Alps trip: a short panel with species you only see there
+            page.locator("table.heat.rm tr", has_text="Berchtesgadener Land").locator("td[data-rm]").first.click()
             page.wait_for_timeout(200)
             shot(page, "regions.png", section(page, "h2:has(#rm-level)", "#rm-cell"))
 

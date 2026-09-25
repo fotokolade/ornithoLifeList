@@ -109,7 +109,7 @@ Beides steckt fertig aufbereitet in `species_reference.json`.
 | --- | --- |
 | `lifelist.py` | liest den Export und erstellt die HTML-Seite |
 | `template.html` | Vorlage der Seite (HTML und CSS) mit den Platzhaltern `__DATA_JSON__`, `__APP_JS__`, `__VENDOR_JS__`, `__VENDOR_CSS__` |
-| `src/*.js` | JavaScript der Seite, aufgeteilt nach Tab und Thema |
+| `src/*.js` | JavaScript der Seite, aufgeteilt nach Tab und Thema (`counties.js`: Namen der Landkreise zu ornithos Kreiskürzeln) |
 | `vendor/` | mitgelieferte Bibliotheken Leaflet, Leaflet.markercluster und Chart.js |
 | `species_reference.json` | Artnamen und Saisonzeiträume |
 | `tests/` | automatische Tests mit erfundenen Beispieldaten |
@@ -162,7 +162,7 @@ Zum Ausprobieren lässt sich die exe auch selbst bauen: unter Windows `python bu
 
 ### Beispieldaten und Screenshots
 
-- `tools/make_demo_export.py` erzeugt einen erfundenen, aber realistisch wirkenden Export (`export_demo.json`): ein fiktiver Beobachter an echten sächsischen Beobachtungsorten, über mehrere Jahre. Gut zum Ausprobieren ohne eigene Daten: `python tools/make_demo_export.py`, dann `python lifelist.py --source export_demo.json`.
+- `tools/make_demo_export.py` erzeugt einen erfundenen, aber realistisch wirkenden Export (`export_demo.json`): ein fiktiver Beobachter aus der Nähe von Dresden, über mehrere Jahre an echten Beobachtungsorten, mit Reisen quer durch Deutschland. Gut zum Ausprobieren ohne eigene Daten: `python tools/make_demo_export.py`, dann `python lifelist.py --source export_demo.json`.
 - `tools/make_screenshots.py` erstellt daraus die Bilder in `docs/screenshots/` (braucht Playwright, siehe Tests). Mit `--map` kommt ein Bild der Karte dazu, dafür braucht es Internet für die Kartenkacheln.
 
 ### Referenzdaten und Bibliotheken pflegen

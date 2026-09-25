@@ -2,10 +2,11 @@
 
 Usage:  python tools/make_demo_export.py [output.json]      (default: export_demo.json)
 
-Nothing in it is a real observation: a fictional birder visits a handful of real Saxon birding
-spots over several years, more often at weekends and in spring, mostly
-in the morning, discovering new spots and finding scarcer species as the years go by; each species
-turns up according to its habitat, season and how common it is.
+Nothing in it is a real observation: a fictional birder from near Dresden visits real birding spots
+at home, more often at weekends and in spring, mostly in the morning, and takes a few birding trips
+across Germany each year (Wadden Sea, Müritz, Alps, Kaiserstuhl, ...). Over the years they discover
+new spots and find scarcer species; each species turns up according to its habitat, season and how
+common it is.
 The same seed always gives the same file.
 """
 import json
@@ -27,10 +28,27 @@ PLACES = [
     ("5", "Königsbrücker Heide", "Königsbrück (SN, BZ)", 51.302, 13.930, "open forest", 3, 2021),
     ("6", "Guttauer Teiche", "Malschwitz (SN, BZ)", 51.262, 14.548, "water open", 3, 2021),
     ("7", "Teichgebiet Niederspree", "Hähnichen (SN, GR)", 51.402, 14.803, "water forest", 2, 2022),
-    ("8", "Talsperre Quitzdorf", "Quitzdorf am See (SN, GR)", 51.282, 14.772, "water open coast", 2, 2022),
+    ("8", "Talsperre Quitzdorf", "Quitzdorf am See (SN, GR)", 51.282, 14.772, "water open", 2, 2022),
     ("9", "Bastei", "Lohmen (SN, PIR)", 50.962, 14.073, "forest rock", 2, 2023),
     ("10", "Auwald Leipzig", "Leipzig (SN, L)", 51.340, 12.340, "forest water", 1, 2024),
     ("11", "Fichtelberg", "Oberwiesenthal (SN, ERZ)", 50.429, 12.954, "mountain forest", 1, 2025),
+]
+
+# birding trips: first day, number of days, places (id, name, municipality, lat, lon, habitats)
+TRIPS = [
+    ("2019-09-14", 3, [("30", "Hauke-Haien-Koog", "Reußenköge (SH, NF)", 54.605, 8.870, "coast water open")]),
+    ("2020-05-21", 3, [("31", "Müritz-Nationalpark, Boeker Mühle", "Rechlin (MV, MSE)", 53.378, 12.782, "water forest open")]),
+    ("2021-10-02", 4, [("32", "Pramort", "Zingst (MV, VR)", 54.438, 12.790, "coast open"),
+                       ("33", "Großer Werder", "Zingst (MV, VR)", 54.450, 12.703, "coast water")]),
+    ("2022-06-18", 4, [("34", "Jenner", "Schönau am Königssee (BY, BGL)", 47.577, 13.022, "alpine mountain rock forest")]),
+    ("2022-10-08", 3, [("35", "Helgoland, Oberland", "Helgoland (SH, PI)", 54.183, 7.886, "sea coast")]),
+    ("2023-04-29", 3, [("36", "Federsee", "Bad Buchau (BW, BC)", 48.068, 9.617, "water open forest")]),
+    ("2023-10-21", 2, [("37", "Unteres Odertal, Criewen", "Schwedt/Oder (BB, UM)", 53.017, 14.233, "water open")]),
+    ("2024-05-09", 4, [("38", "Badberg", "Vogtsburg im Kaiserstuhl (BW, FR)", 48.101, 7.665, "south open forest")]),
+    ("2024-09-28", 2, [("39", "Dümmer, Hüde", "Hüde (NI, DH)", 52.490, 8.345, "water open coast")]),
+    ("2025-03-15", 2, [("40", "Kühkopf-Knoblochsaue", "Stockstadt am Rhein (HE, GG)", 49.825, 8.415, "water forest")]),
+    ("2025-11-08", 3, [("30", "Hauke-Haien-Koog", "Reußenköge (SH, NF)", 54.605, 8.870, "coast water open")]),
+    ("2026-04-11", 3, [("41", "Hirschauer Bucht", "Grabenstätt (BY, TS)", 47.842, 12.508, "water open")]),
 ]
 
 # latin, habitats, season, commonness 1 (everywhere) .. 5 (rare)
@@ -199,6 +217,33 @@ Emberiza citrinella|open|r|2
 Emberiza hortulana|open|s|5
 Emberiza schoeniclus|water open|r|2
 Larus argentatus / michahellis|water coast|r|3
+Somateria mollissima|coast sea|r|2
+Recurvirostra avosetta|coast|s|2
+Calidris canutus|coast|p|2
+Calidris alba|coast sea|p|2
+Limosa lapponica|coast|p|2
+Pluvialis squatarola|coast|p|2
+Arenaria interpres|coast sea|p|3
+Thalasseus sandvicensis|coast|s|3
+Branta bernicla|coast|w|2
+Morus bassanus|sea|r|1
+Uria aalge|sea|r|1
+Alca torda|sea|r|2
+Rissa tridactyla|sea|r|1
+Fulmarus glacialis|sea|r|2
+Pyrrhocorax graculus|alpine|r|1
+Prunella collaris|alpine|s|2
+Tichodroma muraria|alpine|r|3
+Aquila chrysaetos|alpine|r|3
+Lagopus muta|alpine|r|4
+Turdus torquatus|alpine|s|2
+Anthus spinoletta|alpine|s|2
+Phylloscopus bonelli|alpine|s|3
+Merops apiaster|south|s|1
+Emberiza cirlus|south|r|2
+Otus scops|south|s|4
+Crex crex|water open|s|4
+Aythya nyroca|water|s|5
 """
 ESCAPE = ("Cygnus atratus", "Trauerschwan", "water", "r", 5)  # a captivity escape, hidden by default
 
@@ -247,6 +292,7 @@ def generate():
                         set(habitats.split()), season, int(tier)))
     species.append(((ESCAPE[0], ESCAPE[1], 999, "escaped"), set(ESCAPE[2].split()), ESCAPE[3], ESCAPE[4]))
 
+    trips = [(date.fromisoformat(first), days, places) for first, days, places in TRIPS]
     out = []
     d = FIRST
     while d <= LAST:
@@ -258,7 +304,11 @@ def generate():
         skill = 0.35 + 0.65 * min(1, (d.year - FIRST.year) / 6)
         known = [p for p in PLACES if p[7] <= d.year]
         visits = []
-        if rnd.random() < chance:
+        trip = next((t for t in trips if t[0] <= d < t[0] + timedelta(days=t[1])), None)
+        if trip:
+            # trip days: out early at every place of the trip
+            visits = [(p, rnd.randint(330, 480) + i * 180) for i, p in enumerate(trip[2])]
+        elif rnd.random() < chance:
             n = 2 if weekend and rnd.random() < 0.4 else 1
             picks = rnd.choices(known, weights=[p[6] for p in known], k=n)
             # weekends start early in the morning, weekdays after work
