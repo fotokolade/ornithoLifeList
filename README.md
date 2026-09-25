@@ -9,6 +9,7 @@ Macht aus deinem [ornitho.de](https://www.ornitho.de/)-Export eine interaktive V
 - **Ziele:** Arten, die dir noch fehlen, mit Saisonhinweis, wann sie hier vorkommen, und eigener Wunschliste
 - **Tagesaktivität:** zu welcher Uhrzeit, an welchen Wochentagen und in welchen Monaten du unterwegs bist
 - **Regionen:** Arten nach Bundesland, Landkreis, Gemeinde und Ort, und wann du dich wo aufhältst
+- **Touren:** Spaziergänge und Radtouren, rekonstruiert aus Meldungen, die zeitlich und räumlich nah beieinanderliegen, mit Strecke auf der Karte
 - **Karte** deiner Beobachtungsorte
 
 Fast alles ist anklickbar: ein Tag im Kalender, eine Zelle in einer Tabelle oder ein Punkt auf der Kurve zeigt die Arten dahinter, und jede Art führt zu ihrem Eintrag in der Lebensliste. Die Seite gibt es auf Deutsch und Englisch (mit englischen Artnamen), hell und dunkel, und sie lässt sich als PDF speichern.
@@ -36,6 +37,10 @@ Die Bilder zeigen eine Lebensliste aus erfundenen Beispieldaten.
 **Regionen:** wann du dich wo aufhältst, mit den Arten einer Zelle:
 
 ![Tabelle Landkreis × Monat mit geöffneter Zelle](docs/screenshots/regions.png)
+
+**Touren**, zusammengesetzt aus Meldungen, die höchstens 10 Minuten und 1 km auseinanderliegen:
+
+![Liste der Touren mit Kennzahlen und einer geöffneten Tour](docs/screenshots/tours.png)
 
 **Dunkles Design** und **Handy**:
 
@@ -67,7 +72,7 @@ Du brauchst dafür nur Python 3. Ohne Python geht es unter Windows mit der ferti
 | `python lifelist.py --check-update` | sieht auf GitHub nach, ob es eine neuere Version gibt, und erstellt nichts |
 | `python lifelist.py --version` | zeigt die installierte Version |
 
-In der Version mit `--redact` fehlen Beobachtungsorte, Gemeinden, Koordinaten und die Karte. Alle Arten, Daten und Auswertungen bleiben erhalten.
+In der Version mit `--redact` fehlen Beobachtungsorte, Gemeinden, Koordinaten, die Karte und die Touren. Alle Arten, Daten und Auswertungen bleiben erhalten.
 
 ## Ohne Python: lifelist.exe für Windows
 
@@ -90,7 +95,7 @@ Ob es eine neue Version gibt, zeigt `python lifelist.py --check-update`.
 - Die fertige Seite funktioniert offline, nur die Karte lädt ihre Kartenkacheln aus dem Internet.
 - `--check-update` und `update.py` fragen GitHub nach der neuesten Version. Dabei werden keine Beobachtungsdaten gesendet.
 - Deine eigene Wunschliste (Tab „Ziele“) speichert nur dein Browser. Sie bleibt erhalten, wenn du die Lebensliste neu erstellst. Zum Sichern oder für einen anderen Rechner kannst du sie dort als Datei speichern und wieder laden.
-- Export und HTML-Dateien enthalten deine Beobachtungsorte. Sie sind per `.gitignore` vom Git-Repository ausgeschlossen. Zum Weitergeben ist die Version mit `--redact` gedacht.
+- Export und HTML-Dateien enthalten deine Beobachtungsorte. Sie sind per `.gitignore` vom Git-Repository ausgeschlossen. Zum Weitergeben ist die Version mit `--redact` gedacht; ihr fehlen auch Karte und Touren.
 
 ## Woher kommen die Artdaten?
 

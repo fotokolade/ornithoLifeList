@@ -16,7 +16,8 @@ try:
 except ImportError:
     sync_playwright = None
 
-TABS = ["overview", "list", "targets", "activity", "regions", "map"]
+TABS = ["overview", "list", "targets", "activity", "regions", "tours", "map"]
+NO_PLACE_TABS = TABS[:-2]  # tours and map are hidden without place data
 
 
 @unittest.skipIf(sync_playwright is None, "playwright not installed")
@@ -38,6 +39,18 @@ class PageTest(unittest.TestCase):
         with open(path, "w", encoding="utf-8") as fh:
             fh.write(lifelist.render_html(lifelist.build_page_data(extra, "export_test.json", False)))
         cls.url["single"] = "file:///" + path.replace(os.sep, "/").lstrip("/")
+        # tours: A -> B (600 m, 5 min later) is one; C is 3 km away and D comes 20 minutes later, so neither joins it
+        near = dict(municipality="Musterdorf (SN, GR)")
+        walk = [
+            sighting("Parus major", "Kohlmeise", "2024-05-01", place_id="A", place="Punkt A", lat="51.1000", lon="14.5000", time="07:00", **near),
+            sighting("Turdus merula", "Amsel", "2024-05-01", place_id="B", place="Punkt B", lat="51.1054", lon="14.5000", time="07:05", **near),
+            sighting("Sitta europaea", "Kleiber", "2024-05-01", place_id="C", place="Punkt C", lat="51.1324", lon="14.5000", time="07:09", **near),
+            sighting("Buteo buteo", "Mäusebussard", "2024-05-01", place_id="D", place="Punkt D", lat="51.1324", lon="14.5050", time="07:29", **near),
+        ]
+        path = os.path.join(cls.tmp.name, "tours.html")
+        with open(path, "w", encoding="utf-8") as fh:
+            fh.write(lifelist.render_html(lifelist.build_page_data(walk, "export_test.json", False)))
+        cls.url["tours"] = "file:///" + path.replace(os.sep, "/").lstrip("/")
         cls.pw = sync_playwright().start()
         cls.browser = cls.pw.chromium.launch()
 
@@ -84,7 +97,7 @@ class PageTest(unittest.TestCase):
             page.select_option("#f-region", "all")
         for box in ("o-escaped", "o-collective", "o-redact"):
             page.eval_on_selector(f"#{box}", "e => { e.checked = true; e.dispatchEvent(new Event('change')); }")
-        self.click_all_tabs(page, TABS[:-1])
+        self.click_all_tabs(page, NO_PLACE_TABS)
         self.assertEqual(self.errors, [])
 
     def test_life_list_search_and_detail(self):
@@ -252,6 +265,23 @@ class PageTest(unittest.TestCase):
         self.assertIn("Elster", page.inner_text("#list-out tr.row.flash"))
         self.assertEqual(self.errors, [])
 
+    def test_tours_are_rebuilt_from_close_records(self):
+        page = self.open(redact="tours", hash="#tours")
+        tours = page.evaluate("findTours(baseObs()).map(t => ({ path: t.path.map(p => PL[p].name), km: t.km }))")
+        self.assertEqual(len(tours), 1)
+        self.assertEqual(tours[0]["path"], ["Punkt A", "Punkt B"])
+        self.assertAlmostEqual(tours[0]["km"], 0.6, delta=0.02)
+        page.locator("#tab-tours tr.row").first.click()
+        self.assertIn("Punkt A → Punkt B", page.inner_text("#tab-tours"))
+        page.click("[data-route]")
+        page.wait_for_function("S.tab === 'map'")
+        self.assertEqual(page.locator(".route-stop").count(), 2)
+        # no tours without place data
+        page.click("#o-sum")
+        page.check("#o-redact")
+        self.assertFalse(page.is_visible('#tabs button[data-tab="tours"]'))
+        self.assertEqual(self.errors, [])
+
     def test_phone_width_has_no_sideways_scroll(self):
         page = self.open(width=390)
         for tab in TABS:
@@ -304,14 +334,14 @@ class PageTest(unittest.TestCase):
         page = self.open(redact=True)
         self.assertFalse(page.is_visible('#tabs button[data-tab="map"]'))
         self.assertNotIn("Teich am Wald", page.content())
-        self.click_all_tabs(page, TABS[:-1])
+        self.click_all_tabs(page, NO_PLACE_TABS)
         self.assertEqual(self.errors, [])
 
     def test_print_view_renders_every_tab(self):
         page = self.open()
         page.emulate_media(media="print")
         page.evaluate("window.dispatchEvent(new Event('beforeprint'))")
-        for tab in TABS[:-1]:
+        for tab in NO_PLACE_TABS:
             self.assertTrue(page.inner_text(f"#tab-{tab}").strip(), tab)
         self.assertEqual(self.errors, [])
         self.assertTrue(page.eval_on_selector_all("details.info", "ds => ds.length > 0 && ds.every(d => d.open)"))

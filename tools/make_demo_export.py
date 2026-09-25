@@ -34,6 +34,18 @@ PLACES = [
     ("11", "Fichtelberg", "Oberwiesenthal (SN, ERZ)", 50.429, 12.954, "mountain forest", 1, 2025),
 ]
 
+# rounds at some home spots: the birder walks (or rides along the Elbe) past these points and reports
+# on the way, which the page's Touren tab turns back into tours; (id, name, lat, lon), a few hundred metres apart
+WALKS = {
+    "2": [("2-1", "Moritzburger Teiche, Großteich Süd", 51.1585, 13.6795), ("2-2", "Moritzburger Teiche, Großteich Ost", 51.1630, 13.6850),
+          ("2-3", "Moritzburger Teiche, Mittelteich", 51.1668, 13.6800), ("2-4", "Moritzburger Teiche, Frauenteich", 51.1690, 13.6735),
+          ("2-5", "Moritzburger Teiche, Schlossteich", 51.1655, 13.6690)],
+    "3": [("3-1", "Elbwiesen Übigau", 51.0780, 13.7050), ("3-2", "Elbwiesen Mickten", 51.0790, 13.7170),
+          ("3-3", "Elbwiesen Pieschen", 51.0760, 13.7280), ("3-4", "Elbwiesen Neustadt", 51.0690, 13.7390)],
+    "4": [("4-1", "Großer Garten, Carolasee", 51.0385, 13.7600), ("4-2", "Großer Garten, Palaisteich", 51.0365, 13.7640),
+          ("4-3", "Großer Garten, Neuer Teich", 51.0340, 13.7700), ("4-4", "Großer Garten, Südpark", 51.0325, 13.7625)],
+}
+
 # birding trips: first day, number of days, places (id, name, municipality, lat, lon, habitats)
 TRIPS = [
     ("2019-09-14", 3, [("30", "Hauke-Haien-Koog", "Reußenköge (SH, NF)", 54.605, 8.870, "coast water open")]),
@@ -316,6 +328,11 @@ def generate():
             visits = [(p, start + i * rnd.randint(120, 200)) for i, p in enumerate(dict.fromkeys(picks))]
         for place, minute in visits:
             habitats = set(place[5].split())
+            # every other visit to a spot with a round is a walk past its points instead of a stay
+            walk = WALKS.get(place[0]) if rnd.random() < 0.5 else None
+            if walk and rnd.random() < 0.5:
+                walk = walk[::-1]
+            seen = 0
             for sp, sp_hab, season, tier in species:
                 if not (sp_hab & habitats) or not in_season(season, d.month):
                     continue
@@ -325,7 +342,12 @@ def generate():
                 breeding = 4 <= d.month <= 7 and season in "rs" and rnd.random() < 0.25
                 atlas = rnd.choice(["A2", "B4", "B7", "C13", "C14"]) if breeding else None
                 count = max(1, int(rnd.expovariate(1 / (6 if tier <= 2 and "water" in sp_hab else 2))))
-                out.append(sighting(sp, d.isoformat(), place, min(minute, 1439) if rnd.random() < 0.8 else -1,
+                where = place
+                if walk:  # move on to the next point every few records
+                    wid, wname, wlat, wlon = walk[min(len(walk) - 1, seen // 4)]
+                    where = (wid, wname, place[2], wlat, wlon)
+                seen += 1
+                out.append(sighting(sp, d.isoformat(), where, min(minute, 1439) if walk or rnd.random() < 0.8 else -1,
                                     count, atlas, rnd.random() < 0.12))
         d += timedelta(days=1)
     return out

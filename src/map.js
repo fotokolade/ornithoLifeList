@@ -84,7 +84,7 @@ function drawMap() {
   const pts = [...byPlace.values()].filter(r => PL[r.p].lat && value(r) > 0).sort((a, b) => value(b) - value(a));
   $("map-note").textContent = t("mapNote", pts.length);
   const legend = MAP_LEGEND.getContainer();
-  if (!pts.length) { legend.hidden = true; return; }
+  if (!pts.length) { legend.hidden = true; drawTourRoute(); return; }
   const max = value(pts[0]);
   const steps = [...new Set([max, Math.round(max / 2), 1])].filter(v => v > 0);
   legend.hidden = false;
@@ -113,4 +113,5 @@ function drawMap() {
   }
   MAP.fitBounds(bounds, { padding: [30, 30], maxZoom: 15 });
   syncClusterKey();
+  drawTourRoute();  // a tour opened from the Touren tab: its path on top, zoomed to it
 }

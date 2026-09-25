@@ -113,6 +113,12 @@ def main():
             page.wait_for_timeout(200)
             shot(page, "regions.png", section(page, "h2:has(#rm-level)", "#rm-cell"))
 
+            # Touren: tours rebuilt from the records, one opened
+            page = open_page(hash="#tours")
+            page.locator("#tab-tours tr.row").nth(2).click()
+            page.wait_for_timeout(200)
+            shot(page, "tours.png", section(page, "#tab-tours .kpis", "#tab-tours tbody tr:nth-child(8)"))
+
             # dark theme and phone
             page = open_page(theme="dark", hash="#overview")
             last_full_year(page)

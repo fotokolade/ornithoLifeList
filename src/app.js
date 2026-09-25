@@ -42,14 +42,18 @@ function buildRegionSelect() {
   sel.value = [...sel.options].some(o => o.value === S.region) ? S.region : "all";
   S.region = sel.value;
 }
+// the map and the tours show where you were: both are hidden without place data
+const PLACE_TABS = ["tours", "map"];
+const hidePlaceTabs = on => { for (const k of PLACE_TABS) $$(`#tabs button[data-tab="${k}"]`).hidden = on; };
 function applyRedact(on) {
   S.redact = on;
   $("o-redact").checked = on;
-  $$('#tabs button[data-tab="map"]').hidden = on;
+  hidePlaceTabs(on);
   if (on && /^[pm]:/.test(S.region)) S.region = "all";
-  if (on && S.tab === "map") { S.tab = "overview"; }
+  if (on && PLACE_TABS.includes(S.tab)) { S.tab = "overview"; }
   // drop everything rendered with place names; each tab re-renders when it is shown
-  for (const id of ["tab-overview", "list-out", "tab-regions", "tab-targets"]) $(id).innerHTML = "";
+  for (const id of ["tab-overview", "list-out", "tab-regions", "tab-targets", "tab-tours"]) $(id).innerHTML = "";
+  S.tourRoute = null;
   if (MAP_LAYER) MAP_LAYER.clearLayers();
   $("map-note").textContent = "";
   buildRegionSelect();
@@ -72,7 +76,7 @@ function setTab(tab) {
   else apply();
 }
 function renderActive() {
-  ({ overview: renderOverview, list: renderList, regions: renderRegions, targets: renderTargets, activity: renderActivity, map: renderMap })[S.tab]();
+  ({ overview: renderOverview, list: renderList, regions: renderRegions, targets: renderTargets, activity: renderActivity, tours: renderTours, map: renderMap })[S.tab]();
 }
 function refreshAll() { buildRegionSelect(); renderActive(); }
 // floating jump-to-section nav for the active tab: rebuilt from its own <h2> headings after every
@@ -104,10 +108,10 @@ function renderChrome() {
   $("o-redact-t").textContent = t("optRedact");
   $("o-redact-l").hidden = !!RAW.meta.redacted;
   $("q").placeholder = t("searchPh");
-  $("tabs").innerHTML = [["overview", "tabOverview"], ["list", "tabList"], ["targets", "tabTargets"], ["activity", "tabActivity"], ["regions", "tabRegions"], ["map", "tabMap"]]
+  $("tabs").innerHTML = [["overview", "tabOverview"], ["list", "tabList"], ["targets", "tabTargets"], ["activity", "tabActivity"], ["regions", "tabRegions"], ["tours", "tabTours"], ["map", "tabMap"]]
     .map(([k, l]) => `<button data-tab="${k}">${t(l)}</button>`).join("");
   for (const b of $$all("#tabs button")) b.classList.toggle("on", b.dataset.tab === S.tab);
-  if (S.redact) $$('#tabs button[data-tab="map"]').hidden = true;
+  if (S.redact) hidePlaceTabs(true);
   $("f-lang").value = S.lang;
   $("f-region").setAttribute("aria-label", t("ariaRegion"));
   $("q-sort").setAttribute("aria-label", t("ariaSort"));
@@ -208,6 +212,7 @@ function init() {
     $("h-print").textContent = t("printed", new Date().toLocaleDateString(S.lang === "en" ? "en-GB" : "de-DE")) + (S.region === "all" ? "" : ", " + $("f-region").selectedOptions[0].text);
     curveForPrint = true;
     renderOverview(); renderList(); renderTargets(); renderActivity(); renderRegions();
+    if (!S.redact) renderTours();
     // closed <details> keep their text hidden even from print CSS
     for (const d of $$all("details.info")) d.open = true;
   });
@@ -223,7 +228,17 @@ function init() {
     renderActive();
   });
   $("m-metric").addEventListener("change", e => { S.metric = e.target.value; renderMap(); });
+  $("tab-tours").addEventListener("click", e => {
+    const route = e.target.closest("[data-route]");
+    if (route) { S.tourRoute = route.dataset.route; setTab("map"); return; }
+    if (e.target.closest("[data-tours-all]")) { S.tourAll = !S.tourAll; renderTours(); return; }
+    const sp = e.target.closest("[data-sp]");
+    if (sp) { openSpecies(+sp.dataset.sp); return; }
+    const tr = e.target.closest("tr.row[data-tour]");
+    if (tr) { const k = tr.dataset.tour; S.tourOpen.has(k) ? S.tourOpen.delete(k) : S.tourOpen.add(k); renderTours(); }
+  });
   $("tab-map").addEventListener("click", e => {
+    if (e.target.closest("[data-route-off]")) { S.tourRoute = null; renderMap(); return; }
     const r = e.target.closest("[data-region]");
     if (r) { S.region = r.dataset.region; buildRegionSelect(); renderMap(); }
   });
@@ -339,10 +354,10 @@ function init() {
     if (rm) { S.customTargets.splice(+rm.dataset.remove, 1); saveCustomTargets(); renderTargets(); }
   });
 
-  if (S.redact) { $("o-redact").checked = true; $$('#tabs button[data-tab="map"]').hidden = true; }
+  if (S.redact) { $("o-redact").checked = true; hidePlaceTabs(true); }
   const hash = location.hash.slice(1);
   buildRegionSelect();
-  const tabs = ["overview", "list", "targets", "activity", "regions"].concat(S.redact ? [] : ["map"]);
+  const tabs = ["overview", "list", "targets", "activity", "regions"].concat(S.redact ? [] : PLACE_TABS);
   setTab(tabs.includes(hash) ? hash : "overview");
 }
 init();
