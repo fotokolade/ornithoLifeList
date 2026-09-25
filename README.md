@@ -87,6 +87,14 @@ In dieser Version sind Beobachtungsorte, Gemeinden und Koordinaten entfernt. Die
 
 ### Neue Versionen
 
+Wer das Projekt mit `git clone` heruntergeladen hat, holt sich neue Versionen mit dem Update-Skript (unter Windows reicht ein Doppelklick auf `update.bat`):
+
+```bash
+python update.py
+```
+
+Es holt die Änderungen von GitHub und zeigt, was neu ist. Eigene `export_*.json`- und HTML-Dateien bleiben unberührt. Wurden Dateien des Programms selbst lokal verändert, bricht das Skript ab und nennt sie, statt etwas zu überschreiben. Dafür muss [git](https://git-scm.com/) installiert sein; ohne git lädt man die neue Version einfach von der Releases-Seite.
+
 Ob es eine neuere Version gibt, lässt sich bei Bedarf nachsehen:
 
 ```bash
@@ -123,6 +131,7 @@ Die entsprechenden Referenzdaten liegen im Verzeichnis `reference/` bzw. in `spe
 - `lifelist.html`: fertige Lebensliste
 - `lifelist_redacted.html`: fertige Lebensliste ohne Ortsangaben
 - `HOWTO.md`: bebilderte Anleitung für den Datenexport von ornitho.de
+- `update.py`, `update.bat`: aktualisiert eine mit git geklonte Kopie von GitHub
 
 Die persönlichen Export- und HTML-Dateien gehören nicht ins Git-Repository und sind deshalb über `.gitignore` ausgeschlossen.
 
