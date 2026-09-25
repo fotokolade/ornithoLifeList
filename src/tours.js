@@ -1,8 +1,17 @@
 /* ---------- tours ---------- */
 // Tours are reconstructed from the records themselves: on one day, records with a time that follow each
 // other within TOUR_MAX_GAP_MIN minutes and TOUR_MAX_STEP_M metres belong to the same walk or ride.
-// A chain that never leaves one place is a stay, not a tour.
-const TOUR_MAX_GAP_MIN = 10, TOUR_MAX_STEP_M = 1000, TOURS_SHOWN = 30;
+// Records in a row within TOUR_STOP_RADIUS_M of each other are one stop (several species reported at
+// one spot): the stop sits at the mean position of its records. A chain with a single stop is a stay,
+// not a tour.
+const TOUR_MAX_GAP_MIN = 10, TOUR_MAX_STEP_M = 1000, TOUR_STOP_RADIUS_M = 150, TOURS_SHOWN = 30;
+/**
+ * @typedef {Object} TourStop
+ * @property {number} lat - mean latitude of its records
+ * @property {number} lon - mean longitude of its records
+ * @property {string} name - the place most of its records name
+ * @property {Observation[]} obs
+ */
 /**
  * @typedef {Object} Tour
  * @property {string} key - stable id: date, start minute and first place
@@ -10,8 +19,8 @@ const TOUR_MAX_GAP_MIN = 10, TOUR_MAX_STEP_M = 1000, TOURS_SHOWN = 30;
  * @property {number} y
  * @property {number} start - minute of the day of the first record
  * @property {number} end - minute of the day of the last record
- * @property {number[]} path - the places in the order they were visited (indices into PL)
- * @property {number} km - length of the path
+ * @property {TourStop[]} stops - where the birder stopped, in order
+ * @property {number} km - length of the path through the stops
  * @property {Observation[]} obs
  */
 // great-circle distance in metres
@@ -19,6 +28,31 @@ function distM(p, q) {
   const rad = Math.PI / 180, dLat = (q.lat - p.lat) * rad, dLon = (q.lon - p.lon) * rad;
   const a = Math.sin(dLat / 2) ** 2 + Math.cos(p.lat * rad) * Math.cos(q.lat * rad) * Math.sin(dLon / 2) ** 2;
   return 12742000 * Math.asin(Math.sqrt(a));
+}
+/**
+ * Groups a tour's records in a row into stops: a record within TOUR_STOP_RADIUS_M of the current stop's
+ * mean position joins it and moves that mean, weighted by records; a farther one starts the next stop.
+ * @param {Observation[]} chain @returns {TourStop[]}
+ */
+function tourStops(chain) {
+  /** @type {(TourStop & {sumLat: number, sumLon: number})[]} */
+  const stops = [];
+  for (const o of chain) {
+    const p = PL[o.p], cur = stops[stops.length - 1];
+    if (cur && distM(cur, p) <= TOUR_STOP_RADIUS_M) {
+      cur.obs.push(o);
+      cur.sumLat += p.lat; cur.sumLon += p.lon;
+      cur.lat = cur.sumLat / cur.obs.length; cur.lon = cur.sumLon / cur.obs.length;
+    } else {
+      stops.push({ lat: p.lat, lon: p.lon, sumLat: p.lat, sumLon: p.lon, name: "", obs: [o] });
+    }
+  }
+  for (const st of stops) {
+    const n = new Map();
+    for (const o of st.obs) n.set(o.p, (n.get(o.p) || 0) + 1);
+    st.name = placeName([...n].sort((a, b) => b[1] - a[1])[0][0]);
+  }
+  return stops;
 }
 /** @param {Observation[]} list @returns {Tour[]} newest first */
 function findTours(list) {
@@ -34,11 +68,11 @@ function findTours(list) {
     day.sort((a, b) => a.tm - b.tm);
     let chain = [day[0]];
     const flush = () => {
-      const path = chain.map(o => o.p).filter((p, i, a) => i === 0 || p !== a[i - 1]);
-      if (new Set(path).size < 2) return;
+      const stops = tourStops(chain);
+      if (stops.length < 2) return;
       let km = 0;
-      for (let i = 1; i < path.length; i++) km += distM(PL[path[i - 1]], PL[path[i]]) / 1000;
-      tours.push({ key: `${d}-${chain[0].tm}-${path[0]}`, d, y: chain[0].y, start: chain[0].tm, end: chain[chain.length - 1].tm, path, km, obs: chain });
+      for (let i = 1; i < stops.length; i++) km += distM(stops[i - 1], stops[i]) / 1000;
+      tours.push({ key: `${d}-${chain[0].tm}-${chain[0].p}`, d, y: chain[0].y, start: chain[0].tm, end: chain[chain.length - 1].tm, stops, km, obs: chain });
     };
     for (let i = 1; i < day.length; i++) {
       if (close(day[i - 1], day[i])) chain.push(day[i]);
@@ -57,7 +91,7 @@ const fmtKm = km => km.toLocaleString(S.lang === "en" ? "en-GB" : "de-DE", { min
 const fmtDuration = min => `${Math.floor(min / 60)}:${pad(min % 60)} h`;
 function renderTours() {
   const tours = visibleTours();
-  if (!tours.length) { $("tab-tours").innerHTML = infoText(t("toursHelp", TOUR_MAX_GAP_MIN, fmtKm(TOUR_MAX_STEP_M / 1000))) + `<p class="empty">${t("toursNone")}</p>`; updateToc(); return; }
+  if (!tours.length) { $("tab-tours").innerHTML = infoText(t("toursHelp", TOUR_MAX_GAP_MIN, fmtKm(TOUR_MAX_STEP_M / 1000), TOUR_STOP_RADIUS_M)) + `<p class="empty">${t("toursNone")}</p>`; updateToc(); return; }
   const stats = speciesStats(baseObs());
   const isLifer = tr => s => tr.obs.includes(stats.get(s)?.first);
   const km = tours.reduce((a, tr) => a + tr.km, 0);
@@ -69,16 +103,16 @@ function renderTours() {
     const open = S.tourOpen.has(tr.key);
     let h = `<tr class="row" data-tour="${tr.key}"><td>${fmtD(tr.d)}</td><td class="hide-sm">${fmtTime(tr.start)}–${fmtTime(tr.end)}</td>
       <td class="num">${fmtDuration(tr.end - tr.start)}</td><td class="num">${fmtKm(tr.km)} km</td>
-      <td class="num hide-sm">${new Set(tr.path).size}</td><td class="num">${species.size}</td></tr>`;
+      <td class="num hide-sm">${tr.stops.length}</td><td class="num">${species.size}</td></tr>`;
     if (open) {
-      h += `<tr class="detail"><td colspan="6"><div class="tour-path">${tr.path.map(p => esc(placeName(p))).join(" → ")}</div>
+      h += `<tr class="detail"><td colspan="6"><div class="tour-path">${tr.stops.map(st => `${esc(st.name)} (${new Set(st.obs.map(o => o.s)).size})`).join(" → ")}</div>
         ${speciesChipsOf(tr.obs, isLifer(tr))}
         <p style="margin:10px 0 2px"><button class="btn" type="button" data-route="${tr.key}">${t("tourShowMap")}</button></p></td></tr>`;
     }
     return h;
   }).join("");
   $("tab-tours").innerHTML = `
-    ${infoText(t("toursHelp", TOUR_MAX_GAP_MIN, fmtKm(TOUR_MAX_STEP_M / 1000)))}
+    ${infoText(t("toursHelp", TOUR_MAX_GAP_MIN, fmtKm(TOUR_MAX_STEP_M / 1000), TOUR_STOP_RADIUS_M))}
     <div class="kpis k4">
       <div class="kpi main"><b>${fmtN(tours.length)}</b><span>${t("toursKCount")}</span></div>
       <div class="kpi"><b>${fmtKm(km)}</b><span>${t("toursKKm")}</span></div>
@@ -98,13 +132,13 @@ function drawTourRoute() {
   const tr = S.tourRoute && findTours(baseObs()).find(x => x.key === S.tourRoute);
   if (!tr) { S.tourRoute = null; return false; }
   if (!MAP_ROUTE) MAP_ROUTE = L.layerGroup().addTo(MAP);
-  const pts = tr.path.map(p => [PL[p].lat, PL[p].lon]);
+  const pts = tr.stops.map(st => [st.lat, st.lon]);
   const accent = cssVar("--accent");
   L.polyline(pts, { color: accent, weight: 4, opacity: 0.85 }).addTo(MAP_ROUTE);
-  tr.path.forEach((p, i) => L.marker(pts[i], {
+  tr.stops.forEach((st, i) => L.marker(pts[i], {
     icon: L.divIcon({ className: "route-stop", html: `<div>${i + 1}</div>`, iconSize: [22, 22] }), zIndexOffset: 3000,
-  }).bindTooltip(`${i + 1}. ${esc(PL[p].name)}`).addTo(MAP_ROUTE));
+  }).bindTooltip(`${i + 1}. ${esc(st.name)}: ${new Set(st.obs.map(o => o.s)).size} ${esc(t("mapSpecies"))}`).addTo(MAP_ROUTE));
   MAP.fitBounds(pts, { padding: [40, 40], maxZoom: 16 });
-  $("map-note").innerHTML = `${esc(t("tourOnMap", fmtD(tr.d), new Set(tr.path).size, fmtKm(tr.km)))} <button class="lnk" data-route-off>${t("tourHide")}</button>`;
+  $("map-note").innerHTML = `${esc(t("tourOnMap", fmtD(tr.d), tr.stops.length, fmtKm(tr.km)))} <button class="lnk" data-route-off>${t("tourHide")}</button>`;
   return true;
 }
