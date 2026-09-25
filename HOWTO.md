@@ -1,6 +1,6 @@
 # Datenexport von ornitho.de
 
-Kurzanleitung, wie du deinen Beobachtungsexport für [`lifelist.py`](lifelist.py) von [ornitho.de](https://www.ornitho.de/) herunterlädst. Die Bilder zeigen jeweils den Ausschnitt der Seite, um den es im Schritt geht.
+Kurzanleitung, wie du deinen Beobachtungsexport für [`lifelist.py`](lifelist.py) von [ornitho.de](https://www.ornitho.de/) herunterlädst. Rot umrahmt ist in jedem Bild, worauf du im jeweiligen Schritt klickst.
 
 1. Im Menü unter **Aktuelles** auf **Aktuelle Beobachtungen** klicken.
 
