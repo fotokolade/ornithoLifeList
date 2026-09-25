@@ -41,7 +41,7 @@ FLAG_COLLECTIVE = 2
 # page must work from file://, where <script type="module"> is blocked by CORS), so this fixed
 # order stands in for one: later files rely on function hoisting to see earlier consts/functions.
 APP_JS_FILES = [
-    "i18n.js", "data.js", "charts.js", "overview.js", "list.js",
+    "i18n.js", "counties.js", "data.js", "charts.js", "overview.js", "list.js",
     "regions.js", "targets.js", "activity.js", "map.js", "app.js",
 ]
 
