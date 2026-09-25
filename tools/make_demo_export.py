@@ -37,14 +37,14 @@ PLACES = [
 # birding trips: first day, number of days, places (id, name, municipality, lat, lon, habitats)
 TRIPS = [
     ("2019-09-14", 3, [("30", "Hauke-Haien-Koog", "Reußenköge (SH, NF)", 54.605, 8.870, "coast water open")]),
-    ("2020-05-21", 3, [("31", "Müritz-Nationalpark, Boeker Mühle", "Rechlin (MV, MSE)", 53.378, 12.782, "water forest open")]),
-    ("2021-10-02", 4, [("32", "Pramort", "Zingst (MV, VR)", 54.438, 12.790, "coast open"),
-                       ("33", "Großer Werder", "Zingst (MV, VR)", 54.450, 12.703, "coast water")]),
+    ("2020-05-21", 3, [("31", "Müritz-Nationalpark, Boeker Mühle", "Rechlin (MV, MÜR)", 53.378, 12.782, "water forest open")]),
+    ("2021-10-02", 4, [("32", "Pramort", "Zingst (MV, NVP)", 54.438, 12.790, "coast open"),
+                       ("33", "Großer Werder", "Zingst (MV, NVP)", 54.450, 12.703, "coast water")]),
     ("2022-06-18", 4, [("34", "Jenner", "Schönau am Königssee (BY, BGL)", 47.577, 13.022, "alpine mountain rock forest")]),
     ("2022-10-08", 3, [("35", "Helgoland, Oberland", "Helgoland (SH, PI)", 54.183, 7.886, "sea coast")]),
     ("2023-04-29", 3, [("36", "Federsee", "Bad Buchau (BW, BC)", 48.068, 9.617, "water open forest")]),
     ("2023-10-21", 2, [("37", "Unteres Odertal, Criewen", "Schwedt/Oder (BB, UM)", 53.017, 14.233, "water open")]),
-    ("2024-05-09", 4, [("38", "Badberg", "Vogtsburg im Kaiserstuhl (BW, FR)", 48.101, 7.665, "south open forest")]),
+    ("2024-05-09", 4, [("38", "Badberg", "Vogtsburg im Kaiserstuhl (BW, FR*)", 48.101, 7.665, "south open forest")]),
     ("2024-09-28", 2, [("39", "Dümmer, Hüde", "Hüde (NI, DH)", 52.490, 8.345, "water open coast")]),
     ("2025-03-15", 2, [("40", "Kühkopf-Knoblochsaue", "Stockstadt am Rhein (HE, GG)", 49.825, 8.415, "water forest")]),
     ("2025-11-08", 3, [("30", "Hauke-Haien-Koog", "Reußenköge (SH, NF)", 54.605, 8.870, "coast water open")]),

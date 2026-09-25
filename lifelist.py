@@ -124,7 +124,8 @@ def atlas_code(o):
 
 
 def parse_municipality(text):
-    m = re.match(r"^(.*?)\s*\((\w+),\s*(\w+)\)$", text or "")
+    # county codes may end in "*": ornitho's mark for the district around a city of the same code (BY, A*)
+    m = re.match(r"^(.*?)\s*\((\w+),\s*([\w*]+)\)$", text or "")
     if m:
         return m.group(1), m.group(2), m.group(3)
     return (text or "").strip(), "", ""

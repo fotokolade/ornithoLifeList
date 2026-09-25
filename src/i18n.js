@@ -107,7 +107,7 @@ de: {
   monthsShort: ["Jan.","Feb.","März","Apr.","Mai","Juni","Juli","Aug.","Sept.","Okt.","Nov.","Dez."],
   states: {BW:"Baden-Württemberg",BY:"Bayern",BE:"Berlin",BB:"Brandenburg",HB:"Bremen",HH:"Hamburg",HE:"Hessen",
     MV:"Mecklenburg-Vorpommern",NI:"Niedersachsen",NW:"Nordrhein-Westfalen",RP:"Rheinland-Pfalz",SL:"Saarland",
-    SN:"Sachsen",ST:"Sachsen-Anhalt",SH:"Schleswig-Holstein",TH:"Thüringen"},
+    SN:"Sachsen",ST:"Sachsen-Anhalt",SH:"Schleswig-Holstein",TH:"Thüringen",LU:"Luxemburg"},
   unknown: "Unbekannt"
 },
 en: {
@@ -215,7 +215,7 @@ en: {
   monthsShort: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
   states: {BW:"Baden-Württemberg",BY:"Bavaria",BE:"Berlin",BB:"Brandenburg",HB:"Bremen",HH:"Hamburg",HE:"Hesse",
     MV:"Mecklenburg-Western Pomerania",NI:"Lower Saxony",NW:"North Rhine-Westphalia",RP:"Rhineland-Palatinate",SL:"Saarland",
-    SN:"Saxony",ST:"Saxony-Anhalt",SH:"Schleswig-Holstein",TH:"Thuringia"},
+    SN:"Saxony",ST:"Saxony-Anhalt",SH:"Schleswig-Holstein",TH:"Thuringia",LU:"Luxembourg"},
   unknown: "Unknown"
 }
 };

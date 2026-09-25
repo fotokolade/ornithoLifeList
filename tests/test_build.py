@@ -146,6 +146,15 @@ class UpdateCheckTest(unittest.TestCase):
 
 
 
+class MunicipalityTest(unittest.TestCase):
+    def test_county_codes(self):
+        self.assertEqual(lifelist.parse_municipality("Görlitz (SN, GR)"), ("Görlitz", "SN", "GR"))
+        # "*" marks the district around a city with the same code
+        self.assertEqual(lifelist.parse_municipality("Gersthofen (BY, A*)"), ("Gersthofen", "BY", "A*"))
+        self.assertEqual(lifelist.parse_municipality("Bremerhaven (HB, HBh)"), ("Bremerhaven", "HB", "HBh"))
+        self.assertEqual(lifelist.parse_municipality("irgendwo"), ("irgendwo", "", ""))
+
+
 class DemoExportTest(unittest.TestCase):
     def test_demo_export_builds(self):
         sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "tools"))
