@@ -115,9 +115,10 @@ def main():
 
             # Touren: tours rebuilt from the records, one opened
             page = open_page(hash="#tours")
+            page.click("#tour-cfg-sum")  # the settings menu, unfolded
             page.locator("#tab-tours tr.row").nth(2).click()
             page.wait_for_timeout(200)
-            shot(page, "tours.png", section(page, "#tab-tours .tour-cfg", "#tab-tours tbody tr:nth-child(8)"))
+            shot(page, "tours.png", section(page, "#tab-tours details.tour-settings", "#tab-tours tbody tr:nth-child(6)"))
 
             # dark theme and phone
             page = open_page(theme="dark", hash="#overview")

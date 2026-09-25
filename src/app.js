@@ -228,15 +228,35 @@ function init() {
     renderActive();
   });
   $("m-metric").addEventListener("change", e => { S.metric = e.target.value; renderMap(); });
-  $("tab-tours").addEventListener("change", e => {
+  $("tab-tours").addEventListener("toggle", e => {
+    if (e.target.matches?.("details.tour-settings")) S.tourSetOpen = e.target.open;
+  }, true);
+  // sliders take effect while they move; the results redraw at most once per frame
+  let tourRAF = 0;
+  const redrawTours = () => {
+    S.tourOpen = new Set(); S.tourRoute = null;
+    cancelAnimationFrame(tourRAF);
+    tourRAF = requestAnimationFrame(renderTourOut);
+  };
+  $("tab-tours").addEventListener("input", e => {
     const k = e.target.dataset?.tourCfg;
     if (!k) return;
-    const [, min, max] = TOUR_LIMITS.find(l => l[0] === k);
-    const v = parseFloat(String(e.target.value).replace(",", "."));
-    if (Number.isFinite(v)) { S.tourCfg[k] = Math.min(max, Math.max(min, v)); saveTourCfg(); }
-    S.tourOpen = new Set(); S.tourRoute = null;
-    renderTours();
-    $$(`[data-tour-cfg="${k}"]`)?.focus();
+    S.tourCfg[k] = +e.target.value;
+    saveTourCfg();
+    $(`tour-cfg-${k}-v`).textContent = tourCfgValue(k);
+    $("tour-cfg-sum").textContent = tourCfgSummary();
+    redrawTours();
+  });
+  $("tab-tours").addEventListener("change", e => {
+    const preset = e.target.dataset?.tourPreset;
+    if (!preset) return;
+    // a new choice fills in all numbers again
+    const sel = { mode: S.tourCfg.mode, pace: S.tourCfg.pace, pauseLen: S.tourCfg.pauseLen, pauseFreq: S.tourCfg.pauseFreq };
+    sel[/** @type {"mode"|"pace"|"pauseLen"|"pauseFreq"} */ (preset)] = e.target.value;
+    S.tourCfg = tourPreset(sel);
+    saveTourCfg();
+    syncTourSettings();
+    redrawTours();
   });
   $("tab-tours").addEventListener("click", e => {
     const th = e.target.closest("th[data-tour-sort]");
@@ -244,16 +264,16 @@ function init() {
       const k = th.dataset.tourSort;
       // a new column starts with the biggest (or, for the time of day, earliest) first
       S.tourSort = S.tourSort.k === k ? { k, d: /** @type {1|-1} */ (-S.tourSort.d) } : { k, d: k === "time" ? 1 : -1 };
-      renderTours(); return;
+      renderTourOut(); return;
     }
-    if (e.target.closest("[data-tour-reset]")) { S.tourCfg = { ...TOUR_DEFAULTS }; saveTourCfg(); renderTours(); return; }
+    if (e.target.closest("[data-tour-reset]")) { S.tourCfg = { ...TOUR_DEFAULTS }; saveTourCfg(); syncTourSettings(); redrawTours(); return; }
     const route = e.target.closest("[data-route]");
     if (route) { S.tourRoute = route.dataset.route; setTab("map"); return; }
-    if (e.target.closest("[data-tours-all]")) { S.tourAll = !S.tourAll; renderTours(); return; }
+    if (e.target.closest("[data-tours-all]")) { S.tourAll = !S.tourAll; renderTourOut(); return; }
     const sp = e.target.closest("[data-sp]");
     if (sp) { openSpecies(+sp.dataset.sp); return; }
     const tr = e.target.closest("tr.row[data-tour]");
-    if (tr) { const k = tr.dataset.tour; S.tourOpen.has(k) ? S.tourOpen.delete(k) : S.tourOpen.add(k); renderTours(); }
+    if (tr) { const k = tr.dataset.tour; S.tourOpen.has(k) ? S.tourOpen.delete(k) : S.tourOpen.add(k); renderTourOut(); }
   });
   $("tab-map").addEventListener("click", e => {
     if (e.target.closest("[data-route-off]")) { S.tourRoute = null; renderMap(); return; }

@@ -287,7 +287,7 @@ class PageTest(unittest.TestCase):
     def test_tours_are_rebuilt_from_close_records(self):
         page = self.open(redact="tours", hash="#tours")
         # the fixture's tours are short: test the rules with small limits (the defaults are for real walks)
-        page.evaluate("S.tourCfg = { gap: 10, step: 1, win: 3, stop: 150, minKm: 0.5, minDur: 0 }; renderTours()")
+        page.evaluate("S.tourCfg = { mode: 'foot', pace: 'easy', pauseLen: 'short', pauseFreq: 'few', gap: 10, step: 1, speed: 0, win: 3, stop: 150, minKm: 0.5, minDur: 0 }; renderTours()")
         tours = page.evaluate("findTours(baseObs()).map(t => ({ d: t.d, stops: t.stops.map(s => [s.name, s.obs.length, s.lat, s.lon]), km: t.km }))")
         # the zigzag day: time windows follow the walk instead of hopping from bird to bird
         km = lambda win: page.evaluate(f"(S.tourCfg.win = {win}, findTours(baseObs()).find(t => t.d === '2024-05-03').km)")
@@ -321,28 +321,45 @@ class PageTest(unittest.TestCase):
         page.click("[data-route]")
         page.wait_for_function("S.tab === 'map'")
         self.assertEqual(page.locator(".route-stop").count(), 2)
-        # the limits can be changed: a longer pause and distance join C and D into the A-B tour
         page.click('#tabs button[data-tab="tours"]')
-        page.fill('[data-tour-cfg="gap"]', "30")
-        page.press('[data-tour-cfg="gap"]', "Enter")
-        page.fill('[data-tour-cfg="step"]', "5")
-        page.press('[data-tour-cfg="step"]', "Enter")
-        self.assertEqual(page.evaluate("findTours(baseObs()).filter(t => t.d < '2024-05-03').map(t => t.stops.length)"), [2, 4])
+        short = "findTours(baseObs()).filter(t => t.d < '2024-05-03')"
+
+        def slide(k, v):
+            page.evaluate("([k, v]) => { const e = document.querySelector(`[data-tour-cfg=\"${k}\"]`); e.value = v; e.dispatchEvent(new Event('input', { bubbles: true })); }", [k, v])
+            page.wait_for_timeout(50)
+        # the allowed distance grows with the time between records: at 60 km/h, C (3 km, 4 min after B) joins
+        slide("speed", 60)
+        self.assertEqual(page.evaluate(f"{short}.map(t => t.stops.length)"), [2, 3])
+        slide("speed", 0)
+        # a longer pause and base distance join C and D into the A-B tour
+        slide("gap", 30)
+        slide("step", 5)
+        self.assertEqual(page.evaluate(f"{short}.map(t => t.stops.length)"), [2, 4])
+        self.assertIn("angepasst", page.inner_text("#tour-cfg-sum"))
         # a minimum length drops the short ones, and the settings survive a reload
-        page.fill('[data-tour-cfg="minKm"]', "1")
-        page.press('[data-tour-cfg="minKm"]', "Enter")
-        self.assertEqual(page.evaluate("findTours(baseObs()).filter(t => t.d < '2024-05-03').length"), 1)
+        slide("minKm", 1)
+        self.assertEqual(page.evaluate(f"{short}.length"), 1)
         # and a minimum duration: the joined tour runs 07:00-07:29
-        page.fill('[data-tour-cfg="minDur"]', "30")
-        page.press('[data-tour-cfg="minDur"]', "Enter")
-        self.assertEqual(page.evaluate("findTours(baseObs()).filter(t => t.d < '2024-05-03').length"), 0)
-        page.fill('[data-tour-cfg="minDur"]', "0")
-        page.press('[data-tour-cfg="minDur"]', "Enter")
+        slide("minDur", 30)
+        self.assertEqual(page.evaluate(f"{short}.length"), 0)
+        slide("minDur", 0)
         page.reload()
         self.assertEqual(page.evaluate("[S.tourCfg.gap, S.tourCfg.step, S.tourCfg.minKm]"), [30, 5, 1])
+        # the menu: a preset fills in all values, and "Standard" goes back to on foot, easy
         page.click('#tabs button[data-tab="tours"]')
+        page.click("#tour-cfg-sum")
+        page.select_option('[data-tour-preset="mode"]', "bike")
+        page.select_option('[data-tour-preset="pace"]', "jaguar")
+        self.assertEqual(page.evaluate("[S.tourCfg.speed, S.tourCfg.stop]"), [30, 400])
+        self.assertEqual(page.input_value('[data-tour-cfg="speed"]'), "30")
+        self.assertIn("Fahrrad · Jaguar", page.inner_text("#tour-cfg-sum"))
+        # long and frequent pauses: a longer max. pause, a lower average speed
+        page.select_option('[data-tour-preset="pauseLen"]', "long")
+        page.select_option('[data-tour-preset="pauseFreq"]', "often")
+        self.assertEqual(page.evaluate("[S.tourCfg.gap, S.tourCfg.speed]"), [60, 21])
         page.click("[data-tour-reset]")
-        self.assertEqual(page.evaluate("S.tourCfg"), {"gap": 30, "step": 0.5, "win": 15, "stop": 250, "minKm": 1, "minDur": 60})
+        self.assertEqual(page.evaluate("S.tourCfg"), {"mode": "foot", "pace": "easy", "pauseLen": "short", "pauseFreq": "few", "speed": 4, "step": 0.5, "stop": 250,
+                                                      "win": 15, "gap": 30, "minKm": 1, "minDur": 60})
         # no tours without place data
         page.click("#o-sum")
         page.check("#o-redact")
