@@ -18,7 +18,10 @@ sys.path.insert(0, ROOT)
 sys.path.insert(0, HERE)
 import lifelist  # noqa: E402
 import make_demo_export  # noqa: E402
-from playwright.sync_api import sync_playwright  # noqa: E402
+try:
+    from playwright.sync_api import sync_playwright
+except ImportError:
+    sys.exit("Playwright is missing. Install it with:\n  pip install playwright\n  python -m playwright install chromium")
 
 OUT = os.path.join(ROOT, "docs", "screenshots")
 TODAY = "2026-05-20T10:00:00"  # two days after the demo data ends: a lively time of year for the wishlist
