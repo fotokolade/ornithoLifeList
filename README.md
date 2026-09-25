@@ -87,6 +87,7 @@ Beides steckt fertig aufbereitet in `species_reference.json`.
 | `tests/` | automatische Tests mit erfundenen Beispieldaten |
 | `update.py`, `update.bat` | aktualisieren eine git-Kopie |
 | `build.py`, `build.bat`, `lifelist.spec` | bauen die `lifelist.exe` |
+| `.github/workflows/release.yml` | baut die exe und veröffentlicht das Release, sobald ein Versions-Tag gepusht wird |
 | `verify.ps1`, `verify.bat` | prüfen die Prüfsumme der `lifelist.exe` |
 | `tools/` | Werkzeuge zur Pflege der Referenzdaten und Bibliotheken |
 | `HOWTO.md`, `howto/` | Anleitung zum Export mit Screenshots |
@@ -120,13 +121,19 @@ Die Tests nutzen erfundene Beispieldaten aus `tests/fixtures.py` und überschrei
   playwright install chromium
   ```
 
-### lifelist.exe bauen und veröffentlichen
+### Ein Release veröffentlichen
 
-1. Die Versionsnummer `APP_VERSION` in `src/i18n.js` erhöhen.
-2. Unter Windows `python build.py` ausführen (oder `build.bat` doppelklicken). Es braucht `pip install pyinstaller`, lässt zuerst die Tests laufen und baut dann `dist\lifelist.exe` samt `dist\lifelist.exe.sha256`. PyInstaller baut immer für das System, auf dem es läuft; die Windows-exe entsteht also nur unter Windows.
-3. Auf GitHub ein Release mit dem Tag `v` plus Versionsnummer anlegen (zum Beispiel `v0.3.0`). Daran `lifelist.exe`, `lifelist.exe.sha256`, `verify.bat` und `verify.ps1` anhängen und die Prüfsumme in die Release-Notizen schreiben.
+1. Die Versionsnummer `APP_VERSION` in `src/i18n.js` erhöhen und committen.
+2. Ein Tag mit `v` plus Versionsnummer anlegen, dessen Nachricht die Release-Notizen enthält, und es pushen:
 
-Das Tag muss zur Versionsnummer passen, sonst meldet `--check-update` keine neue Version.
+   ```bash
+   git tag -a v0.3.0 -F notizen.md
+   git push origin v0.3.0
+   ```
+
+Den Rest erledigt GitHub Actions (`.github/workflows/release.yml`) auf einem Windows-Rechner: Es prüft, ob Tag und Versionsnummer zusammenpassen, lässt die Tests laufen, baut die `lifelist.exe` und legt das Release an, mit `lifelist.exe`, `lifelist.exe.sha256`, `verify.bat` und `verify.ps1` und der Prüfsumme in den Notizen. Das Tag muss zur Versionsnummer passen, sonst meldet `--check-update` keine neue Version.
+
+Zum Ausprobieren lässt sich die exe auch selbst bauen: unter Windows `python build.py` (oder `build.bat` doppelklicken), nach `pip install pyinstaller`. Das Skript lässt zuerst die Tests laufen und schreibt dann `dist\lifelist.exe` samt `dist\lifelist.exe.sha256`. PyInstaller baut immer für das System, auf dem es läuft.
 
 ### Referenzdaten und Bibliotheken pflegen
 
