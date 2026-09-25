@@ -85,7 +85,9 @@ function calendarSection(list, statsAll) {
       const lifer = liferDays.has(dateStr);
       const bg = n ? heatColor(n / max) : "var(--cal-empty)";
       const title = n ? `${fmtD(dateStr)}: ${n} ${t("mapSpecies")}${lifer ? " · " + t("newBadge") : ""}` : fmtD(dateStr);
-      cells += `<div class="cal-day${lifer ? " cal-lifer" : ""}" style="background:${bg}" title="${esc(title)}"></div>`;
+      cells += n
+        ? `<button type="button" class="cal-day${lifer ? " cal-lifer" : ""}${S.calDay === dateStr ? " cal-sel" : ""}" data-day="${dateStr}" style="background:${bg}" title="${esc(title)}" aria-label="${esc(title)}" aria-pressed="${S.calDay === dateStr}"></button>`
+        : `<div class="cal-day" style="background:${bg}" title="${esc(title)}"></div>`;
     }
     // always pad to 6 full weeks (42 cells): keeps every month's grid the same height, so the
     // section doesn't jump as S.year changes (some years need 6 rows for a month, others only 4-5)
@@ -95,8 +97,26 @@ function calendarSection(list, statsAll) {
   }).join("");
   return `<h2 data-toc="${esc(t("tocCal"))}">${t("calTitle", year)}</h2>
     ${infoText(t("calHelp"))}
-    <div class="card"><div class="cal-months-wrap">${months}</div></div>
+    <div class="card"><div class="cal-months-wrap">${months}</div>${dayData.has(S.calDay || "") ? calDayPanel(list, statsAll, S.calDay) : ""}</div>
     ${heatLegend(max)}`;
+}
+// what was seen on one calendar day, grouped by place; each species opens its row in the life list
+function calDayPanel(list, statsAll, day) {
+  const byPlace = new Map();
+  for (const o of list) {
+    if (o.d !== day) continue;
+    if (!byPlace.has(o.p)) byPlace.set(o.p, new Set());
+    byPlace.get(o.p).add(o.s);
+  }
+  const all = new Set([...byPlace.values()].flatMap(sp => [...sp]));
+  const lifers = [...all].filter(s => statsAll.get(s)?.first.d === day).length;
+  const places = [...byPlace].sort((a, b) => b[1].size - a[1].size).map(([p, sp]) =>
+    `<div class="cal-place"><b>${esc(placeName(p))}</b><div class="chips">${[...sp].sort((a, b) => SP[a].order - SP[b].order).map(s =>
+      `<button type="button" class="chip chip-sp" data-sp="${s}">${esc(speciesName(SP[s]))}${statsAll.get(s)?.first.d === day ? `<span class="new-badge">${t("newBadge")}</span>` : ""}</button>`).join("")}</div></div>`).join("");
+  return `<div class="cal-panel">
+    <div class="cal-panel-h"><b>${fmtD(day)}</b><span class="sub">${t("calDaySummary", all.size, byPlace.size)}${lifers ? " · " + t("calDayLifers", lifers) : ""}</span>
+      <button type="button" class="lnk cal-close" data-day="${day}" aria-label="${t("close")}">×</button></div>
+    ${places}</div>`;
 }
 function renderOverview() {
   const list = regionObs(baseObs());
@@ -136,7 +156,7 @@ function renderOverview() {
     <div class="card">${curveSvg(chrono)}</div>
     <h2>${t("latest")}</h2>
     ${infoText(t("latestHelp"))}
-    <div class="card"><table><tbody>${latest.map(r => `<tr><td class="nr">${r.nr}</td>
+    <div class="card"><table><tbody>${latest.map(r => `<tr class="row" data-sp="${r.s}"><td class="nr">${r.nr}</td>
       <td>${speciesLine(SP[r.s])}</td>
       <td class="num">${fmtD(r.first.d)}<span class="small">${esc(placeName(r.first.p))}</span></td></tr>`).join("")}</tbody></table></div>
     <h2 data-toc="${esc(t("tocPerYear"))}">${t("perYear")}</h2>

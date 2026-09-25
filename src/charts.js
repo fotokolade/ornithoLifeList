@@ -26,7 +26,8 @@ function curveSvg(chrono) {
     d += ` L${x(ms)},${y(prev)} L${x(ms)},${y(i + 1)}`;
     prev = i + 1;
     const cur = o.y === S.year;
-    dots += `<circle cx="${x(ms)}" cy="${y(i + 1)}" r="${cur ? 4.5 : 2.5}" fill="${cur ? "var(--accent)" : "var(--bar)"}" stroke="var(--card)" stroke-width="${cur ? 1.5 : 1}"><title>${i + 1}. ${esc(speciesName(SP[o.s]))}, ${fmtD(o.d)}</title></circle>`;
+    // each dot sits in a larger invisible hit area, so it can be clicked (opens the species in the life list) and hovered easily
+    dots += `<g class="dot" data-sp="${o.s}"><circle cx="${x(ms)}" cy="${y(i + 1)}" r="9" fill="transparent"/><circle cx="${x(ms)}" cy="${y(i + 1)}" r="${cur ? 4.5 : 2.5}" fill="${cur ? "var(--accent)" : "var(--bar)"}" stroke="var(--card)" stroke-width="${cur ? 1.5 : 1}"/><title>${i + 1}. ${esc(speciesName(SP[o.s]))}, ${fmtD(o.d)}</title></g>`;
   });
   const baseline = ` L${x(tEnd)},${y(0)} L${x(t0)},${y(0)} Z`;
   const area = d + ` L${x(tEnd)},${y(prev)}` + baseline;

@@ -47,6 +47,20 @@ function renderList() {
     ${infoText(t("curveHelp"))}
     <div class="card">${curveSvg(chrono)}</div>`;
   updateToc();
+  if (S.focusSp !== null) {
+    const tr = $$(`#list-out tr.row[data-sp="${S.focusSp}"]`);
+    S.focusSp = null;
+    if (tr) { tr.scrollIntoView({ block: "center" }); tr.classList.add("flash"); }
+  }
+}
+// jump from another view (calendar day, curve, latest lifers) to a species: clear what could hide
+// its row, open its detail row and let renderList() scroll to it
+function openSpecies(s) {
+  S.q = ""; $("q").value = "";
+  S.atlasF = "all"; $("q-atlas").value = "all";
+  S.open = new Set([s]);
+  S.focusSp = s;
+  if (S.tab === "list") renderList(); else setTab("list");
 }
 const PHENO_SEASON = ["--k3", "--k3", "--k1", "--k1", "--k1", "--k2", "--k2", "--k2", "--k5", "--k5", "--k5", "--k3"];  // winter/spring/summer/autumn
 // shortest contiguous (wrap-around) run of months covering at least 80% of observations

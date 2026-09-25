@@ -114,6 +114,48 @@ class PageTest(unittest.TestCase):
         self.assertEqual(page.locator(species_rows).count(), total)
         self.assertEqual(self.errors, [])
 
+    def test_wishlist_file_roundtrip(self):
+        page = self.open(hash="#targets")
+        page.fill("#tgt-search", "Seeadler")
+        page.click("#tgt-add")
+        with page.expect_download() as dl:
+            page.click("#tgt-export")
+        path = dl.value.path()
+        # a fresh browser: the list is gone until the file is loaded again
+        page.evaluate("localStorage.clear(); S.customTargets = []; renderTargets()")
+        page.set_input_files("#tgt-import", path)
+        page.wait_for_function("S.customTargets.length === 1")
+        self.assertEqual(page.evaluate("S.customTargets[0].latin"), "Haliaeetus albicilla")
+        self.assertEqual(page.evaluate("JSON.parse(localStorage.getItem('lifelist-custom-targets')).length"), 1)
+        # loading it twice adds nothing; a foreign file is refused
+        page.set_input_files("#tgt-import", path)
+        page.wait_for_function("document.getElementById('tgt-io-msg').textContent !== ''")
+        self.assertEqual(page.evaluate("S.customTargets.length"), 1)
+        page.set_input_files("#tgt-import", {"name": "x.json", "mimeType": "application/json", "buffer": b'{"a": 1}'})
+        page.wait_for_function("document.getElementById('tgt-io-msg').textContent.includes('keine')")
+        self.assertEqual(self.errors, [])
+
+    def test_calendar_day_and_jumps_to_life_list(self):
+        page = self.open()
+        day = page.locator("button.cal-day").first
+        day.click()
+        self.assertIn(page.locator(".cal-panel b").first.inner_text(), day.get_attribute("title"))
+        name = page.locator(".cal-panel .chip-sp").first.inner_text().split("\n")[0]
+        page.locator(".cal-panel .chip-sp").first.click()
+        page.wait_for_function("S.tab === 'list'")
+        self.assertEqual(page.locator("#list-out tr.detail").count(), 1)
+        self.assertIn(name, page.locator("#list-out tr.row.flash").inner_text())
+        # a curve dot and a "latest" row lead to their species too
+        sp = int(page.locator("#list-curve g.dot").nth(2).get_attribute("data-sp"))
+        page.locator("#list-curve g.dot").nth(2).click()
+        self.assertEqual(page.evaluate("[...S.open]"), [sp])
+        page.click('#tabs button[data-tab="overview"]')
+        sp = int(page.locator("#tab-overview tr.row").first.get_attribute("data-sp"))
+        page.locator("#tab-overview tr.row").first.click()
+        page.wait_for_function("S.tab === 'list'")
+        self.assertEqual(page.evaluate("[...S.open]"), [sp])
+        self.assertEqual(self.errors, [])
+
     def test_phone_width_has_no_sideways_scroll(self):
         page = self.open(width=390)
         for tab in TABS:

@@ -1,10 +1,48 @@
+// keeps only well-formed {name, latin} entries; shared by localStorage and imported files
+/** @param {any} data @returns {{name: string, latin: string|null}[]} */
+function cleanTargets(data) {
+  if (!Array.isArray(data)) return [];
+  return data.filter(x => x && typeof x.name === "string" && x.name.trim())
+    .map(x => ({ name: x.name.trim(), latin: typeof x.latin === "string" && x.latin.trim() ? x.latin.trim() : null }));
+}
 function loadCustomTargets() {
   try {
-    const data = JSON.parse(localStorage.getItem("lifelist-custom-targets") || "[]");
-    if (!Array.isArray(data)) return [];
-    return data.filter(x => x && typeof x.name === "string" && x.name)
-      .map(x => ({ name: x.name, latin: typeof x.latin === "string" ? x.latin : null }));
+    return cleanTargets(JSON.parse(localStorage.getItem("lifelist-custom-targets") || "[]"));
   } catch (e) { return []; }
+}
+/* The own wishlist lives in the browser's localStorage, which is lost with the browser data and
+   doesn't travel to another browser or computer; a small JSON file is the backup and the way across. */
+const WISH_FILE_TYPE = "ornitholifelist-wishlist";
+function exportCustomTargets() {
+  const json = JSON.stringify({ type: WISH_FILE_TYPE, version: 1, species: S.customTargets }, null, 2);
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([json], { type: "application/json" }));
+  a.download = t("wishFileName");
+  document.body.append(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+/**
+ * Adds the species of an exported wishlist file (or a plain array of them) that aren't on the list yet.
+ * @param {string} text @returns {{added: number, total: number}|null} null when the file isn't a wishlist
+ */
+function importCustomTargets(text) {
+  let data;
+  try { data = JSON.parse(text); } catch (e) { return null; }
+  const isFile = data && !Array.isArray(data) && data.type === WISH_FILE_TYPE;
+  if (!isFile && !Array.isArray(data)) return null;
+  const incoming = cleanTargets(isFile ? data.species : data);
+  const have = new Set(S.customTargets.map(x => x.name.toLowerCase()));
+  let added = 0;
+  for (const x of incoming) {
+    if (have.has(x.name.toLowerCase())) continue;
+    have.add(x.name.toLowerCase());
+    S.customTargets.push(x);
+    added++;
+  }
+  if (added) saveCustomTargets();
+  return { added, total: incoming.length };
 }
 function saveCustomTargets() {
   try { localStorage.setItem("lifelist-custom-targets", JSON.stringify(S.customTargets)); } catch (e) { /* private mode may refuse */ }
@@ -178,6 +216,11 @@ function renderTargets() {
         <button class="btn" id="tgt-add" type="button">${t("wishAdd")}</button>
       </div>
       ${chips}
+      <div class="wish-io">
+        ${S.customTargets.length ? `<button class="lnk" id="tgt-export" type="button">${t("wishExport")}</button>` : ""}
+        <label class="lnk" tabindex="0">${t("wishImport")}<input type="file" id="tgt-import" accept=".json,application/json" hidden></label>
+        <span class="sub" id="tgt-io-msg" role="status"></span>
+      </div>
     </div>
     <h2>${t("wishTitle")}<small>${rows.length}</small></h2>
     ${rows.length ? `<div class="pick"><input type="search" id="wish-q" placeholder="${t("wishFilterPh")}" autocomplete="off" value="${esc(S.wishQ)}"></div>` : ""}

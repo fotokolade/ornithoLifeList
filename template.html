@@ -137,6 +137,9 @@ table.rtable td:not(.nr):not(.num),table.rtable th:not(.nr):not(.num){overflow:h
 button.lnk{color:var(--link);background:none;border:0;padding:0;font:inherit;cursor:pointer;text-align:left;border-radius:4px;transition:color .12s ease}
 button.lnk:hover{text-decoration:underline;color:var(--accent)}
 button.lnk[data-remove]:hover{text-decoration:none;color:var(--k5)}
+.wish-io{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 16px;margin-top:12px;padding-top:10px;border-top:1px solid var(--line);font-size:.8rem}
+.wish-io .lnk{color:var(--link);cursor:pointer}
+.wish-io .lnk:hover{text-decoration:underline;color:var(--accent)}
 tr.row{cursor:pointer}
 tr.detail td{background:var(--accent-soft)!important;padding:8px}
 .pheno{display:grid;grid-template-columns:repeat(12,1fr);gap:2px;align-items:end;height:54px;max-width:360px}
@@ -185,6 +188,20 @@ tr.grp .grp-t[aria-expanded=true]::before{transform:rotate(90deg)}
 .cal-day{aspect-ratio:1;border-radius:2px;background:var(--bar-soft)}
 .cal-day.cal-lifer{box-shadow:0 0 0 2px var(--k2) inset}
 .cal-day.cal-empty{background:transparent}
+button.cal-day{display:block;width:100%;padding:0;border:0;font:inherit;cursor:pointer;transition:transform .1s ease}
+button.cal-day:hover{transform:scale(1.25);position:relative;z-index:1}
+button.cal-day:focus-visible,.cal-day.cal-sel{outline:2px solid var(--text);outline-offset:1px;position:relative;z-index:1}
+.cal-panel{margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+.cal-panel-h{display:flex;align-items:baseline;gap:10px;margin-bottom:8px}
+.cal-panel-h .cal-close{margin-left:auto;font-size:1.2rem;line-height:1;color:var(--muted)}
+.cal-place{margin:6px 0 10px}
+.cal-place b{font-size:.8rem}
+button.chip-sp{font:inherit;font-size:.78rem;color:var(--text);cursor:pointer;transition:border-color .12s ease,color .12s ease}
+button.chip-sp:hover{border-color:var(--accent);color:var(--accent)}
+svg.curve g.dot{cursor:pointer}
+svg.curve g.dot:hover circle:last-of-type{stroke:var(--accent);stroke-width:2}
+@keyframes flash{from{background:var(--hl)}to{background:transparent}}
+tr.row.flash td{animation:flash 2.4s ease-out}
 svg.curve{width:100%;height:auto;display:block}
 svg.curve text{fill:var(--muted);font-size:11px}
 #list-curve{margin-bottom:22px}
@@ -270,6 +287,8 @@ footer.meta-footer .btn{flex:0 0 auto;padding:3px 10px}
   footer.meta-footer .footer-actions{display:none!important}
   .toc{display:none!important}
   tr.grp .grp-t::before{display:none}
+  .wish-io{display:none!important}
+  .cal-panel{display:none!important}
   .printonly{display:block}
   section.tab{display:block!important;padding-top:0}
   .wrap{max-width:none;padding:0}

@@ -215,6 +215,16 @@ function init() {
     if (r) { S.region = r.dataset.region; buildRegionSelect(); renderMap(); }
   });
 
+  $("tab-overview").addEventListener("click", e => {
+    const day = e.target.closest("[data-day]");
+    if (day) { S.calDay = S.calDay === day.dataset.day ? null : day.dataset.day; renderOverview(); return; }
+    const sp = e.target.closest("[data-sp]");
+    if (sp) openSpecies(+sp.dataset.sp);
+  });
+  $("list-curve").addEventListener("click", e => {
+    const sp = e.target.closest("[data-sp]");
+    if (sp) openSpecies(+sp.dataset.sp);
+  });
   $("list-out").addEventListener("click", e => {
     const th = e.target.closest("th[data-sort]");
     if (th) {
@@ -244,6 +254,18 @@ function init() {
 
   $("tab-targets").addEventListener("change", e => {
     if (e.target.id === "tgt-src") { S.targetSrc = e.target.value; renderTargets(); }
+    if (e.target.id === "tgt-import" && e.target.files[0]) {
+      e.target.files[0].text().then(text => {
+        const res = importCustomTargets(text);
+        renderTargets();
+        $("tgt-io-msg").textContent = !res ? t("wishImportBad") : !res.added ? t("wishImportedNone")
+          : t(res.added === res.total ? "wishImported" : "wishImportedSome", res.added, res.total);
+      });
+    }
+  });
+  // the "load" label acts as a button for the keyboard too
+  $("tab-targets").addEventListener("keydown", e => {
+    if (e.target.matches?.("label.lnk") && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); $("tgt-import").click(); }
   });
   $("tab-targets").addEventListener("input", e => {
     if (e.target.id === "wish-q") { S.wishQ = e.target.value; $("wish-out").innerHTML = wishTableHtml(); }
@@ -257,6 +279,7 @@ function init() {
       S.wishSort = S.wishSort.k === k ? { k, d: -S.wishSort.d } : { k, d: 1 };
       renderTargets(); return;
     }
+    if (e.target.closest("#tgt-export")) { exportCustomTargets(); return; }
     if (e.target.closest("#tgt-add")) {
       const input = $("tgt-search"), val = input.value.trim();
       if (val) {

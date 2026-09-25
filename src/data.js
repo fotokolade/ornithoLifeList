@@ -95,11 +95,13 @@ if (initialTheme !== "system") document.documentElement.setAttribute("data-theme
  * @property {{k: "name"|"season", d: 1|-1}} wishSort - wishlist table sort
  * @property {Set<string>|null} wishOpen - expanded wishlist season groups; null until the user toggles one (see wishOpenGroups())
  * @property {string} wishQ - wishlist search text
+ * @property {string|null} calDay - "YYYY-MM-DD" of the day opened in the overview calendar
+ * @property {number|null} focusSp - species index the life list scrolls to and highlights once, after a jump from another view
  */
 const S = { tab: "overview", region: "all", year: Math.min(TODAY_Y, MAX_Y), month: TODAY_M, timeAll: true, lang: initialLang, theme: initialTheme,
   escaped: false, collective: false, atlasF: "all", actMetric: "obs", redact: !!RAW.meta.redacted, metric: "life", q: "", sort: "nr", dir: -1, open: new Set(),
   regSort: {}, regAll: {}, targetSrc: "all", customTargets: loadCustomTargets(), wishSort: { k: "season", d: 1 },
-  wishOpen: null, wishQ: "" };
+  wishOpen: null, wishQ: "", calDay: null, focusSp: null };
 T = STR[S.lang];
 
 /* ---------- helpers ---------- */
