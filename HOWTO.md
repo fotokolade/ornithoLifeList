@@ -27,12 +27,15 @@ Kurzanleitung, wie du deinen Beobachtungsexport für [`lifelist.py`](lifelist.py
    ![Schritt 6](howto/06.png)
 
 7. Auf **Abfrage starten** klicken.
+
+   ![Schritt 7](howto/07.png)
+
 8. Im Ergebnis unter **Export** das Format **BASIC+** auswählen und auf das orangene **JS**-Symbol klicken.
 
-   ![Schritt 8](howto/07.png)
+   ![Schritt 8](howto/08.png)
 
 9. Nach kurzer Zeit erscheint darunter ein grüner Kasten mit der fertigen Exportdatei. Auf ihren Namen (`export_….json`) klicken, um sie herunterzuladen.
 
-   ![Schritt 9](howto/08.png)
+   ![Schritt 9](howto/09.png)
 
 Die heruntergeladene Datei (`export_*.json`) neben `lifelist.py` legen und wie in der [README](README.md#schnellstart) beschrieben weiterverwenden.
