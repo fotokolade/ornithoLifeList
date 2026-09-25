@@ -4,7 +4,7 @@ const LEVELS = [
   { lvl: "m", title: "grpMuni", label: p => p.muni || T.unknown },
   { lvl: "p", title: "grpPlace", label: p => p.name },
 ];
-function regionTable(lv, list) {
+function regionTable(lv, list, first = false) {
   const map = new Map();
   for (const o of list) {
     const p = PL[o.p], key = p.keys[lv.lvl];
@@ -21,7 +21,8 @@ function regionTable(lv, list) {
   const showAll = S.regAll[lv.lvl], shown = showAll ? rows : rows.slice(0, 10);
   const maxLife = Math.max(1, ...rows.map(r => r.life.size));
   const th = (k, label, cls) => `<th class="sortable ${cls}${sort.k === k ? " sorted" : ""}" data-lvl="${lv.lvl}" data-k="${k}">${label}${sort.k === k ? (sort.d > 0 ? " ▲" : " ▼") : ""}</th>`;
-  return `<h2 data-toc="${esc(t(lv.title))}">${t("regionsBy", t(lv.title))}<small>${rows.length}</small></h2><div class="card"><table class="rtable"><thead><tr>
+  // the tables' names are the clickable ones: the hint sits with the first of them
+  return `<h2 data-toc="${esc(t(lv.title))}">${t("regionsBy", t(lv.title))}<small>${rows.length}</small></h2>${first ? infoText(t("regionsHelp")) : ""}<div class="card"><table class="rtable"><thead><tr>
     <th class="nr">#</th>${th("name", t(lv.title), "")}<th class="rbar"></th>${th("life", t("colLife"), "num")}${th("year", t("colYearShort") + " " + S.year, "num")}${th("month", T.monthsShort[S.month - 1].replace(".", "") + " " + S.year, "num")}</tr></thead><tbody>` +
     shown.map((r, i) => {
       const pct = r.life.size / maxLife * 100;
@@ -102,11 +103,10 @@ function toggleRegMonthCell(key) {
 }
 function renderRegions() {
   const list = baseObs();
-  $("tab-regions").innerHTML = infoText(t("regionsHelp"))
-    + topPlacesSection(regionObs(list))
+  $("tab-regions").innerHTML = topPlacesSection(regionObs(list))
     + regionCoverageSection(list)
     + regionMonthSection(list)
-    + visibleLevels().map(lv => regionTable(lv, list)).join("");
+    + visibleLevels().map((lv, i) => regionTable(lv, list, i === 0)).join("");
   $("reg-cov").value = S.region;
   updateToc();
 }
