@@ -166,23 +166,36 @@ function mountChart(card, height, config) {
   return true;
 }
 const axisTicks = extra => ({ color: cssVar("--muted"), ...extra });
-// one colour for every bar; only the highest one stands out in the accent colour
-function upgradeBarChart(card, labels, values, tips) {
-  const bar = cssVar("--bar"), accent = cssVar("--accent"), max = Math.max(...values);
-  const hue = v => v === max && v > 0 ? accent : bar;
+// weekday shares in percent: weekdays in the bar colour, Saturday and Sunday in the weekend colour, each value written above its bar
+function upgradeWeekdayChart(card, labels, values, tips) {
+  const hue = labels.map((_, i) => cssVar(i >= 5 ? "--k2" : "--bar")), muted = cssVar("--muted");
+  const valueLabels = {
+    id: "valueLabels",
+    afterDatasetsDraw(chart) {
+      const { ctx } = chart;
+      ctx.save();
+      ctx.fillStyle = muted;
+      ctx.font = "600 11px system-ui, sans-serif";
+      ctx.textAlign = "center";
+      chart.getDatasetMeta(0).data.forEach((bar, i) => ctx.fillText(values[i] + " %", bar.x, bar.y - 6));
+      ctx.restore();
+    },
+  };
   mountChart(card, 220, {
     type: "bar",
+    plugins: [valueLabels],
     data: { labels, datasets: [{
       data: values,
-      backgroundColor: values.map(v => hue(v) + "cc"),
-      hoverBackgroundColor: values.map(hue),
+      backgroundColor: hue.map(c => c + "cc"),
+      hoverBackgroundColor: hue,
       borderRadius: 4, maxBarThickness: 34,
     }] },
     options: {
       responsive: true, maintainAspectRatio: false, animation: { duration: 300 },
+      layout: { padding: { top: 18 } },
       plugins: { legend: { display: false }, tooltip: { displayColors: false, callbacks: { title: () => "", label: item => tips[item.dataIndex] } } },
       scales: {
-        y: { beginAtZero: true, ticks: axisTicks({ precision: 0 }), grid: { color: cssVar("--line") } },
+        y: { beginAtZero: true, suggestedMax: Math.min(100, Math.max(...values) * 1.15), ticks: axisTicks({ precision: 0, callback: v => v + " %" }), grid: { color: cssVar("--line") } },
         x: { grid: { display: false }, ticks: axisTicks() },
       },
     },

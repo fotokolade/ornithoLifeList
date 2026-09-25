@@ -168,11 +168,15 @@ class PageTest(unittest.TestCase):
         # keyboard works too, and the charts above are not redrawn
         page.wait_for_selector("#hour-card canvas")
         canvas = page.evaluate_handle("document.querySelector('#hour-card canvas')")
-        page.locator("td[data-mh]").first.focus()
+        page.locator('td[data-mh^="m:"]').first.focus()
         page.keyboard.press("Enter")
-        self.assertGreater(page.locator("#act-cell .chip-sp").count(), 0)
+        self.assertGreater(page.locator("#act-cell-m .chip-sp").count(), 0)
         self.assertTrue(page.evaluate("c => c.isConnected", canvas))
-        page.locator("#act-cell .chip-sp").first.click()
+        # only one hour-table cell is open at a time: the weekday table takes over the panel
+        page.locator('td[data-mh^="w:"]').first.click()
+        self.assertEqual(page.locator("#act-cell-m .chip-sp").count(), 0)
+        self.assertGreater(page.locator("#act-cell-w .chip-sp").count(), 0)
+        page.locator("#act-cell-w .chip-sp").first.click()
         page.wait_for_function("S.tab === 'list'")
         self.assertEqual(page.locator("#list-out tr.detail").count(), 1)
         self.assertEqual(self.errors, [])
@@ -185,6 +189,15 @@ class PageTest(unittest.TestCase):
         self.assertEqual(page.input_value("#f-region"), region)
         self.assertEqual(page.input_value("#reg-cov"), region)
         self.assertIn("gesehen", page.inner_text("#tab-regions"))
+        self.assertEqual(self.errors, [])
+
+    def test_weekday_chart_shows_share_of_days(self):
+        page = self.open(hash="#activity")
+        page.wait_for_selector("#weekday-card canvas")
+        values = page.evaluate("BAR_CHARTS['weekday-card'].data.datasets[0].data")
+        self.assertEqual(len(values), 7)
+        self.assertTrue(all(0 <= v <= 100 for v in values), values)
+        self.assertIn("%", page.inner_text(".wd-ring"))
         self.assertEqual(self.errors, [])
 
     def test_phone_width_has_no_sideways_scroll(self):

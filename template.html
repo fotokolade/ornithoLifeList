@@ -198,6 +198,13 @@ button.cal-day:focus-visible,.cal-day.cal-sel{outline:2px solid var(--text);outl
 .cal-place b{font-size:.8rem}
 button.chip-sp{font:inherit;font-size:.78rem;color:var(--text);cursor:pointer;transition:border-color .12s ease,color .12s ease}
 button.chip-sp:hover{border-color:var(--accent);color:var(--accent)}
+.wd-grid{display:grid;grid-template-columns:1fr 220px;gap:12px;align-items:stretch}
+@media (max-width:700px){.wd-grid{grid-template-columns:1fr}}
+.wd-ring{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:6px}
+.wd-ring svg{width:130px;height:130px}
+.wd-ring-n{font-size:20px;font-weight:700;fill:var(--text)}
+.wd-ring-l{font-size:9px;fill:var(--muted)}
+.wd-legend{margin:0;justify-content:center}
 .chip-n{color:var(--muted);margin-left:5px;font-variant-numeric:tabular-nums}
 .heat td[role=button]{cursor:pointer;transition:filter .1s ease}
 .heat td[role=button]:hover{filter:brightness(1.12)}
@@ -305,7 +312,7 @@ footer.meta-footer .btn{flex:0 0 auto;padding:3px 10px}
   .hide-sm{display:revert!important}
   th.hide-sm,td.hide-sm{display:table-cell!important}
   .show-sm{display:none!important}
-  .bar,.bar i,.heat td,.pheno div,.cal-day,.season-strip,.season-strip *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .wd-ring circle,.bar,.bar i,.heat td,.pheno div,.cal-day,.season-strip,.season-strip *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   details.info summary{display:none!important}
   h2 + details.info{margin-top:0;text-align:left}
   h2 .ctl select{appearance:none;border:0;padding:0;background:none;font-weight:600;color:var(--text)}
