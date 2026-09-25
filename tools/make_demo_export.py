@@ -275,7 +275,7 @@ def in_season(season, month):
             "p": month in (3, 4, 5, 8, 9, 10)}[season]
 
 
-def sighting(sp, day, place, minutes, count, atlas, photo, gps=None):
+def sighting(sp, day, place, minutes, count, atlas, photo, gps=None, rnd=None):
     """gps: (lat, lon) where the birder stood when reporting from the phone; without it the record is tied to its place."""
     latin, name, order, rarity = sp
     observer = {
@@ -285,8 +285,10 @@ def sighting(sp, day, place, minutes, count, atlas, photo, gps=None):
     }
     pid, pname, muni, lat, lon = place[:5]
     if gps:
+        # the bird is marked where it was, typically some 80 m from where the birder stood
+        bird = (gps[0] + rnd.uniform(-0.0008, 0.0008), gps[1] + rnd.uniform(-0.0012, 0.0012))
         observer.update({"gps_lat": f"{gps[0]:.6f}", "gps_lon": f"{gps[1]:.6f}", "precision": "precise",
-                         "coord_lat": f"{gps[0]:.6f}", "coord_lon": f"{gps[1]:.6f}"})
+                         "coord_lat": f"{bird[0]:.6f}", "coord_lon": f"{bird[1]:.6f}"})
     else:
         observer.update({"precision": "place", "coord_lat": str(lat), "coord_lon": str(lon)})
     if atlas:
@@ -359,7 +361,7 @@ def generate():
                     gps = (wlat + rnd.uniform(-0.0003, 0.0003), wlon + rnd.uniform(-0.0004, 0.0004))  # some 30 m around
                 seen += 1
                 out.append(sighting(sp, d.isoformat(), where, min(minute, 1439) if walk or rnd.random() < 0.8 else -1,
-                                    count, atlas, rnd.random() < 0.12, gps))
+                                    count, atlas, rnd.random() < 0.12, gps, rnd))
         d += timedelta(days=1)
     return out
 

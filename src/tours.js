@@ -49,11 +49,18 @@ function distM(p, q) {
   const a = Math.sin(dLat / 2) ** 2 + Math.cos(p.lat * rad) * Math.cos(q.lat * rad) * Math.sin(dLon / 2) ** 2;
   return 12742000 * Math.asin(Math.sqrt(a));
 }
-/** @param {Observation[]} obs @returns {{lat: number, lon: number}} */
+/**
+ * Mean position of some records, from the best source they have: the phone's GPS (where the birder
+ * stood) if any record has it, else points set by hand (mostly where the birds were), else the places.
+ * Mixing the kinds would pull a stop towards the birds.
+ * @param {Observation[]} obs @returns {{lat: number, lon: number}}
+ */
 function meanPos(obs) {
+  const gps = obs.filter(o => o.ls === 1), set = gps.length ? gps : obs.filter(o => o.ls === 2);
+  const use = set.length ? set : obs;
   let lat = 0, lon = 0;
-  for (const o of obs) { const p = obsPos(o); lat += p.lat; lon += p.lon; }
-  return { lat: lat / obs.length, lon: lon / obs.length };
+  for (const o of use) { const p = obsPos(o); lat += p.lat; lon += p.lon; }
+  return { lat: lat / use.length, lon: lon / use.length };
 }
 /**
  * The birder's way through a tour. Record positions are often where the bird was, scattered all round

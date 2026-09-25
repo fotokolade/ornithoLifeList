@@ -124,16 +124,17 @@ def atlas_code(o):
 
 
 def own_position(o):
-    """Where this record was made, when the export knows it more precisely than its place: the phone's
-    GPS position (gps_lat/gps_lon, where the observer stood), else a point set by hand (coord_lat/
-    coord_lon with precision "precise"). None for records tied to a place or a grid square."""
-    for lat, lon, ok in (("gps_lat", "gps_lon", True), ("coord_lat", "coord_lon", o.get("precision") == "precise")):
+    """Where this record was made, when the export knows it more precisely than its place, as
+    (lat, lon, source): source 1 is the phone's GPS position (gps_lat/gps_lon, where the observer
+    stood), 2 a point set by hand (coord_lat/coord_lon with precision "precise", mostly where the bird
+    was). None for records tied to a place or a grid square."""
+    for source, (lat, lon, ok) in enumerate((("gps_lat", "gps_lon", True), ("coord_lat", "coord_lon", o.get("precision") == "precise")), 1):
         try:
             la, lo = float(o.get(lat) or 0), float(o.get(lon) or 0)
         except (TypeError, ValueError):
             continue
         if ok and la and lo:
-            return round(la, 5), round(lo, 5)
+            return round(la, 5), round(lo, 5), source
     return None
 
 
