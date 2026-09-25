@@ -218,8 +218,21 @@ function init() {
   $("tab-overview").addEventListener("click", e => {
     const day = e.target.closest("[data-day]");
     if (day) { S.calDay = S.calDay === day.dataset.day ? null : day.dataset.day; renderOverview(); return; }
+    const ym = e.target.closest("[data-ym]");
+    if (ym) { S.heatCell = S.heatCell === ym.dataset.ym ? null : ym.dataset.ym; renderOverview(); return; }
     const sp = e.target.closest("[data-sp]");
     if (sp) openSpecies(+sp.dataset.sp);
+  });
+  $("act-out").addEventListener("click", e => {
+    const mh = e.target.closest("[data-mh]");
+    if (mh) { toggleActCell(mh.dataset.mh); return; }
+    const sp = e.target.closest("[data-sp]");
+    if (sp) openSpecies(+sp.dataset.sp);
+  });
+  // table cells that open a details panel (role="button") react to Enter/Space like real buttons
+  document.addEventListener("keydown", e => {
+    const el = /** @type {any} */ (e.target);
+    if (el.matches?.('td[role="button"]') && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); el.click(); }
   });
   $("list-curve").addEventListener("click", e => {
     const sp = e.target.closest("[data-sp]");

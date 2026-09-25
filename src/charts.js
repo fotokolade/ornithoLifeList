@@ -54,6 +54,29 @@ const HEAT_INK_FROM = 0.55;
 function heatLegend(max) {
   return `<div class="legend"><span>0</span><div class="grad"></div><span>${max}</span></div>`;
 }
+// a species as a chip that opens it in the life list; `note` is e.g. a count, `isNew` adds the NEU badge
+function speciesChip(s, note = "", isNew = false) {
+  return `<button type="button" class="chip chip-sp" data-sp="${s}">${esc(speciesName(SP[s]))}${note ? `<span class="chip-n">${note}</span>` : ""}${isNew ? `<span class="new-badge">${t("newBadge")}</span>` : ""}</button>`;
+}
+// the details panel under a calendar or heat table; `closeAttr` is the attribute that toggles it (clicking the same cell again closes it too)
+function cellPanel(title, summary, closeAttr, body) {
+  return `<div class="cal-panel">
+    <div class="cal-panel-h"><b>${esc(title)}</b><span class="sub">${summary}</span>
+      <button type="button" class="lnk cal-close" ${closeAttr} aria-label="${t("close")}">×</button></div>
+    ${body}</div>`;
+}
+/**
+ * Species of some observations as chips with their record counts, in taxonomic order; `isNew(s)` marks life species.
+ * @param {Observation[]} obs @param {(s: number) => boolean} [isNew]
+ */
+function speciesChipsOf(obs, isNew = () => false) {
+  const n = new Map();
+  for (const o of obs) n.set(o.s, (n.get(o.s) || 0) + 1);
+  return `<div class="chips">${[...n].sort((a, b) => SP[a[0]].order - SP[b[0]].order).map(([s, c]) => speciesChip(s, fmtN(c), isNew(s))).join("")}</div>`;
+}
+// cell attributes that make a heat table cell a keyboard-reachable toggle for its details panel
+const cellAttrs = (attr, key, selected, label) =>
+  ` ${attr}="${key}" role="button" tabindex="0" aria-pressed="${selected}" aria-label="${esc(label)}"`;
 function heatTable(list) {
   const cell = new Map();
   for (const o of list) {
@@ -68,7 +91,9 @@ function heatTable(list) {
     h += `<tr><td class="y">${y}</td>`;
     for (let m = 1; m <= 12; m++) {
       const n = (cell.get(y * 100 + m) || { size: 0 }).size;
-      h += n ? `<td${n / max > HEAT_INK_FROM ? ' class="hot"' : ""} style="background:${heatColor(n / max)}">${n}</td>` : `<td></td>`;
+      const key = `${y}-${m}`, sel = S.heatCell === key;
+      const cls = [n / max > HEAT_INK_FROM ? "hot" : "", sel ? "sel" : ""].join(" ").trim();
+      h += n ? `<td${cellAttrs("data-ym", key, sel, `${T.months[m - 1]} ${y}: ${n} ${t("mapSpecies")}`)} class="${cls}" style="background:${heatColor(n / max)}">${n}</td>` : `<td></td>`;
     }
     h += `</tr>`;
   }

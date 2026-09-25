@@ -198,6 +198,10 @@ button.cal-day:focus-visible,.cal-day.cal-sel{outline:2px solid var(--text);outl
 .cal-place b{font-size:.8rem}
 button.chip-sp{font:inherit;font-size:.78rem;color:var(--text);cursor:pointer;transition:border-color .12s ease,color .12s ease}
 button.chip-sp:hover{border-color:var(--accent);color:var(--accent)}
+.chip-n{color:var(--muted);margin-left:5px;font-variant-numeric:tabular-nums}
+.heat td[role=button]{cursor:pointer;transition:filter .1s ease}
+.heat td[role=button]:hover{filter:brightness(1.12)}
+.heat td[role=button]:focus-visible,.heat td.sel{outline:2px solid var(--text);outline-offset:-2px}
 svg.curve g.dot{cursor:pointer}
 svg.curve g.dot:hover circle:last-of-type{stroke:var(--accent);stroke-width:2}
 @keyframes flash{from{background:var(--hl)}to{background:transparent}}
@@ -289,6 +293,7 @@ footer.meta-footer .btn{flex:0 0 auto;padding:3px 10px}
   tr.grp .grp-t::before{display:none}
   .wish-io{display:none!important}
   .cal-panel{display:none!important}
+  .heat td.sel,.cal-day.cal-sel{outline:none!important}
   .printonly{display:block}
   section.tab{display:block!important;padding-top:0}
   .wrap{max-width:none;padding:0}

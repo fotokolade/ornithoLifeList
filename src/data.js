@@ -96,12 +96,14 @@ if (initialTheme !== "system") document.documentElement.setAttribute("data-theme
  * @property {Set<string>|null} wishOpen - expanded wishlist season groups; null until the user toggles one (see wishOpenGroups())
  * @property {string} wishQ - wishlist search text
  * @property {string|null} calDay - "YYYY-MM-DD" of the day opened in the overview calendar
+ * @property {string|null} heatCell - "Y-M" of the open cell in the overview's species-per-year-and-month table
+ * @property {string|null} actCell - "M-H" (month 0-11, hour) of the open cell in the activity tab's month/hour table
  * @property {number|null} focusSp - species index the life list scrolls to and highlights once, after a jump from another view
  */
 const S = { tab: "overview", region: "all", year: Math.min(TODAY_Y, MAX_Y), month: TODAY_M, timeAll: true, lang: initialLang, theme: initialTheme,
   escaped: false, collective: false, atlasF: "all", actMetric: "obs", redact: !!RAW.meta.redacted, metric: "life", q: "", sort: "nr", dir: -1, open: new Set(),
   regSort: {}, regAll: {}, targetSrc: "all", customTargets: loadCustomTargets(), wishSort: { k: "season", d: 1 },
-  wishOpen: null, wishQ: "", calDay: null, focusSp: null };
+  wishOpen: null, wishQ: "", calDay: null, heatCell: null, actCell: null, focusSp: null };
 T = STR[S.lang];
 
 /* ---------- helpers ---------- */

@@ -4,8 +4,29 @@ const median = arr => {
   const a = [...arr].sort((x, y) => x - y), n = a.length;
   return n % 2 ? a[(n - 1) / 2] : Math.round((a[n / 2 - 1] + a[n / 2]) / 2);
 };
+const hourLabel = h => t("hourRange", h, (h + 1) % 24);
+// the tab's observations: region filter, and the time bar's year unless "Gesamt" is on
+const activityScope = () => regionObs(baseObs()).filter(o => S.timeAll || o.y === S.year);
+// the species of one month/hour cell of the "month and time of day" table
+function actCellPanel() {
+  if (!S.actCell) return "";
+  const [m, h] = S.actCell.split("-").map(Number);
+  const obs = activityScope().filter(o => o.tm >= 0 && o.m === m + 1 && Math.floor(o.tm / 60) === h);
+  if (!obs.length) return "";
+  return cellPanel(`${T.months[m]}, ${hourLabel(h)}`, t("cellSummary", new Set(obs.map(o => o.s)).size, fmtN(obs.length)), `data-mh="${S.actCell}"`, speciesChipsOf(obs));
+}
+// toggles a month/hour cell without redrawing the tab (and with it the charts above)
+function toggleActCell(key) {
+  S.actCell = S.actCell === key ? null : key;
+  for (const td of $$all("#act-out td[data-mh]")) {
+    const on = td.dataset.mh === S.actCell;
+    td.classList.toggle("sel", on);
+    td.setAttribute("aria-pressed", on);
+  }
+  $("act-cell").innerHTML = actCellPanel();
+}
 function renderActivity() {
-  const scoped = regionObs(baseObs()).filter(o => S.timeAll || o.y === S.year);
+  const scoped = activityScope();
   const timed = scoped.filter(o => o.tm >= 0);
   if (!timed.length) { $("act-out").innerHTML = `<p class="empty">${t("noData")}</p>`; updateToc(); return; }
 
@@ -18,7 +39,7 @@ function renderActivity() {
     bySpecies.get(o.s).push(o.tm);
   }
   const series = { obs: obsH, species: spH.map(s => s.size), days: dayH.map(s => s.size) }[S.actMetric];
-  const hours = [...Array(24).keys()], hourLabel = h => t("hourRange", h, (h + 1) % 24);
+  const hours = [...Array(24).keys()];
   const peak = obsH.indexOf(Math.max(...obsH));
 
   // weekday chart counts days, so it uses every sighting of the scope, with or without a time
@@ -34,7 +55,7 @@ function renderActivity() {
   const heatMax = Math.max(1, ...monthHour.flat());
   const heat = `<table class="heat"><thead><tr><th></th>${hours.map(h => `<th>${h}</th>`).join("")}</tr></thead><tbody>${monthHour.map((row, m) =>
     `<tr><td class="y">${T.monthsShort[m].replace(".", "")}</td>${row.map((n, h) => n
-      ? `<td title="${esc(T.months[m] + ", " + hourLabel(h) + ": " + n)}" style="background:${heatColor(n / heatMax)}"></td>`
+      ? `<td title="${esc(T.months[m] + ", " + hourLabel(h) + ": " + n)}"${cellAttrs("data-mh", `${m}-${h}`, S.actCell === `${m}-${h}`, `${T.months[m]}, ${hourLabel(h)}: ${n}`)}${S.actCell === `${m}-${h}` ? ' class="sel"' : ""} style="background:${heatColor(n / heatMax)}"></td>`
       : `<td></td>`).join("")}</tr>`).join("")}</tbody></table>`;
 
   const metricOptions = [["obs", "actMObs"], ["species", "actMSpecies"], ["days", "actMDays"]]
@@ -52,7 +73,7 @@ function renderActivity() {
     <div class="card" id="weekday-card">${barChartSvg(wdDays.map(s => s.size), T.weekdays, T.weekdays.map((w, i) => w + ": " + wdDays[i].size))}</div>
     <h2>${t("actHeat")}</h2>
     ${infoText(t("actHeatHelp"))}
-    <div class="card">${heat}</div>
+    <div class="card">${heat}<div id="act-cell">${actCellPanel()}</div></div>
     ${heatLegend(heatMax)}
     <h2 data-toc="${esc(t("tocActSpecies"))}">${t("actSpecies")}</h2>
     ${infoText(t("actSpeciesHelp", MIN_TIMED))}

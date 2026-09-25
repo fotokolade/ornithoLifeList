@@ -156,6 +156,27 @@ class PageTest(unittest.TestCase):
         self.assertEqual(page.evaluate("[...S.open]"), [sp])
         self.assertEqual(self.errors, [])
 
+    def test_heat_cells_open_their_species(self):
+        page = self.open()
+        cell = page.locator("td[data-ym]").first
+        cell.click()
+        self.assertEqual(page.locator("#tab-overview .cal-panel").count(), 1)
+        self.assertEqual(page.locator("#tab-overview .cal-panel .chip-sp").count(), int(cell.inner_text()))
+        page.locator("td[data-ym]").first.click()  # the same cell again closes it
+        self.assertEqual(page.locator("#tab-overview .cal-panel").count(), 0)
+        page.click('#tabs button[data-tab="activity"]')
+        # keyboard works too, and the charts above are not redrawn
+        page.wait_for_selector("#hour-card canvas")
+        canvas = page.evaluate_handle("document.querySelector('#hour-card canvas')")
+        page.locator("td[data-mh]").first.focus()
+        page.keyboard.press("Enter")
+        self.assertGreater(page.locator("#act-cell .chip-sp").count(), 0)
+        self.assertTrue(page.evaluate("c => c.isConnected", canvas))
+        page.locator("#act-cell .chip-sp").first.click()
+        page.wait_for_function("S.tab === 'list'")
+        self.assertEqual(page.locator("#list-out tr.detail").count(), 1)
+        self.assertEqual(self.errors, [])
+
     def test_phone_width_has_no_sideways_scroll(self):
         page = self.open(width=390)
         for tab in TABS:

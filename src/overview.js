@@ -112,11 +112,19 @@ function calDayPanel(list, statsAll, day) {
   const lifers = [...all].filter(s => statsAll.get(s)?.first.d === day).length;
   const places = [...byPlace].sort((a, b) => b[1].size - a[1].size).map(([p, sp]) =>
     `<div class="cal-place"><b>${esc(placeName(p))}</b><div class="chips">${[...sp].sort((a, b) => SP[a].order - SP[b].order).map(s =>
-      `<button type="button" class="chip chip-sp" data-sp="${s}">${esc(speciesName(SP[s]))}${statsAll.get(s)?.first.d === day ? `<span class="new-badge">${t("newBadge")}</span>` : ""}</button>`).join("")}</div></div>`).join("");
-  return `<div class="cal-panel">
-    <div class="cal-panel-h"><b>${fmtD(day)}</b><span class="sub">${t("calDaySummary", all.size, byPlace.size)}${lifers ? " · " + t("calDayLifers", lifers) : ""}</span>
-      <button type="button" class="lnk cal-close" data-day="${day}" aria-label="${t("close")}">×</button></div>
-    ${places}</div>`;
+      speciesChip(s, "", statsAll.get(s)?.first.d === day)).join("")}</div></div>`).join("");
+  return cellPanel(fmtD(day), t("calDaySummary", all.size, byPlace.size) + (lifers ? " · " + t("calDayLifers", lifers) : ""), `data-day="${day}"`, places);
+}
+// the species of one year/month cell of the "species per year and month" table
+function heatCellPanel(list, statsAll, key) {
+  const [y, m] = key.split("-").map(Number);
+  const obs = list.filter(o => o.y === y && o.m === m);
+  if (!obs.length) return "";
+  const isNew = s => { const f = statsAll.get(s)?.first; return !!f && f.y === y && f.m === m; };
+  const species = new Set(obs.map(o => o.s));
+  const lifers = [...species].filter(isNew).length;
+  return cellPanel(`${T.months[m - 1]} ${y}`, t("cellSummary", species.size, fmtN(obs.length)) + (lifers ? " · " + t("calDayLifers", lifers) : ""),
+    `data-ym="${key}"`, speciesChipsOf(obs, isNew));
 }
 function renderOverview() {
   const list = regionObs(baseObs());
@@ -165,7 +173,8 @@ function renderOverview() {
     <h2 data-toc="${esc(t("tocPerMonth"))}">${t("perMonth", monthLabel)}</h2>
     ${renderYearBlock(monthRows(list), { showYtd: S.month === TODAY_M, showNew: false })}
     <h2 data-toc="${esc(t("tocHeat"))}">${t("heat")}</h2>
-    <div class="card">${heatT.html}</div>
+    ${infoText(t("heatHelp"))}
+    <div class="card">${heatT.html}${S.heatCell ? heatCellPanel(list, stats, S.heatCell) : ""}</div>
     ${heatLegend(heatT.max)}`;
   updateToc();
 }
