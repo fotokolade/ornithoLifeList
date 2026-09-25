@@ -9,7 +9,7 @@ import unittest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 import lifelist  # noqa: E402
-from tests.fixtures import sample_export  # noqa: E402
+from tests.fixtures import sample_export, sighting  # noqa: E402
 
 try:
     from playwright.sync_api import sync_playwright
@@ -31,6 +31,13 @@ class PageTest(unittest.TestCase):
             with open(path, "w", encoding="utf-8") as fh:
                 fh.write(lifelist.render_html(data))
             cls.url[redact] = "file:///" + path.replace(os.sep, "/").lstrip("/")
+        # plus one species seen in a single state only (every sample species occurs everywhere)
+        extra = sample_export() + [sighting("Pica pica", "Elster", "2024-03-10", place_id="3", place="Flussaue",
+                                            municipality="Anderort (BB, SPN)", lat="51.70", lon="14.30")]
+        path = os.path.join(cls.tmp.name, "single.html")
+        with open(path, "w", encoding="utf-8") as fh:
+            fh.write(lifelist.render_html(lifelist.build_page_data(extra, "export_test.json", False)))
+        cls.url["single"] = "file:///" + path.replace(os.sep, "/").lstrip("/")
         cls.pw = sync_playwright().start()
         cls.browser = cls.pw.chromium.launch()
 
@@ -230,6 +237,19 @@ class PageTest(unittest.TestCase):
         page.locator("#rm-cell .chip-sp").first.click()
         page.wait_for_function("S.tab === 'list'")
         self.assertEqual(page.locator("#list-out tr.detail").count(), 1)
+        self.assertEqual(self.errors, [])
+
+    def test_species_from_another_region_widens_the_filter(self):
+        page = self.open(redact="single", hash="#regions")
+        sachsen = page.eval_on_selector_all("#f-region option", "os => os.find(o => o.text.startsWith('Sachsen')).value")
+        page.select_option("#f-region", sachsen)
+        page.select_option("#rm-level", "s")
+        row = page.locator("table.heat.rm tr", has_text="Brandenburg")
+        row.locator('td[data-rm^="2:"]').click()  # March
+        page.locator("#rm-cell .chip-sp", has_text="Elster").click()
+        page.wait_for_function("S.tab === 'list'")
+        self.assertEqual(page.evaluate("S.region"), "all")
+        self.assertIn("Elster", page.inner_text("#list-out tr.row.flash"))
         self.assertEqual(self.errors, [])
 
     def test_phone_width_has_no_sideways_scroll(self):

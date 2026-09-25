@@ -44,14 +44,16 @@ function regionCoverageSection(list) {
 }
 /* ---------- region x month: where you are out in which month ---------- */
 const REG_MONTH_ROWS = 12;
-// the table's row keys, index-addressed by its cells (region keys may contain "/" or ":")
-/** @type {{key: string, name: string}[]} */
-let regMonthRows = [];
-const regMonthLevels = () => LEVELS.filter(lv => !S.redact || lv.lvl === "s" || lv.lvl === "c");
+// the levels shown: place levels are hidden while redacted
+const visibleLevels = () => LEVELS.filter(lv => !S.redact || lv.lvl === "s" || lv.lvl === "c");
 // observations of the region x month table: all regions (it compares them), the time bar's year unless "Gesamt" is on
 const regMonthScope = list => list.filter(o => S.timeAll || o.y === S.year);
 // the chosen row level, or Landkreis when the choice isn't available (place levels are hidden while redacted)
-const regMonthLevel = () => regMonthLevels().find(l => l.lvl === S.regMonthLvl) || LEVELS[1];
+const regMonthLevel = () => visibleLevels().find(l => l.lvl === S.regMonthLvl) || LEVELS[1];
+const rmDaysText = n => t(n === 1 ? "rmDay" : "rmDays", n);
+// a cell's key "M:regionKey" (month 0-11 first, since region keys may contain ":" themselves): stays with its
+// region when a new year or filter reorders the rows
+const regMonthKey = (m, key) => `${m}:${key}`;
 function regionMonthSection(list) {
   const lv = regMonthLevel();
   const byRegion = new Map();
@@ -63,33 +65,30 @@ function regionMonthSection(list) {
     r.months[o.m - 1].add(o.d);
   }
   const rows = [...byRegion.values()].sort((a, b) => b.days.size - a.days.size || collator.compare(a.name, b.name)).slice(0, REG_MONTH_ROWS);
-  regMonthRows = rows.map(r => ({ key: r.key, name: r.name }));
-  const levelPick = `<label class="ctl">${t("rmLevel")}<select id="rm-level" aria-label="${esc(t("rmLevel"))}">${regMonthLevels().map(l =>
+  const levelPick = `<label class="ctl">${t("rmLevel")}<select id="rm-level" aria-label="${esc(t("rmLevel"))}">${visibleLevels().map(l =>
     `<option value="${l.lvl}"${l === lv ? " selected" : ""}>${t(l.title)}</option>`).join("")}</select></label>`;
   const head = `<h2 data-toc="${esc(t("tocRegMonth"))}">${t("rmTitle")}${levelPick}</h2>${infoText(t("rmHelp"))}`;
   if (!rows.length) return head + `<p class="empty">${t("noData")}</p>`;
   const max = Math.max(1, ...rows.flatMap(r => r.months.map(m => m.size)));
-  const body = rows.map((r, i) => `<tr><td class="y" title="${esc(r.name)}">${esc(r.name)}</td>${r.months.map((days, m) => {
+  const body = rows.map(r => `<tr><td class="y" title="${esc(r.name)}">${esc(r.name)}</td>${r.months.map((days, m) => {
     const n = days.size;
     if (!n) return `<td></td>`;
-    const key = `${i}-${m}`, sel = S.regMonthCell === key;
+    const key = regMonthKey(m, r.key), sel = S.regMonthCell === key;
     const cls = [n / max > HEAT_INK_FROM ? "hot" : "", sel ? "sel" : ""].join(" ").trim();
-    return `<td${cellAttrs("data-rm", key, sel, `${r.name}, ${T.months[m]}: ${t("rmDays", n)}`)} class="${cls}" style="background:${heatColor(n / max)}">${n}</td>`;
+    return `<td${cellAttrs("data-rm", esc(key), sel, `${r.name}, ${T.months[m]}: ${rmDaysText(n)}`)} class="${cls}" style="background:${heatColor(n / max)}">${n}</td>`;
   }).join("")}</tr>`).join("");
-  return head + `<div class="card"><table class="heat months rm"><thead><tr><th></th>${T.monthsShort.map(m =>
-    `<th><span class="m-long">${m.replace(".", "")}</span><span class="m-short">${m.slice(0, 1)}</span></th>`).join("")}</tr></thead><tbody>${body}</tbody></table>
+  return head + `<div class="card"><table class="heat months rm"><thead>${monthHeadRow()}</thead><tbody>${body}</tbody></table>
     <div id="rm-cell">${regMonthPanel(list)}</div></div>${heatLegend(max)}`;
 }
 // the species of the open region x month cell
 function regMonthPanel(list) {
   if (!S.regMonthCell) return "";
-  const [i, m] = S.regMonthCell.split("-").map(Number), row = regMonthRows[i];
-  if (!row) return "";
-  const lvl = regMonthLevel().lvl;
-  const obs = regMonthScope(list).filter(o => o.m === m + 1 && PL[o.p].keys[lvl] === row.key);
+  const sep = S.regMonthCell.indexOf(":"), m = +S.regMonthCell.slice(0, sep), key = S.regMonthCell.slice(sep + 1);
+  const lv = regMonthLevel();
+  const obs = regMonthScope(list).filter(o => o.m === m + 1 && PL[o.p].keys[lv.lvl] === key);
   if (!obs.length) return "";
-  const summary = t("rmDays", new Set(obs.map(o => o.d)).size) + " · " + t("cellSummary", new Set(obs.map(o => o.s)).size, fmtN(obs.length));
-  return cellPanel(`${row.name}, ${T.months[m]}`, summary, `data-rm="${S.regMonthCell}"`, speciesChipsOf(obs));
+  const summary = rmDaysText(new Set(obs.map(o => o.d)).size) + " · " + t("cellSummary", new Set(obs.map(o => o.s)).size, fmtN(obs.length));
+  return cellPanel(`${lv.label(PL[obs[0].p])}, ${T.months[m]}`, summary, `data-rm="${esc(S.regMonthCell)}"`, speciesChipsOf(obs));
 }
 // toggles a cell without redrawing the tab
 function toggleRegMonthCell(key) {
@@ -107,7 +106,7 @@ function renderRegions() {
     + topPlacesSection(regionObs(list))
     + regionCoverageSection(list)
     + regionMonthSection(list)
-    + LEVELS.filter(lv => !S.redact || lv.lvl === "s" || lv.lvl === "c").map(lv => regionTable(lv, list)).join("");
+    + visibleLevels().map(lv => regionTable(lv, list)).join("");
   $("reg-cov").value = S.region;
   updateToc();
 }
