@@ -199,18 +199,23 @@ function init() {
   $("q-atlas").addEventListener("change", e => { S.atlasF = e.target.value; renderList(); });
   $("t-all").addEventListener("click", () => {
     if (S.timeAll) return;
-    S.timeAll = true;
+    // back to the start: the views that always show one year (calendar, "new in", the regions' year
+    // and month columns) return to the current one instead of keeping the slider's
+    S.timeAll = true; S.year = TIME_START.y; S.month = TIME_START.m;
     updateTimeBar();
     renderActive();
   });
-  $("t-range").addEventListener("input", e => {
+  const pickTime = e => {
     const ym = timeYMFromIndex(+e.target.value);
     S.year = ym.y; S.month = ym.m; S.timeAll = false;
     updateTimeBar();
     // the active tab may still be loading (e.g. Leaflet); rAF-throttle redraws during the drag itself
     if (timeRAF) cancelAnimationFrame(timeRAF);
     timeRAF = requestAnimationFrame(() => { timeRAF = null; renderActive(); });
-  });
+  };
+  $("t-range").addEventListener("input", pickTime);
+  // with "Gesamt" on, a click right on the thumb changes no value and so fires no input: leave "Gesamt" all the same
+  $("t-range").addEventListener("pointerup", e => { if (S.timeAll) pickTime(e); });
   $("b-pdf").addEventListener("click", () => window.print());
   let printBackup = null;
   window.addEventListener("beforeprint", () => {

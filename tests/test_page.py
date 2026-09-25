@@ -103,6 +103,27 @@ class PageTest(unittest.TestCase):
         self.click_all_tabs(page, TABS)
         self.assertEqual(self.errors, [])
 
+    def test_all_time_resets_the_overview(self):
+        page = self.open()
+        # both tabs always show one year (calendar, "new in", NEU badges): "Gesamt" takes them back to the current one
+        for tab in ("list", "overview"):
+            page.click(f'#tabs button[data-tab="{tab}"]')
+            page.wait_for_timeout(100)
+            start = page.inner_text(f"#tab-{tab}")
+            page.eval_on_selector("#t-range", "e => { e.value = 0; e.dispatchEvent(new Event('input')); }")
+            page.wait_for_timeout(100)
+            self.assertNotEqual(page.inner_text(f"#tab-{tab}"), start, tab)
+            page.click("#t-all")
+            page.wait_for_timeout(100)
+            self.assertEqual(page.inner_text(f"#tab-{tab}"), start, tab)
+        # with "Gesamt" on, a click on the thumb itself (no value change) still picks that point in time
+        box = page.locator("#t-range").bounding_box()
+        value, maxv = page.eval_on_selector("#t-range", "e => [+e.value, +e.max]")
+        page.mouse.click(box["x"] + 8 + (box["width"] - 16) * value / maxv, box["y"] + box["height"] / 2)
+        page.wait_for_timeout(100)
+        self.assertNotEqual(page.inner_text("#t-label"), "Gesamt")
+        self.assertEqual(self.errors, [])
+
     def test_filters_and_time_bar(self):
         page = self.open()
         for tab in TABS:
