@@ -26,7 +26,7 @@ function tourPreset({ mode, pace, pauseLen, pauseFreq }) {
 const TOUR_DEFAULTS = tourPreset({ mode: "foot", pace: "easy", pauseLen: "short", pauseFreq: "few" });
 // [key, min, max, step of its slider]
 /** @type {["gap"|"step"|"speed"|"win"|"stop"|"minKm"|"minDur", number, number, number][]} */
-const TOUR_LIMITS = [["gap", 5, 120, 5], ["step", 0, 5, 0.1], ["speed", 0, 100, 0.5], ["win", 1, 60, 1], ["stop", 50, 2000, 50], ["minKm", 0, 50, 0.5], ["minDur", 0, 240, 5]];
+const TOUR_LIMITS = [["gap", 5, 120, 5], ["step", 0, 5, 0.1], ["speed", 0, 100, 0.1], ["win", 1, 60, 1], ["stop", 50, 2000, 50], ["minKm", 0, 50, 0.5], ["minDur", 0, 240, 5]];
 const TOURS_SHOWN = 30;
 /** @returns {TourCfg} */
 function loadTourCfg() {
@@ -62,6 +62,7 @@ const tourCfgTuned = () => { const p = tourPreset(S.tourCfg); return TOUR_LIMITS
  * @property {number} end - minute of the day of the last record
  * @property {TourStop[]} stops - where the birder stopped, in order
  * @property {number} km - length of the path through the stops
+ * @property {number} sp - number of species recorded on it
  * @property {Observation[]} obs
  */
 // where a record was made: its own position if the export has one (GPS or a point set by hand), else its place's
@@ -133,7 +134,7 @@ function findTours(list) {
       let km = 0;
       for (let i = 1; i < stops.length; i++) km += distM(stops[i - 1], stops[i]) / 1000;
       if (km < minKm || chain[chain.length - 1].tm - chain[0].tm < minDur) return;
-      tours.push({ key: `${d}-${chain[0].tm}-${chain[0].p}`, d, y: chain[0].y, start: chain[0].tm, end: chain[chain.length - 1].tm, stops, km, obs: chain });
+      tours.push({ key: `${d}-${chain[0].tm}-${chain[0].p}`, d, y: chain[0].y, start: chain[0].tm, end: chain[chain.length - 1].tm, stops, km, sp: new Set(chain.map(o => o.s)).size, obs: chain });
     };
     for (let i = 1; i < day.length; i++) {
       if (close(day[i - 1], day[i])) chain.push(day[i]);
@@ -144,9 +145,10 @@ function findTours(list) {
   return tours.sort((a, b) => byDateDesc(a.d, b.d) || b.start - a.start);
 }
 // the tours the page's filters let through: the time bar's year (unless "Gesamt") and tours touching the selected region
-function visibleTours() {
-  const inRegion = new Set(regionObs(baseObs()));
-  return findTours(baseObs()).filter(tr => (S.timeAll || tr.y === S.year) && tr.obs.some(o => inRegion.has(o)));
+/** @param {Observation[]} [list] baseObs(), when the caller has it already */
+function visibleTours(list = baseObs()) {
+  const inRegion = new Set(regionObs(list));
+  return findTours(list).filter(tr => (S.timeAll || tr.y === S.year) && tr.obs.some(o => inRegion.has(o)));
 }
 const fmtKm = km => km.toLocaleString(S.lang === "en" ? "en-GB" : "de-DE", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 const fmtDuration = min => `${Math.floor(min / 60)}:${pad(min % 60)} h`;
@@ -177,7 +179,7 @@ const TOUR_SORT = {
   dur: tr => tr.end - tr.start,
   km: tr => tr.km,
   stops: tr => tr.stops.length,
-  species: tr => new Set(tr.obs.map(o => o.s)).size,
+  species: tr => tr.sp,
 };
 /** @param {Tour[]} tours */
 function sortTours(tours) {
@@ -197,21 +199,22 @@ function renderTours() {
   renderTourOut();
 }
 function renderTourOut() {
-  const tours = visibleTours();
-  if (!tours.length) { $("tour-out").innerHTML = `<p class="empty">${t("toursNone")}</p>`; updateToc(); return; }
-  const stats = speciesStats(baseObs());
+  const out = $("tour-out");
+  if (!out) return;  // a redraw queued before the tab was cleared (e.g. by the "hide places" option)
+  const list = baseObs(), tours = visibleTours(list);
+  if (!tours.length) { out.innerHTML = `<p class="empty">${t("toursNone")}</p>`; updateToc(); return; }
+  const stats = speciesStats(list);
   const isLifer = tr => s => tr.obs.includes(stats.get(s)?.first);
   const km = tours.reduce((a, tr) => a + tr.km, 0);
   const longest = tours.reduce((a, tr) => tr.km > a.km ? tr : a);
-  const richest = tours.reduce((a, tr) => new Set(tr.obs.map(o => o.s)).size > new Set(a.obs.map(o => o.s)).size ? tr : a);
+  const richest = tours.reduce((a, tr) => tr.sp > a.sp ? tr : a);
   const sorted = sortTours(tours);
   const shown = S.tourAll ? sorted : sorted.slice(0, TOURS_SHOWN);
   const rows = shown.map(tr => {
-    const species = new Set(tr.obs.map(o => o.s));
     const open = S.tourOpen.has(tr.key);
     let h = `<tr class="row" data-tour="${tr.key}"><td>${fmtD(tr.d)}</td><td class="hide-sm">${fmtTime(tr.start)}–${fmtTime(tr.end)}</td>
       <td class="num">${fmtDuration(tr.end - tr.start)}</td><td class="num">${fmtKm(tr.km)} km</td>
-      <td class="num hide-sm">${tr.stops.length}</td><td class="num">${species.size}</td></tr>`;
+      <td class="num hide-sm">${tr.stops.length}</td><td class="num">${tr.sp}</td></tr>`;
     if (open) {
       h += `<tr class="detail"><td colspan="6"><div class="tour-path">${tr.stops.map(st => `${esc(st.name)} (${new Set(st.obs.map(o => o.s)).size})`).join(" → ")}</div>
         ${speciesChipsOf(tr.obs, isLifer(tr))}
@@ -219,12 +222,12 @@ function renderTourOut() {
     }
     return h;
   }).join("");
-  $("tour-out").innerHTML = `
+  out.innerHTML = `
     <div class="kpis k4">
       <div class="kpi main"><b>${fmtN(tours.length)}</b><span>${t("toursKCount")}</span></div>
       <div class="kpi"><b>${fmtKm(km)}</b><span>${t("toursKKm")}</span></div>
       <div class="kpi"><b>${fmtKm(longest.km)}</b><span>${t("toursKLongest", fmtD(longest.d))}</span></div>
-      <div class="kpi"><b>${new Set(richest.obs.map(o => o.s)).size}</b><span>${t("toursKRichest", fmtD(richest.d))}</span></div>
+      <div class="kpi"><b>${richest.sp}</b><span>${t("toursKRichest", fmtD(richest.d))}</span></div>
     </div>
     <h2>${t("toursTitle")}<small>${tours.length}</small></h2>
     <div class="card"><table><thead><tr>${tourTh("date", t("colDate"))}${tourTh("time", t("colTime"), "hide-sm")}${tourTh("dur", t("colDuration"), "num")}

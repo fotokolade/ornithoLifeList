@@ -16,7 +16,7 @@ de: {
   tour_pace_snail: "Schnecke", tour_pace_easy: "Gemütlich", tour_pace_brisk: "Zügig", tour_pace_jaguar: "Jaguar",
   tourCfg_pauseLen: "Pausen", tour_pauseLen_short: "kurze Pausen", tour_pauseLen_long: "lange Pausen",
   tourCfg_pauseFreq: "Pausenhäufigkeit", tour_pauseFreq_few: "wenig Pausen", tour_pauseFreq_often: "oft Pausen",
-  tourCfg_speed: "Tempo", tourCfg_gap: "Max. Pause", tourCfg_step: "Grundabstand", tourCfg_win: "Zeitfenster", tourCfg_stop: "Halt-Radius", tourCfg_minKm: "Mindestlänge", tourCfg_minDur: "Mindestdauer", tourCfgReset: "Standard",
+  tourCfg_speed: "Geschwindigkeit", tourCfg_gap: "Max. Pause", tourCfg_step: "Grundabstand", tourCfg_win: "Zeitfenster", tourCfg_stop: "Halt-Radius", tourCfg_minKm: "Mindestlänge", tourCfg_minDur: "Mindestdauer", tourCfgReset: "Standard",
   tourShowMap: "Auf der Karte zeigen", tourOnMap: "Tour am {0}: {1} Halte, {2} km.", tourHide: "Tour ausblenden",
   actHelp: "Zu welcher Uhrzeit du Beobachtungen meldest. Berücksichtigt sind {0} von {1} Meldungen, denn manche Meldungen (vor allem über die Weboberfläche) haben keine Uhrzeit.",
   actMObs: "Beobachtungen", actMSpecies: "Arten", actMDays: "Beobachtungstage",

@@ -59,16 +59,15 @@ def update(repo=HERE, out=print, ask=None):
         raise UpdateError(f"Branch '{branch}' doesn't follow a branch on GitHub. "
                           f"Run `git branch --set-upstream-to=origin/{branch}` first.")
     changed = git(repo, "status", "--porcelain", "--untracked-files=no").stdout.splitlines()
+    # the changes are only discarded once it is clear that an update will be applied (see below)
+    discard = False
     if changed:
         kinds = {"D": "deleted", "M": "changed", "A": "added", "R": "renamed", "T": "type changed"}
         files = "\n".join(f"  {line[3:]} ({kinds.get(line[:2].strip()[:1], 'changed')})" for line in changed)
         # e.g. screenshots regenerated with tools/make_screenshots.py: offer to put the originals back
-        if ask and ask(f"These files of the program were changed locally:\n{files}\n"
-                       "Discard these changes and update anyway? Your own new files are kept. [y/N] "):
-            git(repo, "reset", "--quiet", "HEAD", "--", ".")
-            git(repo, "checkout", "--", ".")
-            changed = []
-    if changed:
+        discard = bool(ask and ask(f"These files of the program were changed locally:\n{files}\n"
+                                   "Discard these changes and update anyway? Your own new files are kept. [y/N] "))
+    if changed and not discard:
         raise UpdateError(f"These files of the program were changed locally, so the update stops to keep them:\n{files}\n"
                           "Undo the changes (`git checkout -- <file>`, or `git checkout -- .` for all of them) "
                           "or put them aside (`git stash`), then run the update again.")
@@ -86,6 +85,9 @@ def update(repo=HERE, out=print, ask=None):
         raise UpdateError(f"This copy has its own commits that are not on GitHub, so it can't simply be fast-forwarded. "
                           f"Merge or rebase onto {upstream} by hand.")
     log = git(repo, "log", "--format=  %s", f"HEAD..{upstream}").stdout.rstrip()
+    if discard:  # not earlier: without an update to apply, the local changes are kept
+        git(repo, "reset", "--quiet", "HEAD", "--", ".")
+        git(repo, "checkout", "--", ".")
     res = git(repo, "merge", "--ff-only", upstream, check=False)
     if res.returncode:
         # files you put there yourself that the update brings as well, e.g. new screenshots copied in by hand
@@ -100,7 +102,11 @@ def update(repo=HERE, out=print, ask=None):
             raise UpdateError(f"These files are in the way because the update brings its own copies of them:\n{listed}\n"
                               "Move or delete them, then run the update again.")
         for f in files:
-            os.remove(os.path.join(repo, f))
+            try:
+                os.remove(os.path.join(repo, f))
+            except OSError as e:  # e.g. the file is open in another program on Windows
+                raise UpdateError(f"Could not remove {f} ({e.strerror}). Close it or delete it by hand, "
+                                  "then run the update again.")
         git(repo, "merge", "--ff-only", upstream)
     new = app_version(repo)
     out(f"Updated with {incoming} new change{'s' if incoming != 1 else ''}:\n{log}")

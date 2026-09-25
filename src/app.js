@@ -55,6 +55,7 @@ function applyRedact(on) {
   for (const id of ["tab-overview", "list-out", "tab-regions", "tab-targets", "tab-tours"]) $(id).innerHTML = "";
   S.tourRoute = null;
   if (MAP_LAYER) MAP_LAYER.clearLayers();
+  if (MAP_ROUTE) MAP_ROUTE.clearLayers();  // the tour's stops carry place names in their tooltips
   $("map-note").textContent = "";
   buildRegionSelect();
   syncHeaderHeight();

@@ -61,7 +61,6 @@ def main():
                     page.route("**/*", lambda r: r.abort() if r.request.url.startswith("http") else r.continue_())
                 page.goto(url + hash)
                 page.wait_for_timeout(600)
-                # the fixed footer would sit on top of clipped full-page shots
                 # the fixed footer and the sticky header would sit on top of clipped full-page shots
                 page.add_style_tag(content="footer.meta-footer{display:none!important} header.top{position:static!important}")
                 return page

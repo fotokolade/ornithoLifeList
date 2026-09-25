@@ -93,6 +93,12 @@ class UpdateTest(unittest.TestCase):
         with open(os.path.join(self.user, "src", "i18n.js"), encoding="utf-8") as fh:
             self.assertEqual(fh.read(), "// edited again\n")
 
+    def test_keeps_local_changes_when_there_is_nothing_to_update(self):
+        write(os.path.join(self.user, "src", "i18n.js"), "// regenerated\n")
+        self.assertEqual(update.update(self.user, out=self.lines.append, ask=lambda q: True), 0)
+        with open(os.path.join(self.user, "src", "i18n.js"), encoding="utf-8") as fh:
+            self.assertEqual(fh.read(), "// regenerated\n")
+
     def test_can_replace_own_files_in_the_way_when_asked(self):
         write(os.path.join(self.dev, "howto", "01.png"), "new")
         git(self.dev, "add", "-A")
