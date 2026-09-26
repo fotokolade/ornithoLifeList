@@ -75,7 +75,7 @@ function renderActivity() {
 
   // month x hour and weekday x hour, over the records with a time
   const hourSpec = (names, labels, rowOf) => ({ obs: timed, rows: names.map((_, i) => String(i)), rowLabels: labels.map(esc), rowNames: names,
-    colLabels: hours.map(String), colNames: hours.map(hourLabel), rowOf, colOf: o => Math.floor(o.tm / 60) });
+    colLabels: hours.map(String), colNames: hours.map(hourLabel), rowOf, colOf: o => Math.floor(o.tm / 60), cls: "hours" });
 
   const metricOptions = [["obs", "actMObs"], ["species", "actMSpecies"], ["days", "actMDays"]]
     .map(([k, l]) => `<option value="${k}"${k === S.actMetric ? " selected" : ""}>${t(l)}</option>`).join("");

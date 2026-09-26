@@ -296,7 +296,7 @@ class PageTest(unittest.TestCase):
         self.assertIn("Destinations", page.inner_text("#tab-targets"))
         self.assertEqual(self.errors, [])
 
-    def test_heat_steps_compare_rows_and_range(self):
+    def test_heat_steps_hover_difference_and_range(self):
         page = self.open()
         cells = '#heat-ym tbody td[data-heat]:not(.tot)'
         # at most five colour steps, with a legend for each
@@ -304,11 +304,24 @@ class PageTest(unittest.TestCase):
         self.assertLessEqual(len(colours), 5)
         steps = page.locator("#heat-ym .heat-steps .hs").count()
         self.assertTrue(len(colours) <= steps <= 5, (len(colours), steps))
-        # comparing rows recolours, but keeps the numbers
+        # hovering a cell shows the other cells of its row and column as the difference to it
         numbers = page.eval_on_selector_all(cells, "tds => tds.map(td => td.textContent)")
-        page.check('[data-heat-norm="ym"]')
+        hovered = page.locator(cells).nth(1)
+        hovered.scroll_into_view_if_needed()
+        hovered.hover()
+        hovered.hover()
+        v0 = int(hovered.get_attribute("data-v"))
+        diffs = page.eval_on_selector_all("#heat-ym td.d-up, #heat-ym td.d-eq, #heat-ym td.d-down",
+                                          "tds => tds.map(td => [+(td.dataset.v || 0), td.textContent, td.className])")
+        self.assertGreater(len(diffs), 3)
+        for v, text, cls in diffs:
+            d = v - v0
+            self.assertEqual(text, f"+{d}" if d > 0 else f"−{-d}" if d < 0 else "0")
+            self.assertIn("d-up" if d > 0 else "d-down" if d < 0 else "d-eq", cls)
+        # leaving the table puts the numbers back
+        page.mouse.move(2, 2)
         self.assertEqual(page.eval_on_selector_all(cells, "tds => tds.map(td => td.textContent)"), numbers)
-        self.assertIn("bis 100 %", page.inner_text("#heat-ym .heat-steps"))
+        self.assertEqual(page.locator("#heat-ym td.d-up, #heat-ym td.d-down, #heat-ym td.d-self").count(), 0)
         # dragging across cells opens the species of the whole range
         first, last = page.locator(cells).nth(0), page.locator(cells).nth(13)  # two rows, two months
         first.scroll_into_view_if_needed()

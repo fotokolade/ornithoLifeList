@@ -1,8 +1,8 @@
 /* ---------- heat tables ---------- */
 // One builder for the heat tables (year x month, month x hour, weekday x hour, region x month): cells
-// counted by the table's own metric (records, species or days) in at most five colour steps, optionally
-// relative to each row's own maximum ("Zeilen vergleichen"), totals for every row and column as bars at
-// the edges, a crosshair and tooltip on hover (app.js), and a click on a cell or a total, or a drag across
+// counted by the table's own metric (records, species or days) in at most five colour steps, totals for
+// every row and column as bars at the edges; on hover a crosshair, a tooltip and the other cells of the row
+// and column as the difference to the hovered one (app.js), and a click on a cell or a total, or a drag across
 // several cells, that opens their species. Each table registers its spec under a `kind`; a metric change or a click then redraws
 // only that table (heatCard), not the tab around it.
 /**
@@ -42,11 +42,10 @@ function heatSection(kind, spec) {
   HEATS[kind] = spec;
   return `<div class="heat-wrap" id="heat-${kind}">${heatCard(kind)}</div>`;
 }
-// the controls for a heading: what the table counts, and whether each row is coloured on its own
+// the control for a heading: what the table counts
 function heatMetricPick(kind) {
   return `<label class="ctl">${t("actCountBy")}<select data-heat-metric="${kind}" aria-label="${esc(t("ariaMetric"))}">${HEAT_METRICS.map(([k, l]) =>
-    `<option value="${k}"${k === S.heatMetric[kind] ? " selected" : ""}>${t(l)}</option>`).join("")}</select></label>
-    <label class="ctl"><input type="checkbox" data-heat-norm="${kind}"${S.heatNorm[kind] ? " checked" : ""}> ${t("heatNorm")}</label>`;
+    `<option value="${k}"${k === S.heatMetric[kind] ? " selected" : ""}>${t(l)}</option>`).join("")}</select></label>`;
 }
 function redrawHeat(kind) {
   const box = $(`heat-${kind}`);
@@ -64,9 +63,7 @@ function heatCard(kind) {
   }
   const val = a => heatVal(a, metric);
   const max = Math.max(1, ...cells.flat().map(val)), maxR = Math.max(1, ...rowT.map(val)), maxC = Math.max(1, ...colT.map(val));
-  // "Zeilen vergleichen": every row coloured against its own maximum, the numbers stay the real ones
-  const rel = !!S.heatNorm[kind], rowMax = cells.map(row => Math.max(1, ...row.map(val)));
-  const scale = heatScale(max, rel), range = heatRange(spec, sel);
+  const scale = heatScale(max), range = heatRange(spec, sel);
   const inRange = (r, c) => !!range && r >= range.r0 && r <= range.r1 && c >= range.c0 && c <= range.c1;
   const attrs = (key, name, a) => { const tip = heatTip(name, a);
     return ` data-heat="${kind}" data-key="${esc(key)}" data-tip="${esc(tip)}" role="button" tabindex="0" aria-pressed="${sel === key}" aria-label="${esc(tip)}"`; };
@@ -74,9 +71,9 @@ function heatCard(kind) {
   const body = spec.rows.map((rk, r) => `<tr><td class="y" title="${esc(spec.rowNames[r])}">${spec.rowLabels[r]}</td>${cells[r].map((a, c) => {
     const v = val(a), rng = inRange(r, c) ? " in-rng" : "";
     if (!v) return `<td data-r="${r}" data-c="${c}"${rng ? ` class="${rng.trim()}"` : ""}></td>`;
-    const key = heatKey(rk, c), i = scale.step(rel ? v / rowMax[r] : v);
+    const key = heatKey(rk, c), i = scale.step(v);
     const cls = [scale.hot(i) ? "hot" : "", sel === key ? "sel" : ""].join(" ").trim() + rng;
-    return `<td data-r="${r}" data-c="${c}"${attrs(key, `${spec.rowNames[r]}, ${spec.colNames[c]}`, a)} class="${cls}" style="background:${scale.color(i)}">${spec.numbers ? v : ""}</td>`;
+    return `<td data-r="${r}" data-c="${c}" data-v="${v}"${attrs(key, `${spec.rowNames[r]}, ${spec.colNames[c]}`, a)} class="${cls}" style="background:${scale.color(i)}">${spec.numbers ? v : ""}</td>`;
   }).join("")}${val(rowT[r]) ? `<td class="tot${sel === heatKey(rk, "*") ? " sel" : ""}"${attrs(heatKey(rk, "*"), `${spec.rowNames[r]}, ${total}`, rowT[r])}>
     <span class="tot-bar"><i style="width:${val(rowT[r]) / maxR * 100}%"></i></span><span class="tot-n">${fmtN(val(rowT[r]))}</span></td>` : "<td></td>"}</tr>`).join("");
   const foot = `<tr class="tot-row"><td class="y" title="${esc(total)}">Σ</td>${colT.map((a, c) => {

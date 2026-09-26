@@ -13,6 +13,7 @@
   --heat-lo:#dcefe2; --heat-hi:#1a6334; --heat-ink:#fff;
   --shadow:0 1px 2px rgba(20,32,26,.05),0 3px 10px rgba(20,32,26,.04);
   --mk-lo:#f6c36b; --mk-hi:#b8420f; --cal-empty:#e8ece8;
+  --d-up:#cfe9d6; --d-up-ink:#1b5e20; --d-eq:#e4e6e4; --d-eq-ink:#555; --d-down:#f7d0cc; --d-down-ink:#a4251a;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
@@ -22,6 +23,7 @@
     --k1:#4cc275; --k2:#e0a23c; --k3:#5b9bcf; --k4:#b28ee0; --k5:#e08578; --k6:#4cc2b3;
     --heat-lo:#1f3a2a; --heat-hi:#7ee0a2; --heat-ink:#0f2418;
     --shadow:none; --cal-empty:#252c28;
+    --d-up:#1f4a2c; --d-up-ink:#9be3b0; --d-eq:#2c322e; --d-eq-ink:#b8bfba; --d-down:#4d2420; --d-down-ink:#ffb3a9;
   }
 }
 /* explicit override from the theme select in Einstellungen, regardless of OS preference */
@@ -32,6 +34,7 @@
   --k1:#4cc275; --k2:#e0a23c; --k3:#5b9bcf; --k4:#b28ee0; --k5:#e08578; --k6:#4cc2b3;
   --heat-lo:#1f3a2a; --heat-hi:#7ee0a2; --heat-ink:#0f2418;
   --shadow:none; --cal-empty:#252c28;
+    --d-up:#1f4a2c; --d-up-ink:#9be3b0; --d-eq:#2c322e; --d-eq-ink:#b8bfba; --d-down:#4d2420; --d-down-ink:#ffb3a9;
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
@@ -183,6 +186,12 @@ table.heat{table-layout:fixed;min-width:560px}
 .heat td.hot{color:var(--heat-ink)}
 .heat .m-short{display:none}
 /* heat tables (heat.js): crosshair on the hovered row and column, totals as bars at the right and bottom */
+.heat-x td.d-up,.heat-x td.d-eq,.heat-x td.d-down,.heat-x td.d-self{font-size:.72rem;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;letter-spacing:-.02em}
+.heat-x.hours td.d-up,.heat-x.hours td.d-eq,.heat-x.hours td.d-down,.heat-x.hours td.d-self{font-size:.6rem}
+.heat-x td.d-self{outline:2px solid var(--text);outline-offset:-2px}
+.heat-x td.d-up{background:var(--d-up)!important;color:var(--d-up-ink)!important}
+.heat-x td.d-eq{background:var(--d-eq)!important;color:var(--d-eq-ink)!important}
+.heat-x td.d-down{background:var(--d-down)!important;color:var(--d-down-ink)!important}
 .heat-x td.xh,.heat-x th.xh{box-shadow:inset 0 0 0 100px color-mix(in srgb,var(--text) 8%,transparent)}
 .heat-x td.y.xh{color:var(--accent)}
 .heat-x .tot-h{width:4.6rem;color:var(--muted)}
@@ -202,8 +211,6 @@ table.heat{table-layout:fixed;min-width:560px}
 .heat-steps{flex-wrap:wrap;gap:4px 12px}
 .heat-steps .hs{display:inline-flex;align-items:center;gap:4px;font-variant-numeric:tabular-nums}
 .heat-steps .hs i{display:inline-block;width:14px;height:10px;border-radius:2px}
-.heat-steps .hs-note{color:var(--muted)}
-h2 .ctl input[type=checkbox]{margin:0 2px 0 0;vertical-align:-2px;accent-color:var(--accent)}
 #tip{position:fixed;z-index:60;pointer-events:none;max-width:300px;padding:5px 9px;border-radius:7px;font-size:.75rem;line-height:1.35;
   background:var(--text);color:var(--card);box-shadow:0 4px 14px rgba(0,0,0,.25)}
 table.heat.rm th:first-child{width:11rem}
@@ -363,7 +370,7 @@ footer.meta-footer .btn{flex:0 0 auto;padding:3px 10px}
   .toc{display:none!important}
   tr.grp .grp-t::before{display:none}
   .wish-io{display:none!important}
-  .cal-panel,details.tour-settings,#tip,h2 .ctl{display:none!important}
+  .cal-panel,details.tour-settings,#tip{display:none!important}
   .heat td.sel,.cal-day.cal-sel{outline:none!important}
   .printonly{display:block}
   section.tab{display:block!important;padding-top:0}

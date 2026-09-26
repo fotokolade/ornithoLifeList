@@ -324,8 +324,6 @@ function init() {
     refocus(`td[data-heat="${kind}"][data-key="${CSS.escape(key)}"]`);
   });
   $$("main").addEventListener("change", e => {
-    const norm = e.target.dataset?.heatNorm;
-    if (norm) { S.heatNorm[norm] = e.target.checked; redrawHeat(norm); return; }
     const kind = e.target.dataset?.heatMetric;
     if (!kind) return;
     S.heatMetric[kind] = e.target.value;
@@ -385,15 +383,41 @@ function init() {
     placeTip(e.clientX, e.clientY);
   };
   document.addEventListener("mousemove", showTip);
+  // the other cells of the hovered cell's row and column show the difference to it: +4 green, 0 grey, −10 red
+  /** @type {any[]} */
+  let diffed = [], hovered = null;
+  const clearDiff = () => {
+    for (const c of diffed) { c.classList.remove("d-up", "d-eq", "d-down", "d-self"); c.textContent = c.dataset.o; delete c.dataset.o; }
+    diffed = [];
+  };
   document.addEventListener("mouseover", e => {
     showTip(e);
+    const cell = /** @type {any} */ (e.target).closest?.("table.heat-x td, table.heat-x th") || null;
+    if (cell === hovered) return;  // moving within the same cell
+    hovered = cell;
     for (const c of crossed) c.classList.remove("xh");
     crossed = [];
-    const cell = /** @type {any} */ (e.target).closest?.("table.heat-x td, table.heat-x th");
+    clearDiff();
     if (cell) {
       if (cell.parentElement.parentElement.tagName !== "THEAD") crossed.push(...cell.parentElement.children);
       if (cell.dataset.c !== undefined) crossed.push(...cell.closest("table").querySelectorAll(`[data-c="${cell.dataset.c}"]`));
       for (const c of crossed) c.classList.add("xh");
+      if (cell.matches("tbody td[data-r]")) {
+        const v0 = +(cell.dataset.v || 0);
+        // the hovered cell itself shows its value, also in the tables that write no numbers
+        cell.dataset.o = cell.textContent;
+        cell.textContent = fmtN(v0);
+        cell.classList.add("d-self");
+        diffed.push(cell);
+        for (const c of crossed) {
+          if (c === cell || !c.matches("tbody td[data-r]")) continue;
+          const d = +(c.dataset.v || 0) - v0;
+          c.dataset.o = c.textContent;
+          c.textContent = d > 0 ? `+${fmtN(d)}` : d < 0 ? `−${fmtN(-d)}` : "0";
+          c.classList.add(d > 0 ? "d-up" : d < 0 ? "d-down" : "d-eq");
+          diffed.push(c);
+        }
+      }
     }
   });
   document.addEventListener("focusin", e => {
