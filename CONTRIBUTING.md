@@ -31,7 +31,7 @@ Bitte beachten:
 | `build.py`, `build.bat`, `lifelist.spec` | bauen die `lifelist.exe` |
 | `.gitignore` | hält persönliche Daten aus dem Repository heraus: `export_*.json`, `lifelist*.html`, `reference/` und den GBIF-Zwischenspeicher |
 | `.github/workflows/release.yml` | baut die exe für ein Release |
-| `verify.ps1`, `verify.bat`, `verify.sh` | prüfen die Prüfsumme der `lifelist.exe` (Windows bzw. Linux/macOS) |
+| `verify.ps1`, `verify.bat` | prüfen die Prüfsumme der `lifelist.exe` |
 | `tools/` | Werkzeuge zur Pflege der Referenzdaten und Bibliotheken, für Beispieldaten und Screenshots |
 | `docs/screenshots/` | Bilder für die README |
 | `HOWTO.md`, `howto/` | Anleitung zum Export mit Screenshots |

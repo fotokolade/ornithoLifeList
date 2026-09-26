@@ -94,8 +94,6 @@ Auf der [Releases-Seite](../../releases) gibt es eine fertige `lifelist.exe`. Si
 
 Ohne die Skripte geht es auch von Hand in PowerShell: `Get-FileHash lifelist.exe -Algorithm SHA256` ausführen und das Ergebnis mit der Prüfsumme auf der Releases-Seite vergleichen.
 
-Unter Linux oder macOS, etwa bevor du die exe an einen Windows-Rechner weitergibst: `lifelist.exe`, `lifelist.exe.sha256` und `verify.sh` vom Release in einen Ordner legen und dort `sh verify.sh` ausführen. Es meldet „OK“ oder eine Warnung, genau wie `verify.bat`. Ohne das Skript geht es auch mit `sha256sum -c lifelist.exe.sha256` (macOS: `shasum -a 256 -c lifelist.exe.sha256`).
-
 ## Aktualisieren
 
 - **Mit git** (Projekt per `git clone` heruntergeladen): `python update.py` ausführen, unter Windows reicht ein Doppelklick auf `update.bat`. Das Skript holt die neue Version von GitHub und zeigt, was sich geändert hat. Deine Exporte und HTML-Dateien bleiben unberührt. Hast du Dateien des Programms selbst verändert, nennt das Skript sie und fragt, bevor es sie ersetzt. Ohne ein „y“ überschreibt es nichts.
