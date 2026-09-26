@@ -6,7 +6,7 @@ Macht aus deinem [ornitho.de](https://www.ornitho.de/)-Export eine interaktive V
 
 - **Übersicht:** Kennzahlen, Kalender deines Birding-Jahres, Lebenslistenkurve, neueste Lifer, Arten pro Jahr und Monat
 - **Lebensliste:** alle Arten, durchsuchbar und sortierbar, mit Details zu jeder Art
-- **Ziele:** Arten, die dir noch fehlen, mit Saisonhinweis, wann sie hier vorkommen, und eigener Wunschliste
+- **Ziele:** Arten, die dir noch fehlen, mit Saisonhinweis, wann sie hier vorkommen, und eigener Wunschliste; dazu Reiseziele: wo und in welchem Monat du fehlende Arten am ehesten siehst (Deutschland nach Bundesland oder Landkreis, Europa, sobald die Daten dafür da sind)
 - **Tagesaktivität:** zu welcher Uhrzeit, an welchen Wochentagen und in welchen Monaten du unterwegs bist
 - **Regionen:** Arten nach Bundesland, Landkreis, Gemeinde und Ort, und wann du dich wo aufhältst
 - **Touren:** Spaziergänge und Radtouren, rekonstruiert aus Meldungen, die zeitlich und räumlich nah beieinanderliegen, mit Strecke auf der Karte
@@ -110,6 +110,8 @@ Ob es eine neue Version gibt, zeigt `python lifelist.py --check-update`.
 
 Beides steckt fertig aufbereitet in `species_reference.json`.
 
+- **Reiseziele** (Tab „Ziele“): öffentliche Beobachtungen bei [GBIF](https://www.gbif.org/), nur Datensätze unter CC0 oder CC BY. Für jedes Gebiet und jeden Monat ist der Anteil einer Art an allen Vogelmeldungen dort gespeichert, in Stufen und nur für die besten Gebiete jeder Art. Die Daten liegen in `data/gbif_planner_*.json`. Quelle: GBIF.org, mit Abrufdatum und Filtern in jeder Datei (`meta.citation`).
+
 ## Für Entwickler
 
 ### Projektaufbau
@@ -121,6 +123,7 @@ Beides steckt fertig aufbereitet in `species_reference.json`.
 | `src/*.js` | JavaScript der Seite, aufgeteilt nach Tab und Thema (`counties.js`: Namen der Landkreise zu ornithos Kreiskürzeln) |
 | `vendor/` | mitgelieferte Bibliotheken Leaflet, Leaflet.markercluster und Chart.js |
 | `species_reference.json` | Artnamen und Saisonzeiträume |
+| `data/` | Daten der Reiseziele aus GBIF (`tools/fetch_gbif_planner.py`) |
 | `tests/` | automatische Tests mit erfundenen Beispieldaten |
 | `update.py`, `update.bat` | aktualisieren eine git-Kopie |
 | `build.py`, `build.bat`, `lifelist.spec` | bauen die `lifelist.exe` |
@@ -182,6 +185,7 @@ Zum Ausprobieren lässt sich die exe auch selbst bauen: unter Windows `python bu
 
 - `tools/extract_species_reference.py` aktualisiert `species_reference.json` aus der ornitho-Referenzliste (`reference/ornitho-Referenzliste-Arten-*.xlsx`, braucht `pip install openpyxl`). Der Ordner `reference/` ist wegen unklarer Weitergaberechte nicht im Repository.
 - `tools/fetch_occurrence_windows.py` ermittelt die Beobachtungszeiträume der Zug- und Gastvögel über die öffentliche GBIF-API.
+- `tools/fetch_gbif_planner.py` erzeugt die Daten der Reiseziele (`data/gbif_planner_de-states.json`, `_de.json`, `_eu.json`) über die GBIF-API. Zuerst `--check`, dann `--scope de-states`, `--scope de` oder `--scope eu`. Die Antworten werden in `tools/.gbif_cache/` zwischengespeichert: Ein abgebrochener Lauf setzt dort wieder an, und mit `--offline` lassen sich die Dateien aus dem Zwischenspeicher neu berechnen, ohne GBIF erneut zu fragen.
 - `tools/update_vendor.py` lädt die Bibliotheken in `vendor/` neu, zum Beispiel für ein Versions-Update.
 
 Für das normale Erstellen der Lebensliste werden diese Werkzeuge nicht gebraucht.

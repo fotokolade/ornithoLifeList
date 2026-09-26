@@ -45,6 +45,9 @@ LICENSES = ["CC0_1_0", "CC_BY_4_0"]
 LEVELS = [0.0002, 0.0005, 0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1]
 # fewer bird records than this in a region and month say too little: its cells stay 0 (the totals still tell)
 MIN_CELL_TOTAL = 100
+# a species needs this many records in a region and month for a step there: one or two stray records
+# (a vagrant, a mistake) in a month with few records would otherwise give a high share
+MIN_CELL_RECORDS = 3
 # largest acceptable output file; the number of regions kept per species is lowered until it fits
 BUDGET_BYTES = 400_000
 TOP_REGION_STEPS = [60, 50, 40, 30, 25, 20, 15, 10]
@@ -155,7 +158,7 @@ def level_of(share, levels=LEVELS):
     return sum(share >= b for b in levels)
 
 
-def aggregate(months_by_region, min_records, min_cell_total=MIN_CELL_TOTAL, levels=LEVELS):
+def aggregate(months_by_region, min_records, min_cell_total=MIN_CELL_TOTAL, levels=LEVELS, min_cell_records=MIN_CELL_RECORDS):
     """months_by_region: per region the output of region_months().
     Returns (totals: per region 12 ints, steps: {species: {region index: [12 steps]}}) for the species with
     at least min_records records in the whole scope and at least one step above 0."""
@@ -171,7 +174,7 @@ def aggregate(months_by_region, min_records, min_cell_total=MIN_CELL_TOTAL, leve
             if total < min_cell_total:
                 continue
             for s, n in per_species.items():
-                if records[s] < min_records:
+                if records[s] < min_records or n < min_cell_records:
                     continue
                 lv = level_of(n / total, levels)
                 if lv:
@@ -223,11 +226,13 @@ def ornitho_names(api):
 
 
 def species_info(api, keys, known):
-    """{key: {latin, alias, de, en}}: names from the ornitho.de list where it has the species, else GBIF's."""
+    """{key: {latin, alias, de, en}}: names from the ornitho.de list where it has the species, else GBIF's; no hybrids."""
     info = {}
     for i, key in enumerate(sorted(keys), 1):
         sp = api.get(f"species/{key}", [])
         latin = sp.get("canonicalName") or sp.get("scientificName") or str(key)
+        if " x " in latin or "×" in latin or sp.get("notho"):
+            continue  # hybrids: no species to look for (left out of the file)
         if key in known:
             orn, de, en = known[key]
         else:
@@ -263,6 +268,7 @@ def run(scope, years, offline=False):
         "filters": {"taxonKey": AVES, "basisOfRecord": "HUMAN_OBSERVATION", "occurrenceStatus": "PRESENT",
                     "hasGeospatialIssue": False, "licenses": LICENSES, "countries": sorted(sc["countries"])},
         "regionLevel": f"GADM level {sc['level']}", "levels": LEVELS, "minCellTotal": MIN_CELL_TOTAL,
+        "minCellRecords": MIN_CELL_RECORDS,
         "minRecords": sc["min_records"],
         "citation": f"GBIF.org ({today}): occurrence counts via the GBIF occurrence search API "
                     f"(birds, human observations {years[0]}-{years[1]}, licences CC0 and CC BY). https://www.gbif.org",

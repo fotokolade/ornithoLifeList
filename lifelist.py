@@ -42,7 +42,7 @@ FLAG_COLLECTIVE = 2
 # order stands in for one: later files rely on function hoisting to see earlier consts/functions.
 APP_JS_FILES = [
     "i18n.js", "counties.js", "data.js", "charts.js", "heat.js", "overview.js", "list.js",
-    "regions.js", "targets.js", "activity.js", "tours.js", "map.js", "app.js",
+    "regions.js", "targets.js", "planner.js", "activity.js", "tours.js", "map.js", "app.js",
 ]
 
 # Leaflet, its marker-cluster plugin, and Chart.js are vendored (see vendor/, tools/update_vendor.py)
@@ -215,10 +215,26 @@ def build_data(sightings, english_by_latin):
     return {"sp": sp_rows, "pl": place_rows, "obs": obs}
 
 
+# the holiday planner's data per scope, made from GBIF by tools/fetch_gbif_planner.py; a missing file
+# just leaves its scope out of the planner
+PLANNER_SCOPES = ["de-states", "de", "eu"]
+
+
+def load_planner_data():
+    out = {}
+    for scope in PLANNER_SCOPES:
+        path = os.path.join(RESOURCES, "data", f"gbif_planner_{scope}.json")
+        if os.path.exists(path):
+            with open(path, encoding="utf-8") as fh:
+                out[scope] = json.load(fh)
+    return out
+
+
 def build_page_data(sightings, source_name, redact):
     english_by_latin, wishlist_rows = load_species_reference()
     data = build_data(sightings, english_by_latin)
     data["euro"] = wishlist_rows
+    data["planner"] = load_planner_data()
     if redact:  # remove place data from the file itself, not just from the display
         data["pl"] = [["", "", r[2], r[3], 0, 0] for r in data["pl"]]
         data["obs"] = [r[:7] for r in data["obs"]]

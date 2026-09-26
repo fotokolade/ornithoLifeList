@@ -1,7 +1,7 @@
 # PyInstaller spec for the standalone lifelist.exe (see README's release section).
 # Build with:  pyinstaller lifelist.spec
 # Bundles the same files lifelist.py reads at dev time (template.html, src/*.js, vendor/, and
-# species_reference.json) into the exe itself; only the user's export_*.json and the generated
+# species_reference.json, data/ for the holiday planner) into the exe itself; only the user's export_*.json and the generated
 # lifelist.html live next to the exe at runtime.
 a = Analysis(
     ["lifelist.py"],
@@ -10,6 +10,7 @@ a = Analysis(
     datas=[
         ("template.html", "."),
         ("species_reference.json", "."),
+        ("data", "data"),
         ("src", "src"),
         ("vendor", "vendor"),
     ],

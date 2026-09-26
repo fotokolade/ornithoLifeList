@@ -99,6 +99,7 @@ if (initialTheme !== "system") document.documentElement.setAttribute("data-theme
  * @property {{k: "name"|"season", d: 1|-1}} wishSort - wishlist table sort
  * @property {Set<string>|null} wishOpen - expanded wishlist season groups; null until the user toggles one (see wishOpenGroups())
  * @property {string} wishQ - wishlist search text
+ * @property {{scope: string, month: number, view: "dest"|"sp", q: string, open: string|null, all: boolean}} plan - holiday planner: GBIF scope, month (0 = whole year), view, search, open destination, all rows shown
  * @property {string|null} calDay - "YYYY-MM-DD" of the day opened in the overview calendar
  * @property {Object<string, string>} heatMetric - what each heat table counts ("obs", "species", "days"), by its kind (see heat.js)
  * @property {Object<string, string|null>} heatSel - the open cell (or dragged range) of each heat table, by its kind
@@ -117,7 +118,7 @@ const TIME_START = { y: Math.min(TODAY_Y, MAX_Y), m: TODAY_M };
 const S = { tab: "overview", region: "all", year: TIME_START.y, month: TIME_START.m, timeAll: true, lang: initialLang, theme: initialTheme,
   escaped: false, collective: false, atlasF: "all", actMetric: "obs", redact: !!RAW.meta.redacted, metric: "life", q: "", sort: "nr", dir: -1, open: new Set(),
   regSort: {}, regAll: {}, targetSrc: "all", customTargets: loadCustomTargets(), wishSort: { k: "season", d: 1 },
-  wishOpen: null, wishQ: "", calDay: null, heatMetric: { ym: "species", m: "obs", w: "obs", rm: "days" }, heatSel: {}, heatNorm: {}, regMonthLvl: "c", tourCfg: null, tourSetOpen: false, tourSort: { k: "date", d: -1 }, tourOpen: new Set(), tourAll: false, tourRoute: null, focusSp: null };
+  wishOpen: null, wishQ: "", plan: { scope: "de", month: 0, view: "dest", q: "", open: null, all: false }, calDay: null, heatMetric: { ym: "species", m: "obs", w: "obs", rm: "days" }, heatSel: {}, heatNorm: {}, regMonthLvl: "c", tourCfg: null, tourSetOpen: false, tourSort: { k: "date", d: -1 }, tourOpen: new Set(), tourAll: false, tourRoute: null, focusSp: null };
 T = STR[S.lang];
 
 /* ---------- helpers ---------- */

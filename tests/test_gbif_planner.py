@@ -25,13 +25,15 @@ class FakeApi:
             if p["gadmGid"] == "DEU.1.1_1":
                 total = 50 if m == 1 else 1000
                 return {"count": total, "facets": [{"counts": [{"name": "1", "count": total // 10}, {"name": "2", "count": 1}]}]}
-            return {"count": 2000, "facets": [{"counts": [{"name": "1", "count": 5}, {"name": "3", "count": 40 if m in (5, 6) else 0}]}]}
+            return {"count": 2000, "facets": [{"counts": [{"name": "1", "count": 5}, {"name": "3", "count": 40 if m in (5, 6) else 0},
+                                                          {"name": "4", "count": 30}]}]}
         if path == "species/match":
             return {"matchType": "EXACT", "rank": "SPECIES", "usageKey": {"Parus major": 1}.get(p["name"], 99)}
         if path.startswith("species/") and path.endswith("vernacularNames"):
             return {"results": [{"vernacularName": "Testvogel", "language": "deu"}]}
         if path.startswith("species/"):
-            return {"canonicalName": {"species/1": "Parus major", "species/2": "Rara avis", "species/3": "Upupa epops"}[path]}
+            return {"canonicalName": {"species/1": "Parus major", "species/2": "Rara avis", "species/3": "Upupa epops",
+                                     "species/4": "Anser anser x Branta canadensis"}[path]}
         raise AssertionError((path, params))
 
 
@@ -54,6 +56,10 @@ class GbifPlannerTest(unittest.TestCase):
         self.assertEqual(steps[1][1][0], 4)       # 0.25 %
         self.assertNotIn(2, steps)                # 11 records in all: below min_records
         self.assertEqual(steps[3][1][0], 7)       # 2 %
+        # two stray records in a month with few records: no step, however high their share
+        _, steps = g.aggregate([[(120, {4: 2, 5: 3})] * 12], min_records=1)
+        self.assertNotIn(4, steps)
+        self.assertEqual(steps[5][0][0], 7)       # 2.5 %
 
     def test_best_regions_and_budget(self):
         cells = {0: [1] * 12, 1: [9] + [0] * 11, 2: [5] * 12, 3: [5] * 11 + [0]}
@@ -83,7 +89,7 @@ class GbifPlannerTest(unittest.TestCase):
         self.assertEqual(data["regions"][0], {"id": "DEU.1.1_1", "name": "Kreis Nord", "parent": "Nordland", "country": "DE"})
         self.assertEqual(data["totals"][0][:2], [50, 1000])
         sp = {s["latin"]: s for s in data["species"]}
-        self.assertEqual(sorted(sp), ["Parus major", "Upupa epops"])  # Rara avis: 11 records
+        self.assertEqual(sorted(sp), ["Parus major", "Upupa epops"])  # Rara avis: 11 records; no hybrid
         self.assertEqual(sp["Parus major"]["de"], "Kohlmeise")
         self.assertEqual(sp["Parus major"]["cells"]["0"], "099999999999")
         self.assertEqual(sp["Upupa epops"]["de"], "Testvogel")

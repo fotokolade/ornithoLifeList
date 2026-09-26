@@ -153,7 +153,7 @@ class PageTest(unittest.TestCase):
     def test_wishlist_groups_fold_and_search(self):
         page = self.open(hash="#targets")
         species_rows = "#wish-out tbody tr:not(.grp)"
-        total = int(page.inner_text("#tab-targets h2:last-of-type small"))
+        total = int(page.inner_text("#tab-targets h2:nth-of-type(2) small"))
         # only the groups worth acting on now start open
         self.assertEqual(page.get_attribute('[data-grp="later"]', "aria-expanded"), "false")
         folded = page.locator(species_rows).count()
@@ -267,6 +267,33 @@ class PageTest(unittest.TestCase):
         obs = int(page.locator('#heat-ym tbody td[data-heat]:not(.tot)').first.inner_text())
         self.assertGreater(obs, species)
         self.assertEqual(page.locator("#heat-ym .cal-panel").count(), 0)  # a new metric closes the open cell
+        self.assertEqual(self.errors, [])
+
+    def test_holiday_planner(self):
+        page = self.open(hash="#targets")
+        scopes = page.eval_on_selector_all("#plan-scope option", "os => os.map(o => o.value)")
+        self.assertIn("de", scopes)
+        rows = page.locator("tr[data-plan-r]")
+        self.assertGreater(rows.count(), 5)
+        # the ranking: most missing species with a good chance first
+        good = [int(x) for x in page.eval_on_selector_all("tr[data-plan-r] td:nth-child(4)", "tds => tds.map(td => td.textContent)")]
+        self.assertEqual(good, sorted(good, reverse=True))
+        rows.first.click()
+        self.assertGreater(page.locator("table.plan-sp tr").count(), 0)
+        self.assertEqual(page.get_attribute("tr[data-plan-r] >> nth=0", "aria-expanded"), "true")
+        # a species seen in the sample export is not missing
+        self.assertNotIn("Kohlmeise", page.inner_text("#plan-out"))
+        page.select_option("#plan-view", "sp")
+        self.assertGreater(page.locator("#plan-out tbody tr").count(), 5)
+        page.fill("#plan-q", "Alpenbraunelle")
+        self.assertEqual(page.locator("#plan-out tbody tr").count(), 1)
+        self.assertIn("Garmisch", page.inner_text("#plan-out"))
+        page.fill("#plan-q", "")
+        page.select_option("#plan-month", "1")
+        page.select_option("#plan-scope", scopes[0])
+        self.assertTrue(page.inner_text("#plan-out").strip())
+        page.select_option("#f-lang", "en")
+        self.assertIn("Destinations", page.inner_text("#tab-targets"))
         self.assertEqual(self.errors, [])
 
     def test_heat_steps_compare_rows_and_range(self):

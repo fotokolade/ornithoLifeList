@@ -209,6 +209,15 @@ table.heat.rm th:first-child{width:11rem}
 table.wtable td{vertical-align:middle}
 table.wtable .strip-cell{width:45%}
 .season-strip,.season-months{position:relative;display:block;max-width:300px}
+.plan-t td{vertical-align:middle}
+.plan-t .strip-cell{width:34%}
+.plan-t td.plan-bar{width:18%;min-width:60px}
+.plan-strip{display:grid;grid-template-columns:repeat(12,1fr);gap:2px;max-width:300px}
+.plan-strip i{height:12px;border-radius:2px;background:var(--bar-soft)}
+.plan-strip i.now{outline:2px solid var(--text);outline-offset:-1px}
+table.plan-sp{margin:0}
+table.plan-sp td{padding:4px 6px;background:transparent!important}
+.small-inline{color:var(--muted);font-size:.74rem}
 .season-strip{height:12px;border-radius:3px;background:var(--bar-soft);
   background-image:repeating-linear-gradient(90deg,transparent 0 calc(100% / 12 - 1px),var(--card) calc(100% / 12 - 1px) calc(100% / 12))}
 .season-strip i{position:absolute;top:0;bottom:0;border-radius:2px;opacity:.9}
@@ -361,7 +370,7 @@ footer.meta-footer .btn{flex:0 0 auto;padding:3px 10px}
   .hide-sm{display:revert!important}
   th.hide-sm,td.hide-sm{display:table-cell!important}
   .show-sm{display:none!important}
-  .heat-steps .hs i,.wd-ring circle,.bar,.bar i,.heat td,.pheno div,.cal-day,.season-strip,.season-strip *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .heat-steps .hs i,.wd-ring circle,.bar,.bar i,.heat td,.pheno div,.cal-day,.season-strip,.season-strip *,.plan-strip i{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   details.info summary{display:none!important}
   h2 + details.info{margin-top:0;text-align:left}
   h2 .ctl select{appearance:none;border:0;padding:0;background:none;font-weight:600;color:var(--text)}

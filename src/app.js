@@ -402,10 +402,10 @@ function init() {
     tip.textContent = el.dataset.tip; tip.hidden = false; placeTip(r.left, r.bottom - 10);
   });
   document.addEventListener("scroll", () => { tip.hidden = true; }, true);
-  // table cells that open a details panel (role="button") react to Enter/Space like real buttons
+  // table cells that open a details panel (role="button") and the planner's destinations react to Enter/Space like real buttons
   document.addEventListener("keydown", e => {
     const el = /** @type {any} */ (e.target);
-    if (el.matches?.('td[role="button"]') && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); el.click(); }
+    if (el.matches?.('td[role="button"], tr[data-plan-r]') && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); el.click(); }
   });
   $("list-curve").addEventListener("click", e => {
     const sp = e.target.closest("[data-sp]");
@@ -446,6 +446,9 @@ function init() {
 
   $("tab-targets").addEventListener("change", e => {
     if (e.target.id === "tgt-src") { S.targetSrc = e.target.value; renderTargets(); }
+    if (e.target.id === "plan-scope") { S.plan.scope = e.target.value; S.plan.open = null; S.plan.all = false; renderTargets(); }
+    if (e.target.id === "plan-month") { S.plan.month = +e.target.value; S.plan.all = false; renderTargets(); }
+    if (e.target.id === "plan-view") { S.plan.view = e.target.value === "sp" ? "sp" : "dest"; S.plan.q = ""; S.plan.all = false; renderTargets(); }
     if (e.target.id === "tgt-import" && e.target.files[0]) {
       e.target.files[0].text().then(text => {
         const res = importCustomTargets(text);
@@ -462,8 +465,12 @@ function init() {
   });
   $("tab-targets").addEventListener("input", e => {
     if (e.target.id === "wish-q") { S.wishQ = e.target.value; $("wish-out").innerHTML = wishTableHtml(); }
+    if (e.target.id === "plan-q") { S.plan.q = e.target.value; redrawPlanner(); }
   });
   $("tab-targets").addEventListener("click", e => {
+    const dest = e.target.closest("[data-plan-r]");
+    if (dest) { S.plan.open = S.plan.open === dest.dataset.planR ? null : dest.dataset.planR; redrawPlanner(); return; }
+    if (e.target.closest("[data-plan-more]")) { S.plan.all = !S.plan.all; redrawPlanner(); return; }
     const grp = e.target.closest("[data-grp]");
     if (grp) { toggleWishGroup(grp.dataset.grp); return; }
     const th = e.target.closest("th[data-k]");
