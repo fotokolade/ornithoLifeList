@@ -29,11 +29,10 @@ Bitte beachten:
 | `update.py`, `update.bat` | aktualisieren eine git-Kopie |
 | `build.py`, `build.bat`, `lifelist.spec` | bauen die `lifelist.exe` |
 | `.gitignore` | hält persönliche Daten aus dem Repository heraus: `export_*.json`, `lifelist*.html`, `reference/` und den GBIF-Zwischenspeicher |
-| `.github/workflows/release.yml` | baut die exe und veröffentlicht das Release ([docs/maintenance.md](docs/maintenance.md)) |
+| `.github/workflows/release.yml` | baut die exe für ein Release |
 | `verify.ps1`, `verify.bat` | prüfen die Prüfsumme der `lifelist.exe` |
 | `tools/` | Werkzeuge zur Pflege der Referenzdaten und Bibliotheken, für Beispieldaten und Screenshots |
 | `docs/screenshots/` | Bilder für die README |
-| `docs/maintenance.md` | Pflege durch die Projektleitung: Releases, Referenzdaten, Screenshots |
 | `HOWTO.md`, `howto/` | Anleitung zum Export mit Screenshots |
 
 ## Aufbau des JavaScript
