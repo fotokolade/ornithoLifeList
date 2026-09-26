@@ -126,7 +126,7 @@ function openPrintDialog() {
 }
 function renderChrome() {
   $("h-title").textContent = t("title");
-  $("h-sub").textContent = t("subtitle", RAW.meta.source, fmtN(OBS.length)) + " · " + t("version", APP_VERSION);
+  $("h-sub").textContent = (RAW.meta.source ? t("subtitle", RAW.meta.source, fmtN(OBS.length)) : t("subtitleNoFile", fmtN(OBS.length))) + " · " + t("version", APP_VERSION);
   $("o-sum").textContent = t("optsSummary");
   $("o-theme-t").textContent = t("themeLabel");
   $("o-theme").innerHTML = ["system", "light", "dark"].map(v => `<option value="${v}">${t("theme" + v[0].toUpperCase() + v.slice(1))}</option>`).join("");
@@ -268,7 +268,7 @@ function init() {
     document.documentElement.setAttribute("data-theme", "light");  // paper is always light, also for the canvas charts
     S.q = ""; S.open = new Set(); S.atlasF = "all"; S.regAll = Object.fromEntries(LEVELS.map(lv => [lv.lvl, true])); S.targetSrc = "all";
     S.wishQ = ""; S.wishOpen = new Set(WISH_GROUPS.map(([g]) => g));
-    $("h-print").textContent = t("printed", new Date().toLocaleDateString(S.lang === "en" ? "en-GB" : "de-DE")) + (S.region === "all" ? "" : ", " + $("f-region").selectedOptions[0].text);
+    $("h-print").textContent = t("printed", new Date().toLocaleDateString(S.lang === "en" ? "en-GB" : "de-DE")) + (S.region === "all" ? "" : ", " + $("f-region").selectedOptions[0].text) + " · " + t("version", APP_VERSION);
     curveForPrint = true;
     // only the chosen tabs; the first one starts right under the header, the others on a new page
     const chosen = printableTabs();

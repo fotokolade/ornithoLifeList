@@ -674,6 +674,9 @@ class PageTest(unittest.TestCase):
         self.assertEqual(page.eval_on_selector("#list-curve", "e => getComputedStyle(e).display"), "none")  # the overview has it
         # a heading and the info text under it stay with what follows
         self.assertEqual(page.eval_on_selector("h2 + details.info", "e => getComputedStyle(e).breakAfter"), "avoid")
+        # no footer that could end up alone on a last page; the date and version stand in the header
+        self.assertEqual(page.eval_on_selector("footer.meta-footer", "e => getComputedStyle(e).display"), "none")
+        self.assertIn("Version", page.inner_text("#h-print"))
 
     def test_browser_console_stays_clean(self):
         page = self.open()

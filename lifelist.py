@@ -261,7 +261,7 @@ def build_page_data(sightings, source_name, redact):
         data["obs"] = [r[:7] for r in data["obs"]]
     data["meta"] = {
         "redacted": redact,
-        "source": source_name,
+        "source": "" if redact else source_name,  # the file name carries the ornitho user ID
     }
     return data
 

@@ -103,12 +103,14 @@ class RenderTest(unittest.TestCase):
     def test_redact_removes_place_data(self):
         data = lifelist.build_page_data(sample_export(), "export_test.json", redact=True)
         self.assertTrue(data["meta"]["redacted"])
+        self.assertEqual(data["meta"]["source"], "")
         for name, muni, state, county, lat, lon in data["pl"]:
             self.assertEqual((name, muni, lat, lon), ("", "", 0, 0))
             self.assertTrue(state)
         html = lifelist.render_html(data)
         self.assertNotIn("Teich am Wald", html)
         self.assertNotIn("Musterdorf", html)
+        self.assertNotIn("export_test", html)
 
     def test_placeholders_are_all_replaced(self):
         html = lifelist.render_html(lifelist.build_page_data(sample_export(), "export_test.json", redact=False))

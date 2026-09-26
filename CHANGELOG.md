@@ -5,7 +5,8 @@ Die neueste Version steht oben. Die Downloads (`lifelist.exe`) gibt es auf der [
 ## Noch nicht veröffentlicht
 
 ### Seite
-- **PDF:** Das Datum „Stand: …“ steht rechtsbündig in der Titelzeile.
+- **PDF:** Das Datum „Stand: …“ steht mit der Version rechtsbündig in der Titelzeile; die Fußzeile fällt weg, sie landete manchmal allein auf einer sonst leeren letzten Seite.
+- **Weitergeben (`--redact`):** Die Seite nennt den Namen der Exportdatei nicht mehr, denn er enthält die ornitho-Benutzernummer.
 
 ## 0.5.6 (2026-09-26)
 
