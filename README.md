@@ -94,7 +94,7 @@ Ohne die Skripte geht es auch von Hand in PowerShell: `Get-FileHash lifelist.exe
 
 ## Aktualisieren
 
-- **Mit git** (Projekt per `git clone` heruntergeladen): `python update.py` ausführen, unter Windows reicht ein Doppelklick auf `update.bat`. Das Skript holt die neue Version von GitHub und zeigt, was sich geändert hat. Deine Exporte und HTML-Dateien bleiben unberührt. Hast du Dateien des Programms selbst geändert (zum Beispiel die Screenshots neu erzeugt), nennt das Skript sie und fragt, ob es die Änderungen verwerfen soll. Genauso fragt es, wenn eigene Dateien einer Datei aus dem Update im Weg liegen. Ohne ein „y“ überschreibt es nichts. Deine eigenen neuen Dateien bleiben in jedem Fall erhalten.
+- **Mit git** (Projekt per `git clone` heruntergeladen): `python update.py` ausführen, unter Windows reicht ein Doppelklick auf `update.bat`. Das Skript holt die neue Version von GitHub und zeigt, was sich geändert hat. Deine Exporte und HTML-Dateien bleiben unberührt. Hast du Dateien des Programms selbst verändert, nennt das Skript sie und fragt, bevor es sie ersetzt. Ohne ein „y“ überschreibt es nichts.
 - **Ohne git:** die neue Version von der [Releases-Seite](../../releases) herunterladen.
 
 Ob es eine neue Version gibt, zeigt `python lifelist.py --check-update`.
@@ -115,85 +115,15 @@ Ob es eine neue Version gibt, zeigt `python lifelist.py --check-update`.
   - Für Arten, die in Deutschland oder Luxemburg brüten, gilt das offizielle Brutzeitfenster von ornitho.de.
   - Für Zug- und Gastvögel, die hier nicht brüten, wird ein typischer Beobachtungszeitraum aus öffentlichen Fundmeldungen bei [GBIF](https://www.gbif.org/) abgeleitet.
 
-Beides steckt fertig aufbereitet in `species_reference.json`.
+- **Reiseziele** und die Monate der **Ausnahmegäste:** öffentliche Beobachtungen bei [GBIF](https://www.gbif.org/) (Quelle: GBIF.org), nur Datensätze unter CC0 oder CC BY. Das Abrufdatum steht im Infotext der Reiseziele.
 
-- **Reiseziele** (Tab „Ziele“): öffentliche Beobachtungen bei [GBIF](https://www.gbif.org/), nur Datensätze unter CC0 oder CC BY. Für jedes Gebiet und jeden Monat ist der Anteil einer Art an allen Vogelmeldungen dort gespeichert, in Stufen und nur für die besten Gebiete jeder Art. Die Daten liegen in `data/gbif_planner_*.json`. Quelle: GBIF.org, mit Abrufdatum und Filtern in jeder Datei (`meta.citation`).
+Alle diese Daten sind in der Lebensliste schon enthalten; beim Erstellen wird nichts aus dem Internet geladen.
 
-## Für Entwickler
+## Mitmachen
 
-### Projektaufbau
+Fehler gefunden oder eine Idee? Schreib ein [Issue](../../issues) auf GitHub. Wer selbst am Code mitarbeiten möchte, findet in [CONTRIBUTING.md](CONTRIBUTING.md), wie das Projekt aufgebaut ist, wie man die Tests startet und wie ein Pull Request abläuft.
 
-| Datei / Ordner | Inhalt |
-| --- | --- |
-| `lifelist.py` | liest den Export und erstellt die HTML-Seite |
-| `template.html` | Vorlage der Seite (HTML und CSS) mit den Platzhaltern `__DATA_JSON__`, `__APP_JS__`, `__VENDOR_JS__`, `__VENDOR_CSS__` |
-| `src/*.js` | JavaScript der Seite, aufgeteilt nach Tab und Thema (`counties.js`: Namen der Landkreise zu ornithos Kreiskürzeln) |
-| `vendor/` | mitgelieferte Bibliotheken Leaflet, Leaflet.markercluster und Chart.js |
-| `species_reference.json` | Artnamen und Saisonzeiträume |
-| `data/` | Daten der Reiseziele aus GBIF (`tools/fetch_gbif_planner.py`) und das Schaubild der Touren-Einstellungen (`tools/make_tour_diagram.py`) |
-| `tests/` | automatische Tests mit erfundenen Beispieldaten |
-| `update.py`, `update.bat` | aktualisieren eine git-Kopie |
-| `build.py`, `build.bat`, `lifelist.spec` | bauen die `lifelist.exe` |
-| `.gitignore` | hält persönliche Daten aus dem Repository heraus: `export_*.json`, `lifelist*.html`, `reference/` und den GBIF-Zwischenspeicher |
-| `.github/workflows/release.yml` | baut die exe und veröffentlicht das Release ([docs/release.md](docs/release.md)) |
-| `verify.ps1`, `verify.bat` | prüfen die Prüfsumme der `lifelist.exe` |
-| `tools/` | Werkzeuge zur Pflege der Referenzdaten und Bibliotheken, für Beispieldaten und Screenshots |
-| `docs/screenshots/` | Bilder für diese README |
-| `HOWTO.md`, `howto/` | Anleitung zum Export mit Screenshots |
-
-### Aufbau des JavaScript
-
-Die Aufteilung in `src/*.js` dient nur der Bearbeitung. `lifelist.py` fügt die Dateien in fester Reihenfolge (`APP_JS_FILES`) zu einem einzigen `<script>` zusammen, ausgeliefert wird immer nur die eine HTML-Datei. Echte Module mit `import`/`export` gibt es bewusst nicht: `<script type="module">` scheitert unter `file://` an der CORS-Sperre von Chrome.
-
-Optional lässt sich der Code anhand seiner JSDoc-Kommentare mit dem TypeScript-Compiler prüfen, ohne dass TypeScript im ausgelieferten Code landet:
-
-```bash
-npx --package typescript -- tsc -p tsconfig.json
-```
-
-Einfaches `npx tsc` funktioniert nicht, weil ein fremdes npm-Paket namens `tsc` den echten Compiler verdeckt.
-
-### Tests
-
-```bash
-python -m unittest discover -s tests -t .
-```
-
-Die Tests nutzen erfundene Beispieldaten aus `tests/fixtures.py` und überschreiben keine eigene `lifelist.html`.
-
-- `tests/test_build.py` prüft die Datenaufbereitung und braucht nur Python.
-- `tests/test_update.py` prüft `update.py` an Test-Repositories und braucht git.
-- `tests/test_page.py` öffnet die Seite in einem unsichtbaren Chromium, klickt sich durch alle Tabs und Funktionen und meldet JavaScript-Fehler. Dafür wird Playwright gebraucht, sonst werden diese Tests übersprungen:
-
-  ```bash
-  pip install playwright
-  playwright install chromium
-  ```
-
-### Releases
-
-Neue Versionen veröffentlicht der Projektleiter; wie das geht, steht in [docs/release.md](docs/release.md).
-
-### Beispieldaten und Screenshots
-
-- `tools/make_demo_export.py` erzeugt einen erfundenen, aber realistisch wirkenden Export (`export_demo.json`): ein fiktiver Beobachter aus der Nähe von Dresden, über mehrere Jahre an echten Beobachtungsorten, mit Reisen quer durch Deutschland. Gut zum Ausprobieren ohne eigene Daten: `python tools/make_demo_export.py`, dann `python lifelist.py --source export_demo.json`.
-- `tools/make_screenshots.py` erstellt daraus die Bilder in `docs/screenshots/` (braucht Playwright, siehe Tests). Mit `--map` kommt ein Bild der Karte dazu, dafür braucht es Internet für die Kartenkacheln.
-
-### Welche Felder hat ein Export?
-
-`python tools/export_fields.py` listet auf, welche Felder im neuesten `export_*.json` vorkommen, wie oft und mit welcher Art von Wert, und ob Meldungen eigene Koordinaten haben. Es gibt dabei keine Werte aus (keine Namen, Orte, Daten oder Koordinaten), die Ausgabe lässt sich also gefahrlos weitergeben, etwa um neue Funktionen zu planen.
-
-### Referenzdaten und Bibliotheken pflegen
-
-- `tools/extract_species_reference.py` aktualisiert `species_reference.json` aus der ornitho-Referenzliste (`reference/ornitho-Referenzliste-Arten-*.xlsx`, braucht `pip install openpyxl`). Der Ordner `reference/` ist wegen unklarer Weitergaberechte nicht im Repository.
-- `tools/fetch_occurrence_windows.py` ermittelt die Beobachtungszeiträume der Zug- und Gastvögel über die öffentliche GBIF-API.
-- `tools/fetch_gbif_planner.py` erzeugt die Daten der Reiseziele (`data/gbif_planner_de.json`, `_eu.json`) über die GBIF-API. Zuerst `--check`, dann `--scope de` oder `--scope eu`. Die Antworten werden in `tools/.gbif_cache/` zwischengespeichert: Ein abgebrochener Lauf setzt dort wieder an, und mit `--offline` lassen sich die Dateien aus dem Zwischenspeicher neu berechnen, ohne GBIF erneut zu fragen.
-- `tools/make_tour_diagram.py` zeichnet das Schaubild der Touren-Einstellungen (Deutsch und Englisch, für die Seite und die README) neu, etwa nach einer Änderung der Standardwerte oder der Namen.
-- `tools/update_vendor.py` lädt die Bibliotheken in `vendor/` neu, zum Beispiel für ein Versions-Update.
-
-Für das normale Erstellen der Lebensliste werden diese Werkzeuge nicht gebraucht.
-
-### Lizenzen der mitgelieferten Bibliotheken
+## Lizenzen der mitgelieferten Bibliotheken
 
 - [Leaflet](https://leafletjs.com/): BSD-2-Clause, © Vladimir Agafonkin, © 2010–2023 CloudMade
 - [Leaflet.markercluster](https://github.com/Leaflet/Leaflet.markercluster): MIT, © Dave Leaver
