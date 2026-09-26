@@ -13,7 +13,7 @@
  * @property {Map<number, number[]>} cells - region index -> 12 steps (January to December)
  */
 /** @typedef {{meta: any, regions: {id: string, name: string, parent: string, country: string}[], totals: number[][], species: PlanSpecies[], oneParent: boolean}} PlanData */
-const PLAN_SCOPES = ["de-states", "de", "eu"].filter(k => RAW.planner && RAW.planner[k]);
+const PLAN_SCOPES = ["de", "eu"].filter(k => RAW.planner && RAW.planner[k]);
 /** @type {Object<string, PlanData>} */
 const PLAN_CACHE = {};
 // a step from here on is a good chance (at least 1 % of all bird records), from PLAN_MAYBE on a possible one (0.2 %)
@@ -83,9 +83,9 @@ function planStrip(values, frac, tip) {
   return `<span class="plan-strip">${values.map((v, m) =>
     `<i${v ? ` style="background:${heatColor(frac(v))}"` : ""}${m === S.plan.month - 1 ? ' class="now"' : ""} data-tip="${esc(`${T.months[m]}: ${tip(m)}`)}"></i>`).join("")}</span>`;
 }
-function planRegionName(data, r) {
+function planRegionName(data, r, parent = !data.oneParent) {
   const reg = data.regions[r], total = data.totals[r].reduce((a, b) => a + b, 0);
-  return `<span title="${esc(t("planRecords", fmtN(total)))}">${esc(reg.name)}</span>${reg.parent && !data.oneParent ? `<span class="small">${esc(reg.parent)}</span>` : ""}`;
+  return `<span title="${esc(t("planRecords", fmtN(total)))}">${esc(reg.name)}</span>${reg.parent && parent ? `<span class="small">${esc(reg.parent)}</span>` : ""}`;
 }
 function planDestinations(data, missing) {
   const month = S.plan.month, R = data.regions.length;
@@ -100,17 +100,13 @@ function planDestinations(data, missing) {
   }
   return rows.filter(x => x.good + x.maybe).sort((a, b) => b.good - a.good || b.maybe - a.maybe || collator.compare(data.regions[a.r].name, data.regions[b.r].name));
 }
-function planDestHtml(data, missing) {
-  const q = S.plan.q.trim().toLowerCase();
-  let rows = planDestinations(data, missing);
-  if (q) rows = rows.filter(x => [data.regions[x.r].name, data.regions[x.r].parent].some(v => v.toLowerCase().includes(q)));
-  if (!rows.length) return `<p class="empty">${t("planNoDest")}</p>`;
-  const maxGood = Math.max(1, ...rows.map(x => x.good)), maxMonth = Math.max(1, ...rows.flatMap(x => x.perMonth));
-  const shown = S.plan.all || q ? rows : rows.slice(0, PLAN_ROWS);
-  const body = shown.map((x, i) => {
+const planByName = (a, b) => collator.compare(a, b);
+// the rows of some destinations (districts, provinces), each opening its missing species; `sub` indents them under their state
+function planRegionRows(data, rows, maxGood, maxMonth, sub = false) {
+  return rows.map((x, i) => {
     const open = S.plan.open === data.regions[x.r].id;
-    const head = `<tr class="row${open ? " open" : ""}" data-plan-r="${esc(data.regions[x.r].id)}" tabindex="0" aria-expanded="${open}">
-      <td class="nr">${i + 1}</td><td>${planRegionName(data, x.r)}</td>
+    const head = `<tr class="row${open ? " open" : ""}${sub ? " plan-sub" : ""}" data-plan-r="${esc(data.regions[x.r].id)}" tabindex="0" aria-expanded="${open}">
+      <td class="nr">${i + 1}</td><td>${planRegionName(data, x.r, !sub)}</td>
       <td class="plan-bar"><span class="bar"><i style="width:${x.good / maxGood * 100}%"></i></span></td>
       <td class="num">${x.good}</td><td class="num">${x.maybe}</td>
       <td class="strip-cell hide-sm">${planStrip(x.perMonth, v => v / maxMonth, m => t("planMonthSpecies", x.perMonth[m]))}</td></tr>`;
@@ -120,10 +116,84 @@ function planDestHtml(data, missing) {
       `<tr><td>${esc(planName(sp))}<span class="latin">${esc(sp.latin)}</span></td><td><span class="small">${esc(planChance(l))}<br>${esc(planMonths(cells))}</span></td>
         <td class="strip-cell">${planStrip(cells, v => v / 9, m => planLevelText(cells[m], data.meta))}</td></tr>`).join("")}</tbody></table></td></tr>`;
   }).join("");
+}
+/**
+ * The states (or countries) with the missing species that have a chance in any of their districts, each
+ * counted once: with its best chance there, and shown at its best district (over the year the one where it
+ * shows up most reliably, the sum over the months; for one month that month's best).
+ */
+function planGroups(data, missing) {
+  const month = S.plan.month, groups = new Map();
+  const better = (x, y) => month ? x.l > y.l || (x.l === y.l && x.sum > y.sum) : x.sum > y.sum || (x.sum === y.sum && x.l > y.l);
+  for (const sp of missing) {
+    for (const [r, cells] of sp.cells) {
+      const name = data.regions[r].parent;
+      let g = groups.get(name);
+      if (!g) { g = { name, sp: new Map(), months: Array.from({ length: 12 }, () => new Set()) }; groups.set(name, g); }
+      cells.forEach((v, m) => { if (v >= PLAN_MAYBE) g.months[m].add(sp); });
+      const here = { r, cells, l: planLevel(cells, month), sum: cells.reduce((a, v) => a + v, 0) };
+      if (here.l < PLAN_MAYBE) continue;
+      const cur = g.sp.get(sp);
+      if (!cur) g.sp.set(sp, { sp, l: here.l, best: here });
+      else { cur.l = Math.max(cur.l, here.l); if (better(here, cur.best)) cur.best = here; }
+    }
+  }
+  return [...groups.values()].map(g => {
+    const sps = [...g.sp.values()];
+    return { name: g.name, sps, good: sps.filter(x => x.l >= PLAN_GOOD).length, maybe: sps.filter(x => x.l < PLAN_GOOD).length, perMonth: g.months.map(x => x.size) };
+  }).filter(g => g.sps.length);
+}
+const planSortRows = (rows, name) => rows.sort((a, b) => S.plan.sort === "name" ? planByName(name(a), name(b))
+  : b.good - a.good || b.maybe - a.maybe || planByName(name(a), name(b)));
+function planDestHtml(data, missing) {
+  const q = S.plan.q.trim().toLowerCase();
+  let rows = planDestinations(data, missing);
+  if (q) rows = rows.filter(x => [data.regions[x.r].name, data.regions[x.r].parent].some(v => v.toLowerCase().includes(q)));
+  if (!rows.length) return `<p class="empty">${t("planNoDest")}</p>`;
+  planSortRows(rows, x => data.regions[x.r].name);
+  const maxGood = Math.max(1, ...rows.map(x => x.good)), maxMonth = Math.max(1, ...rows.flatMap(x => x.perMonth));
+  // districts and provinces under their state or country; a search lists the matching ones plainly
+  if (!data.oneParent && !q) return planGroupedHtml(data, missing, rows);
+  const shown = S.plan.all || q ? rows : rows.slice(0, PLAN_ROWS);
+  const body = planRegionRows(data, shown, maxGood, maxMonth);
   return `<div class="card"><table class="plan-t"><thead><tr><th class="nr">#</th><th>${t("planDest")}</th><th></th>
       <th class="num" title="${esc(t("planGoodHelp"))}">${t("planGoodCol")}</th><th class="num" title="${esc(t("planMaybeHelp"))}">${t("planMaybeCol")}</th>
       <th class="strip-cell hide-sm">${t("planMonthsCol")}</th></tr></thead><tbody>${body}</tbody></table>
     ${rows.length > PLAN_ROWS && !q ? `<p class="more"><button class="lnk" data-plan-more>${S.plan.all ? t("showLess") : t("showAll", rows.length)}</button></p>` : ""}</div>`;
+}
+const planHead = first => `<thead><tr><th class="nr">#</th><th>${first}</th><th></th>
+  <th class="num" title="${esc(t("planGoodHelp"))}">${t("planGoodCol")}</th><th class="num" title="${esc(t("planMaybeHelp"))}">${t("planMaybeCol")}</th>
+  <th class="strip-cell hide-sm">${t("planMonthsCol")}</th></tr></thead>`;
+function planGroupedHtml(data, missing, regionRows) {
+  const groups = planSortRows(planGroups(data, missing), g => g.name);
+  const maxGood = Math.max(1, ...groups.map(g => g.good)), maxMonth = Math.max(1, ...groups.flatMap(g => g.perMonth));
+  const shown = S.plan.all ? groups : groups.slice(0, PLAN_ROWS);
+  const body = shown.map((g, i) => {
+    const open = S.plan.openG === g.name;
+    const head = `<tr class="row plan-grp${open ? " open" : ""}" data-plan-g="${esc(g.name)}" tabindex="0" aria-expanded="${open}">
+      <td class="nr">${i + 1}</td><td><b>${open ? "▾" : "▸"} ${esc(g.name)}</b></td>
+      <td class="plan-bar"><span class="bar"><i style="width:${g.good / maxGood * 100}%"></i></span></td>
+      <td class="num">${g.good}</td><td class="num">${g.maybe}</td>
+      <td class="strip-cell hide-sm">${planStrip(g.perMonth, v => v / maxMonth, m => t("planMonthSpecies", g.perMonth[m]))}</td></tr>`;
+    if (!open) return head;
+    const gv = S.plan.gview;
+    const tabs = `<tr class="plan-sub-tabs"><td></td><td colspan="5">
+      <button type="button" class="lnk${gv === "d" ? " on" : ""}" data-plan-gv="d" aria-pressed="${gv === "d"}">${t("planGroupAreas")}</button> |
+      <button type="button" class="lnk${gv === "sp" ? " on" : ""}" data-plan-gv="sp" aria-pressed="${gv === "sp"}">${t("planGroupSpecies", g.sps.length)}</button></td></tr>`;
+    if (gv === "sp") {
+      const sps = g.sps.sort((a, b) => b.l - a.l || b.best.sum - a.best.sum || planByName(planName(a.sp), planName(b.sp)));
+      return head + tabs + `<tr class="detail"><td colspan="6"><table class="plan-sp"><tbody>${sps.map(({ sp, l, best: { cells, r } }) =>
+        `<tr><td>${esc(planName(sp))}<span class="latin">${esc(sp.latin)}</span></td><td><span class="small">${esc(planChance(l))}</span></td>
+          <td>${esc(data.regions[r].name)} <span class="small-inline">${esc(planMonths(cells))}</span></td>
+          <td class="strip-cell">${planStrip(cells, v => v / 9, m => `${data.regions[r].name}, ${planLevelText(cells[m], data.meta)}`)}</td></tr>`).join("")}</tbody></table></td></tr>`;
+    }
+    const inGroup = regionRows.filter(x => data.regions[x.r].parent === g.name);
+    const maxG = Math.max(1, ...inGroup.map(x => x.good)), maxM = Math.max(1, ...inGroup.flatMap(x => x.perMonth));
+    const more = inGroup.length > PLAN_ROWS ? `<tr class="plan-sub-tabs"><td></td><td colspan="5"><button type="button" class="lnk" data-plan-gall>${S.plan.gall ? t("showLess") : t("showAll", inGroup.length)}</button></td></tr>` : "";
+    return head + tabs + planRegionRows(data, S.plan.gall ? inGroup : inGroup.slice(0, PLAN_ROWS), maxG, maxM, true) + more;
+  }).join("");
+  return `<div class="card"><table class="plan-t">${planHead(t(S.plan.scope === "eu" ? "planCountry" : "planState"))}<tbody>${body}</tbody></table>
+    ${groups.length > PLAN_ROWS ? `<p class="more"><button class="lnk" data-plan-more>${S.plan.all ? t("showLess") : t("showAll", groups.length)}</button></p>` : ""}</div>`;
 }
 function planSpeciesHtml(data, missing) {
   const month = S.plan.month, q = S.plan.q.trim().toLowerCase();
@@ -165,6 +235,7 @@ function plannerSection() {
       <select id="plan-scope" aria-label="${esc(t("planScope"))}">${PLAN_SCOPES.map(k => opt(k, t("planScope_" + k), S.plan.scope)).join("")}</select>
       <select id="plan-month" aria-label="${esc(t("planMonth"))}">${opt("0", t("planYear"), String(S.plan.month))}${T.months.map((m, i) => opt(String(i + 1), m, String(S.plan.month))).join("")}</select>
       <select id="plan-view" aria-label="${esc(t("planView"))}">${opt("dest", t("planViewDest"), S.plan.view)}${opt("sp", t("planViewSp"), S.plan.view)}</select>
+      ${S.plan.view === "dest" ? `<select id="plan-sort" aria-label="${esc(t("planSort"))}">${opt("n", t("planSortCount"), S.plan.sort)}${opt("name", t("planSortName"), S.plan.sort)}</select>` : ""}
       <input type="search" id="plan-q" placeholder="${esc(t(S.plan.view === "sp" ? "wishFilterPh" : "planFilterPh"))}" autocomplete="off" value="${esc(S.plan.q)}">
     </div>
     <div id="plan-out">${planOutHtml()}</div>`;

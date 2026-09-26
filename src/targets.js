@@ -182,8 +182,7 @@ let PLAN_DE_BY_LATIN = null;
 function planSpeciesDE(latin) {
   if (!PLAN_DE_BY_LATIN) {
     PLAN_DE_BY_LATIN = new Map();
-    const scope = ["de", "de-states"].find(k => PLAN_SCOPES.includes(k));
-    for (const sp of scope ? planData(scope).species : []) {
+    for (const sp of PLAN_SCOPES.includes("de") ? planData("de").species : []) {
       PLAN_DE_BY_LATIN.set(sp.latin, sp);
       if (sp.alias) PLAN_DE_BY_LATIN.set(sp.alias, sp);
     }

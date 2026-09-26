@@ -49,7 +49,7 @@ MIN_CELL_TOTAL = 100
 # (a vagrant, a mistake) in a month with few records would otherwise give a high share
 MIN_CELL_RECORDS = 3
 # largest acceptable output file; the number of regions kept per species is lowered until it fits
-BUDGET_BYTES = 400_000
+BUDGET_BYTES = 500_000
 TOP_REGION_STEPS = [60, 50, 40, 30, 25, 20, 15, 10]
 
 EU_COUNTRIES = {  # ISO 3166 alpha-2 (GBIF's country filter) -> GADM's level-0 id; no Russia (mostly Asian)
@@ -182,10 +182,19 @@ def aggregate(months_by_region, min_records, min_cell_total=MIN_CELL_TOTAL, leve
     return totals, steps
 
 
-def best_regions(cells, top):
-    """The `top` regions with the highest step in any month (then the highest sum over the year)."""
-    order = sorted(cells, key=lambda r: (-max(cells[r]), -sum(cells[r]), r))
-    return {r: cells[r] for r in sorted(order[:top])}
+def best_regions(cells, top, parents=None):
+    """The `top` regions with the highest step in any month (then the highest sum over the year), plus the best
+    region of every parent (federal state, country) the species occurs in: so a state learns about a species
+    even where its districts aren't among the best `top` in all of Germany. `parents`: per region index."""
+    rank = lambda r: (-max(cells[r]), -sum(cells[r]), r)  # noqa: E731
+    order = sorted(cells, key=rank)
+    keep = set(order[:top])
+    if parents:
+        best = {}
+        for r in order:  # best first
+            best.setdefault(parents[r], r)
+        keep |= set(best.values())
+    return {r: cells[r] for r in sorted(keep)}
 
 
 def encode_cells(cells):
@@ -194,8 +203,9 @@ def encode_cells(cells):
 
 def build_output(meta, regions, totals, steps, species_info, budget=BUDGET_BYTES):
     """The file's content, with as many regions per species as the budget allows."""
+    parents = [r.get("parent", "") for r in regions]
     for top in TOP_REGION_STEPS:
-        species = [{**species_info[s], "key": s, "cells": encode_cells(best_regions(cells, top))}
+        species = [{**species_info[s], "key": s, "cells": encode_cells(best_regions(cells, top, parents))}
                    for s, cells in steps.items() if s in species_info]
         species.sort(key=lambda x: x["latin"])
         out = {"meta": {**meta, "topRegions": top}, "regions": regions, "totals": totals, "species": species}

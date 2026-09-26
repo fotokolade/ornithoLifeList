@@ -431,7 +431,7 @@ function init() {
   // table cells that open a details panel (role="button") and the planner's destinations react to Enter/Space like real buttons
   document.addEventListener("keydown", e => {
     const el = /** @type {any} */ (e.target);
-    if (el.matches?.('td[role="button"], tr[data-plan-r]') && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); el.click(); }
+    if (el.matches?.('td[role="button"], tr[data-plan-r], tr[data-plan-g]') && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); el.click(); }
   });
   $("list-curve").addEventListener("click", e => {
     const sp = e.target.closest("[data-sp]");
@@ -472,7 +472,8 @@ function init() {
 
   $("tab-targets").addEventListener("change", e => {
     if (e.target.id === "tgt-src") { S.targetSrc = e.target.value; renderTargets(); }
-    if (e.target.id === "plan-scope") { S.plan.scope = e.target.value; S.plan.open = null; S.plan.all = false; renderTargets(); }
+    if (e.target.id === "plan-scope") { S.plan.scope = e.target.value; S.plan.open = S.plan.openG = null; S.plan.all = false; renderTargets(); }
+    if (e.target.id === "plan-sort") { S.plan.sort = e.target.value === "name" ? "name" : "n"; redrawPlanner(); }
     if (e.target.id === "plan-month") { S.plan.month = +e.target.value; S.plan.all = false; renderTargets(); }
     if (e.target.id === "plan-view") { S.plan.view = e.target.value === "sp" ? "sp" : "dest"; S.plan.q = ""; S.plan.all = false; renderTargets(); }
     if (e.target.id === "tgt-import" && e.target.files[0]) {
@@ -494,6 +495,11 @@ function init() {
     if (e.target.id === "plan-q") { S.plan.q = e.target.value; redrawPlanner(); }
   });
   $("tab-targets").addEventListener("click", e => {
+    const state = e.target.closest("[data-plan-g]");
+    if (state) { S.plan.openG = S.plan.openG === state.dataset.planG ? null : state.dataset.planG; S.plan.open = null; S.plan.gall = false; redrawPlanner(); return; }
+    if (e.target.closest("[data-plan-gall]")) { S.plan.gall = !S.plan.gall; redrawPlanner(); return; }
+    const gv = e.target.closest("[data-plan-gv]");
+    if (gv) { S.plan.gview = gv.dataset.planGv === "sp" ? "sp" : "d"; redrawPlanner(); return; }
     const dest = e.target.closest("[data-plan-r]");
     if (dest) { S.plan.open = S.plan.open === dest.dataset.planR ? null : dest.dataset.planR; redrawPlanner(); return; }
     if (e.target.closest("[data-plan-more]")) { S.plan.all = !S.plan.all; redrawPlanner(); return; }

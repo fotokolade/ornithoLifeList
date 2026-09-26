@@ -280,17 +280,39 @@ class PageTest(unittest.TestCase):
     def test_holiday_planner(self):
         page = self.open(hash="#targets")
         scopes = page.eval_on_selector_all("#plan-scope option", "os => os.map(o => o.value)")
-        self.assertIn("de", scopes)
-        rows = page.locator("tr[data-plan-r]")
-        self.assertGreater(rows.count(), 5)
-        # the ranking: most missing species with a good chance first
-        good = [int(x) for x in page.eval_on_selector_all("tr[data-plan-r] td:nth-child(4)", "tds => tds.map(td => td.textContent)")]
+        self.assertEqual(scopes[0], "de")
+        # the districts under their federal states, most missing species with a good chance first
+        states = page.locator("tr[data-plan-g]")
+        self.assertGreater(states.count(), 10)
+        self.assertEqual(page.locator("tr[data-plan-r]").count(), 0)
+        good = [int(x) for x in page.eval_on_selector_all("tr[data-plan-g] td:nth-child(4)", "tds => tds.map(td => td.textContent)")]
         self.assertEqual(good, sorted(good, reverse=True))
-        rows.first.click()
+        # a state counts each species once, so at least as many as its best district
+        bavaria = page.locator('tr[data-plan-g="Bayern"]')
+        state_good = int(bavaria.locator("td:nth-child(4)").inner_text())
+        bavaria.click()
+        districts = page.locator("tr[data-plan-r]")
+        self.assertGreater(districts.count(), 5)
+        self.assertLessEqual(districts.count(), 20)  # the best 20, the rest on request
+        self.assertGreaterEqual(state_good, int(districts.first.locator("td:nth-child(4)").inner_text()))
+        self.assertNotIn("Bayern", districts.first.locator("td:nth-child(2)").inner_text())  # not repeated under it
+        page.click("[data-plan-gall]")
+        self.assertGreater(page.locator("tr[data-plan-r]").count(), 20)
+        page.locator("tr[data-plan-r]").first.click()
         self.assertGreater(page.locator("table.plan-sp tr").count(), 0)
-        self.assertEqual(page.get_attribute("tr[data-plan-r] >> nth=0", "aria-expanded"), "true")
+        # the state's species, each with its best district
+        page.click('[data-plan-gv="sp"]')
+        self.assertIn("Garmisch-Partenkirchen", page.inner_text("table.plan-sp"))  # Alpenbraunelle's best district
         # a species seen in the sample export is not missing
         self.assertNotIn("Kohlmeise", page.inner_text("#plan-out"))
+        page.select_option("#plan-sort", "name")
+        names = page.eval_on_selector_all("tr[data-plan-g] td:nth-child(2)", "tds => tds.map(td => td.textContent.replace(/[▸▾]/g, '').trim())")
+        self.assertEqual(names[:3], ["Baden-Württemberg", "Bayern", "Berlin"])
+        # a search lists the matching districts plainly
+        page.fill("#plan-q", "Garmisch")
+        self.assertEqual(page.locator("tr[data-plan-g]").count(), 0)
+        self.assertEqual(page.locator("tr[data-plan-r]").count(), 1)
+        page.fill("#plan-q", "")
         page.select_option("#plan-view", "sp")
         self.assertGreater(page.locator("#plan-out tbody tr").count(), 5)
         page.fill("#plan-q", "Alpenbraunelle")
@@ -298,7 +320,6 @@ class PageTest(unittest.TestCase):
         self.assertIn("Garmisch", page.inner_text("#plan-out"))
         page.fill("#plan-q", "")
         page.select_option("#plan-month", "1")
-        page.select_option("#plan-scope", scopes[0])
         self.assertTrue(page.inner_text("#plan-out").strip())
         page.select_option("#f-lang", "en")
         self.assertIn("Destinations", page.inner_text("#tab-targets"))

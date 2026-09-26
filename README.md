@@ -6,7 +6,7 @@ Macht aus deinem [ornitho.de](https://www.ornitho.de/)-Export eine interaktive V
 
 - **Übersicht:** Kennzahlen, Kalender deines Birding-Jahres, Lebenslistenkurve, neueste Lifer, Arten pro Jahr und Monat
 - **Lebensliste:** alle Arten, durchsuchbar und sortierbar, mit Details zu jeder Art
-- **Ziele:** Arten, die dir noch fehlen, mit Saisonhinweis, wann sie hier vorkommen, eigener Wunschliste und den Ausnahmegästen der ornitho-Artenliste; dazu Reiseziele: wo und in welchem Monat du fehlende Arten am ehesten siehst (Deutschland nach Bundesland oder Landkreis, Europa, sobald die Daten dafür da sind)
+- **Ziele:** Arten, die dir noch fehlen, mit Saisonhinweis, wann sie hier vorkommen, eigener Wunschliste und den Ausnahmegästen der ornitho-Artenliste; dazu Reiseziele: wo und in welchem Monat du fehlende Arten am ehesten siehst (Deutschland nach Bundesland und Landkreis, Europa nach Land und Provinz, sobald die Daten dafür da sind)
 - **Tagesaktivität:** zu welcher Uhrzeit, an welchen Wochentagen und in welchen Monaten du unterwegs bist
 - **Regionen:** Arten nach Bundesland, Landkreis, Gemeinde und Ort, und wann du dich wo aufhältst
 - **Touren:** Spaziergänge und Radtouren, rekonstruiert aus Meldungen, die zeitlich und räumlich nah beieinanderliegen, mit Strecke auf der Karte
@@ -191,7 +191,7 @@ Zum Ausprobieren lässt sich die exe auch selbst bauen: unter Windows `python bu
 
 - `tools/extract_species_reference.py` aktualisiert `species_reference.json` aus der ornitho-Referenzliste (`reference/ornitho-Referenzliste-Arten-*.xlsx`, braucht `pip install openpyxl`). Der Ordner `reference/` ist wegen unklarer Weitergaberechte nicht im Repository.
 - `tools/fetch_occurrence_windows.py` ermittelt die Beobachtungszeiträume der Zug- und Gastvögel über die öffentliche GBIF-API.
-- `tools/fetch_gbif_planner.py` erzeugt die Daten der Reiseziele (`data/gbif_planner_de-states.json`, `_de.json`, `_eu.json`) über die GBIF-API. Zuerst `--check`, dann `--scope de-states`, `--scope de` oder `--scope eu`. Die Antworten werden in `tools/.gbif_cache/` zwischengespeichert: Ein abgebrochener Lauf setzt dort wieder an, und mit `--offline` lassen sich die Dateien aus dem Zwischenspeicher neu berechnen, ohne GBIF erneut zu fragen.
+- `tools/fetch_gbif_planner.py` erzeugt die Daten der Reiseziele (`data/gbif_planner_de.json`, `_eu.json`) über die GBIF-API. Zuerst `--check`, dann `--scope de` oder `--scope eu`. Die Antworten werden in `tools/.gbif_cache/` zwischengespeichert: Ein abgebrochener Lauf setzt dort wieder an, und mit `--offline` lassen sich die Dateien aus dem Zwischenspeicher neu berechnen, ohne GBIF erneut zu fragen.
 - `tools/make_tour_diagram.py` zeichnet das Schaubild der Touren-Einstellungen (Deutsch und Englisch, für die Seite und die README) neu, etwa nach einer Änderung der Standardwerte oder der Namen.
 - `tools/update_vendor.py` lädt die Bibliotheken in `vendor/` neu, zum Beispiel für ein Versions-Update.
 

@@ -224,7 +224,7 @@ def build_data(sightings, english_by_latin):
 
 # the holiday planner's data per scope, made from GBIF by tools/fetch_gbif_planner.py; a missing file
 # just leaves its scope out of the planner
-PLANNER_SCOPES = ["de-states", "de", "eu"]
+PLANNER_SCOPES = ["de", "eu"]
 
 
 def load_planner_data():

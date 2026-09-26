@@ -64,6 +64,8 @@ class GbifPlannerTest(unittest.TestCase):
     def test_best_regions_and_budget(self):
         cells = {0: [1] * 12, 1: [9] + [0] * 11, 2: [5] * 12, 3: [5] * 11 + [0]}
         self.assertEqual(list(g.best_regions(cells, 2)), [1, 2])
+        # the best region of every parent stays, even outside the best two: region 0 is the only one in "B"
+        self.assertEqual(list(g.best_regions(cells, 2, ["B", "A", "A", "A"])), [0, 1, 2])
         steps = {k: {r: [3] * 12 for r in range(100)} for k in range(20)}
         info = {k: {"latin": f"Avis {k}", "alias": None, "de": None, "en": None} for k in steps}
         _, full = g.build_output({}, [], [], steps, info)
