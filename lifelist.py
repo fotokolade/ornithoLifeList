@@ -230,11 +230,24 @@ def load_planner_data():
     return out
 
 
+def load_tour_diagram():
+    """The diagram of the tour settings per language (tools/make_tour_diagram.py)."""
+    out = {}
+    for lang in ("de", "en"):
+        path = os.path.join(RESOURCES, "data", f"tour-settings-{lang}.svg")
+        if os.path.exists(path):
+            with open(path, encoding="utf-8") as fh:
+                out[lang] = fh.read()
+    return out
+
+
 def build_page_data(sightings, source_name, redact):
     english_by_latin, wishlist_rows = load_species_reference()
     data = build_data(sightings, english_by_latin)
     data["euro"] = wishlist_rows
     data["planner"] = load_planner_data()
+    if not redact:  # the tours, whose settings it explains, are left out of a redacted page
+        data["tourDiagram"] = load_tour_diagram()
     if redact:  # remove place data from the file itself, not just from the display
         data["pl"] = [["", "", r[2], r[3], 0, 0] for r in data["pl"]]
         data["obs"] = [r[:7] for r in data["obs"]]

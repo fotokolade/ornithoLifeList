@@ -155,7 +155,14 @@ const fmtDuration = min => `${Math.floor(min / 60)}:${pad(min % 60)} h`;
 // one "Einstellungen" menu: the way of getting about and the pace, and a slider for every number
 const TOUR_UNITS = { gap: "min", step: "km", speed: "km/h", win: "min", stop: "m", minKm: "km", minDur: "min" };
 const tourCfgValue = k => `${k === "step" || k === "minKm" ? fmtKm(S.tourCfg[k]) : fmtN(S.tourCfg[k])} ${TOUR_UNITS[k]}`;
-const tourCfgSummary = () => `${t("tourCfg")}: ${Object.keys(TOUR_CHOICES).map(id => t(`tour_${id}_${S.tourCfg[id]}`)).join(" · ")}${tourCfgTuned() ? ` (${t("tourCfgTuned")})` : ""}`;
+// the summary line names each choice in full ("Meldelücken bis 30 min"), where the menu next to its label only says "bis 30 min"
+const tourChoiceText = (id, v) => T[`tourSum_${id}_${v}`] || t(`tour_${id}_${v}`);
+const tourCfgSummary = () => `${t("tourCfg")}: ${Object.keys(TOUR_CHOICES).map(id => tourChoiceText(id, S.tourCfg[id])).join(" · ")}${tourCfgTuned() ? ` (${t("tourCfgTuned")})` : ""}`;
+// the diagram that shows what every setting does (tools/make_tour_diagram.py), folded away under the sliders
+function tourDiagram() {
+  const svg = RAW.tourDiagram && (RAW.tourDiagram[S.lang] || RAW.tourDiagram.de);
+  return svg ? `<details class="tour-diagram"${S.tourDiagOpen ? " open" : ""}><summary>${t("tourDiagram")}</summary><div class="tour-diagram-img">${svg}</div></details>` : "";
+}
 function tourSettingsHtml() {
   const pick = (id, keys) => `<select data-tour-preset="${id}" aria-label="${esc(t("tourCfg_" + id))}">${keys.map(k =>
     `<option value="${k}"${k === S.tourCfg[id] ? " selected" : ""}>${t(`tour_${id}_${k}`)}</option>`).join("")}</select>`;
@@ -164,7 +171,8 @@ function tourSettingsHtml() {
       <button class="lnk" type="button" data-tour-reset>${t("tourCfgReset")}</button></div>
     <div class="tour-sliders">${TOUR_LIMITS.map(([k, min, max, step]) => `<label for="tour-cfg-${k}">${t("tourCfg_" + k)}</label>
       <input type="range" id="tour-cfg-${k}" data-tour-cfg="${k}" min="${min}" max="${max}" step="${step}" value="${S.tourCfg[k]}">
-      <output id="tour-cfg-${k}-v" for="tour-cfg-${k}">${tourCfgValue(k)}</output>`).join("")}</div></details>`;
+      <output id="tour-cfg-${k}-v" for="tour-cfg-${k}">${tourCfgValue(k)}</output>`).join("")}</div>
+    ${tourDiagram()}</details>`;
 }
 // after a preset or reset: move every slider and its value to the new settings
 function syncTourSettings() {

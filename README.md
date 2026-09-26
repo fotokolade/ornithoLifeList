@@ -12,6 +12,12 @@ Macht aus deinem [ornitho.de](https://www.ornitho.de/)-Export eine interaktive V
 - **Touren:** Spaziergänge und Radtouren, rekonstruiert aus Meldungen, die zeitlich und räumlich nah beieinanderliegen, mit Strecke auf der Karte
 - **Karte** deiner Beobachtungsorte
 
+<details><summary>Wie die Touren entstehen: Schaubild der Einstellungen</summary>
+
+![Schaubild der Touren-Einstellungen](docs/tour-settings.png)
+
+</details>
+
 Fast alles ist anklickbar: ein Tag im Kalender, eine Zelle in einer Tabelle oder ein Punkt auf der Kurve zeigt die Arten dahinter, und jede Art führt zu ihrem Eintrag in der Lebensliste. Die Seite gibt es auf Deutsch und Englisch (mit englischen Artnamen), hell und dunkel, und sie lässt sich als PDF speichern.
 
 ## So sieht es aus
@@ -123,7 +129,7 @@ Beides steckt fertig aufbereitet in `species_reference.json`.
 | `src/*.js` | JavaScript der Seite, aufgeteilt nach Tab und Thema (`counties.js`: Namen der Landkreise zu ornithos Kreiskürzeln) |
 | `vendor/` | mitgelieferte Bibliotheken Leaflet, Leaflet.markercluster und Chart.js |
 | `species_reference.json` | Artnamen und Saisonzeiträume |
-| `data/` | Daten der Reiseziele aus GBIF (`tools/fetch_gbif_planner.py`) |
+| `data/` | Daten der Reiseziele aus GBIF (`tools/fetch_gbif_planner.py`) und das Schaubild der Touren-Einstellungen (`tools/make_tour_diagram.py`) |
 | `tests/` | automatische Tests mit erfundenen Beispieldaten |
 | `update.py`, `update.bat` | aktualisieren eine git-Kopie |
 | `build.py`, `build.bat`, `lifelist.spec` | bauen die `lifelist.exe` |
@@ -186,6 +192,7 @@ Zum Ausprobieren lässt sich die exe auch selbst bauen: unter Windows `python bu
 - `tools/extract_species_reference.py` aktualisiert `species_reference.json` aus der ornitho-Referenzliste (`reference/ornitho-Referenzliste-Arten-*.xlsx`, braucht `pip install openpyxl`). Der Ordner `reference/` ist wegen unklarer Weitergaberechte nicht im Repository.
 - `tools/fetch_occurrence_windows.py` ermittelt die Beobachtungszeiträume der Zug- und Gastvögel über die öffentliche GBIF-API.
 - `tools/fetch_gbif_planner.py` erzeugt die Daten der Reiseziele (`data/gbif_planner_de-states.json`, `_de.json`, `_eu.json`) über die GBIF-API. Zuerst `--check`, dann `--scope de-states`, `--scope de` oder `--scope eu`. Die Antworten werden in `tools/.gbif_cache/` zwischengespeichert: Ein abgebrochener Lauf setzt dort wieder an, und mit `--offline` lassen sich die Dateien aus dem Zwischenspeicher neu berechnen, ohne GBIF erneut zu fragen.
+- `tools/make_tour_diagram.py` zeichnet das Schaubild der Touren-Einstellungen (Deutsch und Englisch, für die Seite und die README) neu, etwa nach einer Änderung der Standardwerte oder der Namen.
 - `tools/update_vendor.py` lädt die Bibliotheken in `vendor/` neu, zum Beispiel für ein Versions-Update.
 
 Für das normale Erstellen der Lebensliste werden diese Werkzeuge nicht gebraucht.

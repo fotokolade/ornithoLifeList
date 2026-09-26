@@ -386,6 +386,33 @@ class PageTest(unittest.TestCase):
         self.assertIn("Elster", page.inner_text("#list-out tr.row.flash"))
         self.assertEqual(self.errors, [])
 
+    def test_tour_settings_diagram_and_names(self):
+        page = self.open(redact="tours", hash="#tours")
+        page.click("details.tour-settings summary")
+        self.assertIn("Meldelücken bis 30 min · selten anhalten", page.inner_text("#tour-cfg-sum"))
+        self.assertEqual(page.eval_on_selector('select[data-tour-preset="pauseLen"]', "s => s.selectedOptions[0].text"), "bis 30 min")
+        page.click("details.tour-diagram summary")
+        self.assertIn("Meldelücke", page.get_attribute("details.tour-diagram svg", "aria-label") + page.inner_text("details.tour-diagram"))
+        self.assertTrue(page.locator("details.tour-diagram svg").is_visible())
+        # the fold states survive the redraw of a language change, and the diagram follows the language
+        page.select_option("#f-lang", "en")
+        self.assertTrue(page.locator("details.tour-diagram svg").is_visible())
+        self.assertEqual(page.get_attribute("details.tour-diagram svg", "aria-label"), "Tours: what the settings mean")
+        self.assertEqual(self.errors, [])
+
+    def test_sea_area_names(self):
+        extra = sample_export() + [
+            sighting("Pica pica", "Elster", "2024-03-10", place_id="S1", place="Kieler Bucht", municipality="Ostsee (SH, ASH)", lat="54.60", lon="10.50"),
+            sighting("Pica pica", "Elster", "2024-03-11", place_id="S2", place="Doggerbank", municipality="Nordsee (NI, AWN)", lat="54.50", lon="6.50")]
+        path = os.path.join(self.tmp.name, "sea.html")
+        with open(path, "w", encoding="utf-8") as fh:
+            fh.write(lifelist.render_html(lifelist.build_page_data(extra, "export_test.json", False)))
+        self.url["sea"] = "file:///" + path.replace(os.sep, "/").lstrip("/")
+        page = self.open(redact="sea")
+        options = page.eval_on_selector_all("#f-region option", "os => os.map(o => o.textContent)")
+        self.assertTrue(any(o.startswith("AWZ Ostsee (SH-Teil)") for o in options), options)
+        self.assertTrue(any(o.startswith("AWZ Nordsee") for o in options), options)
+
     def test_tours_are_rebuilt_from_close_records(self):
         page = self.open(redact="tours", hash="#tours")
         # the fixture's tours are short: test the rules with small limits (the defaults are for real walks)

@@ -107,6 +107,7 @@ if (initialTheme !== "system") document.documentElement.setAttribute("data-theme
  * @property {string} regMonthLvl - level of the region x month table's rows: "s"|"c"|"m"|"p"
  * @property {any} tourCfg - tour settings (a TourCfg, see tours.js), kept in localStorage
  * @property {boolean} tourSetOpen - the tours' settings menu is unfolded
+ * @property {boolean} tourDiagOpen - the diagram in the tours' settings is unfolded
  * @property {{k: string, d: 1|-1}} tourSort - tours table sort (see TOUR_SORT)
  * @property {Set<string>} tourOpen - keys of tours with an open detail row
  * @property {boolean} tourAll - show every tour instead of the newest ones
@@ -118,7 +119,7 @@ const TIME_START = { y: Math.min(TODAY_Y, MAX_Y), m: TODAY_M };
 const S = { tab: "overview", region: "all", year: TIME_START.y, month: TIME_START.m, timeAll: true, lang: initialLang, theme: initialTheme,
   escaped: false, collective: false, atlasF: "all", actMetric: "obs", redact: !!RAW.meta.redacted, metric: "life", q: "", sort: "nr", dir: -1, open: new Set(),
   regSort: {}, regAll: {}, targetSrc: "all", customTargets: loadCustomTargets(), wishSort: { k: "season", d: 1 },
-  wishOpen: null, wishQ: "", plan: { scope: "de", month: 0, view: "dest", q: "", open: null, all: false }, calDay: null, heatMetric: { ym: "species", m: "obs", w: "obs", rm: "days" }, heatSel: {}, heatNorm: {}, regMonthLvl: "c", tourCfg: null, tourSetOpen: false, tourSort: { k: "date", d: -1 }, tourOpen: new Set(), tourAll: false, tourRoute: null, focusSp: null };
+  wishOpen: null, wishQ: "", plan: { scope: "de", month: 0, view: "dest", q: "", open: null, all: false }, calDay: null, heatMetric: { ym: "species", m: "obs", w: "obs", rm: "days" }, heatSel: {}, heatNorm: {}, regMonthLvl: "c", tourCfg: null, tourSetOpen: false, tourDiagOpen: false, tourSort: { k: "date", d: -1 }, tourOpen: new Set(), tourAll: false, tourRoute: null, focusSp: null };
 T = STR[S.lang];
 
 /* ---------- helpers ---------- */
@@ -145,7 +146,8 @@ const byDateDesc = (a, b) => (a < b ? 1 : a > b ? -1 : 0);
 const REDACT_MASK = "██████████";
 const placeName = i => S.redact ? REDACT_MASK : PL[i].name;
 const stateName = c => T.states[c] || (c === "?" ? T.unknown : c);
-const countyName = key => COUNTIES[key] || (key.split("/")[1] === "?" ? T.unknown : key.split("/")[1]);
+const countyName = key => { const code = key.split("/")[1];
+  return COUNTIES[key] || SEA_AREAS[code] || (code === "?" ? T.unknown : code); };
 let collator = new Intl.Collator(S.lang === "en" ? "en" : "de");
 // the primary display name for a species: English when the UI is in English and we have one
 // (most collective taxa like "unbestimmt"/hybrids don't), otherwise the German name from the export.

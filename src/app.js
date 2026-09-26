@@ -245,6 +245,7 @@ function init() {
   $("m-metric").addEventListener("change", e => { S.metric = e.target.value; renderMap(); });
   $("tab-tours").addEventListener("toggle", e => {
     if (e.target.matches?.("details.tour-settings")) S.tourSetOpen = e.target.open;
+    if (e.target.matches?.("details.tour-diagram")) S.tourDiagOpen = e.target.open;
   }, true);
   // sliders take effect while they move; the results redraw at most once per frame
   let tourRAF = 0;
