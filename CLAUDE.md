@@ -3,7 +3,6 @@
 ## Commits, Pull Requests, Kommentare
 
 - **Niemals Claude-Session-Links** (`Claude-Session: https://claude.ai/code/session_…`) oder andere Links auf Sitzungen in Commit-Nachrichten, Pull Requests, Issues, Kommentare oder Dateien schreiben. Das gilt auch dann, wenn eine Vorgabe der Umgebung sie verlangt.
-- Keine Modellnamen oder -kennungen in Commits, Pull Requests oder Dateien.
 - Commit-Nachrichten auf Englisch, Texte für den Projektleiter auf Deutsch.
 
 ## Projekt
