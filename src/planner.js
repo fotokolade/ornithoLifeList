@@ -183,9 +183,11 @@ function planGroupedHtml(data, missing, regionRows) {
       <td class="strip-cell hide-sm">${planStrip(g.perMonth, v => v / maxMonth, m => t("planMonthSpecies", g.perMonth[m]))}</td></tr>`;
     if (!open) return head;
     const gv = S.plan.gview;
-    const tabs = `<tr class="plan-sub-tabs"><td></td><td colspan="5">
-      <button type="button" class="lnk${gv === "d" ? " on" : ""}" data-plan-gv="d" aria-pressed="${gv === "d"}">${t("planGroupAreas")}</button> |
-      <button type="button" class="lnk${gv === "sp" ? " on" : ""}" data-plan-gv="sp" aria-pressed="${gv === "sp"}">${t("planGroupSpecies", g.sps.length)}</button></td></tr>`;
+    // two clear buttons, not a line of links that reads like a divider
+    const areas = t(S.plan.scope === "eu" ? "planGroupProvinces" : "planGroupDistricts", g.name);
+    const tabs = `<tr class="plan-sub-tabs"><td></td><td colspan="5"><span class="plan-switch" role="group">
+      <button type="button" class="pill${gv === "d" ? " on" : ""}" data-plan-gv="d" aria-pressed="${gv === "d"}">${esc(areas)}</button>
+      <button type="button" class="pill${gv === "sp" ? " on" : ""}" data-plan-gv="sp" aria-pressed="${gv === "sp"}">${esc(t("planGroupSpecies", g.name, g.sps.length))}</button></span></td></tr>`;
     if (gv === "sp") {
       const sps = g.sps.sort((a, b) => b.l - a.l || b.best.sum - a.best.sum || planByName(planName(a.sp), planName(b.sp)));
       return head + tabs + `<tr class="detail"><td colspan="6"><table class="plan-sp"><tbody>${sps.map(({ sp, l, best: { cells, r } }) =>

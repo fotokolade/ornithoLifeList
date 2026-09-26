@@ -232,9 +232,16 @@ table.plan-sp{margin:0}
 table.plan-sp td{padding:4px 6px;background:transparent!important}
 .small-inline{color:var(--muted);font-size:.74rem}
 .plan-t tr.plan-grp td{border-top:1px solid var(--line)}
-.plan-t tr.plan-sub td:nth-child(2){padding-left:22px}
-.plan-t tr.plan-sub-tabs td{padding:4px 8px;font-size:.8rem;color:var(--muted)}
-.plan-t tr.plan-sub-tabs .lnk.on{font-weight:600;text-decoration:none;color:var(--text)}
+/* an open state heads its group; what belongs to it is indented behind a coloured bar */
+.plan-t tr.plan-grp.open td{background:var(--accent-soft);border-top:2px solid var(--accent)}
+.plan-t tr.plan-sub td,.plan-t tr.plan-sub-tabs td,.plan-t tr.plan-grp.open ~ tr.detail td{background:color-mix(in srgb,var(--accent-soft) 45%,transparent)}
+.plan-t tr.plan-sub td:first-child,.plan-t tr.plan-sub-tabs td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
+.plan-t tr.plan-sub td:nth-child(2){padding-left:26px}
+.plan-t tr.plan-sub td.nr{font-size:.72rem;text-align:right}
+.plan-t tr.plan-sub-tabs td{padding:8px 8px 6px}
+.plan-switch{display:inline-flex;gap:6px;flex-wrap:wrap}
+.plan-switch .pill{font:inherit;font-size:.8rem;padding:3px 12px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--text);cursor:pointer}
+.plan-switch .pill.on{background:var(--accent);border-color:var(--accent);color:var(--card);font-weight:600}
 .season-strip{height:12px;border-radius:3px;background:var(--bar-soft);
   background-image:repeating-linear-gradient(90deg,transparent 0 calc(100% / 12 - 1px),var(--card) calc(100% / 12 - 1px) calc(100% / 12))}
 .season-strip i{position:absolute;top:0;bottom:0;border-radius:2px;opacity:.9}
