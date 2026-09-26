@@ -68,7 +68,7 @@ function setTab(tab) {
     window.scrollTo(0, 0);
     S.tab = tab;
     for (const b of $$all("#tabs button")) b.classList.toggle("on", b.dataset.tab === tab);
-    for (const s of $$all("section.tab")) s.classList.toggle("on", s.id === "tab-" + tab);
+    for (const s of $$all("div.tab")) s.classList.toggle("on", s.id === "tab-" + tab);
     try { history.replaceState(null, "", "#" + tab); } catch (e) { /* file: URLs may refuse */ }
     renderActive();
   };
@@ -428,10 +428,10 @@ function init() {
     tip.textContent = el.dataset.tip; tip.hidden = false; placeTip(r.left, r.bottom - 10);
   });
   document.addEventListener("scroll", () => { tip.hidden = true; }, true);
-  // table cells that open a details panel (role="button") and the planner's destinations react to Enter/Space like real buttons
+  // heat table cells that open a details panel and the planner's destinations react to Enter/Space like real buttons
   document.addEventListener("keydown", e => {
     const el = /** @type {any} */ (e.target);
-    if (el.matches?.('td[role="button"], tr[data-plan-r], tr[data-plan-g]') && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); el.click(); }
+    if (el.matches?.('td[data-heat], tr[data-plan-r], tr[data-plan-g]') && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); el.click(); }
   });
   $("list-curve").addEventListener("click", e => {
     const sp = e.target.closest("[data-sp]");

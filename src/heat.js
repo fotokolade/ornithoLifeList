@@ -66,7 +66,7 @@ function heatCard(kind) {
   const scale = heatScale(max), range = heatRange(spec, sel);
   const inRange = (r, c) => !!range && r >= range.r0 && r <= range.r1 && c >= range.c0 && c <= range.c1;
   const attrs = (key, name, a) => { const tip = heatTip(name, a);
-    return ` data-heat="${kind}" data-key="${esc(key)}" data-tip="${esc(tip)}" role="button" tabindex="0" aria-pressed="${sel === key}" aria-label="${esc(tip)}"`; };
+    return ` data-heat="${kind}" data-key="${esc(key)}" data-tip="${esc(tip)}" tabindex="0" aria-selected="${sel === key}" aria-label="${esc(tip)}"`; };
   const total = t("heatTotal");
   const body = spec.rows.map((rk, r) => `<tr><td class="y" title="${esc(spec.rowNames[r])}">${spec.rowLabels[r]}</td>${cells[r].map((a, c) => {
     const v = val(a), rng = inRange(r, c) ? " in-rng" : "";
@@ -80,7 +80,7 @@ function heatCard(kind) {
     const v = val(a), key = heatKey("*", c);
     return v ? `<td data-c="${c}" class="tot-c${sel === key ? " sel" : ""}"${attrs(key, `${spec.colNames[c]}, ${total}`, a)}><span class="tot-vbar"><i style="height:${v / maxC * 100}%"></i></span>${spec.numbers ? `<span class="tot-n">${fmtN(v)}</span>` : ""}</td>` : `<td data-c="${c}"></td>`;
   }).join("")}<td></td></tr>`;
-  return `<div class="card"><table class="heat heat-x ${spec.cls || ""}"><thead><tr><th></th>${spec.colLabels.map((l, c) => `<th data-c="${c}">${l}</th>`).join("")}<th class="tot-h" title="${esc(total)}">Σ</th></tr></thead>
+  return `<div class="card"><table class="heat heat-x ${spec.cls || ""}" role="grid"><thead><tr><th></th>${spec.colLabels.map((l, c) => `<th data-c="${c}">${l}</th>`).join("")}<th class="tot-h" title="${esc(total)}">Σ</th></tr></thead>
     <tbody>${body}</tbody><tfoot>${foot}</tfoot></table>${sel ? heatPanel(kind, spec, sel) : ""}</div>${scale.legend}`;
 }
 // the species behind a cell, a row or column total, or a dragged range of cells

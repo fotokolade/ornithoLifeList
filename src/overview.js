@@ -93,7 +93,7 @@ function calendarSection(list, statsAll) {
     // always pad to 6 full weeks (42 cells): keeps every month's grid the same height, so the
     // section doesn't jump as S.year changes (some years need 6 rows for a month, others only 4-5)
     for (let i = startDow + daysInMonth; i < 42; i++) cells += `<div class="cal-day cal-empty"></div>`;
-    return `<div class="cal-month"><h4>${name}</h4>
+    return `<div class="cal-month"><h3>${name}</h3>
       <div class="cal-grid">${dowLetters.map(l => `<span class="cal-dow">${l}</span>`).join("")}${cells}</div></div>`;
   }).join("");
   return `<h2 data-toc="${esc(t("tocCal"))}">${t("calTitle", year)}</h2>

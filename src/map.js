@@ -3,7 +3,7 @@ const markerDia = frac => Math.round(2 * (5 + 17 * Math.sqrt(frac)));
 // warm sequential scale (light amber = low, burnt orange = high) that stays visible on every tile layer
 const markerColor = frac => `color-mix(in srgb, var(--mk-hi) ${Math.round(15 + frac * 85)}%, var(--mk-lo))`;
 // `lifer`: a place with a life species' first record gets a green ring (white-edged, so it shows on green woods too)
-const markerDot = (frac, dia = markerDia(frac), lifer = false) => `<div class="dot${lifer ? " lifer" : ""}" style="width:${dia}px;height:${dia}px;background:${markerColor(frac)}"></div>`;
+const markerDot = (frac, dia = markerDia(frac), lifer = false) => `<span class="dot${lifer ? " lifer" : ""}" style="width:${dia}px;height:${dia}px;background:${markerColor(frac)}"></span>`;
 const popupStat = (n, label) => `<span><b>${fmtN(n)}</b>${esc(label)}</span>`;
 const CLUSTER_OFF_ZOOM = 13;
 // the cluster key only makes sense while a cluster is actually drawn
