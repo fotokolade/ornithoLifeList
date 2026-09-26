@@ -481,7 +481,7 @@ class PageTest(unittest.TestCase):
         page.select_option('[data-tour-preset="pace"]', "jaguar")
         self.assertEqual(page.evaluate("[S.tourCfg.speed, S.tourCfg.stop]"), [30, 400])
         self.assertEqual(page.input_value('[data-tour-cfg="speed"]'), "30")
-        self.assertIn("Fahrrad · Jaguar", page.inner_text("#tour-cfg-sum"))
+        self.assertIn("Fahrrad | Jaguar", page.inner_text("#tour-cfg-sum"))
         # long and frequent pauses: a longer max. pause, a lower average speed
         page.select_option('[data-tour-preset="pauseLen"]', "long")
         page.select_option('[data-tour-preset="pauseFreq"]', "often")
