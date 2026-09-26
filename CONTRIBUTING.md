@@ -26,6 +26,7 @@ Bitte beachten:
 | `species_reference.json` | Artnamen und Saisonzeiträume |
 | `data/` | Daten der Reiseziele aus GBIF (`tools/fetch_gbif_planner.py`) und das Schaubild der Touren-Einstellungen (`tools/make_tour_diagram.py`) |
 | `tests/` | automatische Tests mit erfundenen Beispieldaten |
+| `requirements-dev.txt` | Python-Pakete für die Mitarbeit (Playwright); für die Lebensliste selbst wird keines gebraucht |
 | `update.py`, `update.bat` | aktualisieren eine git-Kopie |
 | `build.py`, `build.bat`, `lifelist.spec` | bauen die `lifelist.exe` |
 | `.gitignore` | hält persönliche Daten aus dem Repository heraus: `export_*.json`, `lifelist*.html`, `reference/` und den GBIF-Zwischenspeicher |
@@ -60,7 +61,7 @@ Die Tests nutzen erfundene Beispieldaten aus `tests/fixtures.py` und überschrei
 - `tests/test_page.py` öffnet die Seite in einem unsichtbaren Chromium, klickt sich durch alle Tabs und Funktionen und meldet JavaScript-Fehler. Dafür wird Playwright gebraucht, sonst werden diese Tests übersprungen:
 
   ```bash
-  pip install playwright
+  pip install -r requirements-dev.txt
   playwright install chromium
   ```
 

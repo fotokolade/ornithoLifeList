@@ -1,0 +1,7 @@
+# Only for working on the project: lifelist.py itself needs nothing but Python 3's standard library.
+#   pip install -r requirements-dev.txt
+#   playwright install chromium
+#
+# Browser tests (tests/test_page.py), README screenshots (tools/make_screenshots.py) and the PNG of the
+# tour settings diagram (tools/make_tour_diagram.py)
+playwright>=1.40
