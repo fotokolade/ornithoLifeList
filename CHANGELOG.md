@@ -2,7 +2,7 @@
 
 Die neueste Version steht oben. Die Downloads (`lifelist.exe`) gibt es auf der [Releases-Seite](../../releases).
 
-## Noch nicht veröffentlicht
+## 0.5.7 (2026-09-26)
 
 ### Seite
 - **PDF:** Das Datum „Stand: …“ steht mit der Version rechtsbündig in der Titelzeile; die Fußzeile fällt weg, sie landete manchmal allein auf einer sonst leeren letzten Seite.
