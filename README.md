@@ -1,4 +1,4 @@
-# OrnithoLifeList
+# ornithoLifeList
 
 Macht aus deinem [ornitho.de](https://www.ornitho.de/)-Export eine interaktive Vogel-Lebensliste: eine einzige HTML-Datei, die du direkt im Browser öffnest, ohne Server und ohne Installation.
 
