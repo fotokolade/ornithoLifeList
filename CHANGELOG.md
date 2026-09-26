@@ -2,6 +2,11 @@
 
 Die neueste Version steht oben. Die Downloads (`lifelist.exe`) gibt es auf der [Releases-Seite](../../releases).
 
+## Noch nicht veröffentlicht
+
+### Seite
+- **Chrome-Konsole sauber:** Eine lokal geöffnete Seite merkt sich den Reiter beim Neuladen, ohne ihre Adresse umzuschreiben (Chrome meldete „Unsafe attempt to load URL“), und alle Formularfelder haben einen Namen.
+
 ## 0.5.5 (2026-09-26)
 
 ### Seite

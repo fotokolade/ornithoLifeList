@@ -44,7 +44,7 @@ function heatSection(kind, spec) {
 }
 // the control for a heading: what the table counts
 function heatMetricPick(kind) {
-  return `<label class="ctl">${t("actCountBy")}<select data-heat-metric="${kind}" aria-label="${esc(t("ariaMetric"))}">${HEAT_METRICS.map(([k, l]) =>
+  return `<label class="ctl">${t("actCountBy")}<select name="heat-metric-${kind}" data-heat-metric="${kind}" aria-label="${esc(t("ariaMetric"))}">${HEAT_METRICS.map(([k, l]) =>
     `<option value="${k}"${k === S.heatMetric[kind] ? " selected" : ""}>${t(l)}</option>`).join("")}</select></label>`;
 }
 function redrawHeat(kind) {

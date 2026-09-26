@@ -61,6 +61,20 @@ function applyRedact(on) {
   syncHeaderHeight();
   setTab(S.tab);
 }
+// a reload stays on the tab: in the address (#list) when served, but a page opened from disk may not rewrite
+// its own file: URL (Chrome warns "Unsafe attempt to load URL"), so there the session storage keeps it
+const FILE_PAGE = location.protocol === "file:";
+function rememberTab(tab) {
+  try {
+    if (FILE_PAGE) sessionStorage.setItem("lifelist-tab", tab);
+    else history.replaceState(null, "", "#" + tab);
+  } catch (e) { /* private mode or a refusing browser: the tab just isn't remembered */ }
+}
+function rememberedTab() {
+  let tab = location.hash.slice(1);
+  try { if (!tab && FILE_PAGE) tab = sessionStorage.getItem("lifelist-tab") || ""; } catch (e) { /* see rememberTab */ }
+  return tab;
+}
 function setTab(tab) {
   const apply = () => {
     // tabs share one scroll position (they're just toggled via display, not real navigation); reset
@@ -69,7 +83,7 @@ function setTab(tab) {
     S.tab = tab;
     for (const b of $$all("#tabs button")) b.classList.toggle("on", b.dataset.tab === tab);
     for (const s of $$all("div.tab")) s.classList.toggle("on", s.id === "tab-" + tab);
-    try { history.replaceState(null, "", "#" + tab); } catch (e) { /* file: URLs may refuse */ }
+    rememberTab(tab);
     renderActive();
   };
   // crossfades the switch where supported (Chrome/Edge); other browsers just apply it directly
@@ -106,7 +120,7 @@ function savePrintTabs() {
 }
 function openPrintDialog() {
   $("pd-tabs").innerHTML = printTabButtons().map(b =>
-    `<label class="opt-row"><input type="checkbox" value="${b.dataset.tab}"${S.printTabs.has(b.dataset.tab) ? " checked" : ""}> ${esc(b.textContent.trim())}</label>`).join("");
+    `<label class="opt-row"><input type="checkbox" name="print-tab" value="${b.dataset.tab}"${S.printTabs.has(b.dataset.tab) ? " checked" : ""}> ${esc(b.textContent.trim())}</label>`).join("");
   $("pd-go").disabled = !printableTabs().length;
   /** @type {HTMLDialogElement} */ ($("print-dlg")).showModal();
 }
@@ -573,9 +587,9 @@ function init() {
   });
 
   if (S.redact) { $("o-redact").checked = true; hidePlaceTabs(true); }
-  const hash = location.hash.slice(1);
+  const start = rememberedTab();
   buildRegionSelect();
   const tabs = ["overview", "list", "targets", "activity", "regions"].concat(S.redact ? [] : PLACE_TABS);
-  setTab(tabs.includes(hash) ? hash : "overview");
+  setTab(tabs.includes(start) ? start : "overview");
 }
 init();

@@ -165,7 +165,7 @@ function tourDiagram() {
   return svg ? `<details class="tour-diagram"${S.tourDiagOpen ? " open" : ""}><summary>${t("tourDiagram")}</summary><div class="tour-diagram-img">${svg}</div></details>` : "";
 }
 function tourSettingsHtml() {
-  const pick = (id, keys) => `<select data-tour-preset="${id}" aria-label="${esc(t("tourCfg_" + id))}">${keys.map(k =>
+  const pick = (id, keys) => `<select name="tour-${id}" data-tour-preset="${id}" aria-label="${esc(t("tourCfg_" + id))}">${keys.map(k =>
     `<option value="${k}"${k === S.tourCfg[id] ? " selected" : ""}>${t(`tour_${id}_${k}`)}</option>`).join("")}</select>`;
   return `<details class="tour-settings"${S.tourSetOpen ? " open" : ""}><summary id="tour-cfg-sum">${tourCfgSummary()}</summary>
     <div class="tour-presets">${Object.entries(TOUR_CHOICES).map(([id, opts]) => `<label>${t("tourCfg_" + id)} ${pick(id, Object.keys(opts))}</label>`).join("")}

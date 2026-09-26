@@ -675,6 +675,25 @@ class PageTest(unittest.TestCase):
         # a heading and the info text under it stay with what follows
         self.assertEqual(page.eval_on_selector("h2 + details.info", "e => getComputedStyle(e).breakAfter"), "avoid")
 
+    def test_browser_console_stays_clean(self):
+        page = self.open()
+        # a page opened from disk remembers its tab without rewriting its own file: URL (Chrome warns about that)
+        page.click('#tabs button[data-tab="regions"]')
+        page.wait_for_timeout(200)
+        self.assertEqual(page.evaluate("location.hash"), "")
+        page.reload()
+        page.wait_for_timeout(300)
+        self.assertEqual(page.evaluate("S.tab"), "regions")
+        # every form field has an id or a name (Chrome's autofill check)
+        unnamed = "() => [...document.querySelectorAll('input, select, textarea')].filter(e => !e.id && !e.name).map(e => e.outerHTML.slice(0, 80))"
+        for tab in TABS:
+            page.click(f'#tabs button[data-tab="{tab}"]')
+            page.wait_for_timeout(150)
+            self.assertEqual(page.evaluate(unnamed), [], tab)
+        page.click("#b-pdf")
+        self.assertEqual(page.evaluate(unnamed), [])
+        self.assertEqual(self.errors, [])
+
     def test_print_dialog_picks_the_tabs(self):
         page = self.open()
         page.click("#b-pdf")
