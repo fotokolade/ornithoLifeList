@@ -73,7 +73,7 @@ function heatCard(kind) {
     if (!v) return `<td data-r="${r}" data-c="${c}"${rng ? ` class="${rng.trim()}"` : ""}></td>`;
     const key = heatKey(rk, c), i = scale.step(v);
     const cls = [scale.hot(i) ? "hot" : "", sel === key ? "sel" : ""].join(" ").trim() + rng;
-    return `<td data-r="${r}" data-c="${c}" data-v="${v}"${attrs(key, `${spec.rowNames[r]}, ${spec.colNames[c]}`, a)} class="${cls}" style="background:${scale.color(i)}">${spec.numbers ? v : ""}</td>`;
+    return `<td data-r="${r}" data-c="${c}" data-v="${v}"${attrs(key, `${spec.rowNames[r]}, ${spec.colNames[c]}`, a)} class="${cls}" style="background:${scale.color(i)}">${spec.numbers ? fmtN(v) : ""}</td>`;
   }).join("")}${val(rowT[r]) ? `<td class="tot${sel === heatKey(rk, "*") ? " sel" : ""}"${attrs(heatKey(rk, "*"), `${spec.rowNames[r]}, ${total}`, rowT[r])}>
     <span class="tot-bar"><i style="width:${val(rowT[r]) / maxR * 100}%"></i></span><span class="tot-n">${fmtN(val(rowT[r]))}</span></td>` : "<td></td>"}</tr>`).join("");
   const foot = `<tr class="tot-row"><td class="y" title="${esc(total)}">Σ</td>${colT.map((a, c) => {

@@ -1,7 +1,6 @@
 """Maintenance script: builds the data of the holiday planner from GBIF, for Germany or Europe.
 
-For every region (Germany: districts, GADM level 2, or federal states, GADM level 1; Europe: provinces/states,
-GADM level 1) and month it
+For every region (Germany: districts, GADM level 2; Europe: provinces/states, GADM level 1) and month it
 asks GBIF's occurrence search API for the number of all bird records and, as a facet, the records per
 species. One species' share of all bird records in a region and month (its "reporting share") evens out
 regions with many or few observers and serves as the chance of seeing it there. The shares are stored
@@ -13,7 +12,6 @@ licensed repository). Raw answers are cached in tools/.gbif_cache/, so an interr
 asking again; delete the folder to fetch fresh data.
 
 Usage:  python tools/fetch_gbif_planner.py --check          (a few test queries, a minute)
-        python tools/fetch_gbif_planner.py --scope de-states (federal states, a few minutes)
         python tools/fetch_gbif_planner.py --scope de       (about half an hour)
         python tools/fetch_gbif_planner.py --scope eu       (about an hour)
 Options: --from-year 2015  --to-year <last full year>  --offline (cache only)
@@ -62,7 +60,6 @@ EU_COUNTRIES = {  # ISO 3166 alpha-2 (GBIF's country filter) -> GADM's level-0 i
 }
 SCOPES = {
     "de": {"countries": {"DE": "DEU"}, "level": 2, "min_records": 50},
-    "de-states": {"countries": {"DE": "DEU"}, "level": 1, "min_records": 50},
     "eu": {"countries": EU_COUNTRIES, "level": 1, "min_records": 200},
 }
 
@@ -332,7 +329,7 @@ def main():
         elif args.scope:
             run(args.scope, years, args.offline)
         else:
-            ap.error("give --scope de-states, --scope de, --scope eu or --check")
+            ap.error("give --scope de, --scope eu or --check")
     except RuntimeError as e:
         sys.exit(str(e))
     except KeyboardInterrupt:

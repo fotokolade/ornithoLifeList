@@ -165,12 +165,6 @@ function wishTableHtml() {
     <div class="legend season-legend"><span class="season-key season-breed"></span>${t("wishSeasonKindBreed")}<span class="season-key season-occ"></span>${t("wishSeasonKindOcc")}<span class="season-key season-today"></span>${t("wishToday")}</div>
     <div class="card"><table class="wtable"><thead><tr>${wishTh("name", t("name"))}${wishTh("season", monthHead, "strip-cell")}<th class="hide-sm"></th></tr></thead><tbody>${body}</tbody></table></div>`;
 }
-/**
- * A vagrant's typical months in Germany from the holiday planner's GBIF data (the months with a step in
- * any district or state): the shortest run of months over the year that holds them all, as an occurrence
- * window like the wishlist's; none without data or when they spread over most of the year.
- * @param {string} latin @returns {ReturnType<typeof seasonStatus>}
- */
 // a species of the ornitho.de list off the wishlist that GBIF has in at least this many districts is no vagrant
 // but a regular (Bartmeise, Karmingimpel) or established (Nilgans, Halsbandsittich) one: it joins the wishlist
 const RARE_REGULAR_FROM = 30;
@@ -190,6 +184,12 @@ function planSpeciesDE(latin) {
   return PLAN_DE_BY_LATIN.get(latin);
 }
 const rareIsRegular = latin => !RARE_ALWAYS.has(latin) && PLAN_SCOPES.includes("de") && (planSpeciesDE(latin)?.cells.size || 0) >= RARE_REGULAR_FROM;
+/**
+ * A vagrant's typical months in Germany from the holiday planner's GBIF data (the months with a step in
+ * any district or state): the shortest run of months over the year that holds them all, as an occurrence
+ * window like the wishlist's; none without data, all year when they spread over more than nine months.
+ * @param {string} latin @returns {ReturnType<typeof seasonStatus>}
+ */
 function rareSeason(latin) {
   const none = /** @type {ReturnType<typeof seasonStatus>} */ ({ state: "none", kind: "none" });
   const sp = planSpeciesDE(latin);
@@ -204,8 +204,7 @@ function rareSeason(latin) {
     while (len < 12 && !on[(m + len) % 12]) len++;
     if (len > gapLen) { gapLen = len; gapStart = m; }
   }
-  if (!gapLen) return seasonStatus(null, null, "01-01", "12-31");  // all year
-  if (12 - gapLen > 9) return none;
+  if (12 - gapLen > 9) return seasonStatus(null, null, "01-01", "12-31");  // (nearly) all year
   const first = (gapStart + gapLen) % 12, last = (gapStart + 11) % 12;
   const lastDay = new Date(Date.UTC(2001, last + 1, 0)).getUTCDate();
   return seasonStatus(null, null, `${pad(first + 1)}-01`, `${pad(last + 1)}-${pad(lastDay)}`);

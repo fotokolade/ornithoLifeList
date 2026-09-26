@@ -32,13 +32,21 @@ function planData(scope) {
   return PLAN_CACHE[scope];
 }
 const planName = sp => (S.lang === "en" ? sp.en || sp.de : sp.de || sp.en) || sp.latin;
+// what the life list has seen, by Latin binomial and by German/English name: worked out once per render of the
+// tab (plannerSection), not again on every search keystroke or click that only redraws the planner's output
+/** @type {{seenLatin: Set<string>, seenName: Set<string>}|null} */
+let PLAN_SEEN = null;
+function planSeen() {
+  const stats = speciesStats(baseObs());
+  const binomial = latin => latin.split(" ").slice(0, 2).join(" ");
+  PLAN_SEEN = { seenLatin: new Set([...stats.keys()].map(s => binomial(SP[s].latin))),
+    seenName: new Set([...stats.keys()].flatMap(s => [SP[s].name, SP[s].english].filter(Boolean).map(n => n.toLowerCase()))) };
+  return PLAN_SEEN;
+}
 /** the missing species: never seen (by Latin name, the ornitho.de alias or a German/English name); with the
  *  wishlist source "own" only the ones on the own wishlist @param {PlanData} data */
 function planMissing(data) {
-  const stats = speciesStats(baseObs());
-  const binomial = latin => latin.split(" ").slice(0, 2).join(" ");
-  const seenLatin = new Set([...stats.keys()].map(s => binomial(SP[s].latin)));
-  const seenName = new Set([...stats.keys()].flatMap(s => [SP[s].name, SP[s].english].filter(Boolean).map(n => n.toLowerCase())));
+  const { seenLatin, seenName } = PLAN_SEEN || planSeen();
   const known = sp => [sp.latin, sp.alias].some(l => l && seenLatin.has(l)) || [sp.de, sp.en].some(n => n && seenName.has(n.toLowerCase()));
   let list = data.species.filter(sp => !known(sp));
   if (S.targetSrc === "rare") {
@@ -98,7 +106,7 @@ function planDestinations(data, missing) {
       cells.forEach((v, m) => { if (v >= PLAN_MAYBE) row.perMonth[m]++; });
     }
   }
-  return rows.filter(x => x.good + x.maybe).sort((a, b) => b.good - a.good || b.maybe - a.maybe || collator.compare(data.regions[a.r].name, data.regions[b.r].name));
+  return rows.filter(x => x.good + x.maybe);  // sorted by the caller (planSortRows)
 }
 const planByName = (a, b) => collator.compare(a, b);
 // the rows of some destinations (districts, provinces), each opening its missing species; `sub` indents them under their state
@@ -151,14 +159,12 @@ function planDestHtml(data, missing) {
   if (q) rows = rows.filter(x => [data.regions[x.r].name, data.regions[x.r].parent].some(v => v.toLowerCase().includes(q)));
   if (!rows.length) return `<p class="empty">${t("planNoDest")}</p>`;
   planSortRows(rows, x => data.regions[x.r].name);
-  const maxGood = Math.max(1, ...rows.map(x => x.good)), maxMonth = Math.max(1, ...rows.flatMap(x => x.perMonth));
   // districts and provinces under their state or country; a search lists the matching ones plainly
   if (!data.oneParent && !q) return planGroupedHtml(data, missing, rows);
+  const maxGood = Math.max(1, ...rows.map(x => x.good)), maxMonth = Math.max(1, ...rows.flatMap(x => x.perMonth));
   const shown = S.plan.all || q ? rows : rows.slice(0, PLAN_ROWS);
   const body = planRegionRows(data, shown, maxGood, maxMonth);
-  return `<div class="card"><table class="plan-t"><thead><tr><th class="nr">#</th><th>${t("planDest")}</th><th></th>
-      <th class="num" title="${esc(t("planGoodHelp"))}">${t("planGoodCol")}</th><th class="num" title="${esc(t("planMaybeHelp"))}">${t("planMaybeCol")}</th>
-      <th class="strip-cell hide-sm">${t("planMonthsCol")}</th></tr></thead><tbody>${body}</tbody></table>
+  return `<div class="card"><table class="plan-t">${planHead(t("planDest"))}<tbody>${body}</tbody></table>
     ${rows.length > PLAN_ROWS && !q ? `<p class="more"><button class="lnk" data-plan-more>${S.plan.all ? t("showLess") : t("showAll", rows.length)}</button></p>` : ""}</div>`;
 }
 const planHead = first => `<thead><tr><th class="nr">#</th><th>${first}</th><th></th>
@@ -226,6 +232,7 @@ function planOutHtml() {
 }
 function plannerSection() {
   if (!PLAN_SCOPES.length) return "";
+  planSeen();  // the tab is drawn anew: the life list or its filters may have changed
   if (!PLAN_SCOPES.includes(S.plan.scope)) S.plan.scope = PLAN_SCOPES.includes("de") ? "de" : PLAN_SCOPES[0];
   const meta = planData(S.plan.scope).meta;
   const opt = (v, label, cur) => `<option value="${v}"${v === cur ? " selected" : ""}>${label}</option>`;
