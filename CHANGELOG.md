@@ -2,10 +2,13 @@
 
 Die neueste Version steht oben. Die Downloads (`lifelist.exe`) gibt es auf der [Releases-Seite](../../releases).
 
-## Noch nicht veröffentlicht
+## 0.5.6 (2026-09-26)
 
 ### Seite
 - **Chrome-Konsole sauber:** Eine lokal geöffnete Seite merkt sich den Reiter beim Neuladen, ohne ihre Adresse umzuschreiben (Chrome meldete „Unsafe attempt to load URL“), und alle Formularfelder haben einen Namen.
+
+### Programm
+- Das Projekt heißt auf GitHub jetzt `fotokolade/ornithoLifeList`; die Update-Prüfung nutzt den neuen Namen (der alte leitet weiter).
 
 ## 0.5.5 (2026-09-26)
 
