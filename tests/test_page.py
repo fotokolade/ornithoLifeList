@@ -183,6 +183,7 @@ class PageTest(unittest.TestCase):
         page.fill("#wish-q", "zzzz")
         self.assertIn("Keine passende Art", page.inner_text("#wish-out"))
         # the printed report has every group open and no search
+        page.evaluate("S.printTabs.add('targets')")  # only the tabs chosen for printing are drawn for it
         page.evaluate("window.dispatchEvent(new Event('beforeprint'))")
         self.assertEqual(page.locator(species_rows).count(), total)
         self.assertEqual(self.errors, [])
@@ -652,6 +653,7 @@ class PageTest(unittest.TestCase):
 
     def test_print_view_renders_every_tab(self):
         page = self.open()
+        page.evaluate("S.printTabs = new Set(['overview', 'list', 'targets', 'activity', 'regions', 'tours'])")
         page.emulate_media(media="print")
         page.evaluate("window.dispatchEvent(new Event('beforeprint'))")
         for tab in NO_PLACE_TABS:
@@ -661,9 +663,42 @@ class PageTest(unittest.TestCase):
         # each tab starts a page under its name, and the life list curve is printed once (in the overview)
         self.assertEqual(page.get_attribute("#tab-list", "data-title"), "Lebensliste")
         self.assertEqual(page.eval_on_selector("#tab-targets", "e => getComputedStyle(e).breakBefore"), "page")
-        self.assertEqual(page.eval_on_selector("#list-curve", "e => getComputedStyle(e).display"), "none")
+        self.assertEqual(page.eval_on_selector("#list-curve", "e => getComputedStyle(e).display"), "none")  # the overview has it
         # a heading and the info text under it stay with what follows
         self.assertEqual(page.eval_on_selector("h2 + details.info", "e => getComputedStyle(e).breakAfter"), "avoid")
+
+    def test_print_dialog_picks_the_tabs(self):
+        page = self.open()
+        page.click("#b-pdf")
+        self.assertTrue(page.eval_on_selector("#print-dlg", "d => d.open"))
+        # overview and life list until the viewer picks others; never the map
+        boxes = page.eval_on_selector_all("#pd-tabs input", "is => is.map(i => [i.value, i.checked])")
+        self.assertEqual([v for v, on in boxes if on], ["overview", "list"])
+        self.assertNotIn("map", [v for v, _ in boxes])
+        page.uncheck('#pd-tabs input[value="overview"]')
+        page.check('#pd-tabs input[value="targets"]')
+        page.click("#pd-cancel")
+        self.assertFalse(page.eval_on_selector("#print-dlg", "d => d.open"))
+        # the choice is remembered
+        self.assertEqual(page.evaluate("JSON.parse(localStorage.getItem('lifelist-print-tabs'))"), ["list", "targets"])
+        page.reload()
+        page.wait_for_timeout(300)
+        self.assertEqual(sorted(page.evaluate("[...S.printTabs]")), ["list", "targets"])
+        # only the chosen tabs print; the first one right under the header, and the list keeps its curve without the overview
+        page.emulate_media(media="print")
+        page.evaluate("window.dispatchEvent(new Event('beforeprint'))")
+        shown = page.eval_on_selector_all("div.tab", "bs => bs.filter(b => getComputedStyle(b).display !== 'none').map(b => b.id)")
+        self.assertEqual(shown, ["tab-list", "tab-targets"])
+        self.assertEqual(page.eval_on_selector("#tab-list", "e => getComputedStyle(e).breakBefore"), "auto")
+        self.assertNotEqual(page.eval_on_selector("#list-curve", "e => getComputedStyle(e).display"), "none")
+        # with nothing chosen there is nothing to print
+        page.emulate_media(media="screen")
+        page.evaluate("window.dispatchEvent(new Event('afterprint'))")
+        page.click("#b-pdf")
+        page.uncheck('#pd-tabs input[value="list"]')
+        page.uncheck('#pd-tabs input[value="targets"]')
+        self.assertTrue(page.is_disabled("#pd-go"))
+        self.assertEqual(self.errors, [])
 
     def test_charts_follow_theme_and_print_light(self):
         page = self.open(hash="#activity")
@@ -673,6 +708,7 @@ class PageTest(unittest.TestCase):
         page.select_option("#o-theme", "dark")
         dark = grid()
         self.assertNotEqual(light, dark)
+        page.evaluate("S.printTabs.add('activity')")  # only the tabs chosen for printing are drawn for it
         page.evaluate("window.dispatchEvent(new Event('beforeprint'))")
         self.assertEqual(grid(), light)
         page.evaluate("window.dispatchEvent(new Event('afterprint'))")

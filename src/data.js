@@ -108,6 +108,7 @@ if (initialTheme !== "system") document.documentElement.setAttribute("data-theme
  * @property {string} regMonthLvl - level of the region x month table's rows: "s"|"c"|"m"|"p"
  * @property {any} tourCfg - tour settings (a TourCfg, see tours.js), kept in localStorage
  * @property {boolean} tourSetOpen - the tours' settings menu is unfolded
+ * @property {Set<string>} printTabs - the tabs "PDF erstellen" prints (remembered in localStorage)
  * @property {boolean} tourDiagOpen - the diagram in the tours' settings is unfolded
  * @property {{k: string, d: 1|-1}} tourSort - tours table sort (see TOUR_SORT)
  * @property {Set<string>} tourOpen - keys of tours with an open detail row
@@ -117,10 +118,18 @@ if (initialTheme !== "system") document.documentElement.setAttribute("data-theme
  */
 // the point in time the page opens with, and "Gesamt" returns to
 const TIME_START = { y: Math.min(TODAY_Y, MAX_Y), m: TODAY_M };
+// the tabs to print, overview and life list until the viewer picks others
+function loadPrintTabs() {
+  try {
+    const saved = JSON.parse(localStorage.getItem("lifelist-print-tabs") || "null");
+    if (Array.isArray(saved)) return new Set(saved.filter(x => typeof x === "string"));
+  } catch (e) { /* no or broken setting */ }
+  return new Set(["overview", "list"]);
+}
 const S = { tab: "overview", region: "all", year: TIME_START.y, month: TIME_START.m, timeAll: true, lang: initialLang, theme: initialTheme,
   escaped: false, collective: false, atlasF: "all", actMetric: "obs", redact: !!RAW.meta.redacted, metric: "life", q: "", sort: "nr", dir: -1, open: new Set(),
   regSort: {}, regAll: {}, targetSrc: "all", customTargets: loadCustomTargets(), wishSort: { k: "season", d: 1 },
-  wishOpen: null, wishQ: "", plan: { scope: "de", month: 0, view: "dest", q: "", open: null, all: false, openG: null, gview: "d", sort: "n", gall: false }, calDay: null, heatMetric: { ym: "species", m: "obs", w: "obs", rm: "days" }, heatSel: {}, regMonthLvl: "c", tourCfg: null, tourSetOpen: false, tourDiagOpen: false, tourSort: { k: "date", d: -1 }, tourOpen: new Set(), tourAll: false, tourRoute: null, focusSp: null };
+  wishOpen: null, wishQ: "", plan: { scope: "de", month: 0, view: "dest", q: "", open: null, all: false, openG: null, gview: "d", sort: "n", gall: false }, calDay: null, heatMetric: { ym: "species", m: "obs", w: "obs", rm: "days" }, heatSel: {}, regMonthLvl: "c", tourCfg: null, tourSetOpen: false, printTabs: loadPrintTabs(), tourDiagOpen: false, tourSort: { k: "date", d: -1 }, tourOpen: new Set(), tourAll: false, tourRoute: null, focusSp: null };
 T = STR[S.lang];
 
 /* ---------- helpers ---------- */

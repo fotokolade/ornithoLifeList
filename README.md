@@ -20,7 +20,7 @@ Macht aus deinem [ornitho.de](https://www.ornitho.de/)-Export eine interaktive V
 
 </details>
 
-Fast alles ist anklickbar: ein Tag im Kalender, eine Zelle in einer Tabelle oder ein Punkt auf der Kurve zeigt die Arten dahinter, und jede Art führt zu ihrem Eintrag in der Lebensliste. Die Seite gibt es auf Deutsch und Englisch (mit englischen Artnamen), hell und dunkel, und sie lässt sich als PDF speichern.
+Fast alles ist anklickbar: ein Tag im Kalender, eine Zelle in einer Tabelle oder ein Punkt auf der Kurve zeigt die Arten dahinter, und jede Art führt zu ihrem Eintrag in der Lebensliste. Die Seite gibt es auf Deutsch und Englisch (mit englischen Artnamen), hell und dunkel, und sie lässt sich als PDF speichern, wahlweise mit allen Reitern oder nur einzelnen (vorgewählt: Übersicht und Lebensliste).
 
 ## So sieht es aus
 

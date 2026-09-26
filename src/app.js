@@ -97,6 +97,19 @@ function updateToc() {
 }
 
 // (re-)sets every static label, option list and select value from the active language; safe to call again after a language switch
+/* ---------- print choice ---------- */
+// the tabs that can be printed: every visible one but the map
+const printTabButtons = () => [...$$all("#tabs button")].filter(b => !b.hidden && b.dataset.tab !== "map");
+const printableTabs = () => printTabButtons().map(b => b.dataset.tab).filter(tab => S.printTabs.has(tab));
+function savePrintTabs() {
+  try { localStorage.setItem("lifelist-print-tabs", JSON.stringify([...S.printTabs])); } catch (e) { /* private mode may refuse */ }
+}
+function openPrintDialog() {
+  $("pd-tabs").innerHTML = printTabButtons().map(b =>
+    `<label class="opt-row"><input type="checkbox" value="${b.dataset.tab}"${S.printTabs.has(b.dataset.tab) ? " checked" : ""}> ${esc(b.textContent.trim())}</label>`).join("");
+  $("pd-go").disabled = !printableTabs().length;
+  /** @type {HTMLDialogElement} */ ($("print-dlg")).showModal();
+}
 function renderChrome() {
   $("h-title").textContent = t("title");
   $("h-sub").textContent = t("subtitle", RAW.meta.source, fmtN(OBS.length)) + " · " + t("version", APP_VERSION);
@@ -127,6 +140,11 @@ function renderChrome() {
   $("q-atlas").innerHTML = Object.entries(T.atlasFilter).map(([k, v]) => `<option value="${k}">${v}</option>`).join("");
   $("q-atlas").value = S.atlasF;
   $("b-pdf").textContent = t("pdf");
+  $("pd-title").textContent = t("pdf");
+  $("pd-which").textContent = t("printWhich");
+  $("pd-hint").textContent = t("printHint");
+  $("pd-cancel").textContent = t("printCancel");
+  $("pd-go").textContent = t("printGo");
   $("m-metric").innerHTML = `<option value="life">${cutoffLabel("mapLiferAll", "mapLifer")}</option><option value="year">${t("mapYear", timePeriodLabel())}</option><option value="obs">${t("mapObs", timePeriodLabel())}</option><option value="lifer">${cutoffLabel("mapNewHereAll", "mapNewHere")}</option>`;
   $("m-metric").value = S.metric;
   syncHeaderHeight();
@@ -216,7 +234,19 @@ function init() {
   $("t-range").addEventListener("input", pickTime);
   // with "Gesamt" on, a click right on the thumb changes no value and so fires no input: leave "Gesamt" all the same
   $("t-range").addEventListener("pointerup", e => { if (S.timeAll) pickTime(e); });
-  $("b-pdf").addEventListener("click", () => window.print());
+  // "PDF erstellen": pick the tabs to print first (the browser remembers them); Ctrl+P prints the same ones
+  $("b-pdf").addEventListener("click", openPrintDialog);
+  $("pd-tabs").addEventListener("change", e => {
+    const box = /** @type {HTMLInputElement} */ (e.target);
+    if (box.checked) S.printTabs.add(box.value); else S.printTabs.delete(box.value);
+    savePrintTabs();
+    $("pd-go").disabled = !printableTabs().length;
+  });
+  $("pd-go").addEventListener("click", e => {
+    e.preventDefault();
+    /** @type {HTMLDialogElement} */ ($("print-dlg")).close();
+    setTimeout(() => window.print(), 50);  // once the dialog is gone
+  });
   let printBackup = null;
   window.addEventListener("beforeprint", () => {
     // the report contains every section in full: no open detail rows, search, atlas filter, truncated region tables, wishlist source filter, search or folded groups
@@ -226,8 +256,17 @@ function init() {
     S.wishQ = ""; S.wishOpen = new Set(WISH_GROUPS.map(([g]) => g));
     $("h-print").textContent = t("printed", new Date().toLocaleDateString(S.lang === "en" ? "en-GB" : "de-DE")) + (S.region === "all" ? "" : ", " + $("f-region").selectedOptions[0].text);
     curveForPrint = true;
-    renderOverview(); renderList(); renderTargets(); renderActivity(); renderRegions();
-    if (!S.redact) renderTours();
+    // only the chosen tabs; the first one starts right under the header, the others on a new page
+    const chosen = printableTabs();
+    const renders = { overview: renderOverview, list: renderList, targets: renderTargets, activity: renderActivity, regions: renderRegions, tours: renderTours };
+    for (const tab of chosen) renders[tab]();
+    for (const box of $$all("div.tab")) {
+      const tab = box.id.slice(4);
+      box.dataset.print = chosen.includes(tab) ? "on" : "off";
+      box.classList.toggle("print-first", tab === chosen[0]);
+    }
+    // the life list's curve only when the overview doesn't already print it
+    document.body.classList.toggle("print-overview", chosen.includes("overview"));
     // closed <details> keep their text hidden even from print CSS
     for (const d of $$all("details.info")) d.open = true;
     // each tab starts a page under its own name (the tab bar itself isn't printed)
@@ -235,6 +274,7 @@ function init() {
   });
   window.addEventListener("afterprint", () => {
     curveForPrint = false;
+    for (const box of $$all("div.tab")) { delete box.dataset.print; box.classList.remove("print-first"); }
     for (const d of $$all("details.info")) d.open = false;
     if (printBackup) {
       const { theme, ...state } = printBackup;

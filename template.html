@@ -363,6 +363,13 @@ footer.meta-footer{position:fixed;left:0;right:0;bottom:0;z-index:20;display:fle
 footer.meta-footer #h-sub{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 footer.meta-footer .footer-actions{display:flex;align-items:center;gap:12px;flex:0 0 auto}
 footer.meta-footer .btn{flex:0 0 auto;padding:3px 10px}
+.print-dlg{border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--text);padding:18px 22px;max-width:min(92vw,380px);box-shadow:0 10px 40px rgba(0,0,0,.3)}
+.print-dlg::backdrop{background:rgba(0,0,0,.35)}
+.print-dlg h2{margin:0 0 6px;font-size:1.1rem}
+.print-dlg #pd-tabs{display:grid;gap:6px;margin:10px 0 12px}
+.print-dlg #pd-tabs label{display:flex;align-items:center;gap:8px;cursor:pointer}
+.print-dlg .pd-actions{display:flex;justify-content:flex-end;align-items:center;gap:14px;margin-top:14px}
+.print-dlg #pd-go:disabled{opacity:.5;cursor:not-allowed}
 .legend{display:flex;align-items:center;gap:8px;margin:6px 2px 14px;font-size:.72rem;color:var(--muted)}
 .legend .grad{flex:0 0 90px;height:8px;border-radius:4px;background:linear-gradient(90deg,color-mix(in srgb,var(--heat-hi) 8%,var(--heat-lo)),var(--heat-hi))}
 .hbar{display:flex;flex-direction:column;gap:8px;padding:12px 14px}
@@ -396,8 +403,10 @@ footer.meta-footer .btn{flex:0 0 auto;padding:3px 10px}
   details.info{break-inside:avoid}
   /* every tab on a new page, under its name; the life list's curve is already in the overview */
   #tab-list,#tab-regions,#tab-targets,#tab-activity,#tab-tours{break-before:page}
+  div.tab[data-print="off"],dialog{display:none!important}
+  div.tab.print-first{break-before:auto!important}
   div.tab[data-title]::before{content:attr(data-title);display:block;font-size:17pt;font-weight:700;margin:0 0 6px;padding-bottom:4px;border-bottom:2px solid var(--accent)}
-  #list-curve{display:none!important}
+  body.print-overview #list-curve{display:none!important}
   tr.row{cursor:auto}
   .hide-sm{display:revert!important}
   th.hide-sm,td.hide-sm{display:table-cell!important}
@@ -475,6 +484,15 @@ footer.meta-footer .btn{flex:0 0 auto;padding:3px 10px}
     <button class="btn" id="b-pdf" type="button"></button>
   </div>
 </footer>
+<dialog id="print-dlg" class="print-dlg" aria-labelledby="pd-title">
+  <form method="dialog">
+    <h2 id="pd-title"></h2>
+    <p class="sub" id="pd-which"></p>
+    <div id="pd-tabs"></div>
+    <p class="sub" id="pd-hint"></p>
+    <div class="pd-actions"><button class="lnk" id="pd-cancel" value="cancel"></button><button class="btn" id="pd-go" value="print"></button></div>
+  </form>
+</dialog>
 
 <script id="data" type="application/json">__DATA_JSON__</script>
 <script id="vendor-js">__VENDOR_JS__</script>
