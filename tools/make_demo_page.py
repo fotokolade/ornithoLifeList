@@ -1,4 +1,4 @@
-"""Builds the demo life list from tools/make_demo_export.py's made-up export, for the release and GitHub Pages.
+"""Builds the demo life list from tools/make_demo_export.py's made-up export, attached to each release.
 
 Usage:  python tools/make_demo_page.py [output.html]      (default: lifelist-demo.html)
 
