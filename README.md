@@ -2,7 +2,7 @@
 
 Macht aus deinem [ornitho.de](https://www.ornitho.de/)-Export eine interaktive Vogel-Lebensliste: eine einzige HTML-Datei, die du direkt im Browser öffnest, ohne Server und ohne Installation.
 
-**[Demo ansehen](https://fotokolade.github.io/OrnithoLifeList/)**: eine fertige Lebensliste aus erfundenen Beispieldaten. Dieselbe Datei (`lifelist-demo.html`) liegt auch jedem [Release](../../releases) bei.
+**[Demo herunterladen](../../releases/latest/download/lifelist-demo.html)**: eine fertige Lebensliste aus erfundenen Beispieldaten. Einfach im Browser öffnen und ausprobieren, ganz ohne eigenen Export.
 
 ## Was zeigt die Lebensliste?
 

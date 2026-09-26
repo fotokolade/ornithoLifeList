@@ -8,7 +8,7 @@ Aufgaben, die nur die Projektleitung erledigt: Releases veröffentlichen, die mi
 2. Die Release-Notizen nach `.github/release-notes/v<Version>.md` schreiben, zum Beispiel `v0.3.0.md`, und in `CHANGELOG.md` den Abschnitt „Noch nicht veröffentlicht“ zur neuen Version machen; alles committen und pushen.
 3. Auf GitHub im Tab **Actions** den Workflow **Release** mit **Run workflow** starten. Alternativ das Tag selbst pushen: `git tag v0.3.0 && git push origin v0.3.0`.
 
-Die Demo-Seite `lifelist-demo.html` baut der Workflow aus erfundenen Daten und hängt sie ans Release; danach veröffentlicht der Workflow **Demo** (`.github/workflows/demo.yml`) sie auf GitHub Pages. Dafür muss unter Settings → Pages als Quelle „GitHub Actions“ gewählt sein, und auf dem kostenlosen Plan muss das Repository öffentlich sein. Von Hand lässt sich die Demo mit Run workflow beim Workflow Demo neu veröffentlichen.
+Die Demo-Seite `lifelist-demo.html` baut der Workflow aus erfundenen Daten und hängt sie ans Release; die README verlinkt immer auf die des neuesten Releases.
 
 Den Rest erledigt GitHub Actions (`.github/workflows/release.yml`) auf einem Windows-Rechner: Es legt beim Start von Hand das Tag aus der Versionsnummer an (ein gepushtes Tag prüft es gegen die Versionsnummer), lässt die Tests laufen, baut die `lifelist.exe` und legt das Release an, mit `lifelist.exe`, `lifelist.exe.sha256`, `verify.bat` und `verify.ps1` und der Prüfsumme in den Notizen. Das Tag muss zur Versionsnummer passen, sonst meldet `--check-update` keine neue Version.
 
