@@ -230,6 +230,8 @@ function init() {
     if (!S.redact) renderTours();
     // closed <details> keep their text hidden even from print CSS
     for (const d of $$all("details.info")) d.open = true;
+    // each tab starts a page under its own name (the tab bar itself isn't printed)
+    for (const b of $$all("#tabs button")) { const box = $("tab-" + b.dataset.tab); if (box) box.dataset.title = b.textContent.trim(); }
   });
   window.addEventListener("afterprint", () => {
     curveForPrint = false;

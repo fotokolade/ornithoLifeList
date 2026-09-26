@@ -658,6 +658,12 @@ class PageTest(unittest.TestCase):
             self.assertTrue(page.inner_text(f"#tab-{tab}").strip(), tab)
         self.assertEqual(self.errors, [])
         self.assertTrue(page.eval_on_selector_all("details.info", "ds => ds.length > 0 && ds.every(d => d.open)"))
+        # each tab starts a page under its name, and the life list curve is printed once (in the overview)
+        self.assertEqual(page.get_attribute("#tab-list", "data-title"), "Lebensliste")
+        self.assertEqual(page.eval_on_selector("#tab-targets", "e => getComputedStyle(e).breakBefore"), "page")
+        self.assertEqual(page.eval_on_selector("#list-curve", "e => getComputedStyle(e).display"), "none")
+        # a heading and the info text under it stay with what follows
+        self.assertEqual(page.eval_on_selector("h2 + details.info", "e => getComputedStyle(e).breakAfter"), "avoid")
 
     def test_charts_follow_theme_and_print_light(self):
         page = self.open(hash="#activity")

@@ -391,8 +391,13 @@ footer.meta-footer .btn{flex:0 0 auto;padding:3px 10px}
   .wrap{max-width:none;padding:0}
   .card,.kpi{overflow:visible;border-color:var(--line);box-shadow:none}
   tr,.yrow,.kpi{break-inside:avoid}
-  h2{break-after:avoid;margin-top:14px}
-  #tab-list,#tab-regions,#tab-targets,#tab-activity{break-before:page}
+  /* a heading never ends a page on its own: neither after it nor after the info text below it */
+  h2,h2 + details.info{break-after:avoid;margin-top:14px}
+  details.info{break-inside:avoid}
+  /* every tab on a new page, under its name; the life list's curve is already in the overview */
+  #tab-list,#tab-regions,#tab-targets,#tab-activity,#tab-tours{break-before:page}
+  div.tab[data-title]::before{content:attr(data-title);display:block;font-size:17pt;font-weight:700;margin:0 0 6px;padding-bottom:4px;border-bottom:2px solid var(--accent)}
+  #list-curve{display:none!important}
   tr.row{cursor:auto}
   .hide-sm{display:revert!important}
   th.hide-sm,td.hide-sm{display:table-cell!important}
