@@ -313,6 +313,9 @@ class PageTest(unittest.TestCase):
         self.assertNotIn("Kohlmeise", page.inner_text("#plan-out"))
         # GBIF's Columba livia are Germany's feral pigeons: named like ornitho.de does
         self.assertEqual(page.evaluate("planData('de').species.find(s => s.latin === 'Columba livia').de"), "Straßentaube (Haustaube)")
+        # possible in every state: widespread, not a destination; a coastal bird is not
+        self.assertTrue(page.evaluate("planData('de').species.find(s => s.latin === 'Columba livia').widespread"))
+        self.assertFalse(page.evaluate("planData('de').species.find(s => s.latin === 'Haematopus ostralegus').widespread"))
         page.select_option("#plan-sort", "name")
         names = page.eval_on_selector_all("tr[data-plan-g] td:nth-child(2)", "tds => tds.map(td => td.textContent.replace(/[▸▾]/g, '').trim())")
         self.assertEqual(names[:3], ["Baden-Württemberg", "Bayern", "Berlin"])

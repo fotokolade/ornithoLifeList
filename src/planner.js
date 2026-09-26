@@ -11,6 +11,7 @@
  * @property {string|null} de
  * @property {string|null} en
  * @property {Map<number, number[]>} cells - region index -> 12 steps (January to December)
+ * @property {boolean} widespread - possible (or better) in every state or country: no destination needed
  */
 /** @typedef {{meta: any, regions: {id: string, name: string, parent: string, country: string}[], totals: number[][], species: PlanSpecies[], oneParent: boolean}} PlanData */
 const PLAN_SCOPES = ["de", "eu"].filter(k => RAW.planner && RAW.planner[k]);
@@ -30,7 +31,14 @@ function planData(scope) {
     const oneParent = raw.regions.every(r => r.parent === raw.regions[0].parent);
     PLAN_CACHE[scope] = { meta: raw.meta, regions: raw.regions, totals: raw.totals, oneParent,
       species: raw.species.map(s => ({ latin: s.latin, alias: s.alias, de: s.de, en: s.en, ...PLAN_NAMES[s.latin],
-        cells: new Map(Object.entries(s.cells).map(([r, v]) => [+r, [...v].map(Number)])) })) };
+        cells: new Map(Object.entries(s.cells).map(([r, v]) => [+r, [...v].map(Number)])), widespread: false })) };
+    // a species possible in every state (country) is possible almost anywhere: which districts the data
+    // happen to favour says more about who reports it than about where it lives
+    const parents = new Set(raw.regions.map(r => r.parent));
+    for (const sp of PLAN_CACHE[scope].species) {
+      const where = new Set([...sp.cells].filter(([, cells]) => Math.max(...cells) >= PLAN_MAYBE).map(([r]) => raw.regions[r].parent));
+      sp.widespread = parents.size > 1 && where.size === parents.size;
+    }
   }
   return PLAN_CACHE[scope];
 }
@@ -101,7 +109,7 @@ function planRegionName(data, r, parent = !data.oneParent) {
 function planDestinations(data, missing) {
   const month = S.plan.month, R = data.regions.length;
   const rows = Array.from({ length: R }, (_, r) => ({ r, good: 0, maybe: 0, perMonth: Array(12).fill(0), sp: [] }));
-  for (const sp of missing) {
+  for (const sp of missing.filter(x => !x.widespread)) {
     for (const [r, cells] of sp.cells) {
       const row = rows[r], l = planLevel(cells, month);
       if (l >= PLAN_GOOD) row.good++; else if (l >= PLAN_MAYBE) row.maybe++;
@@ -136,7 +144,7 @@ function planRegionRows(data, rows, maxGood, maxMonth, sub = false) {
 function planGroups(data, missing) {
   const month = S.plan.month, groups = new Map();
   const better = (x, y) => month ? x.l > y.l || (x.l === y.l && x.sum > y.sum) : x.sum > y.sum || (x.sum === y.sum && x.l > y.l);
-  for (const sp of missing) {
+  for (const sp of missing.filter(x => !x.widespread)) {
     for (const [r, cells] of sp.cells) {
       const name = data.regions[r].parent;
       let g = groups.get(name);
@@ -217,9 +225,18 @@ function planSpeciesHtml(data, missing) {
   }).filter(x => x.l);
   if (q) rows = rows.filter(x => [x.sp.de, x.sp.en, x.sp.latin, x.sp.alias].some(v => v && v.toLowerCase().includes(q)));
   if (!rows.length) return `<p class="empty">${t("planNoSpecies")}</p>`;
-  rows.sort((a, b) => b.l - a.l || b.sum - a.sum || collator.compare(planName(a.sp), planName(b.sp)));
+  // the widespread ones last: for them the months matter, not the place
+  rows.sort((a, b) => Number(a.sp.widespread) - Number(b.sp.widespread) || b.l - a.l || b.sum - a.sum || collator.compare(planName(a.sp), planName(b.sp)));
   const shown = S.plan.all || q ? rows : rows.slice(0, PLAN_ROWS);
   const body = shown.map(x => {
+    if (x.sp.widespread) {
+      // per month: in how many of its districts it is possible
+      const perMonth = Array.from({ length: 12 }, (_, m) => [...x.sp.cells.values()].filter(c => c[m] >= PLAN_MAYBE).length);
+      const most = Math.max(1, ...perMonth);
+      return `<tr class="plan-wide"><td>${esc(planName(x.sp))}<span class="latin">${esc(x.sp.latin)}</span></td><td><span class="small">${t("planWide")}</span></td>
+        <td><span class="small-inline">${t(S.plan.scope === "eu" ? "planWideWhereEu" : "planWideWhere")}</span></td>
+        <td class="strip-cell hide-sm">${planStrip(perMonth, v => v / most, m => t("planWideMonth", perMonth[m]))}</td></tr>`;
+    }
     const top = x.best[0];
     const where = x.best.slice(0, 3).map(b => `${esc(data.regions[b.r].name)} <span class="small-inline">${esc(planMonths(b.cells))}</span>`).join("<br>");
     return `<tr><td>${esc(planName(x.sp))}<span class="latin">${esc(x.sp.latin)}</span></td><td><span class="small">${esc(planChance(x.l))}</span></td>
@@ -232,7 +249,8 @@ function planSpeciesHtml(data, missing) {
 // the part below the controls: redrawn alone on a search, a click on a destination or "show all", so the search field keeps its focus
 function planOutHtml() {
   const data = planData(S.plan.scope), missing = planMissing(data);
-  const summary = `<p class="sub">${t("planSummary", fmtN(missing.length))}</p>`;
+  const wide = missing.filter(sp => sp.widespread).length;
+  const summary = `<p class="sub">${t("planSummary", fmtN(missing.length))}${wide ? ` · ${t("planWideSummary", fmtN(wide))}` : ""}</p>`;
   return summary + (S.plan.view === "sp" ? planSpeciesHtml(data, missing) : planDestHtml(data, missing));
 }
 function plannerSection() {
