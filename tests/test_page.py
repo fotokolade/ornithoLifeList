@@ -105,17 +105,25 @@ class PageTest(unittest.TestCase):
 
     def test_all_time_resets_the_overview(self):
         page = self.open()
+
+        def settled(sel):
+            # the text once it stops changing: tab switches and time bar redraws finish a frame or more later
+            prev = None
+            for _ in range(40):
+                text = page.inner_text(sel)
+                if text == prev:
+                    return text
+                prev = text
+                page.wait_for_timeout(100)
+            return prev
         # both tabs always show one year (calendar, "new in", NEU badges): "Gesamt" takes them back to the current one
         for tab in ("list", "overview"):
             page.click(f'#tabs button[data-tab="{tab}"]')
-            page.wait_for_timeout(100)
-            start = page.inner_text(f"#tab-{tab}")
+            start = settled(f"#tab-{tab}")
             page.eval_on_selector("#t-range", "e => { e.value = 0; e.dispatchEvent(new Event('input')); }")
-            page.wait_for_timeout(100)
-            self.assertNotEqual(page.inner_text(f"#tab-{tab}"), start, tab)
+            self.assertNotEqual(settled(f"#tab-{tab}"), start, tab)
             page.click("#t-all")
-            page.wait_for_timeout(100)
-            self.assertEqual(page.inner_text(f"#tab-{tab}"), start, tab)
+            self.assertEqual(settled(f"#tab-{tab}"), start, tab)
         # with "Gesamt" on, a click on the thumb itself (no value change) still picks that point in time
         box = page.locator("#t-range").bounding_box()
         value, maxv = page.eval_on_selector("#t-range", "e => [+e.value, +e.max]")
@@ -313,6 +321,8 @@ class PageTest(unittest.TestCase):
         self.assertEqual(page.locator("#wish-out .season-strip").count(), 1)  # its months from the GBIF data
         page.fill("#wish-q", "Nilgans")
         self.assertIn("Keine passende Art", page.inner_text("#wish-out"))
+        page.fill("#wish-q", "Rothalsgans")  # widespread, but a vagrant: kept here by hand
+        self.assertIn("Rothalsgans", page.inner_text("#wish-out"))
         # the destinations follow the source: only vagrants
         page.select_option("#plan-view", "sp")
         page.fill("#plan-q", "Blauschwanz")

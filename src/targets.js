@@ -174,6 +174,8 @@ function wishTableHtml() {
 // a species of the ornitho.de list off the wishlist that GBIF has in at least this many districts is no vagrant
 // but a regular (Bartmeise, Karmingimpel) or established (Nilgans, Halsbandsittich) one: it joins the wishlist
 const RARE_REGULAR_FROM = 30;
+// widespread in the GBIF data, but vagrants all the same: they turn up in the flocks of other species
+const RARE_ALWAYS = new Set(["Branta ruficollis"]);  // Rothalsgans
 /** @type {Map<string, PlanSpecies>|null} */
 let PLAN_DE_BY_LATIN = null;
 /** @param {string} latin @returns {PlanSpecies|undefined} the species in the planner's data for Germany, by GBIF's or ornitho's name */
@@ -188,7 +190,7 @@ function planSpeciesDE(latin) {
   }
   return PLAN_DE_BY_LATIN.get(latin);
 }
-const rareIsRegular = latin => PLAN_SCOPES.includes("de") && (planSpeciesDE(latin)?.cells.size || 0) >= RARE_REGULAR_FROM;
+const rareIsRegular = latin => !RARE_ALWAYS.has(latin) && PLAN_SCOPES.includes("de") && (planSpeciesDE(latin)?.cells.size || 0) >= RARE_REGULAR_FROM;
 function rareSeason(latin) {
   const none = /** @type {ReturnType<typeof seasonStatus>} */ ({ state: "none", kind: "none" });
   const sp = planSpeciesDE(latin);
