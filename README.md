@@ -105,7 +105,8 @@ Ob es eine neue Version gibt, zeigt `python lifelist.py --check-update`.
 - Die fertige Seite funktioniert offline, nur die Karte lädt ihre Kartenkacheln aus dem Internet.
 - `--check-update` und `update.py` fragen GitHub nach der neuesten Version. Dabei werden keine Beobachtungsdaten gesendet.
 - Deine eigene Wunschliste (Tab „Ziele“) speichert nur dein Browser. Sie bleibt erhalten, wenn du die Lebensliste neu erstellst. Zum Sichern oder für einen anderen Rechner kannst du sie dort als Datei speichern und wieder laden.
-- Export und HTML-Dateien enthalten deine Beobachtungsorte. Sie sind per `.gitignore` vom Git-Repository ausgeschlossen. Zum Weitergeben ist die Version mit `--redact` gedacht; ihr fehlen auch Karte und Touren.
+- Dein Export und die fertige `lifelist.html` enthalten deine Beobachtungsorte, bei Handy-Meldungen auch deinen GPS-Standort. Gib sie deshalb nur weiter, wenn das in Ordnung ist. Zum Teilen, etwa per Mail oder im Verein, gibt es die Version mit `--redact` (siehe [Optionen](#optionen)).
+- Ein Update mit `update.bat` oder `update.py` lässt deinen Export und deine HTML-Dateien unangetastet.
 
 ## Woher kommen die Artdaten?
 
@@ -133,6 +134,7 @@ Beides steckt fertig aufbereitet in `species_reference.json`.
 | `tests/` | automatische Tests mit erfundenen Beispieldaten |
 | `update.py`, `update.bat` | aktualisieren eine git-Kopie |
 | `build.py`, `build.bat`, `lifelist.spec` | bauen die `lifelist.exe` |
+| `.gitignore` | hält persönliche Daten aus dem Repository heraus: `export_*.json`, `lifelist*.html`, `reference/` und den GBIF-Zwischenspeicher |
 | `.github/workflows/release.yml` | baut die exe und veröffentlicht das Release, sobald ein Versions-Tag gepusht wird |
 | `verify.ps1`, `verify.bat` | prüfen die Prüfsumme der `lifelist.exe` |
 | `tools/` | Werkzeuge zur Pflege der Referenzdaten und Bibliotheken, für Beispieldaten und Screenshots |
