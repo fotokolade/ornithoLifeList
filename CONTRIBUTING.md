@@ -7,7 +7,7 @@ Beiträge sind willkommen: Fehlerkorrekturen, neue Auswertungen, Übersetzungen,
 1. Das Repository forken und für die Änderung einen eigenen Branch anlegen.
 2. Die Änderung machen. Texte der Seite stehen in `src/i18n.js` und brauchen immer beide Sprachen, Deutsch und Englisch.
 3. Tests und Typprüfung laufen lassen (siehe unten). Für neue Funktionen gern einen Test in `tests/` ergänzen.
-4. Einen Pull Request öffnen und kurz beschreiben, was sich ändert und warum. Bei sichtbaren Änderungen hilft ein Screenshot.
+4. Einen Pull Request öffnen und kurz beschreiben, was sich ändert und warum. Bei sichtbaren Änderungen hilft ein Screenshot. Behebt er ein Issue, im Text „Fixes #Nummer“ schreiben: Dann schließt sich das Issue beim Zusammenführen von selbst.
 
 Bitte beachten:
 

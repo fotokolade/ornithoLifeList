@@ -37,7 +37,7 @@ OUT_DIR = os.path.join(ROOT, "data")
 API = "https://api.gbif.org/v1"
 AVES = 212
 REQUESTS_PER_SECOND = 3
-USER_AGENT = "OrnithoLifeList data fetch (https://github.com/fotokolade/OrnithoLifeList)"
+USER_AGENT = "OrnithoLifeList data fetch (https://github.com/fotokolade/ornithoLifeList)"
 LICENSES = ["CC0_1_0", "CC_BY_4_0"]
 # a step's lower bound as a share of all bird records in the region and month: step 1 from 0.02 %, ..., step 9 from 10 %
 LEVELS = [0.0002, 0.0005, 0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1]

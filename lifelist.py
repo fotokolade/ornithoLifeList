@@ -29,7 +29,7 @@ if getattr(sys, "frozen", False):
 else:
     RESOURCES = HERE = os.path.dirname(os.path.abspath(__file__))
 
-REPO = "fotokolade/OrnithoLifeList"
+REPO = "fotokolade/ornithoLifeList"
 RELEASES_URL = f"https://github.com/{REPO}/releases"
 LATEST_RELEASE_API = f"https://api.github.com/repos/{REPO}/releases/latest"
 UPDATE_TIMEOUT = 10  # seconds; enough for a slow connection, short enough not to hang offline or behind a stuck proxy
