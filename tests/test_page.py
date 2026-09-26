@@ -296,6 +296,31 @@ class PageTest(unittest.TestCase):
         self.assertIn("Destinations", page.inner_text("#tab-targets"))
         self.assertEqual(self.errors, [])
 
+    def test_rare_vagrants_source(self):
+        _, wishlist, rare = lifelist.load_species_reference()
+        names = {r[1] for r in rare}
+        self.assertIn("Blauschwanz", names)
+        self.assertNotIn("Habicht", names)  # on the wishlist under a newer genus
+        self.assertFalse({w[0] for w in wishlist} & {r[0] for r in rare})
+        page = self.open(hash="#targets")
+        regular = int(page.inner_text("#tab-targets p.sub").split(" von ")[1].split()[0])
+        self.assertGreater(regular, len(wishlist))  # widespread species off the wishlist (Bartmeise, Nilgans) join it
+        page.select_option("#tgt-src", "rare")
+        self.assertIn("Ausnahmegästen gesehen", page.inner_text("#tab-targets p.sub"))
+        self.assertEqual(page.locator("#tab-targets > .bar").count(), 0)  # no progress bar for vagrants
+        page.fill("#wish-q", "Blauschwanz")
+        self.assertIn("Blauschwanz", page.inner_text("#wish-out"))
+        self.assertEqual(page.locator("#wish-out .season-strip").count(), 1)  # its months from the GBIF data
+        page.fill("#wish-q", "Nilgans")
+        self.assertIn("Keine passende Art", page.inner_text("#wish-out"))
+        # the destinations follow the source: only vagrants
+        page.select_option("#plan-view", "sp")
+        page.fill("#plan-q", "Blauschwanz")
+        self.assertIn("Pinneberg", page.inner_text("#plan-out"))
+        page.fill("#plan-q", "Nilgans")
+        self.assertIn("Keine", page.inner_text("#plan-out"))
+        self.assertEqual(self.errors, [])
+
     def test_heat_steps_hover_difference_and_range(self):
         page = self.open()
         cells = '#heat-ym tbody td[data-heat]:not(.tot)'

@@ -149,7 +149,8 @@ def parse_municipality(text):
 def load_species_reference():
     """Latin-name lookups generated from the official ornitho.de species list, plus GBIF-derived
     occurrence windows for non-breeding species; see tools/extract_species_reference.py and
-    tools/fetch_occurrence_windows.py. Returns (english_by_latin, wishlist_rows)."""
+    tools/fetch_occurrence_windows.py. Returns (english_by_latin, wishlist_rows, rare_rows): rare_rows are the
+    species of the ornitho.de list that are not on the wishlist, mostly rare vagrants, as [latin, german, english]."""
     path = os.path.join(RESOURCES, "species_reference.json")
     with open(path, encoding="utf-8") as fh:
         ref = json.load(fh)
@@ -158,7 +159,13 @@ def load_species_reference():
         [e["latin"], e["de"], e["en"], e["bzcStart"], e["bzcEnd"], e.get("occStart"), e.get("occEnd")]
         for e in ref["wishlist"]
     ]
-    return english_by_latin, wishlist_rows
+    # by Latin or German name: the wishlist may use a newer genus (Astur gentilis, Accipiter gentilis: Habicht)
+    on_wishlist = {e["latin"] for e in ref["wishlist"]} | {e["de"] for e in ref["wishlist"]}
+    # plain binomials only: no "A / B" pairs, hybrids, "sp." or subspecies
+    rare_rows = [[latin, names["de"], names.get("en") or ""] for latin, names in ref["lifeListNames"].items()
+                 if latin not in on_wishlist and names.get("de") not in on_wishlist and len(latin.split()) == 2
+                 and "/" not in latin and " x " not in latin and "sp." not in latin and names.get("de")]
+    return english_by_latin, wishlist_rows, rare_rows
 
 
 def build_data(sightings, english_by_latin):
@@ -242,9 +249,10 @@ def load_tour_diagram():
 
 
 def build_page_data(sightings, source_name, redact):
-    english_by_latin, wishlist_rows = load_species_reference()
+    english_by_latin, wishlist_rows, rare_rows = load_species_reference()
     data = build_data(sightings, english_by_latin)
     data["euro"] = wishlist_rows
+    data["rare"] = rare_rows
     data["planner"] = load_planner_data()
     if not redact:  # the tours, whose settings it explains, are left out of a redacted page
         data["tourDiagram"] = load_tour_diagram()

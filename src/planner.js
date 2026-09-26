@@ -41,6 +41,10 @@ function planMissing(data) {
   const seenName = new Set([...stats.keys()].flatMap(s => [SP[s].name, SP[s].english].filter(Boolean).map(n => n.toLowerCase())));
   const known = sp => [sp.latin, sp.alias].some(l => l && seenLatin.has(l)) || [sp.de, sp.en].some(n => n && seenName.has(n.toLowerCase()));
   let list = data.species.filter(sp => !known(sp));
+  if (S.targetSrc === "rare") {
+    const rare = new Set(RARE_SPECIES.map(e => e.latin).filter(l => !rareIsRegular(l)));
+    list = list.filter(sp => rare.has(sp.latin) || (sp.alias && rare.has(sp.alias)));
+  }
   if (S.targetSrc === "own") {
     const own = new Set(S.customTargets.flatMap(x => [x.latin, x.name]).filter(Boolean).map(v => v.toLowerCase()));
     list = list.filter(sp => [sp.latin, sp.alias, sp.de, sp.en].some(v => v && own.has(v.toLowerCase())));

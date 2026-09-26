@@ -165,6 +165,50 @@ function wishTableHtml() {
     <div class="legend season-legend"><span class="season-key season-breed"></span>${t("wishSeasonKindBreed")}<span class="season-key season-occ"></span>${t("wishSeasonKindOcc")}<span class="season-key season-today"></span>${t("wishToday")}</div>
     <div class="card"><table class="wtable"><thead><tr>${wishTh("name", t("name"))}${wishTh("season", monthHead, "strip-cell")}<th class="hide-sm"></th></tr></thead><tbody>${body}</tbody></table></div>`;
 }
+/**
+ * A vagrant's typical months in Germany from the holiday planner's GBIF data (the months with a step in
+ * any district or state): the shortest run of months over the year that holds them all, as an occurrence
+ * window like the wishlist's; none without data or when they spread over most of the year.
+ * @param {string} latin @returns {ReturnType<typeof seasonStatus>}
+ */
+// a species of the ornitho.de list off the wishlist that GBIF has in at least this many districts is no vagrant
+// but a regular (Bartmeise, Karmingimpel) or established (Nilgans, Halsbandsittich) one: it joins the wishlist
+const RARE_REGULAR_FROM = 30;
+/** @type {Map<string, PlanSpecies>|null} */
+let PLAN_DE_BY_LATIN = null;
+/** @param {string} latin @returns {PlanSpecies|undefined} the species in the planner's data for Germany, by GBIF's or ornitho's name */
+function planSpeciesDE(latin) {
+  if (!PLAN_DE_BY_LATIN) {
+    PLAN_DE_BY_LATIN = new Map();
+    const scope = ["de", "de-states"].find(k => PLAN_SCOPES.includes(k));
+    for (const sp of scope ? planData(scope).species : []) {
+      PLAN_DE_BY_LATIN.set(sp.latin, sp);
+      if (sp.alias) PLAN_DE_BY_LATIN.set(sp.alias, sp);
+    }
+  }
+  return PLAN_DE_BY_LATIN.get(latin);
+}
+const rareIsRegular = latin => PLAN_SCOPES.includes("de") && (planSpeciesDE(latin)?.cells.size || 0) >= RARE_REGULAR_FROM;
+function rareSeason(latin) {
+  const none = /** @type {ReturnType<typeof seasonStatus>} */ ({ state: "none", kind: "none" });
+  const sp = planSpeciesDE(latin);
+  if (!sp) return none;
+  const on = Array(12).fill(false);
+  for (const cells of sp.cells.values()) cells.forEach((v, m) => { if (v) on[m] = true; });
+  if (!on.some(Boolean)) return none;
+  // the longest run of months without data is what the window leaves out
+  let gapStart = -1, gapLen = 0;
+  for (let m = 0; m < 12; m++) {
+    let len = 0;
+    while (len < 12 && !on[(m + len) % 12]) len++;
+    if (len > gapLen) { gapLen = len; gapStart = m; }
+  }
+  if (!gapLen) return seasonStatus(null, null, "01-01", "12-31");  // all year
+  if (12 - gapLen > 9) return none;
+  const first = (gapStart + gapLen) % 12, last = (gapStart + 11) % 12;
+  const lastDay = new Date(Date.UTC(2001, last + 1, 0)).getUTCDate();
+  return seasonStatus(null, null, `${pad(first + 1)}-01`, `${pad(last + 1)}-${pad(lastDay)}`);
+}
 function renderTargets() {
   // deliberately unscoped by S.region: "never seen" means never seen anywhere, not just in the currently filtered region
   const list = baseObs();
@@ -173,8 +217,12 @@ function renderTargets() {
   const seenName = new Set([...stats.keys()].map(s => SP[s].name.toLowerCase()));
   const src = S.targetSrc;
   const pool = [];
-  if (src !== "own") for (const e of EURO_SPECIES) pool.push({ latin: e.latin, name: e.de, english: e.en, season: seasonStatus(e.bzcStart, e.bzcEnd, e.occStart, e.occEnd), src: "euro" });
-  if (src !== "euro") for (const x of S.customTargets) pool.push({ latin: x.latin, name: x.name, english: null, season: { state: "none", kind: "none" }, src: "own" });
+  for (const e of RARE_SPECIES) {
+    const regular = rareIsRegular(e.latin);
+    if (regular ? src === "all" || src === "euro" : src === "rare") pool.push({ latin: e.latin, name: e.de, english: e.en, season: rareSeason(e.latin), src: regular ? "euro" : "rare" });
+  }
+  if (src === "all" || src === "euro") for (const e of EURO_SPECIES) pool.push({ latin: e.latin, name: e.de, english: e.en, season: seasonStatus(e.bzcStart, e.bzcEnd, e.occStart, e.occEnd), src: "euro" });
+  if (src === "all" || src === "own") for (const x of S.customTargets) pool.push({ latin: x.latin, name: x.name, english: null, season: { state: "none", kind: "none" }, src: "own" });
   const seenKey = new Set(), rows = [];
   let totalDistinct = 0, seenCount = 0;
   for (const p of pool) {
@@ -197,14 +245,16 @@ function renderTargets() {
     : `<p class="empty">${t("wishEmpty")}</p>`;
   wishRows = rows; wishPoolLen = pool.length;
   $("tab-targets").innerHTML = `
-    ${infoText(`${t("wishHelp")}<br><br>${t("wishSeasonHelp")}`)}
-    <p class="sub">${t("wishProgress", seenCount, totalDistinct, progressPct)}</p>
-    <div class="bar" style="max-width:360px;margin-bottom:12px"><i style="width:${progressPct}%;background:linear-gradient(90deg,color-mix(in srgb,var(--accent) 45%,transparent),var(--accent))"></i></div>
+    ${infoText(`${t("wishHelp")}<br><br>${t("wishSeasonHelp")}<br><br>${t("wishRareHelp")}`)}
+    ${src === "rare" ? `<p class="sub">${t("wishRareProgress", seenCount, totalDistinct)}</p>`  // vagrants: a count, no progress to make
+      : `<p class="sub">${t("wishProgress", seenCount, totalDistinct, progressPct)}</p>
+    <div class="bar" style="max-width:360px;margin-bottom:12px"><i style="width:${progressPct}%;background:linear-gradient(90deg,color-mix(in srgb,var(--accent) 45%,transparent),var(--accent))"></i></div>`}
     <div class="pick">
       <select id="tgt-src" aria-label="${t("wishSrcCol")}">
         <option value="all">${t("wishSrcAll")}</option>
         <option value="euro">${t("wishSrcEuro")}</option>
         <option value="own">${t("wishSrcOwn")}</option>
+        <option value="rare">${t("wishSrcRare")}</option>
       </select>
     </div>
     <h2 data-toc="${esc(t("tocWishManage"))}">${t("wishManage")}</h2>

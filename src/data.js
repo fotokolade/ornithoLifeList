@@ -7,16 +7,18 @@ const SP = RAW.sp.map(([name, latin, order, flags, english]) => ({ name, latin, 
 // from public GBIF sighting records, used as a fallback for passage migrants and visitors that don't
 // breed here. See species_reference.json.
 const EURO_SPECIES = (RAW.euro || []).map(([latin, de, en, bzcStart, bzcEnd, occStart, occEnd]) => ({ latin, de, en, bzcStart, bzcEnd, occStart, occEnd }));
-// lets the wishlist "add" flow and its <datalist> match by either the German or the English name
+// the other species of the ornitho.de list, mostly rare vagrants (Ausnahmegäste): the wishlist's own source
+const RARE_SPECIES = (RAW.rare || []).map(([latin, de, en]) => ({ latin, de, en }));
+// lets the wishlist "add" flow and its <datalist> match by either the German or the English name, vagrants too
 const EURO_BY_NAME = new Map();
-for (const e of EURO_SPECIES) {
+for (const e of [...EURO_SPECIES, ...RARE_SPECIES]) {
   EURO_BY_NAME.set(e.de.toLowerCase(), e);
   if (e.en) EURO_BY_NAME.set(e.en.toLowerCase(), e);
 }
 const EURO_SUGGESTIONS_HTML = {};  // cached per language, since the suggested names switch with S.lang
 function euroSuggestionsHtml() {
   if (!EURO_SUGGESTIONS_HTML[S.lang]) {
-    EURO_SUGGESTIONS_HTML[S.lang] = EURO_SPECIES.map(e => `<option value="${esc(S.lang === "en" && e.en ? e.en : e.de)}">`).join("");
+    EURO_SUGGESTIONS_HTML[S.lang] = [...EURO_SPECIES, ...RARE_SPECIES].map(e => `<option value="${esc(S.lang === "en" && e.en ? e.en : e.de)}">`).join("");
   }
   return EURO_SUGGESTIONS_HTML[S.lang];
 }
@@ -94,7 +96,7 @@ if (initialTheme !== "system") document.documentElement.setAttribute("data-theme
  * @property {Set<number>} open - species indices with an open detail row in the life list
  * @property {Object<string, {k: string, d: 1|-1}>} regSort - per region-level table sort
  * @property {Object<string, boolean>} regAll - per region-level table "show all" toggle
- * @property {string} targetSrc - wishlist source filter: "all"|"euro"|"own"
+ * @property {string} targetSrc - wishlist source filter: "all"|"euro"|"own"|"rare"
  * @property {{name: string, latin: string|null}[]} customTargets - user-maintained wishlist entries
  * @property {{k: "name"|"season", d: 1|-1}} wishSort - wishlist table sort
  * @property {Set<string>|null} wishOpen - expanded wishlist season groups; null until the user toggles one (see wishOpenGroups())
