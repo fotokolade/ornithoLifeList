@@ -260,7 +260,7 @@ function init() {
     S.tourCfg[k] = +e.target.value;
     saveTourCfg();
     $(`tour-cfg-${k}-v`).textContent = tourCfgValue(k);
-    $("tour-cfg-sum").textContent = tourCfgSummary();
+    $("tour-cfg-sum").innerHTML = tourCfgSummary();
     redrawTours();
   });
   $("tab-tours").addEventListener("change", e => {

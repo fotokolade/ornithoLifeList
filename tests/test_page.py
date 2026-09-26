@@ -389,7 +389,7 @@ class PageTest(unittest.TestCase):
     def test_tour_settings_diagram_and_names(self):
         page = self.open(redact="tours", hash="#tours")
         page.click("details.tour-settings summary")
-        self.assertIn("Meldelücken bis 30 min · selten anhalten", page.inner_text("#tour-cfg-sum"))
+        self.assertIn("Meldelücken bis 30 min | selten anhalten", page.inner_text("#tour-cfg-sum"))
         self.assertEqual(page.eval_on_selector('select[data-tour-preset="pauseLen"]', "s => s.selectedOptions[0].text"), "bis 30 min")
         page.click("details.tour-diagram summary")
         self.assertIn("Meldelücke", page.get_attribute("details.tour-diagram svg", "aria-label") + page.inner_text("details.tour-diagram"))

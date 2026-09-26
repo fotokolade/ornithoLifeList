@@ -157,7 +157,8 @@ const TOUR_UNITS = { gap: "min", step: "km", speed: "km/h", win: "min", stop: "m
 const tourCfgValue = k => `${k === "step" || k === "minKm" ? fmtKm(S.tourCfg[k]) : fmtN(S.tourCfg[k])} ${TOUR_UNITS[k]}`;
 // the summary line names each choice in full ("Meldelücken bis 30 min"), where the menu next to its label only says "bis 30 min"
 const tourChoiceText = (id, v) => T[`tourSum_${id}_${v}`] || t(`tour_${id}_${v}`);
-const tourCfgSummary = () => `${t("tourCfg")}: ${Object.keys(TOUR_CHOICES).map(id => tourChoiceText(id, S.tourCfg[id])).join(" · ")}${tourCfgTuned() ? ` (${t("tourCfgTuned")})` : ""}`;
+// HTML: the label in bold, the choices plain, the separators pale
+const tourCfgSummary = () => `<b>${t("tourCfg")}:</b> ${Object.keys(TOUR_CHOICES).map(id => esc(tourChoiceText(id, S.tourCfg[id]))).join(' <span class="sep">|</span> ')}${tourCfgTuned() ? ` <i>(${t("tourCfgTuned")})</i>` : ""}`;
 // the diagram that shows what every setting does (tools/make_tour_diagram.py), folded away under the sliders
 function tourDiagram() {
   const svg = RAW.tourDiagram && (RAW.tourDiagram[S.lang] || RAW.tourDiagram.de);
@@ -166,7 +167,7 @@ function tourDiagram() {
 function tourSettingsHtml() {
   const pick = (id, keys) => `<select data-tour-preset="${id}" aria-label="${esc(t("tourCfg_" + id))}">${keys.map(k =>
     `<option value="${k}"${k === S.tourCfg[id] ? " selected" : ""}>${t(`tour_${id}_${k}`)}</option>`).join("")}</select>`;
-  return `<details class="tour-settings"${S.tourSetOpen ? " open" : ""}><summary id="tour-cfg-sum">${esc(tourCfgSummary())}</summary>
+  return `<details class="tour-settings"${S.tourSetOpen ? " open" : ""}><summary id="tour-cfg-sum">${tourCfgSummary()}</summary>
     <div class="tour-presets">${Object.entries(TOUR_CHOICES).map(([id, opts]) => `<label>${t("tourCfg_" + id)} ${pick(id, Object.keys(opts))}</label>`).join("")}
       <button class="lnk" type="button" data-tour-reset>${t("tourCfgReset")}</button></div>
     <div class="tour-sliders">${TOUR_LIMITS.map(([k, min, max, step]) => `<label for="tour-cfg-${k}">${t("tourCfg_" + k)}</label>
@@ -178,7 +179,7 @@ function tourSettingsHtml() {
 function syncTourSettings() {
   for (const [k] of TOUR_LIMITS) { $(`tour-cfg-${k}`).value = S.tourCfg[k]; $(`tour-cfg-${k}-v`).textContent = tourCfgValue(k); }
   for (const id of Object.keys(TOUR_CHOICES)) $$(`[data-tour-preset="${id}"]`).value = S.tourCfg[id];
-  $("tour-cfg-sum").textContent = tourCfgSummary();
+  $("tour-cfg-sum").innerHTML = tourCfgSummary();
 }
 // sortable columns, like the life list: a click sorts, a second click turns the order round
 const TOUR_SORT = {
