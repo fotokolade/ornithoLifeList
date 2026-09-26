@@ -66,4 +66,6 @@ Die Tests nutzen erfundene Beispieldaten aus `tests/fixtures.py` und überschrei
 
 ## Beispieldaten zum Ausprobieren
 
+`python tools/make_demo_page.py` erzeugt daraus direkt `lifelist-demo.html`, die Demo, die auch jedem Release beiliegt und auf GitHub Pages steht.
+
 `tools/make_demo_export.py` erzeugt einen erfundenen, aber realistisch wirkenden Export (`export_demo.json`): ein fiktiver Beobachter aus der Nähe von Dresden, über mehrere Jahre an echten Beobachtungsorten, mit Reisen quer durch Deutschland. Gut zum Ausprobieren ohne eigene Daten: `python tools/make_demo_export.py`, dann `python lifelist.py --source export_demo.json`.

@@ -2,6 +2,17 @@
 
 Die neueste Version steht oben. Die Downloads (`lifelist.exe`) gibt es auf der [Releases-Seite](../../releases).
 
+## 0.5.3 (2026-09-26)
+
+### Seite
+- **Lizenzhinweise:** Die Copyright- und Lizenztexte von Leaflet und Leaflet.markercluster stehen jetzt in jeder erzeugten Lebensliste und in der `lifelist.exe`, wie es ihre Lizenzen verlangen.
+
+### Demo
+- Jedem Release liegt `lifelist-demo.html` bei, eine fertige Lebensliste aus erfundenen Beispieldaten zum Ansehen ohne eigenen Export. Sie erscheint außerdem auf GitHub Pages (Link in der README).
+
+### Programm
+- Das Beispiel in der README und das Bild in der Export-Anleitung zeigen einen neutralen Dateinamen.
+
 ## 0.5.2 (2026-09-26)
 
 ### Seite

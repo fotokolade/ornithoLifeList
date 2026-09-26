@@ -34,6 +34,8 @@ jobs:
           echo "TAG=$tag" >> "$GITHUB_ENV"
       - name: Build (runs the tests first)
         run: python build.py
+      - name: Build the demo page from made-up data
+        run: python tools/make_demo_page.py dist/lifelist-demo.html
       - name: Publish the release
         shell: bash
         env:
@@ -49,8 +51,12 @@ jobs:
             echo "SHA256 von \`lifelist.exe\`: \`$sum\`"
             echo
             echo "Zum Prüfen \`lifelist.exe\`, \`lifelist.exe.sha256\`, \`verify.bat\` und \`verify.ps1\` in einen Ordner legen und \`verify.bat\` doppelklicken (siehe README)."
+            echo
+            echo "### Demo"
+            echo
+            echo "\`lifelist-demo.html\` ist eine fertige Lebensliste aus erfundenen Beispieldaten: herunterladen und im Browser öffnen."
           } > notes.md
           # a release of this version made before (e.g. before a history rewrite) is replaced, tag and all
           if gh release view "$TAG" >/dev/null 2>&1; then gh release delete "$TAG" --cleanup-tag --yes; fi
           gh release create "$TAG" --target "$GITHUB_SHA" --title "$TAG" --notes-file notes.md \
-            dist/lifelist.exe dist/lifelist.exe.sha256 verify.bat verify.ps1
+            dist/lifelist.exe dist/lifelist.exe.sha256 verify.bat verify.ps1 dist/lifelist-demo.html
