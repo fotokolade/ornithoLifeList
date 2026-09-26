@@ -5,7 +5,7 @@ Aufgaben, die nur die Projektleitung erledigt: Releases veröffentlichen, die mi
 ## Ein Release veröffentlichen
 
 1. Die Versionsnummer `APP_VERSION` in `src/i18n.js` erhöhen.
-2. Die Release-Notizen nach `.github/release-notes/v<Version>.md` schreiben, zum Beispiel `v0.3.0.md`, und oben in `CHANGELOG.md` als neue Version eintragen; alles committen und pushen.
+2. Die Release-Notizen nach `.github/release-notes/v<Version>.md` schreiben, zum Beispiel `v0.3.0.md`, und in `CHANGELOG.md` den Abschnitt „Noch nicht veröffentlicht“ zur neuen Version machen; alles committen und pushen.
 3. Auf GitHub im Tab **Actions** den Workflow **Release** mit **Run workflow** starten. Alternativ das Tag selbst pushen: `git tag v0.3.0 && git push origin v0.3.0`.
 
 Den Rest erledigt GitHub Actions (`.github/workflows/release.yml`) auf einem Windows-Rechner: Es legt beim Start von Hand das Tag aus der Versionsnummer an (ein gepushtes Tag prüft es gegen die Versionsnummer), lässt die Tests laufen, baut die `lifelist.exe` und legt das Release an, mit `lifelist.exe`, `lifelist.exe.sha256`, `verify.bat` und `verify.ps1` und der Prüfsumme in den Notizen. Das Tag muss zur Versionsnummer passen, sonst meldet `--check-update` keine neue Version.

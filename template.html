@@ -321,6 +321,8 @@ svg.curve text{fill:var(--muted);font-size:11px}
 /* Leaflet sets marker z-index inline (small places are lifted above big ones); clusters stay on top of both */
 .leaflet-marker-icon.marker-cluster-custom{z-index:5000!important}
 .value-marker .dot{border-radius:50%;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4);box-sizing:border-box}
+/* places (and groups of places) with a first record: a green ring outside the white edge, and white around it */
+.value-marker .dot.lifer,.map-legend .dot.lifer,.marker-cluster-custom.has-lifer div{box-shadow:0 0 0 3px #1e9e4f,0 0 0 4.5px #fff,0 1px 5px rgba(0,0,0,.45)}
 .map-legend{background:rgba(255,255,255,.94);color:#1d2521;padding:8px 12px;border-radius:10px;box-shadow:0 1px 6px rgba(0,0,0,.2);font:12px/1.3 system-ui,sans-serif}
 .map-legend b{display:block;margin-bottom:6px}
 .map-legend-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px}

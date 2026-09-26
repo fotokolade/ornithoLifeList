@@ -613,6 +613,31 @@ class PageTest(unittest.TestCase):
             self.assertEqual(key_hidden, not has_cluster)
         self.assertEqual(self.errors, [])
 
+    def test_map_rings_places_with_first_records(self):
+        page = self.open(hash="#map")
+        page.wait_for_timeout(500)
+        # every place where a species was seen for the first time, and only those, has the ring
+        expected = page.evaluate("""() => { const first = new Map();
+            for (const o of regionObs(baseObs())) if (!first.has(o.s)) first.set(o.s, o.p);
+            return new Set([...first.values()].filter(p => PL[p].lat)).size; }""")
+        ringed = lambda: page.evaluate("MAP_LAYER.getLayers().filter(m => m.options.lifer).length")
+        self.assertGreater(expected, 0)
+        self.assertEqual(ringed(), expected)
+        self.assertLessEqual(ringed(), page.evaluate("MAP_LAYER.getLayers().length"))
+        self.assertIn("mit Erstbeobachtung", page.inner_text(".map-legend"))
+        # zoomed out, the groups holding such a place carry the ring too
+        page.evaluate("MAP.setZoom(5, { animate: false })")
+        page.wait_for_timeout(600)
+        self.assertGreater(page.locator("#map .marker-cluster-custom.has-lifer").count(), 0)
+        # the ring follows the time bar: only first records up to the chosen month count
+        page.eval_on_selector("#t-range", "e => { e.value = 3; e.dispatchEvent(new Event('input')); }")
+        page.wait_for_timeout(300)
+        until = page.evaluate("""() => { const first = new Map();
+            for (const o of regionObs(baseObs())) if (!first.has(o.s)) first.set(o.s, o);
+            return new Set([...first.values()].filter(o => PL[o.p].lat && (o.y < S.year || (o.y === S.year && o.m <= S.month))).map(o => o.p)).size; }""")
+        self.assertEqual(ringed(), until)
+        self.assertEqual(self.errors, [])
+
     def test_redacted_build_hides_map_and_places(self):
         page = self.open(redact=True)
         self.assertFalse(page.is_visible('#tabs button[data-tab="map"]'))

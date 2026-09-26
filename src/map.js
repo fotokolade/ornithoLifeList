@@ -2,7 +2,8 @@ let MAP = null, MAP_LAYER = null, MAP_LEGEND = null;
 const markerDia = frac => Math.round(2 * (5 + 17 * Math.sqrt(frac)));
 // warm sequential scale (light amber = low, burnt orange = high) that stays visible on every tile layer
 const markerColor = frac => `color-mix(in srgb, var(--mk-hi) ${Math.round(15 + frac * 85)}%, var(--mk-lo))`;
-const markerDot = (frac, dia = markerDia(frac)) => `<div class="dot" style="width:${dia}px;height:${dia}px;background:${markerColor(frac)}"></div>`;
+// `lifer`: a place with a life species' first record gets a green ring (white-edged, so it shows on green woods too)
+const markerDot = (frac, dia = markerDia(frac), lifer = false) => `<div class="dot${lifer ? " lifer" : ""}" style="width:${dia}px;height:${dia}px;background:${markerColor(frac)}"></div>`;
 const popupStat = (n, label) => `<span><b>${fmtN(n)}</b>${esc(label)}</span>`;
 const CLUSTER_OFF_ZOOM = 13;
 // the cluster key only makes sense while a cluster is actually drawn
@@ -35,7 +36,9 @@ function drawMap() {
           maxClusterRadius: 40, disableClusteringAtZoom: CLUSTER_OFF_ZOOM, showCoverageOnHover: false,
           iconCreateFunction: cl => {
             const n = cl.getChildCount(), size = Math.round(24 + 4 * Math.log2(n));
-            return L.divIcon({ html: `<div>${n}</div>`, className: "marker-cluster-custom", iconSize: [size, size] });
+            // the ring of the lifer places inside, so zooming out doesn't hide where they are
+            const lifer = cl.getAllChildMarkers().some(m => m.options.lifer);
+            return L.divIcon({ html: `<div>${n}</div>`, className: `marker-cluster-custom${lifer ? " has-lifer" : ""}`, iconSize: [size, size] });
           },
         })
       : L.layerGroup();
@@ -89,7 +92,7 @@ function drawMap() {
   const steps = [...new Set([max, Math.round(max / 2), 1])].filter(v => v > 0);
   legend.hidden = false;
   legend.innerHTML = `<b>${esc($("m-metric").selectedOptions[0].text)}</b><div class="map-legend-row">${steps.map(v =>
-    `<span>${markerDot(v / max)}${fmtN(v)}</span>`).join("")}<span class="cluster-key"><i class="map-legend-cluster"></i>${t("mapClusterKey")}</span></div>`;
+    `<span>${markerDot(v / max)}${fmtN(v)}</span>`).join("")}${pts.some(r => r.lifer) ? `<span>${markerDot(0.25, 16, true)}${t("mapLiferKey")}</span>` : ""}<span class="cluster-key"><i class="map-legend-cluster"></i>${t("mapClusterKey")}</span></div>`;
   const bounds = [];
   for (const r of pts) {
     const p = PL[r.p], v = value(r);
@@ -98,15 +101,15 @@ function drawMap() {
       .map(o => `<li>${esc(speciesName(SP[o.s]))}${o.c ? ` (${o.c})` : ""}${o.ph ? " 📷" : ""}</li>`).join("")}</ul></details>`).join("");
     // a plain div-icon marker (not circleMarker) so the cluster plugin, which only understands L.Marker, can group these
     const dia = markerDia(v / max);
-    const icon = L.divIcon({ className: "value-marker", html: markerDot(v / max, dia), iconSize: [dia, dia], iconAnchor: [dia / 2, dia / 2] });
+    const icon = L.divIcon({ className: "value-marker", html: markerDot(v / max, dia, r.lifer > 0), iconSize: [dia, dia], iconAnchor: [dia / 2, dia / 2] });
     // smaller circles on top, so a big neighbour never hides one completely
-    const marker = L.marker([p.lat, p.lon], { icon, zIndexOffset: Math.round((1 - v / max) * 1000) })
+    const marker = L.marker([p.lat, p.lon], { icon, lifer: r.lifer > 0, zIndexOffset: Math.round((1 - v / max) * 1000) })
       .bindPopup(`<div class="pop-h">${esc(p.name)}</div><div class="pop-sub">${esc(p.muni)}</div>
         <div class="pop-stats">${popupStat(r.sp.size, t("mapSpecies"))}${popupStat(r.n, t("obsShort"))}${r.lifer ? popupStat(r.lifer, t("mapLifeHere")) : ""}</div>
         <div class="pop-sub">${fmtD(r.first)} ${t("to")} ${fmtD(r.last)}</div>
         <div class="visits">${visitList}</div>
         <button class="lnk" data-region="p:${p.i}">${t("mapFilter")}</button>`, { maxWidth: 300, minWidth: 220 })
-      .bindTooltip(`${esc(p.name)}: ${fmtN(v)}`, { direction: "top", offset: [0, -dia / 2] })
+      .bindTooltip(`${esc(p.name)}: ${fmtN(v)}${r.lifer ? ` · ${fmtN(r.lifer)} ${esc(t("mapLifeHere"))}` : ""}`, { direction: "top", offset: [0, -dia / 2] })
       .addTo(MAP_LAYER);
     marker.on("popupopen", () => marker.closeTooltip());
     bounds.push([p.lat, p.lon]);
