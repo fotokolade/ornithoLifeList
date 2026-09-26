@@ -311,6 +311,8 @@ class PageTest(unittest.TestCase):
         self.assertIn("Garmisch-Partenkirchen", page.inner_text("table.plan-sp"))  # Alpenbraunelle's best district
         # a species seen in the sample export is not missing
         self.assertNotIn("Kohlmeise", page.inner_text("#plan-out"))
+        # GBIF's Columba livia are Germany's feral pigeons: named like ornitho.de does
+        self.assertEqual(page.evaluate("planData('de').species.find(s => s.latin === 'Columba livia').de"), "Straßentaube (Haustaube)")
         page.select_option("#plan-sort", "name")
         names = page.eval_on_selector_all("tr[data-plan-g] td:nth-child(2)", "tds => tds.map(td => td.textContent.replace(/[▸▾]/g, '').trim())")
         self.assertEqual(names[:3], ["Baden-Württemberg", "Bayern", "Berlin"])

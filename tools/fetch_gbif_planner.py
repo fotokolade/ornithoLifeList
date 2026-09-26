@@ -222,9 +222,11 @@ def ornitho_names(api):
         ref = json.load(fh)["lifeListNames"]
     out = {}
     for latin, names in ref.items():
-        if not clean_latin(latin):
+        # "Columba livia f. domestica" (Straßentaube): GBIF records feral pigeons as the species itself
+        query = latin[: -len(" f. domestica")] if latin.endswith(" f. domestica") else latin
+        if not clean_latin(query):
             continue
-        m = api.get("species/match", [("name", latin), ("class", "Aves"), ("strict", "true")])
+        m = api.get("species/match", [("name", query), ("class", "Aves"), ("strict", "true")])
         if m.get("matchType") == "NONE" or m.get("rank") != "SPECIES":
             continue
         key = m.get("acceptedUsageKey") or m.get("usageKey")
