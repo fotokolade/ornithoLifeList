@@ -313,7 +313,8 @@ class PageTest(unittest.TestCase):
         v0 = int(hovered.get_attribute("data-v"))
         diffs = page.eval_on_selector_all("#heat-ym td.d-up, #heat-ym td.d-eq, #heat-ym td.d-down",
                                           "tds => tds.map(td => [+(td.dataset.v || 0), td.textContent, td.className])")
-        self.assertGreater(len(diffs), 3)
+        # every other cell of the table, not only the hovered one's row and column
+        self.assertEqual(len(diffs), page.locator("#heat-ym tbody td[data-r]").count() - 1)
         for v, text, cls in diffs:
             d = v - v0
             self.assertEqual(text, f"+{d}" if d > 0 else f"−{-d}" if d < 0 else "0")

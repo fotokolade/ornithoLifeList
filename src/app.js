@@ -383,7 +383,8 @@ function init() {
     placeTip(e.clientX, e.clientY);
   };
   document.addEventListener("mousemove", showTip);
-  // the other cells of the hovered cell's row and column show the difference to it: +4 green, 0 grey, −10 red
+  // every other cell of the hovered cell's table shows the difference to it: +4 green, 0 grey, −10 red;
+  // the crosshair still marks the hovered cell's row and column
   /** @type {any[]} */
   let diffed = [], hovered = null;
   const clearDiff = () => {
@@ -409,8 +410,8 @@ function init() {
         cell.textContent = fmtN(v0);
         cell.classList.add("d-self");
         diffed.push(cell);
-        for (const c of crossed) {
-          if (c === cell || !c.matches("tbody td[data-r]")) continue;
+        for (const c of cell.closest("tbody").querySelectorAll("td[data-r]")) {
+          if (c === cell) continue;
           const d = +(c.dataset.v || 0) - v0;
           c.dataset.o = c.textContent;
           c.textContent = d > 0 ? `+${fmtN(d)}` : d < 0 ? `−${fmtN(-d)}` : "0";

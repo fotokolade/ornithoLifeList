@@ -1,8 +1,8 @@
 /* ---------- heat tables ---------- */
 // One builder for the heat tables (year x month, month x hour, weekday x hour, region x month): cells
 // counted by the table's own metric (records, species or days) in at most five colour steps, totals for
-// every row and column as bars at the edges; on hover a crosshair, a tooltip and the other cells of the row
-// and column as the difference to the hovered one (app.js), and a click on a cell or a total, or a drag across
+// every row and column as bars at the edges; on hover a crosshair, a tooltip and every other cell as the
+// difference to the hovered one (app.js), and a click on a cell or a total, or a drag across
 // several cells, that opens their species. Each table registers its spec under a `kind`; a metric change or a click then redraws
 // only that table (heatCard), not the tab around it.
 /**
