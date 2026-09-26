@@ -20,9 +20,21 @@ const PLAN_CACHE = {};
 // a step from here on is a good chance (at least 1 % of all bird records), from PLAN_MAYBE on a possible one (0.2 %)
 const PLAN_GOOD = 6, PLAN_MAYBE = 4;
 const PLAN_ROWS = 20;
-// GBIF records Germany's feral pigeons as Columba livia, the wild Rock Dove, which doesn't occur here;
-// ornitho.de only knows them as Straßentaube (Haustaube), and so does the planner
-const PLAN_NAMES = { "Columba livia": { de: "Straßentaube (Haustaube)", en: "Feral Pigeon", alias: "Columba livia f. domestica" } };
+// Names where GBIF's differ from ornitho.de's, or GBIF has no German one; `alias` is ornitho's Latin name,
+// so a species on the life list under that name counts as seen. GBIF records Germany's feral pigeons,
+// chickens and Muscovy ducks under the wild species.
+const PLAN_NAMES = {
+  "Columba livia": { de: "Straßentaube (Haustaube)", en: "Feral Pigeon", alias: "Columba livia f. domestica" },
+  "Gallus gallus": { de: "Haushuhn (Bankivahuhn)", en: "Domestic Chicken" },
+  "Cairina moschata": { de: "Warzenente (Moschusente)", en: "Muscovy Duck", alias: "Cairina moschata f. domestica" },
+  "Anser cygnoides": { de: "Höckergans (Schwanengans)", en: "Swan Goose" },
+  "Serinus canaria": { de: "Kanarienvogel (Kanarengirlitz)", en: "Atlantic Canary" },
+  "Phylloscopus tristis": { de: "Taigazilpzalp", en: "Siberian Chiffchaff", alias: "Phylloscopus collybita tristis" },
+  "Curruca iberiae": { alias: "Sylvia iberiae" },
+};
+// GBIF entries that are other species under an old or wrong name, already in the data under the right one:
+// Schwarzkehlchen (Saxicola rubicola), Weidenmeise (Poecile montanus), Silberreiher (Ardea alba)
+const PLAN_SKIP = new Set(["Saxicola torquatus", "Parus montanus", "Ardea modesta"]);
 /** @returns {PlanData} */
 function planData(scope) {
   if (!PLAN_CACHE[scope]) {
@@ -30,7 +42,7 @@ function planData(scope) {
     // the federal states all lie in "Germany": no need to say so under every one
     const oneParent = raw.regions.every(r => r.parent === raw.regions[0].parent);
     PLAN_CACHE[scope] = { meta: raw.meta, regions: raw.regions, totals: raw.totals, oneParent,
-      species: raw.species.map(s => ({ latin: s.latin, alias: s.alias, de: s.de, en: s.en, ...PLAN_NAMES[s.latin],
+      species: raw.species.filter(s => !PLAN_SKIP.has(s.latin)).map(s => ({ latin: s.latin, alias: s.alias, de: s.de, en: s.en, ...PLAN_NAMES[s.latin],
         cells: new Map(Object.entries(s.cells).map(([r, v]) => [+r, [...v].map(Number)])), widespread: false })) };
     // a species possible in every state (country) is possible almost anywhere: which districts the data
     // happen to favour says more about who reports it than about where it lives
