@@ -2,6 +2,11 @@
 
 Die neueste Version steht oben. Die Downloads (`lifelist.exe`) gibt es auf der [Releases-Seite](../../releases).
 
+## 0.5.1 (2026-09-26)
+
+### Seite
+- **Reiseziele:** Ein aufgeklapptes Bundesland ist jetzt klar als Kopf seiner Gruppe erkennbar. Seine Landkreise stehen eingerückt hinter einer farbigen Leiste, und zwischen „Landkreise in Bayern“ und „Arten in Bayern“ schalten zwei deutliche Knöpfe um.
+
 ## 0.5.0 (2026-09-26)
 
 ### Seite
@@ -18,6 +23,8 @@ Die neueste Version steht oben. Die Downloads (`lifelist.exe`) gibt es auf der [
 ### Programm
 - `tools/fetch_gbif_planner.py` holt die Daten der Reiseziele von GBIF (mit Zwischenspeicher, `--check` und `--offline`), `tools/make_tour_diagram.py` zeichnet das Schaubild der Touren.
 - Die README richtet sich an Anwender; wer mitarbeiten möchte, findet in `CONTRIBUTING.md` Projektaufbau, Tests und den Ablauf eines Pull Requests.
+- Die Prüfsummendatei `lifelist.exe.sha256` hat Unix-Zeilenenden, damit `sha256sum -c` unter Linux sie liest; die README erklärt die Prüfung unter Linux und macOS.
+- Neu: `CHANGELOG.md` mit allen Versionen.
 
 ## 0.4.0 (2026-09-25)
 
