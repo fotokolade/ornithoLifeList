@@ -6,6 +6,7 @@ Die neueste Version steht oben. Die Downloads (`lifelist.exe`) gibt es auf der [
 
 ### Seite
 - **PDF:** Jeder Reiter beginnt auf einer neuen Seite unter seinem Namen; Überschriften bleiben mit ihrem Infotext und dem folgenden Inhalt zusammen, statt allein am Seitenende zu stehen; die Lebenslistenkurve steht nur noch einmal drin.
+- **Prüfsumme unter Linux und macOS:** Jedem Release liegt `verify.sh` bei, das Gegenstück zu `verify.bat`.
 - **Gültiges HTML5:** Die Seite besteht jetzt die Prüfung mit dem offiziellen Nu HTML Checker (u. a. Heatmaps nach dem ARIA-Muster „grid“).
 
 ## 0.5.3 (2026-09-26)

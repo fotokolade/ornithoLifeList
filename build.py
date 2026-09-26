@@ -58,7 +58,7 @@ def main():
     print(f"\nBuilt:   {exe} ({os.path.getsize(exe) / 1e6:.1f} MB)")
     print(f"SHA256:  {digest}")
     name = os.path.basename(exe)
-    print(f"\nFor the release: tag v{version} on GitHub, attach {name}, {name}.sha256, verify.bat and verify.ps1,"
+    print(f"\nFor the release: tag v{version} on GitHub, attach {name}, {name}.sha256, verify.bat, verify.ps1 and verify.sh,"
           " and put the SHA256 in the release notes.")
 
 

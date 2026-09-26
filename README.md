@@ -94,7 +94,7 @@ Auf der [Releases-Seite](../../releases) gibt es eine fertige `lifelist.exe`. Si
 
 Ohne die Skripte geht es auch von Hand in PowerShell: `Get-FileHash lifelist.exe -Algorithm SHA256` ausführen und das Ergebnis mit der Prüfsumme auf der Releases-Seite vergleichen.
 
-Unter Linux (oder macOS), etwa bevor du die exe an einen Windows-Rechner weitergibst: `lifelist.exe` und `lifelist.exe.sha256` in einen Ordner legen und dort `sha256sum -c lifelist.exe.sha256` ausführen (macOS: `shasum -a 256 -c lifelist.exe.sha256`). Es meldet `lifelist.exe: OK` oder einen Fehler.
+Unter Linux oder macOS, etwa bevor du die exe an einen Windows-Rechner weitergibst: `lifelist.exe`, `lifelist.exe.sha256` und `verify.sh` vom Release in einen Ordner legen und dort `sh verify.sh` ausführen. Es meldet „OK“ oder eine Warnung, genau wie `verify.bat`. Ohne das Skript geht es auch mit `sha256sum -c lifelist.exe.sha256` (macOS: `shasum -a 256 -c lifelist.exe.sha256`).
 
 ## Aktualisieren
 
