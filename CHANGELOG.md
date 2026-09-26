@@ -2,7 +2,7 @@
 
 Die neueste Version steht oben. Die Downloads (`lifelist.exe`) gibt es auf der [Releases-Seite](../../releases).
 
-## Noch nicht veröffentlicht
+## 0.5.2 (2026-09-26)
 
 ### Seite
 - **Karte:** Orte, an denen du eine Art zum ersten Mal gesehen hast, tragen einen grünen Ring, ebenso zusammengefasste Gruppen, die einen solchen Ort enthalten. Der Ring folgt der Zeitleiste; die Legende erklärt ihn, der Tooltip nennt die Zahl der Lifer.
