@@ -52,7 +52,8 @@ def main():
 
     exe = os.path.join(HERE, "dist", "lifelist.exe" if os.name == "nt" else "lifelist")
     digest = sha256(exe)
-    with open(exe + ".sha256", "w", encoding="utf-8") as fh:
+    # Unix line ends, also when built on Windows: `sha256sum -c` on Linux chokes on a trailing \r
+    with open(exe + ".sha256", "w", encoding="utf-8", newline="\n") as fh:
         fh.write(f"{digest}  {os.path.basename(exe)}\n")
     print(f"\nBuilt:   {exe} ({os.path.getsize(exe) / 1e6:.1f} MB)")
     print(f"SHA256:  {digest}")
