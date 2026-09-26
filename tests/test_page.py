@@ -107,7 +107,12 @@ class PageTest(unittest.TestCase):
         page = self.open()
 
         def settled(sel):
-            # the text once it stops changing: tab switches and time bar redraws finish a frame or more later
+            # the text once it stops changing: tab switches (a view transition) and time bar redraws (the next
+            # animation frame) finish later, so first let those frames pass, then wait for two equal reads
+            page.evaluate("""() => new Promise(done => {
+                const frames = () => requestAnimationFrame(() => requestAnimationFrame(done));
+                (document.getAnimations ? Promise.all(document.getAnimations().map(a => a.finished)) : Promise.resolve()).then(frames, frames);
+            })""")
             prev = None
             for _ in range(40):
                 text = page.inner_text(sel)

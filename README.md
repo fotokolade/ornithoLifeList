@@ -127,11 +127,11 @@ Fehler gefunden oder eine Idee? Schreib ein [Issue](../../issues) auf GitHub. We
 
 ## Lizenzen der mitgelieferten Bibliotheken
 
-- [Leaflet](https://leafletjs.com/): BSD-2-Clause, © Vladimir Agafonkin, © 2010–2023 CloudMade
-- [Leaflet.markercluster](https://github.com/Leaflet/Leaflet.markercluster): MIT, © Dave Leaver
+- [Leaflet](https://leafletjs.com/): BSD-2-Clause, © 2010–2023 Vladimir Agafonkin, © 2010–2011 CloudMade
+- [Leaflet.markercluster](https://github.com/Leaflet/Leaflet.markercluster): MIT, © 2012 David Leaver
 - [Chart.js](https://www.chartjs.org/): MIT, © Chart.js Contributors
 
-Alle drei erlauben Einbettung und Weitergabe. Ihre Copyright-Hinweise bleiben in den Dateien in `vendor/` erhalten.
+Alle drei erlauben Einbettung und Weitergabe, solange der Copyright- und Lizenzhinweis mitgeht. Er steht am Anfang der Dateien in `vendor/` und kommt damit in jede erzeugte Lebensliste und in die `lifelist.exe`.
 
 ## Lizenz
 
