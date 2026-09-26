@@ -22,9 +22,10 @@ const COUNTIES = Object.fromEntries(Object.entries({
   SH: "FL:Flensburg HEI:Dithmarschen HL:Lübeck IZ:Steinburg KI:Kiel NF:Nordfriesland NMS:Neumünster OD:Stormarn OH:Ostholstein PI:Pinneberg PLÖ:Plön RD:Rendsburg-Eckernförde RZ:Herzogtum Lauenburg SE:Segeberg SL:Schleswig-Flensburg",
   TH: "ABG:Altenburger Land AP:Weimarer Land EA:Eisenach EF:Erfurt EIC:Eichsfeld G:Gera GRZ:Greiz GTH:Gotha HBN:Hildburghausen IK:Ilm-Kreis J:Jena KYF:Kyffhäuserkreis NDH:Nordhausen SHK:Saale-Holzland-Kreis SHL:Suhl SLF:Saalfeld-Rudolstadt SM:Schmalkalden-Meiningen SOK:Saale-Orla-Kreis SON:Sonneberg SÖM:Sömmerda UH:Unstrut-Hainich-Kreis WAK:Wartburgkreis WE:Weimar",
   LU: "LUX:Luxemburg",
-  // not named (yet): ASH, AMV and AW/AWN, which look like coastal and offshore areas
   // entries are "CODE:Name" separated by spaces, and names may contain spaces too: split before every "CODE:"
 }).flatMap(([state, list]) => list.split(/ (?=[A-ZÄÖÜ][A-ZÄÖÜa-z]*\*?:)/).map(entry => {
   const [code, name] = entry.split(/:(.*)/s);
   return [`${state}/${code}`, name];
 })));
+// the offshore areas (Ausschließliche Wirtschaftszone) of ornitho's list, whatever state a record gives with them
+const SEA_AREAS = { ASH: "AWZ Ostsee (SH-Teil)", AMV: "AWZ Ostsee (MV-Teil)", AWN: "AWZ Nordsee" };
