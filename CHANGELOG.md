@@ -2,7 +2,7 @@
 
 Die neueste Version steht oben. Die Downloads (`lifelist.exe`) gibt es auf der [Releases-Seite](../../releases).
 
-## Noch nicht veröffentlicht
+## 0.6.0 (2026-09-29)
 
 ### Programm
 - **Mehrere Exporte:** `lifelist.py` wertet alle `export_*.json` im Ordner zusammen aus, statt nur die neueste. So lässt sich die Historie auf mehrere Exporte verteilen (etwa einen pro Jahr), und nur der Export des laufenden Jahres muss neu von ornitho.de geholt werden. Beobachtungen, die in mehreren Dateien stehen, zählen einmal; es gilt der Stand aus dem neuesten Export. `--source` nimmt auch mehrere Dateien und `*`-Platzhalter.
