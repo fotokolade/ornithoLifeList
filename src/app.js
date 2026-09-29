@@ -126,7 +126,13 @@ function openPrintDialog() {
 }
 function renderChrome() {
   $("h-title").textContent = t("title");
-  $("h-sub").textContent = (RAW.meta.source ? t("subtitle", RAW.meta.source, fmtN(OBS.length)) : t("subtitleNoFile", fmtN(OBS.length))) + " · " + t("version", APP_VERSION);
+  // several exports (e.g. one per year) are merged by lifelist.py; their names go into the tooltip.
+  // A redacted page carries no file names, as they contain the ornitho user ID.
+  const sources = RAW.meta.sources || [];
+  $("h-sub").textContent = (sources.length === 0 ? t("subtitleNoFile", fmtN(OBS.length))
+    : sources.length === 1 ? t("subtitle", sources[0], fmtN(OBS.length))
+    : t("subtitleMulti", sources.length, fmtN(OBS.length))) + " · " + t("version", APP_VERSION);
+  $("h-sub").title = sources.join("\n");
   $("o-sum").textContent = t("optsSummary");
   $("o-theme-t").textContent = t("themeLabel");
   $("o-theme").innerHTML = ["system", "light", "dark"].map(v => `<option value="${v}">${t("theme" + v[0].toUpperCase() + v.slice(1))}</option>`).join("");

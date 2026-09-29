@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+import tempfile
 import unittest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
@@ -99,11 +100,80 @@ class BuildDataTest(unittest.TestCase):
         self.assertEqual([o[1] for o in data["obs"]], ["2023-01-01", "2024-01-01", "2024-05-03"])
 
 
+class MergeExportsTest(unittest.TestCase):
+    def test_disjoint_exports_are_concatenated(self):
+        merged = lifelist.merge_exports([
+            ("export_2023.json", [sighting("Parus major", "Kohlmeise", "2023-05-01", sighting_id="1")]),
+            ("export_2024.json", [sighting("Turdus merula", "Amsel", "2024-05-01", sighting_id="2")]),
+        ])
+        self.assertEqual([s["date"]["@ISO8601"][:10] for s in merged], ["2023-05-01", "2024-05-01"])
+
+    def test_duplicate_ids_are_counted_once_and_later_export_wins(self):
+        merged = lifelist.merge_exports([
+            ("export_old.json", [sighting("Parus major", "Kohlmeise", "2024-05-01", count="2", sighting_id="7")]),
+            ("export_new.json", [sighting("Parus major", "Kohlmeise", "2024-05-01", count="5", sighting_id="7"),
+                                 sighting("Parus major", "Kohlmeise", "2024-05-01", count="1", sighting_id="8")]),
+        ])
+        self.assertEqual([s["observers"][0]["count"] for s in merged], ["5", "1"])
+
+    def test_identical_records_without_id_are_counted_once(self):
+        record = sighting("Grus grus", "Kranich", "2024-03-01")
+        merged = lifelist.merge_exports([("a.json", [record]), ("b.json", [dict(record)])])
+        self.assertEqual(len(merged), 1)
+
+    def test_yearly_exports_equal_one_full_export(self):
+        full = sample_export(years=(2023, 2024))
+        for i, s in enumerate(full):
+            s["observers"][0]["id_sighting"] = str(i)
+        by_year = [(str(y), [s for s in full if s["date"]["@ISO8601"].startswith(str(y))]) for y in (2023, 2024)]
+        self.assertEqual(build(lifelist.merge_exports(by_year)), build(lifelist.merge_exports([("full", full)])))
+        # an old full export lying next to the yearly ones adds nothing
+        self.assertEqual(build(lifelist.merge_exports([("full", full)] + by_year)), build(full))
+
+    def test_universal_id_takes_precedence(self):
+        # same id_sighting on two portals, but different sightings
+        de = sighting("Parus major", "Kohlmeise", "2024-05-01", sighting_id="7")
+        lu = sighting("Turdus merula", "Amsel", "2024-05-02", sighting_id="7")
+        de["observers"][0]["id_universal"] = "65_7"
+        lu["observers"][0]["id_universal"] = "22_7"
+        self.assertEqual(len(lifelist.merge_exports([("de.json", [de]), ("lu.json", [lu])])), 2)
+
+    def test_load_exports_orders_by_file_name_timestamp_before_modification_time(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            # mtimes reversed, as after copying the files; the time in the name decides
+            for name, mtime in [("export_1_2_20250101_120000.json", 300), ("export_1_2_20260101_120000.json", 100),
+                                ("export_1_2_20240101_120000.json", 200)]:
+                path = os.path.join(tmp, name)
+                with open(path, "w", encoding="utf-8") as fh:
+                    json.dump({"data": {"sightings": []}}, fh)
+                os.utime(path, (mtime, mtime))
+            files = lifelist.expand_sources([os.path.join(tmp, "export_*.json")])
+            self.assertEqual([n[-20:-12] for n, _ in lifelist.load_exports(files)], ["20240101", "20250101", "20260101"])
+
+    def test_load_exports_orders_by_modification_time(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            for name, mtime in [("export_b.json", 200), ("export_a.json", 300), ("export_c.json", 100)]:
+                path = os.path.join(tmp, name)
+                with open(path, "w", encoding="utf-8") as fh:
+                    json.dump({"data": {"sightings": []}}, fh)
+                os.utime(path, (mtime, mtime))
+            files = lifelist.expand_sources([os.path.join(tmp, "export_*.json")])
+            self.assertEqual([n for n, _ in lifelist.load_exports(files)], ["export_c.json", "export_b.json", "export_a.json"])
+
+
+    def test_existing_path_with_brackets_is_taken_literally(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "Vögel [2024]", "export.json")
+            os.makedirs(os.path.dirname(path))
+            open(path, "w").close()
+            self.assertEqual(lifelist.expand_sources([path]), [path])
+
+
 class RenderTest(unittest.TestCase):
     def test_redact_removes_place_data(self):
         data = lifelist.build_page_data(sample_export(), "export_test.json", redact=True)
         self.assertTrue(data["meta"]["redacted"])
-        self.assertEqual(data["meta"]["source"], "")
+        self.assertEqual(data["meta"]["sources"], [])
         for name, muni, state, county, lat, lon in data["pl"]:
             self.assertEqual((name, muni, lat, lon), ("", "", 0, 0))
             self.assertTrue(state)
@@ -118,7 +188,7 @@ class RenderTest(unittest.TestCase):
             self.assertNotIn(placeholder, html)
         start = html.index('<script id="data" type="application/json">') + len('<script id="data" type="application/json">')
         blob = json.loads(html[start:html.index("</script>", start)])
-        self.assertEqual(blob["meta"]["source"], "export_test.json")
+        self.assertEqual(blob["meta"]["sources"], ["export_test.json"])
         self.assertTrue(blob["euro"])
 
 

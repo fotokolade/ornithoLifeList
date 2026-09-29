@@ -4,7 +4,7 @@ from datetime import date, timedelta
 
 def sighting(latin, name, day, place_id="1", place="Teich am Wald", municipality="Musterdorf (SN, GR)",
              lat="51.1", lon="14.5", count="1", estimation="EXACT_VALUE", time=None, atlas=None,
-             photo=False, rarity="common", sys_order="100"):
+             photo=False, rarity="common", sys_order="100", sighting_id=None):
     observer = {
         "count": count,
         "estimation_code": estimation,
@@ -13,6 +13,8 @@ def sighting(latin, name, day, place_id="1", place="Teich am Wald", municipality
             "@ISO8601": f"{day}T{time or '00:00'}:00+02:00",
         },
     }
+    if sighting_id:
+        observer["id_sighting"] = sighting_id
     if atlas:
         observer["atlas_code"] = {"@id": "1", "#text": atlas}
     if photo:
