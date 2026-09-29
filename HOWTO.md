@@ -14,6 +14,8 @@ Kurzanleitung, wie du deinen Beobachtungsexport für [`lifelist.py`](lifelist.py
 
    ![Schritt 3](howto/03.png)
 
+   Alternativ nur einen Teilzeitraum exportieren, zum Beispiel ein einzelnes Jahr vom 01.01. bis 31.12. Das entlastet den ornitho-Server: Abgeschlossene Jahre werden nur einmal exportiert, danach wird nur noch der Export des laufenden Jahres erneuert. Alle Exporte im Ordner werden zusammen ausgewertet (siehe [README](README.md#export-in-mehrere-zeiträume-aufteilen)).
+
 4. Im Tab **Arten** **Alle Taxa** auswählen.
 
    ![Schritt 4](howto/04.png)
@@ -38,4 +40,4 @@ Kurzanleitung, wie du deinen Beobachtungsexport für [`lifelist.py`](lifelist.py
 
    ![Schritt 9](howto/09.png)
 
-Die heruntergeladene Datei (`export_*.json`) neben `lifelist.py` legen und wie in der [README](README.md#schnellstart) beschrieben weiterverwenden.
+Die heruntergeladene Datei (`export_*.json`) neben `lifelist.py` legen (bei aufgeteilten Exporten alle Dateien) und wie in der [README](README.md#schnellstart) beschrieben weiterverwenden.

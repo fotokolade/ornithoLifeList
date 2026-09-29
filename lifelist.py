@@ -1,15 +1,18 @@
-"""Builds lifelist.html from an ornitho.de JSON export.
+"""Builds lifelist.html from one or more ornitho.de JSON exports.
 
-Usage:  python lifelist.py [--source export.json] [--redact]
+Usage:  python lifelist.py [--source export.json [export2.json ...]] [--redact]
         python lifelist.py --check-update
         lifelist.exe [same options]
-Without --source, the newest export_*.json next to the script (or the exe) is used.
+Without --source, every export_*.json next to the script (or the exe) is read, so the history can be
+split into several exports (e.g. one per year) and only the current one needs to be re-downloaded.
+Sightings contained in more than one file are counted once; the newest export wins.
 --redact writes lifelist_redacted.html without any place names or coordinates.
 --check-update asks GitHub whether a newer release exists (only the version number is fetched,
 nothing is sent) and builds nothing. A normal build never goes online.
 """
 import argparse
 import base64
+import datetime
 import glob
 import http.client
 import json
@@ -88,11 +91,70 @@ def build_vendor_css():
     return "\n".join(parts)
 
 
-def find_export():
+def find_exports():
     files = glob.glob(os.path.join(HERE, "export_*.json"))
     if not files:
         sys.exit("No export_*.json found.")
-    return max(files, key=os.path.getmtime)
+    return files
+
+
+def expand_sources(patterns):
+    """--source values -> file paths. Wildcards are expanded here as well, because cmd.exe and
+    PowerShell pass them through literally instead of expanding them like a Unix shell."""
+    files = []
+    for pattern in patterns:
+        # an existing path is taken literally, so names with [ ] (e.g. "Vögel [2024]/export.json") still work
+        matches = glob.glob(pattern) if glob.has_magic(pattern) and not os.path.exists(pattern) else [pattern]
+        if not matches:
+            sys.exit(f"No file matches {pattern}.")
+        files.extend(matches)
+    return files
+
+
+def sighting_id(s):
+    """ornitho's own sighting id; the whole record serves as fallback for exports without one.
+    id_universal comes first: it is unique across the ornitho portals, whereas id_sighting is only
+    unique within one, so exports from e.g. ornitho.de and ornitho.lu could share an id_sighting."""
+    o = (s.get("observers") or [{}])[0]
+    if o.get("id_universal"):
+        return "u" + str(o["id_universal"])
+    if o.get("id_sighting"):
+        return "s" + str(o["id_sighting"])
+    return json.dumps(s, sort_keys=True)
+
+
+def merge_exports(exports):
+    """exports: [(name, sightings)] ordered oldest first. Returns the sightings of all exports with
+    duplicates removed (overlapping periods, or an old full export next to newer partial ones). For a
+    sighting in several files the record of the later file is kept, so edits made on ornitho since
+    the older export show up."""
+    merged = {}
+    for _, sightings in exports:
+        for s in sightings:
+            merged[sighting_id(s)] = s
+    return list(merged.values())
+
+
+def export_time(path):
+    """When the export was made: the timestamp ornitho puts into the file name
+    (export_23283_77699_20260919_002546.json), which survives copying and unzipping, unlike the
+    modification time -- that only serves as fallback for files named otherwise."""
+    m = re.search(r"_(\d{8}_\d{6})\.json$", os.path.basename(path), re.IGNORECASE)
+    if m:
+        try:
+            return datetime.datetime.strptime(m.group(1), "%Y%m%d_%H%M%S").timestamp()
+        except ValueError:
+            pass
+    return os.path.getmtime(path)
+
+
+def load_exports(paths):
+    """Reads the given export files, oldest (see export_time) first. Returns [(basename, sightings)]."""
+    exports = []
+    for path in sorted({os.path.abspath(p) for p in paths}, key=lambda p: (export_time(p), p)):
+        with open(path, encoding="utf-8") as fh:
+            exports.append((os.path.basename(path), json.load(fh)["data"]["sightings"]))
+    return exports
 
 
 def species_key(latin, name, escaped):
@@ -248,7 +310,10 @@ def load_tour_diagram():
     return out
 
 
-def build_page_data(sightings, source_name, redact):
+def build_page_data(sightings, source_names, redact):
+    """source_names: the export file name, or a list of them when several exports were merged."""
+    if isinstance(source_names, str):
+        source_names = [source_names]
     english_by_latin, wishlist_rows, rare_rows = load_species_reference()
     data = build_data(sightings, english_by_latin)
     data["euro"] = wishlist_rows
@@ -261,7 +326,7 @@ def build_page_data(sightings, source_name, redact):
         data["obs"] = [r[:7] for r in data["obs"]]
     data["meta"] = {
         "redacted": redact,
-        "source": "" if redact else source_name,  # the file name carries the ornitho user ID
+        "sources": [] if redact else sorted(source_names),  # the file names carry the ornitho user ID
     }
     return data
 
@@ -328,8 +393,9 @@ def check_update_now():
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Builds lifelist.html from an ornitho.de JSON export.")
-    parser.add_argument("--source", "-s", help="export JSON file (default: newest export_*.json)")
+    parser = argparse.ArgumentParser(description="Builds lifelist.html from one or more ornitho.de JSON exports.")
+    parser.add_argument("--source", "-s", nargs="+", metavar="FILE",
+                        help="export JSON file(s), wildcards allowed (default: every export_*.json)")
     parser.add_argument("--redact", action="store_true", help="write lifelist_redacted.html without place data")
     parser.add_argument("--check-update", action="store_true", help="only check GitHub for a newer version, build nothing")
     parser.add_argument("--version", action="version", version=f"%(prog)s {app_version()}")
@@ -338,13 +404,15 @@ def main():
         check_update_now()
         return
     redact = opts.redact
-    src = opts.source or find_export()
-    src = os.path.abspath(src)
-    print("Source:", src)
-    with open(src, encoding="utf-8") as fh:
-        sightings = json.load(fh)["data"]["sightings"]
+    exports = load_exports(expand_sources(opts.source) if opts.source else find_exports())
+    for name, sightings in exports:
+        print(f"Source: {name} ({len(sightings)} sightings)")
+    sightings = merge_exports(exports)
+    duplicates = sum(len(s) for _, s in exports) - len(sightings)
+    if duplicates:
+        print(f"Duplicates (contained in more than one export, counted once): {duplicates}")
 
-    data = build_page_data(sightings, os.path.basename(src), redact)
+    data = build_page_data(sightings, [name for name, _ in exports], redact)
     dst = os.path.join(HERE, "lifelist_redacted.html" if redact else "lifelist.html")
     with open(dst, "w", encoding="utf-8") as fh:
         fh.write(render_html(data))

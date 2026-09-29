@@ -39,6 +39,11 @@ class PageTest(unittest.TestCase):
         with open(path, "w", encoding="utf-8") as fh:
             fh.write(lifelist.render_html(lifelist.build_page_data(extra, "export_test.json", False)))
         cls.url["single"] = "file:///" + path.replace(os.sep, "/").lstrip("/")
+        # several merged exports
+        path = os.path.join(cls.tmp.name, "multi.html")
+        with open(path, "w", encoding="utf-8") as fh:
+            fh.write(lifelist.render_html(lifelist.build_page_data(sample_export(), ["export_2024.json", "export_2023.json"], False)))
+        cls.url["multi"] = "file:///" + path.replace(os.sep, "/").lstrip("/")
         # tours: A -> B (600 m, 5 min later) is one; C is 3 km away and D comes 20 minutes later, so neither joins it
         near = dict(municipality="Musterdorf (SN, GR)")
         walk = [
@@ -101,6 +106,14 @@ class PageTest(unittest.TestCase):
     def test_all_tabs_render_without_errors(self):
         page = self.open()
         self.click_all_tabs(page, TABS)
+        self.assertEqual(self.errors, [])
+
+    def test_subtitle_names_the_export_files(self):
+        self.assertIn("export_test.json", self.open().inner_text("#h-sub"))
+        self.assertNotIn("export_test", self.open(redact=True).inner_text("#h-sub"))
+        page = self.open(redact="multi")
+        self.assertIn("2 Exportdateien", page.inner_text("#h-sub"))
+        self.assertEqual(page.get_attribute("#h-sub", "title"), "export_2023.json\nexport_2024.json")
         self.assertEqual(self.errors, [])
 
     def test_all_time_resets_the_overview(self):

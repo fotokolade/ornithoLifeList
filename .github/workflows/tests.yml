@@ -1,0 +1,33 @@
+# Runs the same checks a contributor runs before committing (see CONTRIBUTING.md) on every pull request
+# and every push to master, so a ruleset can require them before merging. The job name "tests" is what
+# the ruleset's "Require status checks to pass" lists.
+name: Tests
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      # without Playwright tests/test_page.py would only be skipped, so it is installed here
+      - run: pip install -r requirements-dev.txt
+      - run: playwright install --with-deps chromium
+      - name: Unit and browser tests
+        run: python -m unittest discover -s tests -t . -v
+      - name: JSDoc type check
+        run: npx --yes --package typescript -- tsc -p tsconfig.json

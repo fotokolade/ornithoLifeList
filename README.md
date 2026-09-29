@@ -70,16 +70,34 @@ Die Bilder zeigen eine Lebensliste aus erfundenen Beispieldaten.
 
 4. **Öffnen:** Die neue Datei `lifelist.html` im Browser öffnen.
 
-Liegen mehrere `export_*.json` im Ordner, nimmt das Programm automatisch die neueste.
+Liegen mehrere `export_*.json` im Ordner, wertet das Programm alle zusammen aus (siehe nächster Abschnitt).
 
 Du brauchst dafür nur Python 3. Ohne Python geht es unter Windows mit der fertigen `lifelist.exe`, siehe [unten](#ohne-python-lifelistexe-für-windows).
+
+## Export in mehrere Zeiträume aufteilen
+
+Damit der ornitho.de-Server nicht bei jeder Aktualisierung den kompletten Beobachtungszeitraum exportieren muss, kann die Historie auf mehrere Exporte verteilt werden, zum Beispiel:
+
+- einmalig je ein Export für die abgeschlossenen Jahre 2017, 2018, …, 2025
+- ein Export für das laufende Jahr 2026, der bei Bedarf neu heruntergeladen wird
+
+Beim Aktualisieren muss dann nur der Export des laufenden Jahres ersetzt werden; die alte Datei dieses Jahres einfach löschen. Zu Beginn des neuen Jahres wird der letzte Export des Vorjahres (mit Zeitraum bis 31.12.) zum festen Jahresexport, und ab dann wird nur noch das neue Jahr aktualisiert. Wie ein Teilzeitraum gewählt wird, steht in der [HOWTO.md](HOWTO.md).
+
+`lifelist.py` liest alle `export_*.json` im Ordner und führt sie zusammen:
+
+- Beobachtungen, die in mehreren Dateien enthalten sind (etwa bei sich überschneidenden Zeiträumen oder wenn noch ein alter Gesamtexport im Ordner liegt), werden anhand ihrer ornitho-Beobachtungsnummer nur einmal gezählt.
+- Bei solchen Doppelten gilt der Stand aus dem neuesten Export, damit nachträgliche Korrekturen auf ornitho.de übernommen werden. Wann ein Export erstellt wurde, steht in seinem Dateinamen (`export_…_20260919_002546.json` = 19.09.2026, 00:25:46); nur bei anders benannten Dateien zählt das Änderungsdatum der Datei. Die Dateien deshalb möglichst nicht umbenennen.
+- Eine auf ornitho.de gelöschte Beobachtung bleibt allerdings erhalten, solange sie noch in einer der Dateien steht. Veraltete Exporte, deren Zeitraum vollständig von neueren abgedeckt ist, deshalb löschen.
+
+Die Ausgabe zeigt, welche Dateien gelesen wurden und wie viele doppelte Beobachtungen dabei aussortiert wurden.
 
 ## Optionen
 
 | Aufruf | Was passiert |
 | --- | --- |
-| `python lifelist.py` | erstellt `lifelist.html` aus dem neuesten Export |
+| `python lifelist.py` | erstellt `lifelist.html` aus allen Exporten im Ordner |
 | `python lifelist.py --source export_….json` | nimmt genau diese Exportdatei |
+| `python lifelist.py --source archiv/*.json export_….json` | nimmt genau diese Exportdateien; `*` funktioniert auch unter Windows |
 | `python lifelist.py --redact` | erstellt `lifelist_redacted.html` ohne Ortsangaben, zum Weitergeben |
 | `python lifelist.py --check-update` | sieht auf GitHub nach, ob es eine neuere Version gibt, und erstellt nichts |
 | `python lifelist.py --version` | zeigt die installierte Version |
