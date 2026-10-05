@@ -462,16 +462,16 @@ function init() {
     placeTip(e.clientX, e.clientY);
   };
   document.addEventListener("mousemove", showTip);
-  // a calendar day lights up its whole month; anywhere else puts the calendar back
-  document.addEventListener("mouseover", e => {
-    const box = $$all(".cal-days")[0];
-    if (!box) return;
-    const m = /** @type {any} */ (e.target).closest?.(".cal-days .cal-day[data-m]")?.dataset.m || "";
-    if ((box.dataset.glow || "") === m) return;
+  // a calendar day lights up its whole month; anywhere else (or leaving the window) puts the calendar back
+  const calGlow = (/** @type {string} */ m) => {
+    const box = /** @type {HTMLElement|null} */ ($$(".cal-days"));
+    if (!box || (box.dataset.glow || "") === m) return;
     box.dataset.glow = m;
     box.classList.toggle("glowing", !!m);
-    for (const d of $$all(".cal-days .cal-day[data-m]")) d.classList.toggle("glow", d.dataset.m === m);
-  });
+    for (const d of box.querySelectorAll(".cal-day[data-m]")) d.classList.toggle("glow", /** @type {HTMLElement} */ (d).dataset.m === m);
+  };
+  document.addEventListener("mouseover", e => calGlow(/** @type {any} */ (e.target).closest?.(".cal-days .cal-day[data-m]")?.dataset.m || ""));
+  document.documentElement.addEventListener("mouseleave", () => calGlow(""));
   // every other cell of the hovered cell's table shows the difference to it: +4 green, 0 grey, −10 red;
   // the crosshair still marks the hovered cell's row and column
   /** @type {any[]} */

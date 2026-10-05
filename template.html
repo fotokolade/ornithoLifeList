@@ -267,11 +267,11 @@ tr.grp .grp-t[aria-expanded=true]::before{transform:rotate(90deg)}
 .cal-months span{grid-column:var(--w)/span 4;white-space:nowrap}
 .cal-dows{grid-area:dows;display:grid;grid-template-rows:repeat(7,1fr);row-gap:var(--gap);font-size:.58rem;color:var(--muted);text-align:right;align-items:center}
 .cal-days{grid-area:days;display:grid;grid-auto-flow:column;grid-template-rows:repeat(7,auto);grid-template-columns:repeat(var(--weeks),1fr);gap:var(--gap)}
-.cal-day{aspect-ratio:1;border-radius:2px;background:var(--bar-soft);position:relative;filter:var(--cal-tone,none);transition:filter .15s ease,opacity .15s ease}
+.cal-day{aspect-ratio:1;border-radius:2px;background:var(--bar-soft);position:relative;filter:var(--cal-tone,brightness(1));transition:filter .15s ease,opacity .15s ease}
 /* every other month a shade darker, coloured days too; the hovered day's month glows while the rest steps back */
 .cal-day.m-odd:not(.cal-empty){--cal-tone:brightness(.86) saturate(1.1)}
 .cal-days.glowing .cal-day{opacity:.5}
-.cal-days.glowing .cal-day.glow{opacity:1;z-index:1;filter:var(--cal-tone,none) brightness(1.18) drop-shadow(0 0 3px var(--accent))}
+.cal-days.glowing .cal-day.glow{opacity:1;z-index:1;filter:var(--cal-tone,brightness(1)) brightness(1.18) drop-shadow(0 0 3px var(--accent))}
 /* a month's edge, drawn in the gap beside the day (and a little beyond it, so the steps join up) */
 .cal-day.m-top::before,.cal-day.m-left::before{content:"";position:absolute;background:color-mix(in srgb,var(--text) 30%,transparent);pointer-events:none}
 .cal-day.m-top::before{left:calc(var(--gap) * -1);right:calc(var(--gap) * -1);top:calc(var(--gap) * -1);height:var(--gap)}

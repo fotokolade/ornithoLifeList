@@ -24,13 +24,13 @@ function tlModel(list, year, sp) {
   for (const o of list) if (!first.has(o.s)) first.set(o.s, o);
   const n = dayOfYear(year, 12, 31) + 1;
   const daySp = Array.from({ length: n }, () => new Set()), dayPlaces = Array.from({ length: n }, () => new Set());
-  const dayRecords = new Array(n).fill(0);
+  const dayRecords = new Array(n).fill(0);  // one species: the records of a day
   const byPlace = new Map();
   for (const o of list) {
     if (o.y !== year || !PL[o.p].lat || (sp !== null && o.s !== sp)) continue;
     const di = dayOfYear(year, o.m, +o.d.slice(8));
-    // what a day counts: the species seen, or (one species) the places it was seen at and the records made
-    daySp[di].add(sp === null ? o.s : `${o.p}|${dayRecords[di]++}`);
+    // what a day counts: the species seen, or (one species) the records made
+    if (sp === null) daySp[di].add(o.s); else dayRecords[di]++;
     dayPlaces[di].add(o.p);
     if (!byPlace.has(o.p)) byPlace.set(o.p, new Map());
     const visits = byPlace.get(o.p);
@@ -48,7 +48,7 @@ function tlModel(list, year, sp) {
     visits: [...visits.values()].sort((a, b) => a.di - b.di).map(v => ({ di: v.di, n: sp === null ? v.sp.size : v.birds, lifer: v.lifer })),
   }));
   const maxN = places.reduce((m, pl) => pl.visits.reduce((mm, v) => Math.max(mm, v.n), m), 1);
-  return { year, n, sp, daySp: daySp.map(s => s.size), cum, places, maxN };
+  return { year, n, sp, daySp: sp === null ? daySp.map(s => s.size) : dayRecords, cum, places, maxN };
 }
 /** Draws the state of day `day` (0-based) onto the markers and the bar. */
 function tlShow(day) {
@@ -66,7 +66,7 @@ function tlShow(day) {
     const live = Math.max(0, 1 - (day - v.di) / TL_FADE);  // 1 on the day itself, 0 once faded
     const dia = Math.round(TL_DOT_OLD + (markerDia(v.n / m.maxN) - TL_DOT_OLD) * live);
     const opacity = (0.35 + 0.65 * live).toFixed(2), ring = live > 0 && v.lifer;
-    const state = `${dia}|${opacity}|${ring}`;
+    const state = `${dia}|${opacity}|${ring}|${v.n}`;  // v.n: the colour, which two faded visits may not share
     if (state === pl.state) continue;
     pl.state = state;
     Object.assign(dot.style, { display: "", width: dia + "px", height: dia + "px", opacity, background: markerColor(v.n / m.maxN) });
@@ -138,6 +138,7 @@ function drawTimelapse() {
   if (!years.length) {
     // with a species chosen the bar stays, so that it can be changed or cleared
     tlReset(); legend.hidden = true; $("tl-bar").hidden = S.tl.sp === null;
+    $("tl-date").textContent = $("tl-stats").textContent = ""; $("tl-year").innerHTML = "";  // nothing of the last region's year stays on the bar
     $("map-note").textContent = t(S.tl.sp === null ? "tlNone" : "tlNoneSp");
     return;
   }
