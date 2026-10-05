@@ -260,6 +260,57 @@ class PageTest(unittest.TestCase):
             self.assertEqual(page.evaluate(self.CONTRAST_JS), [], f"{scheme} time-lapse")
             self.assertEqual(self.errors, [])
 
+    # Chart.js draws its text (axes, the day bands, the weekday values) on a canvas, where the DOM walk above sees nothing:
+    # every fillText is intercepted, and the pixels under the text, as they are before it is drawn, give its background
+    CANVAS_CONTRAST_JS = """() => {
+        const cv = document.createElement('canvas').getContext('2d', { willReadFrequently: true });
+        const rgba = c => { cv.clearRect(0, 0, 1, 1); cv.fillStyle = '#000'; cv.fillStyle = c; cv.fillRect(0, 0, 1, 1); const d = cv.getImageData(0, 0, 1, 1).data; return [d[0], d[1], d[2], d[3] / 255]; };
+        const lum = ([r, g, b]) => { const f = c => { c /= 255; return c <= .03928 ? c / 12.92 : ((c + .055) / 1.055) ** 2.4; }; return .2126 * f(r) + .7152 * f(g) + .0722 * f(b); };
+        const over = (top, under, a = top[3]) => [0, 1, 2].map(i => top[i] * a + under[i] * (1 - a));
+        const pageBg = el => { const layers = []; for (let e = el; e; e = e.parentElement) { const c = rgba(getComputedStyle(e).backgroundColor); if (c[3] > 0) { layers.push(c); if (c[3] >= 1) break; } }
+            let base = [255, 255, 255]; for (const c of layers.reverse()) base = over(c, base); return base; };
+        window.__canvasTexts = [];
+        if (window.Chart) Chart.defaults.animation = false;
+        const real = CanvasRenderingContext2D.prototype.fillText;
+        CanvasRenderingContext2D.prototype.fillText = function (text, x, y, ...rest) {
+            try {
+                const t = this.getTransform(), m = this.measureText(String(text));
+                if (!t.b && !t.c && String(text).trim()) {
+                    const x0 = Math.max(0, Math.floor((x - m.actualBoundingBoxLeft) * t.a + t.e)), x1 = Math.min(this.canvas.width, Math.ceil((x + m.actualBoundingBoxRight) * t.a + t.e));
+                    const y0 = Math.max(0, Math.floor((y - m.actualBoundingBoxAscent) * t.d + t.f)), y1 = Math.min(this.canvas.height, Math.ceil((y + m.actualBoundingBoxDescent) * t.d + t.f));
+                    if (x1 > x0 && y1 > y0) {
+                        const px = this.getImageData(x0, y0, x1 - x0, y1 - y0).data, under = pageBg(this.canvas), ratios = [];
+                        const ink = rgba(String(this.fillStyle)), alpha = ink[3] * this.globalAlpha;
+                        for (let i = 0; i < px.length; i += 4) {
+                            const bg = over([px[i], px[i + 1], px[i + 2]], under, px[i + 3] / 255), fg = over(ink, bg, alpha);
+                            const a = lum(fg), b = lum(bg); ratios.push((Math.max(a, b) + .05) / (Math.min(a, b) + .05));
+                        }
+                        ratios.sort((p, q) => p - q);
+                        window.__canvasTexts.push({ text: String(text), ratio: ratios[Math.floor(ratios.length / 2)] });  // the median pixel: gridlines may cross a label
+                    }
+                }
+            } catch (e) { /* a measuring problem must not stop the drawing */ }
+            return real.call(this, text, x, y, ...rest);
+        };
+    }"""
+
+    def test_chart_text_contrast_is_at_least_aa_in_both_themes(self):
+        for scheme in ("light", "dark"):
+            page = self.open()
+            page.emulate_media(color_scheme=scheme)
+            page.evaluate(self.CANVAS_CONTRAST_JS)
+            for tab in ("overview", "activity", "regions"):
+                page.evaluate(f"setTab('{tab}')")
+                page.wait_for_timeout(500)
+            seen = page.evaluate("window.__canvasTexts")
+            names = {t["text"] for t in seen}
+            # the test sees what it should: axis numbers, the day bands and the weekday values
+            self.assertTrue({"Nacht", "Morgen", "Tag", "Abend"} <= names, (scheme, sorted(names)[:20]))
+            self.assertTrue(any(n.endswith(" %") for n in names), (scheme, sorted(names)[:20]))
+            self.assertGreater(len(names), 15)
+            self.assertEqual([f"{t['text']} {t['ratio']:.2f}" for t in seen if t["ratio"] < 4.5], [], scheme)
+            self.assertEqual(self.errors, [])
+
     def test_calendar_is_one_run_of_weeks(self):
         page = self.open()
         # every day of the year once, in date order, in one grid (not one block per month)
