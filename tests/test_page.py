@@ -222,6 +222,24 @@ class PageTest(unittest.TestCase):
         page.wait_for_function("document.getElementById('tgt-io-msg').textContent.includes('keine')")
         self.assertEqual(self.errors, [])
 
+    def test_calendar_is_one_run_of_weeks(self):
+        page = self.open()
+        # every day of the year once, in date order, in one grid (not one block per month)
+        days = page.evaluate("""() => { const y = S.year, n = Math.round((Date.UTC(y + 1, 0, 1) - Date.UTC(y, 0, 1)) / 864e5);
+            return Array.from({ length: n }, (_, i) => new Date(Date.UTC(y, 0, 1 + i)).toISOString().slice(0, 10)).map(fmtD); }""")
+        shown = page.evaluate("[...document.querySelectorAll('.cal-days > .cal-day:not(.cal-empty)')].map(d => d.dataset.tip.slice(0, 10))")
+        self.assertEqual(shown, days)
+        self.assertEqual(page.locator(".cal-months span").count(), 12)
+        # the weeks are columns: the next day is below, and after a Sunday at the top of the next column
+        pos = page.evaluate("""() => [...document.querySelectorAll('.cal-days > .cal-day')].slice(0, 14).map(d => { const r = d.getBoundingClientRect(); return [Math.round(r.left), Math.round(r.top)]; })""")
+        self.assertEqual(pos[0][0], pos[1][0])
+        self.assertGreater(pos[1][1], pos[0][1])
+        self.assertGreater(pos[7][0], pos[0][0])
+        self.assertEqual(pos[7][1], pos[0][1])
+        # a month's edge is drawn along its first week, in every month but January
+        self.assertEqual(page.locator(".cal-day.m-left").count(), 11 * 7)
+        self.assertEqual(self.errors, [])
+
     def test_calendar_day_and_jumps_to_life_list(self):
         page = self.open()
         day = page.locator("button.cal-day").first

@@ -72,33 +72,38 @@ function calendarSection(list, statsAll) {
   const scale = heatScale(max);
   const liferDays = new Set([...statsAll.values()].filter(r => r.first.y === year).map(r => r.first.d));
   const dowLetters = T.weekdays.map(w => w[0]);
-  const months = T.months.map((name, mi) => {
-    const m = mi + 1;
-    const first = new Date(Date.UTC(year, mi, 1));
-    const startDow = (first.getUTCDay() + 6) % 7;  // 0 = Monday
-    const daysInMonth = new Date(Date.UTC(year, mi + 1, 0)).getUTCDate();
-    let cells = "";
-    for (let i = 0; i < startDow; i++) cells += `<div class="cal-day cal-empty"></div>`;
-    for (let day = 1; day <= daysInMonth; day++) {
+  // the year as one continuous run of weeks (a column each, Monday on top): the months flow into each other
+  // instead of standing as separate blocks. A month's edge is a stepped line (m-top / m-left); the empty days of
+  // every other month are a shade darker, so the months stay readable in a sparse year, too.
+  const startDow = (new Date(Date.UTC(year, 0, 1)).getUTCDay() + 6) % 7;  // 0 = Monday
+  let cells = `<div class="cal-day cal-empty"></div>`.repeat(startDow), idx = startDow, lastIdx = startDow;
+  const monthLabels = [];
+  for (let mi = 0; mi < 12; mi++) {
+    const m = mi + 1, daysInMonth = new Date(Date.UTC(year, mi + 1, 0)).getUTCDate();
+    monthLabels.push(`<span style="--w:${Math.floor(idx / 7) + 1}">${esc(T.monthsShort[mi].replace(".", ""))}</span>`);
+    for (let day = 1; day <= daysInMonth; day++, idx++) {
       const dateStr = `${year}-${pad(m)}-${pad(day)}`;
       const sp = dayData.get(dateStr);
       const n = sp ? sp.size : 0;
       const lifer = liferDays.has(dateStr);
-      const bg = n ? scale.color(scale.step(n)) : "var(--cal-empty)";
+      const bg = n ? scale.color(scale.step(n)) : mi % 2 ? "var(--cal-empty-alt)" : "var(--cal-empty)";
+      // the day above is the one before (a month's 1st unless it tops its column), the one to the left is a week back
+      const edge = `${day === 1 && idx % 7 ? " m-top" : ""}${day <= 7 && mi ? " m-left" : ""}`;
       const title = n ? `${fmtD(dateStr)}: ${n} ${t("mapSpecies")}${lifer ? " · " + t("newBadge") : ""}` : fmtD(dateStr);
       cells += n
-        ? `<button type="button" class="cal-day${lifer ? " cal-lifer" : ""}${S.calDay === dateStr ? " cal-sel" : ""}" data-day="${dateStr}" style="background:${bg}" data-tip="${esc(title)}" aria-label="${esc(title)}" aria-pressed="${S.calDay === dateStr}"></button>`
-        : `<div class="cal-day" style="background:${bg}" data-tip="${esc(title)}"></div>`;
+        ? `<button type="button" class="cal-day${lifer ? " cal-lifer" : ""}${S.calDay === dateStr ? " cal-sel" : ""}${edge}" data-day="${dateStr}" style="background:${bg}" data-tip="${esc(title)}" aria-label="${esc(title)}" aria-pressed="${S.calDay === dateStr}"></button>`
+        : `<div class="cal-day${edge}" style="background:${bg}" data-tip="${esc(title)}"></div>`;
     }
-    // always pad to 6 full weeks (42 cells): keeps every month's grid the same height, so the
-    // section doesn't jump as S.year changes (some years need 6 rows for a month, others only 4-5)
-    for (let i = startDow + daysInMonth; i < 42; i++) cells += `<div class="cal-day cal-empty"></div>`;
-    return `<div class="cal-month"><h3>${name}</h3>
-      <div class="cal-grid">${dowLetters.map(l => `<span class="cal-dow">${l}</span>`).join("")}${cells}</div></div>`;
-  }).join("");
+    lastIdx = idx;
+  }
+  const weeks = Math.ceil(lastIdx / 7);
+  const months = `<div class="cal-scroll"><div class="cal-flow" style="--weeks:${weeks}">
+      <div class="cal-months">${monthLabels.join("")}</div>
+      <div class="cal-dows">${dowLetters.map(l => `<span>${l}</span>`).join("")}</div>
+      <div class="cal-days">${cells}</div></div></div>`;
   return `<h2 data-toc="${esc(t("tocCal"))}">${t("calTitle", year)}</h2>
     ${infoText(t("calHelp"))}
-    <div class="card"><div class="cal-months-wrap">${months}</div>${dayData.has(S.calDay || "") ? calDayPanel(list, statsAll, S.calDay) : ""}</div>
+    <div class="card">${months}${dayData.has(S.calDay || "") ? calDayPanel(list, statsAll, S.calDay) : ""}</div>
     ${scale.legend}`;
 }
 // what was seen on one calendar day, grouped by place; each species opens its row in the life list

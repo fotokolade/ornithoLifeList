@@ -12,7 +12,7 @@
   --k1:#2f8f4e; --k2:#c98a1b; --k3:#3d78a8; --k4:#8659b3; --k5:#c1554a; --k6:#2f9e93;
   --heat-lo:#dcefe2; --heat-hi:#1a6334; --heat-ink:#fff;
   --shadow:0 1px 2px rgba(20,32,26,.05),0 3px 10px rgba(20,32,26,.04);
-  --mk-lo:#f6c36b; --mk-hi:#b8420f; --cal-empty:#e8ece8;
+  --mk-lo:#f6c36b; --mk-hi:#b8420f; --cal-empty:#e8ece8; --cal-empty-alt:#dde3dd;
   --d-up:#cfe9d6; --d-up-ink:#1b5e20; --d-eq:#e4e6e4; --d-eq-ink:#555; --d-down:#f7d0cc; --d-down-ink:#a4251a;
 }
 @media (prefers-color-scheme: dark){
@@ -22,7 +22,7 @@
     --hl:#3b3717; --link:#8ab8dc; --stripe:#202622;
     --k1:#4cc275; --k2:#e0a23c; --k3:#5b9bcf; --k4:#b28ee0; --k5:#e08578; --k6:#4cc2b3;
     --heat-lo:#1f3a2a; --heat-hi:#7ee0a2; --heat-ink:#0f2418;
-    --shadow:none; --cal-empty:#252c28;
+    --shadow:none; --cal-empty:#252c28; --cal-empty-alt:#2e3732;
     --d-up:#1f4a2c; --d-up-ink:#9be3b0; --d-eq:#2c322e; --d-eq-ink:#b8bfba; --d-down:#4d2420; --d-down-ink:#ffb3a9;
   }
 }
@@ -33,7 +33,7 @@
   --hl:#3b3717; --link:#8ab8dc; --stripe:#202622;
   --k1:#4cc275; --k2:#e0a23c; --k3:#5b9bcf; --k4:#b28ee0; --k5:#e08578; --k6:#4cc2b3;
   --heat-lo:#1f3a2a; --heat-hi:#7ee0a2; --heat-ink:#0f2418;
-  --shadow:none; --cal-empty:#252c28;
+  --shadow:none; --cal-empty:#252c28; --cal-empty-alt:#2e3732;
     --d-up:#1f4a2c; --d-up-ink:#9be3b0; --d-eq:#2c322e; --d-eq-ink:#b8bfba; --d-down:#4d2420; --d-down-ink:#ffb3a9;
 }
 *{box-sizing:border-box}
@@ -260,12 +260,18 @@ tr.grp .grp-t:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 tr.grp .grp-t::before{content:"▸";display:inline-block;width:1em;color:var(--muted);transition:transform .12s ease}
 tr.grp .grp-t[aria-expanded=true]::before{transform:rotate(90deg)}
 .new-badge{background:var(--accent);color:#fff;border-radius:999px;padding:0 6px;font-size:.62rem;font-weight:700;margin-left:6px;vertical-align:middle}
-.cal-months-wrap{display:grid;grid-template-columns:repeat(6,1fr);gap:18px 14px}
-@media (max-width:900px){.cal-months-wrap{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}}
-.cal-month h3{margin:0 0 5px;font-size:.76rem;color:var(--muted);font-weight:600}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
-.cal-dow{font-size:.6rem;color:var(--muted);text-align:center;line-height:1.6}
-.cal-day{aspect-ratio:1;border-radius:2px;background:var(--bar-soft)}
+/* the year's calendar: one run of weeks, a column each; narrow screens scroll it sideways rather than shrink the days to dots */
+.cal-scroll{overflow-x:auto;padding:2px}
+.cal-flow{--gap:2px;display:grid;grid-template-columns:auto 1fr;grid-template-areas:". months" "dows days";gap:5px 6px;min-width:620px}
+.cal-months{grid-area:months;display:grid;grid-template-columns:repeat(var(--weeks),1fr);font-size:.68rem;color:var(--muted);font-weight:600}
+.cal-months span{grid-column:var(--w)/span 4;white-space:nowrap}
+.cal-dows{grid-area:dows;display:grid;grid-template-rows:repeat(7,1fr);row-gap:var(--gap);font-size:.58rem;color:var(--muted);text-align:right;align-items:center}
+.cal-days{grid-area:days;display:grid;grid-auto-flow:column;grid-template-rows:repeat(7,auto);grid-template-columns:repeat(var(--weeks),1fr);gap:var(--gap)}
+.cal-day{aspect-ratio:1;border-radius:2px;background:var(--bar-soft);position:relative}
+/* a month's edge, drawn in the gap beside the day (and a little beyond it, so the steps join up) */
+.cal-day.m-top::before,.cal-day.m-left::before{content:"";position:absolute;background:color-mix(in srgb,var(--text) 30%,transparent);pointer-events:none}
+.cal-day.m-top::before{left:calc(var(--gap) * -1);right:calc(var(--gap) * -1);top:calc(var(--gap) * -1);height:var(--gap)}
+.cal-day.m-left::before{top:calc(var(--gap) * -1);bottom:calc(var(--gap) * -1);left:calc(var(--gap) * -1);width:var(--gap)}
 .cal-day.cal-lifer{box-shadow:0 0 0 2px var(--k2) inset}
 .cal-day.cal-empty{background:transparent}
 button.cal-day{display:block;width:100%;padding:0;border:0;font:inherit;cursor:pointer;transition:transform .1s ease}
@@ -391,7 +397,7 @@ footer.meta-footer .btn{flex:0 0 auto;padding:3px 10px}
      beats the higher-specificity :root[data-theme="dark"] override */
   :root{--bg:#fff!important;--card:#fff!important;--text:#111!important;--muted:#555!important;--line:#ccc!important;--accent:#1f7a3d!important;--accent-soft:#eef6f0!important;
     --bar:#3d78a8!important;--bar-soft:#d3e2ee!important;--hl:#fff!important;--link:#111!important;--stripe:#f5f5f5!important;
-    --heat-lo:#dcefe2!important;--heat-hi:#1a6334!important;--heat-ink:#fff!important;--cal-empty:#eef0ee!important}
+    --heat-lo:#dcefe2!important;--heat-hi:#1a6334!important;--heat-ink:#fff!important;--cal-empty:#eef0ee!important;--cal-empty-alt:#e3e7e3!important}
   body{font-size:10pt}
   header.top{position:static;border:0}
   .filters,nav.tabs,.pick,.time-bar,#tab-map,.more{display:none!important}
