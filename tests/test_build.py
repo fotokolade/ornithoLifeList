@@ -1,3 +1,5 @@
+import contextlib
+import io
 import json
 import os
 import sys
@@ -252,6 +254,156 @@ class DemoExportTest(unittest.TestCase):
         self.assertEqual(len(sightings), len(make_demo_export.generate()))  # same seed, same data
         data = lifelist.build_page_data(sightings, "export_demo.json", False)
         self.assertGreater(len(data["sp"]), 100)
+
+
+
+def write_export(path, sightings=None, raw=None, encoding="utf-8"):
+    with open(path, "w", encoding=encoding) as fh:
+        fh.write(raw if raw is not None else json.dumps({"data": {"sightings": sightings}}))
+
+
+class BadInputTest(unittest.TestCase):
+    """A file that is no export, or records the page cannot use, end in a message instead of a traceback."""
+
+    def exit_message(self, fn, *args):
+        with self.assertRaises(SystemExit) as cm:
+            fn(*args)
+        self.assertIsInstance(cm.exception.code, str)  # a message, so the exit code is 1
+        return cm.exception.code
+
+    def test_export_with_byte_order_mark_is_read(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "export_bom.json")
+            write_export(path, sample_export()[:3], encoding="utf-8-sig")
+            self.assertEqual(len(lifelist.load_export(path)), 3)
+
+    def test_file_that_is_no_export_names_itself_and_the_howto(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            for name, raw in [("export_text.json", "not json at all"), ("export_other.json", '{"foo": 1}'),
+                              ("export_list.json", '{"data": {"sightings": 5}}')]:
+                path = os.path.join(tmp, name)
+                write_export(path, raw=raw)
+                msg = self.exit_message(lifelist.load_export, path)
+                self.assertIn(name, msg)
+                self.assertIn("HOWTO.md", msg)
+            path = os.path.join(tmp, "export_latin1.json")
+            with open(path, "wb") as fh:
+                fh.write('{"data": {"sightings": []}, "x": "Mäusebussard"}'.encode("latin-1"))
+            self.assertIn("UTF-8", self.exit_message(lifelist.load_export, path))
+
+    def test_missing_source_file(self):
+        missing = os.path.join(tempfile.gettempdir(), "no_such_export_4711.json")
+        self.assertIn("File not found", self.exit_message(lifelist.expand_sources, [missing]))
+
+    def test_exports_found_in_a_folder_with_brackets(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = os.path.join(tmp, "Vögel [2024]")
+            os.makedirs(folder)
+            write_export(os.path.join(folder, "export_1.json"), [])
+            here = lifelist.HERE
+            lifelist.HERE = folder
+            try:
+                self.assertEqual([os.path.basename(p) for p in lifelist.find_exports()], ["export_1.json"])
+            finally:
+                lifelist.HERE = here
+
+    def test_unusable_records_are_skipped_and_counted(self):
+        good = sample_export()[:5]
+        no_observer = dict(good[0]); del no_observer["observers"]
+        no_species = dict(good[0], species={"name": "", "latin_name": ""})
+        no_place = dict(good[0], place={"name": "Teich"})
+        bad_date = dict(good[0], date={"@ISO8601": "2024-13-45T00:00:00+02:00"})
+        skipped = []
+        data = lifelist.build_data(good + [no_observer, no_species, no_place, bad_date, "not a record"], {}, skipped)
+        self.assertEqual(len(data["obs"]), 5)
+        self.assertEqual(sorted(skipped), ["no observer data", "no observer data", "no place", "no species", "no valid date"])
+        # a skipped record leaves nothing behind: no taxon, no place of its own
+        self.assertEqual(len(data["sp"]), len(build(good)["sp"]))
+
+    def test_small_flaws_are_mended(self):
+        s = sighting("Grus grus", "Kranich", "2024-03-01", place_id="9", lat="", lon="x", count="1-5", sys_order="?")
+        s["observers"][0]["timing"] = {"@notime": "0", "@ISO8601": "2024-03-01Txx:yy:00"}
+        data = build([s, sighting("Parus major", "Kohlmeise", "2024-03-02", sys_order="5")])
+        self.assertEqual(data["pl"][0][4:], [0, 0])  # kept, without coordinates
+        self.assertEqual(data["obs"][0][3], 0)      # a count that is no number
+        self.assertEqual(data["obs"][0][6], -1)     # a time that is none
+        self.assertEqual(data["sp"][0][2], 99999)   # an unknown taxonomic order sorts last
+
+    def test_main_stops_when_nothing_is_left(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "export_empty.json")
+            write_export(path, [])
+            argv = sys.argv
+            sys.argv = ["lifelist.py", "--source", path]
+            try:
+                with contextlib.redirect_stdout(io.StringIO()):
+                    msg = self.exit_message(lifelist.main)
+            finally:
+                sys.argv = argv
+            self.assertIn("Nothing was written", msg)
+
+
+# runs lifelist.py as the exe would: frozen, its bundled files next to the script, the exe (and so the
+# exports and lifelist.html) in a folder of its own
+FROZEN_DRIVER = """
+import os, runpy, sys
+script, exe_dir = sys.argv[1], sys.argv[2]
+sys.frozen = True
+sys._MEIPASS = os.path.dirname(os.path.abspath(script))
+sys.executable = os.path.join(exe_dir, "lifelist.exe")
+sys.argv = ["lifelist.exe"] + sys.argv[3:]
+runpy.run_path(script, run_name="__main__")
+"""
+
+
+class FrozenExeTest(unittest.TestCase):
+    """Double-clicked, the exe's window closes when the process ends: whatever happens is shown and waits for Enter."""
+
+    def run_exe(self, exe_dir, *args, script=None, stdin="\n"):
+        import subprocess
+        script = script or os.path.join(os.path.dirname(__file__), "..", "lifelist.py")
+        return subprocess.run([sys.executable, "-c", FROZEN_DRIVER, os.path.abspath(script), exe_dir, *args],
+                              input=stdin, capture_output=True, text=True, encoding="utf-8", timeout=120)
+
+    def test_success_waits_and_exits_0(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            write_export(os.path.join(tmp, "export_1.json"), sample_export()[:20])
+            res = self.run_exe(tmp)
+            self.assertEqual(res.returncode, 0, res.stderr)
+            self.assertIn("Done. Press Enter to close.", res.stdout)
+            self.assertTrue(os.path.exists(os.path.join(tmp, "lifelist.html")))
+
+    def test_known_problem_is_shown_waits_and_exits_1(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            write_export(os.path.join(tmp, "export_1.json"), raw="<html>not an export</html>")
+            res = self.run_exe(tmp)
+            self.assertEqual(res.returncode, 1)
+            self.assertIn("export_1.json is not valid JSON", res.stderr)
+            self.assertNotIn("Traceback", res.stderr)
+            self.assertIn("Stopped. Press Enter to close.", res.stdout)
+            self.assertNotIn("Done", res.stdout)
+
+    def test_unforeseen_error_is_shown_with_where_to_report_it(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            # a copy of the script without its bundled files: reading the page template fails
+            script = os.path.join(tmp, "bundle", "lifelist.py")
+            os.makedirs(os.path.dirname(script))
+            with open(os.path.join(os.path.dirname(__file__), "..", "lifelist.py"), encoding="utf-8") as src, \
+                    open(script, "w", encoding="utf-8") as dst:
+                dst.write(src.read())
+            write_export(os.path.join(tmp, "export_1.json"), sample_export()[:5])
+            res = self.run_exe(tmp, script=script)
+            self.assertEqual(res.returncode, 1)
+            self.assertIn("Traceback", res.stderr)
+            self.assertIn("/issues", res.stderr)
+            self.assertIn("Stopped. Press Enter to close.", res.stdout)
+
+    def test_without_a_console_it_ends_cleanly(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            write_export(os.path.join(tmp, "export_1.json"), sample_export()[:5])
+            res = self.run_exe(tmp, stdin="")  # no answer to the pause (scheduled task)
+            self.assertEqual(res.returncode, 0, res.stderr)
+            self.assertNotIn("EOFError", res.stderr)
 
 
 if __name__ == "__main__":
