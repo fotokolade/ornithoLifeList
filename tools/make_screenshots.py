@@ -42,7 +42,7 @@ def main():
     parser.add_argument("--map", action="store_true", help="also take the map (needs internet for the tiles)")
     opts = parser.parse_args()
     os.makedirs(OUT, exist_ok=True)
-    data = lifelist.build_page_data(make_demo_export.generate(), "export_demo.json", False)
+    data = lifelist.build_page_data(make_demo_export.generate(), "demo_export.json", False)
     with tempfile.TemporaryDirectory() as tmp:
         path = os.path.join(tmp, "demo.html")
         with open(path, "w", encoding="utf-8") as fh:

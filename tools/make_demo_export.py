@@ -1,6 +1,9 @@
 """Generates a made-up but realistic-looking ornitho.de export, for screenshots and demos.
 
-Usage:  python tools/make_demo_export.py [output.json]      (default: export_demo.json)
+Usage:  python tools/make_demo_export.py [output.json]      (default: demo_export.json)
+
+The default name deliberately does not match export_*.json, so a later `python lifelist.py` in the same
+folder does not merge the made-up records into a real life list; use --source demo_export.json for it.
 
 Nothing in it is a real observation: a fictional birder from near Dresden visits real birding spots
 at home, more often at weekends and in spring, mostly in the morning, and takes a few birding trips
@@ -367,7 +370,7 @@ def generate():
 
 
 def main():
-    dst = sys.argv[1] if len(sys.argv) > 1 else "export_demo.json"
+    dst = sys.argv[1] if len(sys.argv) > 1 else "demo_export.json"
     sightings = generate()
     with open(dst, "w", encoding="utf-8") as fh:
         json.dump({"data": {"sightings": sightings}}, fh, ensure_ascii=False)

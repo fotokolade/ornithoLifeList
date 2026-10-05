@@ -195,6 +195,34 @@ class RenderTest(unittest.TestCase):
 
 
 
+class EmbeddingTest(unittest.TestCase):
+    """Place names are free text: whatever they hold must neither end the data block nor be taken for a placeholder."""
+
+    def test_data_block_holds_no_markup_and_parses_back(self):
+        names = ["Teich <!--<script>", "Heide </script><b>", "__APP_JS__", "__DATA_JSON__ & <SCRIPT/"]
+        s = sample_export() + [sighting("Pica pica", "Elster", "2024-03-10", place_id=f"x{i}", place=n, lat="51.2", lon="14.4")
+                               for i, n in enumerate(names)]
+        data = lifelist.build_page_data(s, "export_test.json", False)
+        html = lifelist.render_html(data)
+        start = html.index('<script id="data" type="application/json">') + len('<script id="data" type="application/json">')
+        block = html[start:html.index("</script>", start)]
+        self.assertNotIn("<", block)
+        self.assertEqual(json.loads(block)["pl"], data["pl"])
+        for n in names:
+            self.assertIn(n, [p[0] for p in json.loads(block)["pl"]])
+        # each placeholder was replaced exactly once, the app code is in the page once
+        self.assertEqual(html.count("const APP_VERSION ="), 1)
+        for ph in ("__DATA_JSON__", "__APP_JS__", "__VENDOR_JS__", "__VENDOR_CSS__"):
+            self.assertNotIn(f">{ph}<", html)
+
+    def test_demo_export_name_is_not_picked_up_as_an_export(self):
+        sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "tools"))
+        import make_demo_export
+        import fnmatch
+        self.assertIn("demo_export.json", make_demo_export.__doc__)
+        self.assertFalse(fnmatch.fnmatch("demo_export.json", "export_*.json"))
+
+
 class UpdateCheckTest(unittest.TestCase):
     def test_version_matches_page(self):
         self.assertIsNotNone(lifelist.parse_version(lifelist.app_version()))
@@ -252,7 +280,7 @@ class DemoExportTest(unittest.TestCase):
         import make_demo_export
         sightings = make_demo_export.generate()
         self.assertEqual(len(sightings), len(make_demo_export.generate()))  # same seed, same data
-        data = lifelist.build_page_data(sightings, "export_demo.json", False)
+        data = lifelist.build_page_data(sightings, "demo_export.json", False)
         self.assertGreater(len(data["sp"]), 100)
 
 

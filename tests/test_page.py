@@ -776,6 +776,32 @@ class PageTest(unittest.TestCase):
         self.assertFalse(page.is_visible('#tabs button[data-tab="tours"]'))
         self.assertEqual(self.errors, [])
 
+    def test_place_names_that_look_like_markup_leave_the_page_working(self):
+        names = ["Teich <!--<script>", "Heide </script><b>", "__APP_JS__"]
+        extra = sample_export() + [sighting("Pica pica", "Elster", "2024-03-10", place_id=f"x{i}", place=n,
+                                            municipality="Anderort (BB, SPN)", lat="51.2", lon="14.4") for i, n in enumerate(names)]
+        path = os.path.join(self.tmp.name, "markup.html")
+        with open(path, "w", encoding="utf-8") as fh:
+            fh.write(lifelist.render_html(lifelist.build_page_data(extra, "export_test.json", False)))
+        self.url["markup"] = "file:///" + path.replace(os.sep, "/").lstrip("/")
+        page = self.open(redact="markup", hash="#regions")  # open() takes the key of self.url
+        page.wait_for_function("typeof OBS !== 'undefined' && OBS.length > 0")
+        self.assertEqual(sorted(page.evaluate("PL.map(p => p.name).filter(n => !/^(Teich am Wald|Heide Nord|Flussaue)$/.test(n))")), sorted(names))
+        self.assertIn("Teich <!--<script>", page.inner_text("#tab-regions"))  # shown as text, not taken for markup
+        self.assertEqual(self.errors, [])
+
+    def test_redact_switch_hides_the_export_file_name(self):
+        page = self.open()
+        self.assertIn("export_test.json", page.inner_text("#h-sub"))
+        page.click("#o-sum")
+        self.assertIn("--redact", page.inner_text("#o-redact-l"))  # says that it only hides, and how to share
+        page.check("#o-redact")
+        self.assertNotIn("export_test", page.inner_text("#h-sub"))
+        self.assertEqual(page.get_attribute("#h-sub", "title"), "")
+        page.uncheck("#o-redact")
+        self.assertIn("export_test.json", page.inner_text("#h-sub"))
+        self.assertEqual(self.errors, [])
+
     def test_phone_width_has_no_sideways_scroll(self):
         page = self.open(width=390)
         for tab in TABS:

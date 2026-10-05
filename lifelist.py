@@ -405,16 +405,18 @@ def build_page_data(sightings, source_names, redact, skipped=None):
 def render_html(data):
     with open(os.path.join(RESOURCES, "template.html"), encoding="utf-8") as fh:
         tpl = fh.read()
-    blob = json.dumps(data, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
-    app_js = build_app_js().replace("</script", "<\\/script")
-    vendor_js = build_vendor_js().replace("</script", "<\\/script")
-    vendor_css = build_vendor_css().replace("</style", "<\\/style")
-    # vendor/data/app placeholders first, in increasing order of "how likely is this blob to
-    # accidentally contain another placeholder's literal text" — str.replace() replaces every
-    # occurrence, so once a large blob is substituted in, any later replace() pass would also hit
-    # a stray match inside *that* blob (this bit us once: a JS comment mentioning "__VENDOR_JS__")
-    return (tpl.replace("__VENDOR_CSS__", vendor_css).replace("__VENDOR_JS__", vendor_js)
-            .replace("__DATA_JSON__", blob).replace("__APP_JS__", app_js))
+    # The data may hold any text (place names are free text on ornitho): "<" only ever occurs inside
+    # JSON strings, so writing it as \\u003c keeps the JSON the same and leaves nothing the HTML parser
+    # could read as markup, not even "<!--<script>", which would otherwise swallow the end of the block.
+    parts = {
+        "DATA_JSON": json.dumps(data, ensure_ascii=False, separators=(",", ":")).replace("<", "\\u003c"),
+        "APP_JS": re.sub(r"</(script)", r"<\\/\1", build_app_js(), flags=re.IGNORECASE),
+        "VENDOR_JS": re.sub(r"</(script)", r"<\\/\1", build_vendor_js(), flags=re.IGNORECASE),
+        "VENDOR_CSS": re.sub(r"</(style)", r"<\\/\1", build_vendor_css(), flags=re.IGNORECASE),
+    }
+    # one pass over the template: what is put in is not searched again, so a placeholder's name inside
+    # the data or the code (a place called "__APP_JS__", a comment) stays as it is
+    return re.sub(r"__(DATA_JSON|APP_JS|VENDOR_JS|VENDOR_CSS)__", lambda m: parts[m.group(1)], tpl)
 
 
 def app_version():

@@ -59,6 +59,7 @@ function applyRedact(on) {
   if (MAP_ROUTE) MAP_ROUTE.clearLayers();  // the tour's stops carry place names in their tooltips
   $("map-note").textContent = "";
   buildRegionSelect();
+  renderSubtitle();
   syncHeaderHeight();
   setTab(S.tab);
 }
@@ -128,13 +129,7 @@ function openPrintDialog() {
 }
 function renderChrome() {
   $("h-title").textContent = t("title");
-  // several exports (e.g. one per year) are merged by lifelist.py; their names go into the tooltip.
-  // A redacted page carries no file names, as they contain the ornitho user ID.
-  const sources = RAW.meta.sources || [];
-  $("h-sub").textContent = (sources.length === 0 ? t("subtitleNoFile", fmtN(OBS.length))
-    : sources.length === 1 ? t("subtitle", sources[0], fmtN(OBS.length))
-    : t("subtitleMulti", sources.length, fmtN(OBS.length))) + " · " + t("version", APP_VERSION);
-  $("h-sub").title = sources.join("\n");
+  renderSubtitle();
   $("o-sum").textContent = t("optsSummary");
   $("o-theme-t").textContent = t("themeLabel");
   $("o-theme").innerHTML = ["system", "light", "dark"].map(v => `<option value="${v}">${t("theme" + v[0].toUpperCase() + v.slice(1))}</option>`).join("");
@@ -182,6 +177,16 @@ function renderChrome() {
   $("m-metric").innerHTML = `<option value="life">${cutoffLabel("mapLiferAll", "mapLifer")}</option><option value="year">${t("mapYear", timePeriodLabel())}</option><option value="obs">${t("mapObs", timePeriodLabel())}</option><option value="lifer">${cutoffLabel("mapNewHereAll", "mapNewHere")}</option>`;
   $("m-metric").value = S.metric;
   syncHeaderHeight();
+}
+// the header's second line: where the data comes from
+function renderSubtitle() {
+  // several exports (e.g. one per year) are merged by lifelist.py; their names go into the tooltip. They contain
+  // the ornitho user ID, so a redacted page shows none: neither one built with --redact nor the switch on screen
+  const sources = S.redact ? [] : RAW.meta.sources || [];
+  $("h-sub").textContent = (sources.length === 0 ? t("subtitleNoFile", fmtN(OBS.length))
+    : sources.length === 1 ? t("subtitle", sources[0], fmtN(OBS.length))
+    : t("subtitleMulti", sources.length, fmtN(OBS.length))) + " · " + t("version", APP_VERSION);
+  $("h-sub").title = sources.join("\n");
 }
 function applyLang(lang) {
   if (lang === S.lang) return;

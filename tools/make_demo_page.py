@@ -18,7 +18,7 @@ import make_demo_export  # noqa: E402
 
 def main():
     out = sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, "lifelist-demo.html")
-    data = lifelist.build_page_data(make_demo_export.generate(), "export_demo.json", False)
+    data = lifelist.build_page_data(make_demo_export.generate(), "demo_export.json", False)
     os.makedirs(os.path.dirname(os.path.abspath(out)), exist_ok=True)
     with open(out, "w", encoding="utf-8") as fh:
         fh.write(lifelist.render_html(data))

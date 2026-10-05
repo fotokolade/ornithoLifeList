@@ -70,4 +70,4 @@ Die Tests nutzen erfundene Beispieldaten aus `tests/fixtures.py` und überschrei
 
 `python tools/make_demo_page.py` erzeugt daraus direkt `lifelist-demo.html`, die Demo, die auch jedem Release beiliegt.
 
-`tools/make_demo_export.py` erzeugt einen erfundenen, aber realistisch wirkenden Export (`export_demo.json`): ein fiktiver Beobachter aus der Nähe von Dresden, über mehrere Jahre an echten Beobachtungsorten, mit Reisen quer durch Deutschland. Gut zum Ausprobieren ohne eigene Daten: `python tools/make_demo_export.py`, dann `python lifelist.py --source export_demo.json`.
+`tools/make_demo_export.py` erzeugt einen erfundenen, aber realistisch wirkenden Export (`demo_export.json`): ein fiktiver Beobachter aus der Nähe von Dresden, über mehrere Jahre an echten Beobachtungsorten, mit Reisen quer durch Deutschland. Gut zum Ausprobieren ohne eigene Daten: `python tools/make_demo_export.py`, dann `python lifelist.py --source demo_export.json`. Der Name passt mit Absicht nicht auf `export_*.json`: So mischt ein späteres `python lifelist.py` im selben Ordner die erfundenen Daten nicht unter die eigenen.

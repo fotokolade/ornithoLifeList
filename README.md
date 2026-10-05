@@ -102,7 +102,7 @@ Die Ausgabe zeigt, welche Dateien gelesen wurden und wie viele doppelte Beobacht
 | `python lifelist.py --check-update` | sieht auf GitHub nach, ob es eine neuere Version gibt, und erstellt nichts |
 | `python lifelist.py --version` | zeigt die installierte Version |
 
-In der Version mit `--redact` fehlen Beobachtungsorte, Gemeinden, Koordinaten, die Karte und die Touren. Alle Arten, Daten und Auswertungen bleiben erhalten.
+In der Version mit `--redact` fehlen Beobachtungsorte, Gemeinden, Koordinaten, die Karte und die Touren. Alle Arten, Daten und Auswertungen bleiben erhalten, ebenso Bundesland und Landkreis; bei heiklen Arten (etwa Brutplätzen) können Art, Tag, Uhrzeit, Brutzeitcode und Landkreis zusammen noch viel verraten. Der Schalter „Ortsangaben schwärzen“ in den Einstellungen blendet die Orte nur aus: Die Datei enthält sie weiter, zum Weitergeben also immer die Version mit `--redact` erstellen.
 
 ## Ohne Python: lifelist.exe für Windows
 
