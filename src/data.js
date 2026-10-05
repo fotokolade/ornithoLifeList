@@ -114,6 +114,7 @@ if (initialTheme !== "system") document.documentElement.setAttribute("data-theme
  * @property {Set<string>} tourOpen - keys of tours with an open detail row
  * @property {boolean} tourAll - show every tour instead of the newest ones
  * @property {string|null} tourRoute - key of the tour drawn on the map
+ * @property {{on: boolean, year: number, day: number, speed: number, playing: boolean, sp: number|null}} tl - the map's time-lapse: shown, year, day, days per second, playing, the one species followed (null: all)
  * @property {number|null} focusSp - species index the life list scrolls to and highlights once, after a jump from another view
  */
 // the point in time the page opens with, and "Gesamt" returns to
@@ -129,7 +130,7 @@ function loadPrintTabs() {
 const S = { tab: "overview", region: "all", year: TIME_START.y, month: TIME_START.m, timeAll: true, lang: initialLang, theme: initialTheme,
   escaped: false, collective: false, atlasF: "all", actMetric: "obs", redact: !!RAW.meta.redacted, metric: "life", q: "", sort: "nr", dir: -1, open: new Set(),
   regSort: {}, regAll: {}, targetSrc: "all", customTargets: loadCustomTargets(), wishSort: { k: "season", d: 1 },
-  wishOpen: null, wishQ: "", plan: { scope: "de", month: 0, view: "dest", q: "", open: null, all: false, openG: null, gview: "d", sort: "n", gall: false }, calDay: null, heatMetric: { ym: "species", m: "obs", w: "obs", rm: "days" }, heatSel: {}, regMonthLvl: "c", tourCfg: null, tourSetOpen: false, printTabs: loadPrintTabs(), tourDiagOpen: false, tourSort: { k: "date", d: -1 }, tourOpen: new Set(), tourAll: false, tourRoute: null, focusSp: null, tl: { on: false, year: 0, day: 0, speed: 30, playing: false } };
+  wishOpen: null, wishQ: "", plan: { scope: "de", month: 0, view: "dest", q: "", open: null, all: false, openG: null, gview: "d", sort: "n", gall: false }, calDay: null, heatMetric: { ym: "species", m: "obs", w: "obs", rm: "days" }, heatSel: {}, regMonthLvl: "c", tourCfg: null, tourSetOpen: false, printTabs: loadPrintTabs(), tourDiagOpen: false, tourSort: { k: "date", d: -1 }, tourOpen: new Set(), tourAll: false, tourRoute: null, focusSp: null, tl: { on: false, year: 0, day: 0, speed: 30, playing: false, sp: null } };
 T = STR[S.lang];
 
 /* ---------- helpers ---------- */

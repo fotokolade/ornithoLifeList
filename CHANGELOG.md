@@ -5,7 +5,7 @@ Die neueste Version steht oben. Die Downloads (`lifelist.exe`) gibt es auf der [
 ## Noch nicht veröffentlicht
 
 ### Seite
-- **Karte, Zeitraffer:** Ein Jahr Beobachtungen, Tag für Tag abgespielt. Ein Ort leuchtet am Tag der Beobachtung auf (Größe: Arten an dem Tag, grüner Ring: Erstbeobachtung) und verblasst binnen zwei Wochen; ein kleiner Punkt bleibt, wo du im Jahr schon warst. Mit Abspielen/Pause, Schieberegler, Jahr und Tempo (7 bis 60 Tage pro Sekunde). Er startet nie von selbst und folgt der gewählten Region.
+- **Karte, Zeitraffer:** Ein Jahr Beobachtungen, Tag für Tag abgespielt. Ein Ort leuchtet am Tag der Beobachtung auf (Größe: Arten an dem Tag, grüner Ring: Erstbeobachtung) und verblasst binnen zwei Wochen; ein kleiner Punkt bleibt, wo du im Jahr schon warst. Mit Abspielen/Pause, Schieberegler, Jahr und Tempo (7 bis 60 Tage pro Sekunde). Er startet nie von selbst und folgt der gewählten Region. Über das Suchfeld lässt sich eine einzelne Art verfolgen: Dann spielen nur ihre Orte, die Größe zeigt die Vögel an dem Tag, die Jahreswahl bietet nur ihre Jahre an, und die Leiste zählt Beobachtungen und Orte.
 
 ## 0.6.0 (2026-09-29)
 

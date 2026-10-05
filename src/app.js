@@ -157,6 +157,8 @@ function renderChrome() {
   $("tl-range").setAttribute("aria-label", t("ariaTlDay"));
   $("tl-year").setAttribute("aria-label", t("ariaTlYear"));
   $("tl-speed").setAttribute("aria-label", t("ariaTlSpeed"));
+  $("tl-sp").placeholder = t("tlSpPh");
+  $("tl-sp").setAttribute("aria-label", t("ariaTlSp"));
   $("tl-speed").innerHTML = TL_SPEEDS.map(v => `<option value="${v}">${t("tlSpeed", v)}</option>`).join("");
   $("tl-speed").value = String(S.tl.speed);
   tlSyncPlay();
@@ -319,6 +321,7 @@ function init() {
   $("tl-range").addEventListener("input", e => { TL_POS = +e.target.value; tlShow(TL_POS); });
   $("tl-year").addEventListener("change", e => { S.tl.year = +e.target.value; renderMap(); });
   $("tl-speed").addEventListener("change", e => { S.tl.speed = +e.target.value; });
+  $("tl-sp").addEventListener("change", tlPickSpecies);
   $("tab-tours").addEventListener("toggle", e => {
     if (e.target.matches?.("details.tour-settings")) S.tourSetOpen = e.target.open;
     if (e.target.matches?.("details.tour-diagram")) S.tourDiagOpen = e.target.open;

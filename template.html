@@ -345,6 +345,7 @@ svg.curve text{fill:var(--muted);font-size:11px}
 .tl-bar[hidden]{display:none}
 .tl-bar input[type=range]{flex:1 1 220px;min-width:140px;accent-color:var(--accent)}
 .tl-play{min-width:9.5ch}
+.tl-sp{flex:0 1 190px;min-width:130px}
 .tl-date{font-weight:700;min-width:10ch;font-variant-numeric:tabular-nums}
 .tl-stats{color:var(--muted);font-size:.8rem}
 /* the time-lapse markers only show; the wrapper keeps the biggest size so a dot grows and shrinks around its centre */
@@ -475,6 +476,8 @@ footer.meta-footer .btn{flex:0 0 auto;padding:3px 10px}
       <button class="tl-toggle" id="m-tl" type="button" aria-pressed="false"></button>
     </div>
     <div class="tl-bar" id="tl-bar" hidden>
+      <input type="search" id="tl-sp" class="tl-sp" list="tl-suggest" autocomplete="off">
+      <datalist id="tl-suggest"></datalist>
       <button class="btn tl-play" id="tl-play" type="button"></button>
       <input type="range" id="tl-range" min="0" max="364" value="0" step="1">
       <span class="tl-date" id="tl-date"></span>

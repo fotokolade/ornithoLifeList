@@ -726,6 +726,49 @@ class PageTest(unittest.TestCase):
         self.assertEqual(page.evaluate("TL_LAYER.getLayers().length"), 0)
         self.assertEqual(self.errors, [])
 
+    def test_map_timelapse_follows_one_species(self):
+        page = self.open(hash="#map")
+        page.wait_for_timeout(500)
+        page.click("#m-tl")
+        page.wait_for_timeout(300)
+        everything = page.evaluate("TL_MODEL.places.length")
+        # a species seen in more than one year, with a place: the suggestions offer it by name
+        sp, name = page.evaluate("""() => { const years = new Map();
+            for (const o of OBS) if (PL[o.p].lat) { if (!years.has(o.s)) years.set(o.s, new Set()); years.get(o.s).add(o.y); }
+            const s = [...years].find(([, ys]) => ys.size > 1)[0]; return [s, speciesName(SP[s])]; }""")
+        self.assertGreater(page.locator("#tl-suggest option").count(), 1)
+        self.assertTrue(page.evaluate("n => [...document.querySelectorAll('#tl-suggest option')].some(o => o.value === n)", name))
+        page.fill("#tl-sp", name)
+        page.press("#tl-sp", "Enter")
+        page.wait_for_timeout(300)
+        self.assertEqual(page.evaluate("S.tl.sp"), sp)
+        # only the places of that species in the year shown, a year it occurs in, and the bar counts records and places
+        year = page.evaluate("S.tl.year")
+        expected = page.evaluate(f"new Set(regionObs(baseObs()).filter(o => o.s === {sp} && o.y === S.tl.year && PL[o.p].lat).map(o => o.p)).size")
+        self.assertEqual(page.evaluate("TL_MODEL.places.length"), expected)
+        self.assertLessEqual(expected, everything)
+        self.assertEqual(page.evaluate("TL_LAYER.getLayers().length"), expected)
+        self.assertIn(year, page.evaluate(f"OBS.filter(o => o.s === {sp}).map(o => o.y)"))
+        page.evaluate("tlShow(TL_MODEL.n - 1)")
+        self.assertIn("Orte seit Jahresbeginn", page.inner_text("#tl-stats"))
+        self.assertEqual(page.evaluate("TL_MODEL.cum[TL_MODEL.n - 1]"), expected)
+        self.assertIn("Vögel", page.inner_text(".map-legend"))
+        # the years offered are those of the species only
+        offered = page.evaluate("[...document.querySelector('#tl-year').options].map(o => +o.value).sort()")
+        self.assertEqual(offered, page.evaluate(f"[...new Set(OBS.filter(o => o.s === {sp} && PL[o.p].lat).map(o => o.y))].sort()"))
+        # a name that is none goes back to the species; an emptied field means all species again
+        page.fill("#tl-sp", "kein Vogel")
+        page.press("#tl-sp", "Enter")
+        self.assertEqual(page.input_value("#tl-sp"), name)
+        self.assertEqual(page.evaluate("S.tl.sp"), sp)
+        page.fill("#tl-sp", "")
+        page.press("#tl-sp", "Enter")
+        page.wait_for_timeout(300)
+        self.assertIsNone(page.evaluate("S.tl.sp"))
+        self.assertGreaterEqual(page.evaluate("TL_MODEL.places.length"), expected)
+        self.assertEqual(page.evaluate("TL_MODEL.sp"), None)
+        self.assertEqual(self.errors, [])
+
     def test_redacted_build_hides_map_and_places(self):
         page = self.open(redact=True)
         self.assertFalse(page.is_visible('#tabs button[data-tab="map"]'))
