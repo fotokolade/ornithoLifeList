@@ -356,10 +356,10 @@ svg.curve text{fill:var(--muted);font-size:11px}
 .tl-bar input[type=range]{flex:1 1 220px;min-width:140px;accent-color:var(--accent)}
 .tl-play{min-width:9.5ch}
 .tl-sp{flex:0 1 190px;min-width:130px}
+.tl-canvas{position:absolute;left:0;top:0;pointer-events:none}
+.tl-ramp{display:inline-block;width:46px;height:10px;border-radius:5px;background:linear-gradient(90deg,transparent,var(--mk-lo),var(--mk-hi),#5c1a08);box-shadow:inset 0 0 0 1px rgba(0,0,0,.18)}
 .tl-date{font-weight:700;min-width:10ch;font-variant-numeric:tabular-nums}
 .tl-stats{color:var(--muted);font-size:.8rem}
-/* the time-lapse markers only show; the wrapper keeps the biggest size so a dot grows and shrinks around its centre */
-.tl-marker{display:flex;align-items:center;justify-content:center;pointer-events:none}
 .time-label{font-weight:700;font-size:1rem;min-width:9ch;text-align:right;color:var(--text);text-shadow:0 1px 1px rgba(0,0,0,.12);flex:0 0 auto}
 @media (max-width:700px){
   .hide-sm{display:none}
@@ -493,6 +493,7 @@ footer.meta-footer .btn{flex:0 0 auto;padding:3px 10px}
       <span class="tl-date" id="tl-date"></span>
       <select id="tl-year"></select>
       <select id="tl-speed"></select>
+      <select id="tl-glow"></select>
       <span class="tl-stats" id="tl-stats"></span>
     </div>
     <div id="map"></div>

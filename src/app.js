@@ -161,6 +161,9 @@ function renderChrome() {
   $("tl-sp").setAttribute("aria-label", t("ariaTlSp"));
   $("tl-speed").innerHTML = TL_SPEEDS.map(v => `<option value="${v}">${t("tlSpeed", v)}</option>`).join("");
   $("tl-speed").value = String(S.tl.speed);
+  $("tl-glow").setAttribute("aria-label", t("ariaTlGlow"));
+  $("tl-glow").innerHTML = TL_GLOWS.map(v => `<option value="${v}">${t("tlGlowDays", v)}</option>`).join("");
+  $("tl-glow").value = String(S.tl.glow);
   tlSyncPlay();
   $("t-all").textContent = t("timeAll");
   $("t-range").min = 0; $("t-range").max = timeYMIndex(MAX_Y, 12);
@@ -321,6 +324,7 @@ function init() {
   $("tl-range").addEventListener("input", e => { TL_POS = +e.target.value; tlShow(TL_POS); });
   $("tl-year").addEventListener("change", e => { S.tl.year = +e.target.value; renderMap(); });
   $("tl-speed").addEventListener("change", e => { S.tl.speed = +e.target.value; });
+  $("tl-glow").addEventListener("change", e => { S.tl.glow = +e.target.value; tlShow(S.tl.day); });
   $("tl-sp").addEventListener("change", tlPickSpecies);
   $("tab-tours").addEventListener("toggle", e => {
     if (e.target.matches?.("details.tour-settings")) S.tourSetOpen = e.target.open;

@@ -712,27 +712,46 @@ class PageTest(unittest.TestCase):
         self.assertFalse(page.is_visible("#m-metric"))
         self.assertEqual(page.get_attribute("#m-tl", "aria-pressed"), "true")
         year = page.evaluate("S.tl.year")
-        # the latest year with located records, and a marker per place of that year
+        # the latest year with located records, drawn on a canvas layer of its own
         self.assertEqual(year, page.evaluate("Math.max(...OBS.filter(o => PL[o.p].lat).map(o => o.y))"))
-        self.assertEqual(page.evaluate("TL_LAYER.getLayers().length"), page.evaluate("TL_MODEL.places.length"))
+        self.assertTrue(page.evaluate("MAP.hasLayer(TL_LAYER)"))
         self.assertGreater(page.evaluate("TL_MODEL.places.length"), 0)
         self.assertFalse(page.evaluate("MAP.hasLayer(MAP_LAYER)"))
         self.assertEqual(page.evaluate("document.querySelector('#tl-range').max"), "365" if year % 4 == 0 else "364")
-        # a day of a visit: the place shows, with the species of that day counted in the bar
-        day, shown = page.evaluate("""() => { const v = TL_MODEL.places[0].visits[0]; tlShow(v.di);
-            return [v.di, TL_MODEL.places.filter(p => p.state !== "-").length]; }""")
-        self.assertGreaterEqual(shown, 1)
+        # a day of a visit: that place glows, and the canvas holds colour there
+        painted = """() => { const c = TL_LAYER._canvas, d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+            let n = 0; for (let i = 3; i < d.length; i += 4) if (d[i]) n++; return n; }"""
+        first = page.evaluate("Math.min(...TL_MODEL.places.map(p => p.visits[0].di))")
+        day = page.evaluate("""() => { const v = TL_MODEL.places[0].visits[0]; tlShow(v.di); return v.di; }""")
+        self.assertTrue(page.evaluate(f"TL_FRAME.some(f => f.lat === PL[TL_MODEL.places[0].p].lat && f.w > 0.4)"))
+        self.assertGreater(page.evaluate(painted), 0)
         self.assertEqual(page.evaluate("S.tl.day"), day)
         self.assertEqual(page.input_value("#tl-range"), str(day))
         self.assertRegex(page.inner_text("#tl-date"), r"^\d\d\.\d\d\.%d$" % year)
-        # before its first visit a place is hidden, and long after one it is only a small faint dot
-        page.evaluate("tlShow(0)")
-        hidden0 = page.evaluate("TL_MODEL.places.filter(p => p.visits[0].di > 0).every(p => p.state === '-')")
-        self.assertTrue(hidden0)
-        page.evaluate("tlShow(TL_MODEL.n - 1)")
-        old = page.evaluate("""() => TL_MODEL.places.filter(p => TL_MODEL.n - 1 - p.visits[p.visits.length - 1].di >= TL_FADE)
-            .every(p => p.dot.style.width === TL_DOT_OLD + 'px')""")
-        self.assertTrue(old)
+        # before the year's first visit nothing glows and the canvas is clear
+        if first > 0:
+            page.evaluate(f"tlShow({first - 1})")
+            self.assertEqual(page.evaluate("TL_FRAME.length"), 0)
+            self.assertEqual(page.evaluate(painted), 0)
+        # a visit's glow fades with the days after it, more slowly with a longer afterglow, and a first record's ring with it
+        fade = page.evaluate("""() => { const v = [{ di: 10, n: 3, lifer: true }], g = (day, tau) => tlGlow(v, day, tau, 3);
+            return { a: g(10, 30), b: g(24, 30), c: g(70, 30), slow: g(70, 365), short: g(24, 14), sum: tlGlow([...v, { di: 12, n: 3, lifer: false }], 12, 30, 3).w, one: g(12, 30).w }; }""")
+        self.assertGreater(fade["a"]["w"], fade["b"]["w"])
+        self.assertGreater(fade["b"]["w"], fade["c"]["w"])
+        self.assertGreater(fade["c"]["w"], 0)
+        self.assertGreater(fade["slow"]["w"], fade["c"]["w"])
+        self.assertLess(fade["short"]["w"], fade["b"]["w"])
+        self.assertGreater(fade["a"]["ring"], fade["b"]["ring"])
+        self.assertGreater(fade["sum"], fade["one"] * 1.5)  # a second visit adds to the first
+        # the blobs' size follows the zoom, within limits, whatever the day
+        radii = page.evaluate("""() => { const r = z => { MAP.setZoom(z, { animate: false }); return tlRadius(51); };
+            return [r(6), r(10), r(13), r(18)]; }""")
+        self.assertEqual(radii[0], 10)
+        self.assertGreater(radii[2], radii[1])
+        self.assertEqual(radii[3], 140)
+        # the afterglow is a setting
+        page.select_option("#tl-glow", "90")
+        self.assertEqual(page.evaluate("S.tl.glow"), 90)
         # playing moves the day on by itself, pausing keeps it, and the end stops it
         page.evaluate("tlShow(0); TL_POS = 0; S.tl.speed = 60")
         page.click("#tl-play")
@@ -759,7 +778,7 @@ class PageTest(unittest.TestCase):
         self.assertFalse(page.is_visible("#tl-bar"))
         self.assertTrue(page.is_visible("#m-metric"))
         self.assertEqual(page.evaluate("MAP_LAYER.getLayers().length"), normal)
-        self.assertEqual(page.evaluate("TL_LAYER.getLayers().length"), 0)
+        self.assertFalse(page.evaluate("MAP.hasLayer(TL_LAYER)"))
         self.assertEqual(self.errors, [])
 
     def test_map_timelapse_follows_one_species(self):
@@ -783,7 +802,6 @@ class PageTest(unittest.TestCase):
         expected = page.evaluate(f"new Set(regionObs(baseObs()).filter(o => o.s === {sp} && o.y === S.tl.year && PL[o.p].lat).map(o => o.p)).size")
         self.assertEqual(page.evaluate("TL_MODEL.places.length"), expected)
         self.assertLessEqual(expected, everything)
-        self.assertEqual(page.evaluate("TL_LAYER.getLayers().length"), expected)
         self.assertIn(year, page.evaluate(f"OBS.filter(o => o.s === {sp}).map(o => o.y)"))
         page.evaluate("tlShow(TL_MODEL.n - 1)")
         self.assertIn("Orte seit Jahresbeginn", page.inner_text("#tl-stats"))
