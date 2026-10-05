@@ -314,19 +314,22 @@ svg.curve text{fill:var(--muted);font-size:11px}
 #map{height:70vh;min-height:360px;border-radius:12px;border:1px solid var(--line);isolation:isolate;box-shadow:var(--shadow)}
 /* map furniture stays light in both themes, like the tiles underneath */
 .leaflet-popup-content-wrapper{border-radius:10px;box-shadow:0 6px 24px rgba(0,0,0,.18)}
-.leaflet-popup-content{font:13px/1.4 system-ui,sans-serif;color:#1d2521;margin:12px 14px}
+/* the popup is light in both themes, so it has its own greys instead of the theme's --muted (4.5:1 on its panels) */
+.leaflet-popup-content{--pop-muted:#5f6963;font:13px/1.4 system-ui,sans-serif;color:#1d2521;margin:12px 14px}
 .leaflet-popup-content .pop-h{font-weight:700;font-size:14px;line-height:1.25;padding-right:10px}
-.leaflet-popup-content .pop-sub{color:#5f6963;font-size:12px}
+.leaflet-popup-content .pop-sub{color:var(--pop-muted);font-size:12px}
 .leaflet-popup-content .pop-stats{display:flex;gap:6px;margin:8px 0 6px}
-.leaflet-popup-content .pop-stats span{flex:1;background:#f1f5f2;border-radius:7px;padding:5px 8px;font-size:11px;color:#5f6963;line-height:1.2}
+.leaflet-popup-content .pop-stats span{flex:1;background:#f1f5f2;border-radius:7px;padding:5px 8px;font-size:11px;color:var(--pop-muted);line-height:1.2}
 .leaflet-popup-content .pop-stats b{display:block;font-size:15px;color:#1d2521}
 .leaflet-popup-content .visits{max-height:190px;overflow:auto;margin:8px 0 6px;border-top:1px solid #e4e8e4;padding-top:6px}
 .leaflet-popup-content .visits details{margin:2px 0}
 .leaflet-popup-content .visits summary{cursor:pointer}
 .leaflet-popup-content .visits ul{margin:2px 0 4px;padding-left:18px}
 .leaflet-popup-content .lnk{color:#3d6a8c}
-/* Leaflet's close cross is light grey (3.4:1 on the map, 4.6:1 on the popup); it sits beside the popup in the page, so it has to hold on both */
-.leaflet-container .leaflet-popup a.leaflet-popup-close-button,.leaflet-container .leaflet-popup a.leaflet-popup-close-button:hover{color:#4a544e}
+/* Leaflet's close cross (#757575) is 4.6:1 on the popup's white corner, which is where it is drawn; a little darker keeps it
+   clear of the map around the popup, and the hover still differs */
+.leaflet-container .leaflet-popup a.leaflet-popup-close-button{color:#4a544e}
+.leaflet-container .leaflet-popup a.leaflet-popup-close-button:hover,.leaflet-container .leaflet-popup a.leaflet-popup-close-button:focus-visible{color:#111815}
 .leaflet-tooltip{font:12px/1.3 system-ui,sans-serif;border-radius:6px}
 .marker-cluster-custom div{background:#3d78a8;color:#fff;border:2px solid #fff;border-radius:50%;display:flex;align-items:center;justify-content:center;
   font:700 12px/1 system-ui,sans-serif;width:100%;height:100%;box-shadow:0 1px 4px rgba(0,0,0,.35);transition:transform .12s ease}

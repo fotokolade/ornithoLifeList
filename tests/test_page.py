@@ -228,7 +228,9 @@ class PageTest(unittest.TestCase):
         const rgba = c => { cv.clearRect(0, 0, 1, 1); cv.fillStyle = '#000'; cv.fillStyle = c; cv.fillRect(0, 0, 1, 1); const d = cv.getImageData(0, 0, 1, 1).data; return [d[0], d[1], d[2], d[3] / 255]; };
         const lum = ([r, g, b]) => { const f = c => { c /= 255; return c <= .03928 ? c / 12.92 : ((c + .055) / 1.055) ** 2.4; }; return .2126 * f(r) + .7152 * f(g) + .0722 * f(b); };
         const over = (top, under) => [0, 1, 2].map(i => top[i] * top[3] + under[i] * (1 - top[3])).concat([1]);
-        const bgOf = el => { const layers = []; for (let e = el; e; e = e.parentElement) { const c = rgba(getComputedStyle(e).backgroundColor); if (c[3] > 0) { layers.push(c); if (c[3] >= 1) break; } }
+        // Leaflet draws the popup's close cross over the corner of the popup's panel, but puts it beside the panel in the DOM
+        const bgOf = el => { const layers = []; const panel = el.closest('.leaflet-popup') && el.closest('.leaflet-popup').querySelector('.leaflet-popup-content-wrapper');
+            for (let e = panel || el; e; e = e.parentElement) { const c = rgba(getComputedStyle(e).backgroundColor); if (c[3] > 0) { layers.push(c); if (c[3] >= 1) break; } }
             let base = [255, 255, 255, 1]; for (const c of layers.reverse()) base = over(c, base); return base; };
         const bad = [], seen = new Set(), walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
         while (walker.nextNode()) {
@@ -329,6 +331,7 @@ class PageTest(unittest.TestCase):
             page.evaluate("setTab('overview')")
             page.wait_for_timeout(300)
             self.hover_for_tooltip(page, page.locator("button.cal-day").first)
+            page.wait_for_function("!document.getElementById('tip').hidden")
             self.assertTrue(page.is_visible("#tip"), scheme)
             self.assertTrue(page.inner_text("#tip").strip(), scheme)
             self.assertEqual(page.evaluate(self.CONTRAST_JS), [], f"{scheme} calendar tooltip")
@@ -336,19 +339,19 @@ class PageTest(unittest.TestCase):
             page.evaluate("setTab('activity')")
             page.wait_for_timeout(400)
             self.hover_for_tooltip(page, page.locator("#tab-activity table.heat-x td[data-heat]:not(.tot)").first)
-            page.wait_for_timeout(200)
+            page.wait_for_function("!document.getElementById('tip').hidden && document.querySelector('td.d-up, td.d-down, td.d-eq')")
             self.assertTrue(page.is_visible("#tip"), scheme)
             self.assertGreater(page.locator("td.d-up, td.d-down, td.d-eq").count(), 0, scheme)
             self.assertEqual(page.evaluate(self.CONTRAST_JS), [], f"{scheme} heat tooltip and differences")
             page.mouse.move(2, 2)
             # Chart.js tooltips are drawn on the canvas: hover a point of the day curve and a bar of the weekdays
             for card in ("hour-card", "weekday-card"):
-                point = page.evaluate("""id => { const c = BAR_CHARTS[id], el = c.getDatasetMeta(0).data[3].getCenterPoint();
+                point = page.evaluate("""id => { const c = BAR_CHARTS[id], data = c.getDatasetMeta(0).data, el = data[Math.min(3, data.length - 1)].getCenterPoint();
                     c.canvas.scrollIntoView({ block: 'center' }); const r = c.canvas.getBoundingClientRect(); return [r.left + el.x, r.top + el.y]; }""", card)
                 page.evaluate("window.__canvasTexts = []")
                 page.mouse.move(point[0] - 6, point[1] - 6)
                 page.mouse.move(point[0], point[1])
-                page.wait_for_timeout(300)
+                page.wait_for_function(f"BAR_CHARTS['{card}'].tooltip.opacity === 1")
                 body = page.evaluate("id => { const t = BAR_CHARTS[id].tooltip; return [t.opacity, t.body.flatMap(b => b.lines)]; }", card)
                 self.assertEqual(body[0], 1, (scheme, card))
                 seen = page.evaluate("window.__canvasTexts")
@@ -357,14 +360,13 @@ class PageTest(unittest.TestCase):
                 page.mouse.move(2, 2)
             # the map's hint over a place and its popup (the map's furniture is light in both themes)
             page.evaluate("setTab('map')")
-            page.wait_for_timeout(500)
-            page.evaluate("""() => { const mk = MAP_LAYER.getLayers()[0]; MAP.setView(mk.getLatLng(), 16, { animate: false }); mk.openTooltip(); }""")
-            page.wait_for_timeout(300)
-            self.assertTrue(page.is_visible(".leaflet-tooltip"), scheme)
+            page.wait_for_function("MAP_LAYER && MAP_LAYER.getLayers().length > 0")
+            # zoomed in past CLUSTER_OFF_ZOOM, so the place is a marker of its own and not part of a group
+            page.evaluate("""() => { const mk = MAP_LAYER.getLayers()[0]; MAP.setView(mk.getLatLng(), Math.max(16, CLUSTER_OFF_ZOOM + 1), { animate: false }); mk.openTooltip(); }""")
+            page.wait_for_selector(".leaflet-tooltip", state="visible")
             self.assertEqual(page.evaluate(self.CONTRAST_JS), [], f"{scheme} map hint")
             page.evaluate("MAP_LAYER.getLayers()[0].openPopup()")
-            page.wait_for_timeout(300)
-            self.assertTrue(page.is_visible(".leaflet-popup"), scheme)
+            page.wait_for_selector(".leaflet-popup .pop-stats", state="visible")
             self.assertEqual(page.evaluate(self.CONTRAST_JS), [], f"{scheme} map popup")
             self.assertEqual(self.errors, [])
 
