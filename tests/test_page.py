@@ -236,8 +236,9 @@ class PageTest(unittest.TestCase):
         self.assertGreater(pos[1][1], pos[0][1])
         self.assertGreater(pos[7][0], pos[0][0])
         self.assertEqual(pos[7][1], pos[0][1])
-        # a month's edge is drawn along its first week, in every month but January
-        self.assertEqual(page.locator(".cal-day.m-left").count(), 11 * 7)
+        # the edge between two months is one line each (eleven of them), over the grid and out of the pointer's way
+        self.assertEqual(page.locator(".cal-edges path").count(), 11)
+        self.assertEqual(page.evaluate("getComputedStyle(document.querySelector('.cal-edges')).pointerEvents"), "none")
         # every other month is a shade darker, and hovering a day lights up exactly its month
         self.assertEqual(page.evaluate("[...new Set([...document.querySelectorAll('.cal-day.m-odd')].map(d => d.dataset.m))].join()"), "2,4,6,8,10,12")
         self.assertEqual(page.locator(".cal-day.glow").count(), 0)
@@ -247,6 +248,11 @@ class PageTest(unittest.TestCase):
         self.assertEqual(page.locator(".cal-day.glow").count(), month)
         self.assertEqual(page.evaluate("[...document.querySelectorAll('.cal-day.glow')].every(d => d.dataset.m === '3')"), True)
         self.assertTrue(page.evaluate("document.querySelector('.cal-days').classList.contains('glowing')"))
+        # the space between two days in the middle of the month is no "outside": moving over it keeps the glow
+        box = page.evaluate("""() => { const a = document.querySelectorAll('.cal-day.glow')[10].getBoundingClientRect(); return [a.left, a.top, a.width]; }""")
+        for dx, dy in ((box[2], box[2] / 2), (box[2] / 2, box[2]), (box[2], box[2])):
+            page.mouse.move(box[0] + dx, box[1] + dy)
+            self.assertEqual(page.locator(".cal-day.glow").count(), month)
         page.mouse.move(2, 2)
         self.assertEqual(page.locator(".cal-day.glow").count(), 0)
         self.assertFalse(page.evaluate("document.querySelector('.cal-days').classList.contains('glowing')"))

@@ -73,35 +73,40 @@ function calendarSection(list, statsAll) {
   const liferDays = new Set([...statsAll.values()].filter(r => r.first.y === year).map(r => r.first.d));
   const dowLetters = T.weekdays.map(w => w[0]);
   // the year as one continuous run of weeks (a column each, Monday on top): the months flow into each other
-  // instead of standing as separate blocks. A month's edge is a stepped line (m-top / m-left); the empty days of
-  // every other month are a shade darker, and so are its coloured days (m-odd), so the months stay readable in a sparse year, too.
+  // instead of standing as separate blocks. Every other month is a shade darker (m-odd; the empty days too), and the
+  // edge between two months is one stepped line over the grid (an SVG in week/weekday units), not a border per day.
+  // The gap between two days belongs to the days (a transparent border), so the pointer is never "between" them.
   // Hovering a day lights up its whole month (app.js).
   const startDow = (new Date(Date.UTC(year, 0, 1)).getUTCDay() + 6) % 7;  // 0 = Monday
-  let cells = `<div class="cal-day cal-empty"></div>`.repeat(startDow), idx = startDow, lastIdx = startDow;
-  const monthLabels = [];
+  let cells = `<div class="cal-day cal-empty"></div>`.repeat(startDow), idx = startDow;
+  const monthLabels = [], edges = [];
   for (let mi = 0; mi < 12; mi++) {
     const m = mi + 1, daysInMonth = new Date(Date.UTC(year, mi + 1, 0)).getUTCDate();
     monthLabels.push(`<span style="--w:${Math.floor(idx / 7) + 1}">${esc(T.monthsShort[mi].replace(".", ""))}</span>`);
+    if (mi) {
+      // the 1st sits in column c at weekday r: the month before ends above it (and to its left), so the line runs down
+      // the right of column c's first r days, along the top of the 1st, and down the left of the rest of the column
+      const c = Math.floor(idx / 7), r = idx % 7;
+      edges.push(r ? `M${c + 1} 0V${r}H${c}V7` : `M${c} 0V7`);
+    }
     for (let day = 1; day <= daysInMonth; day++, idx++) {
       const dateStr = `${year}-${pad(m)}-${pad(day)}`;
       const sp = dayData.get(dateStr);
       const n = sp ? sp.size : 0;
       const lifer = liferDays.has(dateStr);
       const bg = n ? scale.color(scale.step(n)) : mi % 2 ? "var(--cal-empty-alt)" : "var(--cal-empty)";
-      // the day above is the one before (a month's 1st unless it tops its column), the one to the left is a week back
-      const edge = `${mi % 2 ? " m-odd" : ""}${day === 1 && idx % 7 ? " m-top" : ""}${day <= 7 && mi ? " m-left" : ""}`;
+      const odd = mi % 2 ? " m-odd" : "";
       const title = n ? `${fmtD(dateStr)}: ${n} ${t("mapSpecies")}${lifer ? " · " + t("newBadge") : ""}` : fmtD(dateStr);
       cells += n
-        ? `<button type="button" class="cal-day${lifer ? " cal-lifer" : ""}${S.calDay === dateStr ? " cal-sel" : ""}${edge}" data-day="${dateStr}" data-m="${m}" style="background:${bg}" data-tip="${esc(title)}" aria-label="${esc(title)}" aria-pressed="${S.calDay === dateStr}"></button>`
-        : `<div class="cal-day${edge}" data-m="${m}" style="background:${bg}" data-tip="${esc(title)}"></div>`;
+        ? `<button type="button" class="cal-day${lifer ? " cal-lifer" : ""}${S.calDay === dateStr ? " cal-sel" : ""}${odd}" data-day="${dateStr}" data-m="${m}" style="background-color:${bg}" data-tip="${esc(title)}" aria-label="${esc(title)}" aria-pressed="${S.calDay === dateStr}"></button>`
+        : `<div class="cal-day${odd}" data-m="${m}" style="background-color:${bg}" data-tip="${esc(title)}"></div>`;
     }
-    lastIdx = idx;
   }
-  const weeks = Math.ceil(lastIdx / 7);
+  const weeks = Math.ceil(idx / 7);
   const months = `<div class="cal-scroll"><div class="cal-flow" style="--weeks:${weeks}">
       <div class="cal-months">${monthLabels.join("")}</div>
       <div class="cal-dows">${dowLetters.map(l => `<span>${l}</span>`).join("")}</div>
-      <div class="cal-days">${cells}</div></div></div>`;
+      <div class="cal-days">${cells}<svg class="cal-edges" viewBox="0 0 ${weeks} 7" preserveAspectRatio="none" aria-hidden="true">${edges.map(d => `<path d="${d}"/>`).join("")}</svg></div></div></div>`;
   return `<h2 data-toc="${esc(t("tocCal"))}">${t("calTitle", year)}</h2>
     ${infoText(t("calHelp"))}
     <div class="card">${months}${dayData.has(S.calDay || "") ? calDayPanel(list, statsAll, S.calDay) : ""}</div>
