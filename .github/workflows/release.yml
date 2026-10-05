@@ -2,12 +2,19 @@
 # Release steps: bump APP_VERSION in src/i18n.js, write the notes to .github/release-notes/v<version>.md,
 # commit, then either push the tag (git tag v0.3.0 && git push origin v0.3.0) or start this workflow
 # by hand ("Run workflow" on the Actions tab), which creates the tag from APP_VERSION itself.
+# A published release is never replaced by accident: a run for a version that already has one stops
+# before building, unless it was started by hand with "replace" ticked (a new exe has a new checksum).
 name: Release
 
 on:
   push:
     tags: ["v*"]
   workflow_dispatch:
+    inputs:
+      replace:
+        description: "Replace the existing release of this version (the new exe gets a new checksum)"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -32,6 +39,38 @@ jobs:
           if [ "$GITHUB_EVENT_NAME" = "push" ]; then tag="$GITHUB_REF_NAME"; else tag="v$v"; fi
           if [ "$tag" != "v$v" ]; then echo "Tag $tag does not match APP_VERSION $v in src/i18n.js"; exit 1; fi
           echo "TAG=$tag" >> "$GITHUB_ENV"
+      # before building, so a mistaken run costs nothing: a new release needs a new APP_VERSION
+      - name: Refuse to replace a published release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPLACE: ${{ inputs.replace }}
+        run: |
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            if [ "$REPLACE" != "true" ]; then
+              echo "::error::Release $TAG already exists. For a new release raise APP_VERSION in src/i18n.js; to rebuild $TAG on purpose, start this workflow by hand with \"replace\" ticked."
+              exit 1
+            fi
+            echo "::warning::Replacing release $TAG: the new lifelist.exe has a new checksum, so a checksum of $TAG quoted elsewhere no longer fits."
+          elif [ "$GITHUB_EVENT_NAME" != "push" ] && git rev-parse -q --verify "refs/tags/$TAG" >/dev/null \
+              && [ "$(git rev-list -n 1 "$TAG")" != "$GITHUB_SHA" ] && [ "$REPLACE" != "true" ]; then
+            echo "::error::Tag $TAG already exists on another commit. Raise APP_VERSION in src/i18n.js, or tick \"replace\" to move it here."
+            exit 1
+          fi
+      # also before building: a release without notes is a mistake, not a default
+      - name: Release notes
+        shell: bash
+        run: |
+          if [ -f ".github/release-notes/$TAG.md" ]; then
+            # a "Prüfsumme" section committed after an earlier build of this version no longer fits; the new one is added below
+            awk '/^### Prüfsumme/ { skip = 1; next } /^#+ / { skip = 0 } !skip' ".github/release-notes/$TAG.md" > notes.md
+          else
+            git tag -l --format='%(contents)' "$TAG" > notes.md
+          fi
+          if ! grep -q '[^[:space:]]' notes.md; then
+            echo "::error::No release notes for $TAG: write .github/release-notes/$TAG.md (see docs/maintenance.md)."
+            exit 1
+          fi
       - name: Build (runs the tests first)
         run: python build.py
       - name: Build the demo page from made-up data
@@ -43,8 +82,6 @@ jobs:
         run: |
           sum=$(cut -d' ' -f1 dist/lifelist.exe.sha256)
           {
-            if [ -f ".github/release-notes/$TAG.md" ]; then cat ".github/release-notes/$TAG.md"
-            else git tag -l --format='%(contents)' "$TAG"; fi
             echo
             echo "### Prüfsumme"
             echo
@@ -55,8 +92,11 @@ jobs:
             echo "### Demo"
             echo
             echo "\`lifelist-demo.html\` ist eine fertige Lebensliste aus erfundenen Beispieldaten: herunterladen und im Browser öffnen."
-          } > notes.md
-          # a release of this version made before (e.g. before a history rewrite) is replaced, tag and all
-          if gh release view "$TAG" >/dev/null 2>&1; then gh release delete "$TAG" --cleanup-tag --yes; fi
+          } >> notes.md
+          # only reached with "replace" ticked (see above): the old release goes, tag and all; a tag left on
+          # another commit without a release goes too, or the new release would point at the old code
+          if gh release view "$TAG" >/dev/null 2>&1; then gh release delete "$TAG" --cleanup-tag --yes
+          elif [ "$GITHUB_EVENT_NAME" != "push" ] && git rev-parse -q --verify "refs/tags/$TAG" >/dev/null \
+              && [ "$(git rev-list -n 1 "$TAG")" != "$GITHUB_SHA" ]; then git push origin ":refs/tags/$TAG"; fi
           gh release create "$TAG" --target "$GITHUB_SHA" --title "$TAG" --notes-file notes.md \
             dist/lifelist.exe dist/lifelist.exe.sha256 verify.bat verify.ps1 dist/lifelist-demo.html

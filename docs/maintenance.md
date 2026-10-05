@@ -8,6 +8,8 @@ Aufgaben, die nur die Projektleitung erledigt: Releases veröffentlichen, die mi
 2. Die Release-Notizen nach `.github/release-notes/v<Version>.md` schreiben, zum Beispiel `v0.3.0.md`, und in `CHANGELOG.md` den Abschnitt „Noch nicht veröffentlicht“ zur neuen Version machen; alles committen und pushen.
 3. Auf GitHub im Tab **Actions** den Workflow **Release** mit **Run workflow** starten. Alternativ das Tag selbst pushen: `git tag v0.3.0 && git push origin v0.3.0`.
 
+Ein veröffentlichtes Release ersetzt der Workflow nie aus Versehen: Gibt es zur Versionsnummer schon ein Release (oder liegt ihr Tag auf einem anderen Commit), bricht er vor dem Bauen ab. Für ein neues Release also immer erst `APP_VERSION` erhöhen. Soll eine Version bewusst neu gebaut werden, den Workflow von Hand mit dem Häkchen **replace** starten; die neue exe hat dann eine neue Prüfsumme, eine früher veröffentlichte (etwa ein nachgetragener Abschnitt „Prüfsumme“ in den Notizen) passt nicht mehr und wird in den neuen Notizen durch die neue ersetzt. Fehlen die Notizen, bricht der Workflow ebenfalls ab.
+
 Die Demo-Seite `lifelist-demo.html` baut der Workflow aus erfundenen Daten und hängt sie ans Release; die README verlinkt immer auf die des neuesten Releases.
 
 Den Rest erledigt GitHub Actions (`.github/workflows/release.yml`) auf einem Windows-Rechner: Es legt beim Start von Hand das Tag aus der Versionsnummer an (ein gepushtes Tag prüft es gegen die Versionsnummer), lässt die Tests laufen, baut die `lifelist.exe` und legt das Release an, mit `lifelist.exe`, `lifelist.exe.sha256`, `verify.bat`, `verify.ps1` und `lifelist-demo.html` und der Prüfsumme in den Notizen. Das Tag muss zur Versionsnummer passen, sonst meldet `--check-update` keine neue Version.
