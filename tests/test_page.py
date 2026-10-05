@@ -311,6 +311,63 @@ class PageTest(unittest.TestCase):
             self.assertEqual([f"{t['text']} {t['ratio']:.2f}" for t in seen if t["ratio"] < 4.5], [], scheme)
             self.assertEqual(self.errors, [])
 
+    @staticmethod
+    def hover_for_tooltip(page, element):
+        """Scrolling an element into view hides the page's tooltip (a scroll closes it), and only a mouse move shows it again."""
+        element.scroll_into_view_if_needed()
+        page.wait_for_timeout(300)
+        box = element.bounding_box()
+        page.mouse.move(box["x"] + 2, box["y"] + 2)
+        page.mouse.move(box["x"] + 4, box["y"] + 3)
+
+    def test_tooltip_and_popup_contrast_is_at_least_aa_in_both_themes(self):
+        for scheme in ("light", "dark"):
+            page = self.open()
+            page.emulate_media(color_scheme=scheme)
+            page.evaluate(self.CANVAS_CONTRAST_JS)
+            # the page's own tooltip, on a calendar day
+            page.evaluate("setTab('overview')")
+            page.wait_for_timeout(300)
+            self.hover_for_tooltip(page, page.locator("button.cal-day").first)
+            self.assertTrue(page.is_visible("#tip"), scheme)
+            self.assertTrue(page.inner_text("#tip").strip(), scheme)
+            self.assertEqual(page.evaluate(self.CONTRAST_JS), [], f"{scheme} calendar tooltip")
+            # and on a heat table's cell, which shows every other cell as the difference to it (+ green, = grey, - red)
+            page.evaluate("setTab('activity')")
+            page.wait_for_timeout(400)
+            self.hover_for_tooltip(page, page.locator("#tab-activity table.heat-x td[data-heat]:not(.tot)").first)
+            page.wait_for_timeout(200)
+            self.assertTrue(page.is_visible("#tip"), scheme)
+            self.assertGreater(page.locator("td.d-up, td.d-down, td.d-eq").count(), 0, scheme)
+            self.assertEqual(page.evaluate(self.CONTRAST_JS), [], f"{scheme} heat tooltip and differences")
+            page.mouse.move(2, 2)
+            # Chart.js tooltips are drawn on the canvas: hover a point of the day curve and a bar of the weekdays
+            for card in ("hour-card", "weekday-card"):
+                point = page.evaluate("""id => { const c = BAR_CHARTS[id], el = c.getDatasetMeta(0).data[3].getCenterPoint();
+                    c.canvas.scrollIntoView({ block: 'center' }); const r = c.canvas.getBoundingClientRect(); return [r.left + el.x, r.top + el.y]; }""", card)
+                page.evaluate("window.__canvasTexts = []")
+                page.mouse.move(point[0] - 6, point[1] - 6)
+                page.mouse.move(point[0], point[1])
+                page.wait_for_timeout(300)
+                body = page.evaluate("id => { const t = BAR_CHARTS[id].tooltip; return [t.opacity, t.body.flatMap(b => b.lines)]; }", card)
+                self.assertEqual(body[0], 1, (scheme, card))
+                seen = page.evaluate("window.__canvasTexts")
+                self.assertTrue(any(t["text"] in body[1] for t in seen), (scheme, card, body, [t["text"] for t in seen][:12]))
+                self.assertEqual([f"{t['text']} {t['ratio']:.2f}" for t in seen if t["ratio"] < 4.5], [], f"{scheme} {card} tooltip")
+                page.mouse.move(2, 2)
+            # the map's hint over a place and its popup (the map's furniture is light in both themes)
+            page.evaluate("setTab('map')")
+            page.wait_for_timeout(500)
+            page.evaluate("""() => { const mk = MAP_LAYER.getLayers()[0]; MAP.setView(mk.getLatLng(), 16, { animate: false }); mk.openTooltip(); }""")
+            page.wait_for_timeout(300)
+            self.assertTrue(page.is_visible(".leaflet-tooltip"), scheme)
+            self.assertEqual(page.evaluate(self.CONTRAST_JS), [], f"{scheme} map hint")
+            page.evaluate("MAP_LAYER.getLayers()[0].openPopup()")
+            page.wait_for_timeout(300)
+            self.assertTrue(page.is_visible(".leaflet-popup"), scheme)
+            self.assertEqual(page.evaluate(self.CONTRAST_JS), [], f"{scheme} map popup")
+            self.assertEqual(self.errors, [])
+
     def test_calendar_is_one_run_of_weeks(self):
         page = self.open()
         # every day of the year once, in date order, in one grid (not one block per month)
