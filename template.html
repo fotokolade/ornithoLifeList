@@ -6,33 +6,33 @@
 <title>Meine Lebensliste</title>
 <style>
 :root{
-  --bg:#f7f8f6; --card:#ffffff; --text:#1d2521; --muted:#6a746e; --line:#e4e8e4;
-  --accent:#2f8f4e; --accent-soft:#eaf4ed; --bar:#4a86b6; --bar-soft:#dbe7f0;
+  --bg:#f7f8f6; --card:#ffffff; --text:#1d2521; --muted:#5f6963; --line:#e4e8e4; --line-ui:#858f89;
+  --accent:#277a42; --on-accent:#fff; --accent-soft:#eaf4ed; --bar:#4a86b6; --bar-soft:#dbe7f0;
   --hl:#fff7cc; --link:#3d6a8c; --stripe:#f6f8f5;
-  --k1:#2f8f4e; --k2:#c98a1b; --k3:#3d78a8; --k4:#8659b3; --k5:#c1554a; --k6:#2f9e93;
-  --heat-lo:#dcefe2; --heat-hi:#1a6334; --heat-ink:#fff;
+  --k1:#2f8f4e; --k2:#bd7f12; --k3:#3d78a8; --k4:#8659b3; --k5:#c1554a; --k6:#2f9e93;
+  --heat-lo:#dcefe2; --heat-hi:#1a6334;
   --shadow:0 1px 2px rgba(20,32,26,.05),0 3px 10px rgba(20,32,26,.04);
   --mk-lo:#f6c36b; --mk-hi:#b8420f; --cal-empty:#e8ece8; --cal-empty-alt:#dde3dd;
   --d-up:#cfe9d6; --d-up-ink:#1b5e20; --d-eq:#e4e6e4; --d-eq-ink:#555; --d-down:#f7d0cc; --d-down-ink:#a4251a;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --bg:#121614; --card:#1b201d; --text:#e8ece9; --muted:#96a19a; --line:#2c332f;
-    --accent:#4cc275; --accent-soft:#1f3327; --bar:#5b9bcf; --bar-soft:#2b3b48;
+    --bg:#121614; --card:#1b201d; --text:#e8ece9; --muted:#96a19a; --line:#2c332f; --line-ui:#727e77;
+    --accent:#4cc275; --on-accent:#0b1f12; --accent-soft:#1f3327; --bar:#5b9bcf; --bar-soft:#2b3b48;
     --hl:#3b3717; --link:#8ab8dc; --stripe:#202622;
     --k1:#4cc275; --k2:#e0a23c; --k3:#5b9bcf; --k4:#b28ee0; --k5:#e08578; --k6:#4cc2b3;
-    --heat-lo:#1f3a2a; --heat-hi:#7ee0a2; --heat-ink:#0f2418;
+    --heat-lo:#1f3a2a; --heat-hi:#7ee0a2;
     --shadow:none; --cal-empty:#252c28; --cal-empty-alt:#2e3732;
     --d-up:#1f4a2c; --d-up-ink:#9be3b0; --d-eq:#2c322e; --d-eq-ink:#b8bfba; --d-down:#4d2420; --d-down-ink:#ffb3a9;
   }
 }
 /* explicit override from the theme select in Einstellungen, regardless of OS preference */
 :root[data-theme="dark"]{
-  --bg:#121614; --card:#1b201d; --text:#e8ece9; --muted:#96a19a; --line:#2c332f;
-  --accent:#4cc275; --accent-soft:#1f3327; --bar:#5b9bcf; --bar-soft:#2b3b48;
+  --bg:#121614; --card:#1b201d; --text:#e8ece9; --muted:#96a19a; --line:#2c332f; --line-ui:#727e77;
+  --accent:#4cc275; --on-accent:#0b1f12; --accent-soft:#1f3327; --bar:#5b9bcf; --bar-soft:#2b3b48;
   --hl:#3b3717; --link:#8ab8dc; --stripe:#202622;
   --k1:#4cc275; --k2:#e0a23c; --k3:#5b9bcf; --k4:#b28ee0; --k5:#e08578; --k6:#4cc2b3;
-  --heat-lo:#1f3a2a; --heat-hi:#7ee0a2; --heat-ink:#0f2418;
+  --heat-lo:#1f3a2a; --heat-hi:#7ee0a2;
   --shadow:none; --cal-empty:#252c28; --cal-empty-alt:#2e3732;
     --d-up:#1f4a2c; --d-up-ink:#9be3b0; --d-eq:#2c322e; --d-eq-ink:#b8bfba; --d-down:#4d2420; --d-down-ink:#ffb3a9;
 }
@@ -60,7 +60,7 @@ h1 .logo.peck .bird{animation:peck .75s ease-in-out}
 @media (prefers-reduced-motion:reduce){h1 .logo.peck .bird{animation:none}}
 .sub{color:var(--muted);font-size:.78rem;margin:0}
 .filters{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-select,input[type=search]{font:inherit;font-size:.82rem;padding:5px 8px;border:1px solid var(--line);
+select,input[type=search]{font:inherit;font-size:.82rem;padding:5px 8px;border:1px solid var(--line-ui);
   border-radius:7px;background:var(--card);color:var(--text);max-width:100%}
 input[type=search]{min-width:0;flex:1 1 200px}
 details.opts{position:relative;font-size:.8rem;color:var(--muted)}
@@ -70,7 +70,7 @@ details.opts .opts-panel{position:absolute;bottom:100%;right:0;margin-bottom:6px
   background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.18);white-space:nowrap;z-index:21}
 details.opts label{display:block;margin:5px 0}
 details.opts .opt-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-bottom:8px;margin-bottom:5px;border-bottom:1px solid var(--line)}
-details.opts .opt-row select{font:inherit;font-size:.8rem;padding:2px 4px;border:1px solid var(--line);border-radius:5px;background:var(--card);color:var(--text)}
+details.opts .opt-row select{font:inherit;font-size:.8rem;padding:2px 4px;border:1px solid var(--line-ui);border-radius:5px;background:var(--card);color:var(--text)}
 nav.tabs{display:flex;gap:2px;margin-top:8px;overflow-x:auto}
 nav.tabs button{font:inherit;font-size:.85rem;border:0;background:none;color:var(--muted);
   padding:8px 14px;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;transition:color .12s ease,border-color .12s ease}
@@ -111,7 +111,7 @@ details.tour-settings summary::before{content:"⚙ ";color:var(--muted)}
 .tour-diagram-img svg{display:block;width:100%;min-width:560px;max-width:1000px;height:auto}
 .tour-sliders output{font-variant-numeric:tabular-nums;color:var(--text);text-align:right}
 .tour-path{font-size:.8rem;color:var(--muted);margin:2px 0 8px}
-.route-stop div{background:var(--accent);color:#fff;border:2px solid #fff;border-radius:50%;width:100%;height:100%;display:flex;align-items:center;justify-content:center;
+.route-stop div{background:var(--accent);color:var(--on-accent);border:2px solid #fff;border-radius:50%;width:100%;height:100%;display:flex;align-items:center;justify-content:center;
   font:700 11px/1 system-ui,sans-serif;box-shadow:0 1px 4px rgba(0,0,0,.35)}
 /* key-figure tiles are coloured by what they count, in the colours the charts use for the same things
    (see kpiTile()): species green, activity blue, places and distances amber, photos violet; a zero stays grey */
@@ -183,7 +183,8 @@ table.heat{table-layout:fixed;min-width:560px}
 .heat td,.heat th{text-align:center;padding:3px 2px;font-size:.72rem}
 .heat td.y{text-align:left;font-weight:600;padding-left:4px}
 .heat td{border:1px solid var(--card);border-radius:3px}
-.heat td.hot{color:var(--heat-ink)}
+.heat td[data-v]{color:#000}
+.heat td.hot{color:#fff}
 .heat .m-short{display:none}
 /* heat tables (heat.js): crosshair on the hovered row and column, totals as bars at the right and bottom */
 .heat-x td.d-up,.heat-x td.d-eq,.heat-x td.d-down,.heat-x td.d-self{font-size:.72rem;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;letter-spacing:-.02em}
@@ -240,7 +241,7 @@ table.plan-sp td{padding:4px 6px;background:transparent!important}
 .plan-t tr.plan-sub td.nr{font-size:.72rem;text-align:right}
 .plan-t tr.plan-sub-tabs td{padding:8px 8px 6px}
 .plan-switch{display:inline-flex;gap:6px;flex-wrap:wrap}
-.plan-switch .pill{font:inherit;font-size:.8rem;padding:3px 12px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--text);cursor:pointer}
+.plan-switch .pill{font:inherit;font-size:.8rem;padding:3px 12px;border-radius:999px;border:1px solid var(--line-ui);background:var(--card);color:var(--text);cursor:pointer}
 .plan-switch .pill.on{background:var(--accent);border-color:var(--accent);color:var(--card);font-weight:600}
 .season-strip{height:12px;border-radius:3px;background:var(--bar-soft);
   background-image:repeating-linear-gradient(90deg,transparent 0 calc(100% / 12 - 1px),var(--card) calc(100% / 12 - 1px) calc(100% / 12))}
@@ -259,7 +260,7 @@ tr.grp .grp-t:hover{background:var(--stripe);color:var(--accent)}
 tr.grp .grp-t:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 tr.grp .grp-t::before{content:"▸";display:inline-block;width:1em;color:var(--muted);transition:transform .12s ease}
 tr.grp .grp-t[aria-expanded=true]::before{transform:rotate(90deg)}
-.new-badge{background:var(--accent);color:#fff;border-radius:999px;padding:0 6px;font-size:.62rem;font-weight:700;margin-left:6px;vertical-align:middle}
+.new-badge{background:var(--accent);color:var(--on-accent);border-radius:999px;padding:0 6px;font-size:.62rem;font-weight:700;margin-left:6px;vertical-align:middle}
 /* the year's calendar: one run of weeks, a column each; narrow screens scroll it sideways rather than shrink the days to dots */
 .cal-scroll{overflow-x:auto;padding:2px}
 .cal-flow{display:grid;grid-template-columns:auto 1fr;grid-template-areas:". months" "dows days";gap:5px 6px;min-width:620px}
@@ -325,7 +326,7 @@ svg.curve text{fill:var(--muted);font-size:11px}
 .leaflet-popup-content .visits ul{margin:2px 0 4px;padding-left:18px}
 .leaflet-popup-content .lnk{color:#3d6a8c}
 .leaflet-tooltip{font:12px/1.3 system-ui,sans-serif;border-radius:6px}
-.marker-cluster-custom div{background:var(--k3);color:#fff;border:2px solid #fff;border-radius:50%;display:flex;align-items:center;justify-content:center;
+.marker-cluster-custom div{background:#3d78a8;color:#fff;border:2px solid #fff;border-radius:50%;display:flex;align-items:center;justify-content:center;
   font:700 12px/1 system-ui,sans-serif;width:100%;height:100%;box-shadow:0 1px 4px rgba(0,0,0,.35);transition:transform .12s ease}
 .marker-cluster-custom:hover div{transform:scale(1.12)}
 /* Leaflet sets marker z-index inline (small places are lifted above big ones); clusters stay on top of both */
@@ -340,16 +341,16 @@ svg.curve text{fill:var(--muted);font-size:11px}
 .map-legend.no-cluster .cluster-key{display:none}
 .map-legend-row span{display:flex;align-items:center;gap:5px}
 .map-legend .dot{border-radius:50%;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.35);box-sizing:border-box}
-.map-legend-cluster{display:inline-block;width:18px;height:18px;border-radius:50%;background:var(--k3);border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.35);box-sizing:border-box}
+.map-legend-cluster{display:inline-block;width:18px;height:18px;border-radius:50%;background:#3d78a8;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.35);box-sizing:border-box}
 /* hover targets the inner circle div, not the outer .value-marker wrapper: Leaflet positions that
    wrapper via its own inline transform, and a competing CSS transform there would fight it */
 .value-marker > .dot{transition:transform .12s ease,filter .12s ease}
 .value-marker:hover > .dot{transform:scale(1.18);filter:brightness(1.1)}
 .time-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:9px 0;margin-top:2px;border-top:1px solid var(--line)}
 .time-bar input[type=range]{flex:1 1 200px;min-width:140px;accent-color:var(--accent)}
-.time-all,.tl-toggle{font:inherit;font-size:.78rem;padding:4px 12px;border-radius:999px;border:1px solid var(--line);background:none;color:var(--muted);cursor:pointer;flex:0 0 auto;transition:background-color .12s ease,border-color .12s ease,color .12s ease}
+.time-all,.tl-toggle{font:inherit;font-size:.78rem;padding:4px 12px;border-radius:999px;border:1px solid var(--line-ui);background:none;color:var(--muted);cursor:pointer;flex:0 0 auto;transition:background-color .12s ease,border-color .12s ease,color .12s ease}
 .time-all:not(.on):hover,.tl-toggle:not(.on):hover{border-color:var(--accent);color:var(--text)}
-.time-all.on,.tl-toggle.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.time-all.on,.tl-toggle.on{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
 .time-all.on:hover,.tl-toggle.on:hover{background:color-mix(in srgb,var(--accent) 85%,black)}
 .tl-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 12px}
 .tl-bar[hidden]{display:none}
@@ -374,8 +375,8 @@ svg.curve text{fill:var(--muted);font-size:11px}
   .yhead,.yrow{grid-template-columns:2.4rem 2.8rem 1fr 2.6rem 2.2rem;gap:4px}
 }
 .ab{display:inline-block;min-width:1.9rem;text-align:center;border-radius:5px;padding:0 5px;font-size:.74rem;font-weight:600;color:#fff}
-.ab-A{background:#8a949d}.ab-B{background:#d18a1b}.ab-C{background:#2f8f4e}
-.btn{font:inherit;font-size:.82rem;padding:3px 10px;border:1px solid var(--accent);border-radius:6px;background:var(--accent);color:#fff;cursor:pointer;transition:background-color .12s ease,border-color .12s ease}
+.ab-A{background:#656f78}.ab-B{background:#a2660a}.ab-C{background:#277a42}
+.btn{font:inherit;font-size:.82rem;padding:3px 10px;border:1px solid var(--accent);border-radius:6px;background:var(--accent);color:var(--on-accent);cursor:pointer;transition:background-color .12s ease,border-color .12s ease}
 .btn:hover{background:color-mix(in srgb,var(--accent) 85%,black);border-color:color-mix(in srgb,var(--accent) 85%,black)}
 footer.meta-footer{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:12px;
   padding:6px 16px;background:var(--card);border-top:1px solid var(--line)}
@@ -401,7 +402,7 @@ footer.meta-footer .btn{flex:0 0 auto;padding:3px 10px}
      beats the higher-specificity :root[data-theme="dark"] override */
   :root{--bg:#fff!important;--card:#fff!important;--text:#111!important;--muted:#555!important;--line:#ccc!important;--accent:#1f7a3d!important;--accent-soft:#eef6f0!important;
     --bar:#3d78a8!important;--bar-soft:#d3e2ee!important;--hl:#fff!important;--link:#111!important;--stripe:#f5f5f5!important;
-    --heat-lo:#dcefe2!important;--heat-hi:#1a6334!important;--heat-ink:#fff!important;--cal-empty:#eef0ee!important;--cal-empty-alt:#e3e7e3!important}
+    --heat-lo:#dcefe2!important;--heat-hi:#1a6334!important;--cal-empty:#eef0ee!important;--cal-empty-alt:#e3e7e3!important}
   body{font-size:10pt}
   header.top{position:static;border:0}
   .filters,nav.tabs,.pick,.time-bar,#tab-map,.more{display:none!important}

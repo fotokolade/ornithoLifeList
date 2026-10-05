@@ -74,10 +74,6 @@ function tlGlow(visits, day, tau, maxN) {
   return { w, ring };
 }
 // the layer: the blobs of TL_FRAME, added up in one canvas over the map and coloured by how strong the sum is
-const tlRgb = (() => {
-  const g = document.createElement("canvas").getContext("2d");
-  return css => { g.clearRect(0, 0, 1, 1); g.fillStyle = css; g.fillRect(0, 0, 1, 1); const d = g.getImageData(0, 0, 1, 1).data; return [d[0], d[1], d[2]]; };
-})();
 const TL_SPRITES = new Map();
 /** A white blob that falls off like a Gaussian bell (out to 2.5 sigma), `r` px to its edge. */
 function tlSprite(r) {
@@ -97,7 +93,7 @@ let TL_PALETTE = { key: "", lut: new Uint8ClampedArray(0) };  // the last palett
 function tlPalette() {
   const cLo = cssVar("--mk-lo"), cHi = cssVar("--mk-hi"), key = cLo + "|" + cHi;
   if (TL_PALETTE.key === key) return TL_PALETTE.lut;
-  const lo = tlRgb(cLo), hi = tlRgb(cHi), deep = [92, 26, 8];
+  const lo = cssRgb(cLo), hi = cssRgb(cHi), deep = [92, 26, 8];
   /** @type {[number, number[], number][]} */
   const stops = [[0, lo, 0], [0.18, lo, 0.5], [0.55, hi, 0.82], [1, deep, 0.95]];
   const lut = new Uint8ClampedArray(256 * 4);

@@ -222,6 +222,44 @@ class PageTest(unittest.TestCase):
         page.wait_for_function("document.getElementById('tgt-io-msg').textContent.includes('keine')")
         self.assertEqual(self.errors, [])
 
+    # text on its real background, as WCAG AA wants it: 4.5:1 (3:1 for large text), measured in the page itself
+    CONTRAST_JS = """() => {
+        const cv = document.createElement('canvas').getContext('2d', { willReadFrequently: true });
+        const rgba = c => { cv.clearRect(0, 0, 1, 1); cv.fillStyle = '#000'; cv.fillStyle = c; cv.fillRect(0, 0, 1, 1); const d = cv.getImageData(0, 0, 1, 1).data; return [d[0], d[1], d[2], d[3] / 255]; };
+        const lum = ([r, g, b]) => { const f = c => { c /= 255; return c <= .03928 ? c / 12.92 : ((c + .055) / 1.055) ** 2.4; }; return .2126 * f(r) + .7152 * f(g) + .0722 * f(b); };
+        const over = (top, under) => [0, 1, 2].map(i => top[i] * top[3] + under[i] * (1 - top[3])).concat([1]);
+        const bgOf = el => { const layers = []; for (let e = el; e; e = e.parentElement) { const c = rgba(getComputedStyle(e).backgroundColor); if (c[3] > 0) { layers.push(c); if (c[3] >= 1) break; } }
+            let base = [255, 255, 255, 1]; for (const c of layers.reverse()) base = over(c, base); return base; };
+        const bad = [], seen = new Set(), walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+        while (walker.nextNode()) {
+            const n = walker.currentNode, el = n.parentElement;
+            if (!n.textContent.trim() || !el || seen.has(el) || el.closest('[hidden],script,style')) continue;
+            seen.add(el);
+            const r = el.getBoundingClientRect(), cs = getComputedStyle(el);
+            if (!r.width || !r.height || cs.visibility === 'hidden' || +cs.opacity === 0) continue;
+            const bg = bgOf(el), fg = over(rgba(cs.color), bg), l1 = lum(fg), l2 = lum(bg);
+            const ratio = (Math.max(l1, l2) + .05) / (Math.min(l1, l2) + .05), size = parseFloat(cs.fontSize);
+            const large = size >= 24 || (+cs.fontWeight >= 700 && size >= 18.66);
+            if (ratio < (large ? 3 : 4.5)) bad.push(el.tagName.toLowerCase() + (el.className ? '.' + String(el.className).split(' ')[0] : '') + ' ' + ratio.toFixed(2) + ' "' + n.textContent.trim().slice(0, 20) + '"');
+        }
+        return bad;
+    }"""
+
+    def test_text_contrast_is_at_least_aa_in_both_themes(self):
+        for scheme in ("light", "dark"):
+            page = self.open()
+            page.emulate_media(color_scheme=scheme)
+            for tab in ("overview", "list", "targets", "activity", "regions", "tours", "map"):
+                page.evaluate(f"setTab('{tab}')")
+                page.wait_for_timeout(350)
+                self.assertEqual(page.evaluate(self.CONTRAST_JS), [], f"{scheme} {tab}")
+            # the calendar's day, a heat table's cell and the time-lapse bar stay readable on their colours, too
+            page.evaluate("setTab('map')")
+            page.click("#m-tl")
+            page.wait_for_timeout(300)
+            self.assertEqual(page.evaluate(self.CONTRAST_JS), [], f"{scheme} time-lapse")
+            self.assertEqual(self.errors, [])
+
     def test_calendar_is_one_run_of_weeks(self):
         page = self.open()
         # every day of the year once, in date order, in one grid (not one block per month)
