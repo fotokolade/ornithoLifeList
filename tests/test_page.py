@@ -802,6 +802,61 @@ class PageTest(unittest.TestCase):
         self.assertIn("export_test.json", page.inner_text("#h-sub"))
         self.assertEqual(self.errors, [])
 
+    def test_print_keeps_the_svg_charts(self):
+        # Chart.js animates and measures its (on screen hidden) tab: printed right after beforeprint, it was blank
+        page = self.open(hash="#overview")
+        page.evaluate("S.printTabs = new Set(['activity'])")
+        page.evaluate("window.dispatchEvent(new Event('beforeprint'))")
+        for card in ("#hour-card", "#weekday-card"):
+            self.assertEqual(page.locator(f"{card} canvas").count(), 0, card)
+            self.assertGreater(page.locator(f"{card} svg rect, {card} svg path").count(), 5, card)
+        page.evaluate("window.dispatchEvent(new Event('afterprint'))")
+        page.evaluate("setTab('activity')")
+        page.wait_for_timeout(300)
+        self.assertEqual(page.locator("#hour-card canvas").count(), 1)  # the screen gets Chart.js again
+        self.assertEqual(self.errors, [])
+
+    def test_heat_panel_marks_new_species_per_region(self):
+        # Rotkehlchen first in Bautzen county in 2023, in Görlitz county only in 2024: with Görlitz chosen it is new in 2024
+        s = [sighting("Erithacus rubecula", "Rotkehlchen", "2023-04-01", place_id="b", place="Bautzen-Ort", municipality="Bautzen (SN, BZ)"),
+             sighting("Erithacus rubecula", "Rotkehlchen", "2024-04-01", place_id="g", place="Görlitz-Ort", municipality="Görlitz (SN, GR)"),
+             sighting("Parus major", "Kohlmeise", "2023-05-01", place_id="g", place="Görlitz-Ort", municipality="Görlitz (SN, GR)")]
+        path = os.path.join(self.tmp.name, "regions_new.html")
+        with open(path, "w", encoding="utf-8") as fh:
+            fh.write(lifelist.render_html(lifelist.build_page_data(s, "export_test.json", False)))
+        self.url["regions_new"] = "file:///" + path.replace(os.sep, "/").lstrip("/")
+        page = self.open(redact="regions_new")  # open() takes the key of self.url
+        page.evaluate("S.region = 'c:SN/GR'; buildRegionSelect(); renderActive()")
+        page.wait_for_timeout(300)
+        row = page.locator("#heat-ym tbody tr", has_text="2024").locator("td.tot")
+        row.click()
+        self.assertIn("1 neu", page.inner_text("#heat-ym .cal-panel-h"))
+        self.assertIn("NEU", page.inner_text("#heat-ym .cal-panel"))
+        self.assertEqual(self.errors, [])
+
+    def test_planner_does_not_count_collective_taxa_as_seen(self):
+        page = self.open()
+        # the sample has "Larus argentatus / michahellis": with collective taxa shown it must not pass for Larus argentatus
+        page.evaluate("S.collective = true; PLAN_SEEN = null")
+        seen = page.evaluate("[...planSeen().seenLatin]")
+        self.assertNotIn("Larus argentatus", seen)
+        self.assertIn("Parus major", seen)
+        self.assertEqual(self.errors, [])
+
+    def test_map_keeps_its_view_until_the_places_change(self):
+        page = self.open(hash="#map")
+        page.wait_for_timeout(500)
+        page.evaluate("MAP.setView([51.3, 14.2], 14, { animate: false })")
+        page.select_option("#m-metric", "obs")
+        page.eval_on_selector("#t-range", "e => { e.value = 3; e.dispatchEvent(new Event('input')); }")
+        page.wait_for_timeout(400)
+        self.assertEqual(page.evaluate("[MAP.getZoom(), +MAP.getCenter().lat.toFixed(2)]"), [14, 51.3])
+        # another region: other places, so the map fits them
+        page.evaluate("S.region = 'c:SN/BZ'; buildRegionSelect(); renderActive()")
+        page.wait_for_timeout(400)
+        self.assertNotEqual(page.evaluate("[MAP.getZoom(), +MAP.getCenter().lat.toFixed(2)]"), [14, 51.3])
+        self.assertEqual(self.errors, [])
+
     def test_phone_width_has_no_sideways_scroll(self):
         page = self.open(width=390)
         for tab in TABS:
@@ -1085,7 +1140,9 @@ class PageTest(unittest.TestCase):
         self.assertNotEqual(light, dark)
         page.evaluate("S.printTabs.add('activity')")  # only the tabs chosen for printing are drawn for it
         page.evaluate("window.dispatchEvent(new Event('beforeprint'))")
-        self.assertEqual(grid(), light)
+        # paper gets the SVG chart (drawn at once, see mountChart), in the light colours
+        self.assertEqual(page.evaluate("BAR_CHARTS['weekday-card']"), None)
+        self.assertEqual(page.eval_on_selector("#weekday-card svg line", "l => getComputedStyle(l).stroke"), "rgb(228, 232, 228)")
         page.evaluate("window.dispatchEvent(new Event('afterprint'))")
         self.assertEqual(grid(), dark)
         self.assertEqual(page.get_attribute("html", "data-theme"), "dark")

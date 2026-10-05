@@ -266,6 +266,7 @@ function drawTimelapse() {
     TL_MODEL = tlModel(list, S.tl.year, S.tl.sp);
     if (fresh) TL_POS = 0;
     MAP.fitBounds(TL_MODEL.places.map(pl => [PL[pl.p].lat, PL[pl.p].lon]), { padding: [30, 30], maxZoom: 15, animate: false });
+    MAP_FIT_KEY = "";  // back on the normal map, it fits its own places again
     $("tl-range").max = String(TL_MODEL.n - 1);
   }
   legend.hidden = false;

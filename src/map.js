@@ -1,4 +1,6 @@
 let MAP = null, MAP_LAYER = null, MAP_LEGEND = null;
+// what the map was last fitted to: a new value metric or point in time keeps the user's pan and zoom
+let MAP_FIT_KEY = "";
 const markerDia = frac => Math.round(2 * (5 + 17 * Math.sqrt(frac)));
 // warm sequential scale (light amber = low, burnt orange = high) that stays visible on every tile layer
 const markerColor = frac => `color-mix(in srgb, var(--mk-hi) ${Math.round(15 + frac * 85)}%, var(--mk-lo))`;
@@ -120,7 +122,8 @@ function drawMap() {
     marker.on("popupopen", () => marker.closeTooltip());
     bounds.push([p.lat, p.lon]);
   }
-  MAP.fitBounds(bounds, { padding: [30, 30], maxZoom: 15 });
+  const fitKey = `${S.region}|${S.escaped}|${S.collective}`;
+  if (fitKey !== MAP_FIT_KEY) { MAP.fitBounds(bounds, { padding: [30, 30], maxZoom: 15 }); MAP_FIT_KEY = fitKey; }
   syncClusterKey();
   drawTourRoute();  // a tour opened from the Touren tab: its path on top, zoomed to it
 }

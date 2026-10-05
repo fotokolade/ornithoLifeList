@@ -158,10 +158,13 @@ const cssRgb = (() => {
   const g = document.createElement("canvas").getContext("2d", { willReadFrequently: true });
   return css => { g.clearRect(0, 0, 1, 1); g.fillStyle = css; g.fillRect(0, 0, 1, 1); const d = g.getImageData(0, 0, 1, 1).data; return [d[0], d[1], d[2]]; };
 })();
-/** Swaps the card's content for a canvas of the given height and draws `config` on it; false without Chart.js. */
+/** Swaps the card's content for a canvas of the given height and draws `config` on it; false without Chart.js.
+ *  Not for printing: the print is taken right after "beforeprint", before Chart.js has drawn anything (it animates,
+ *  and a tab hidden on screen has no width to measure yet), so the paper keeps the card's SVG chart, which is drawn at once. */
 function mountChart(card, height, config) {
-  if (!card || typeof Chart === "undefined") return false;
-  if (BAR_CHARTS[card.id]) { BAR_CHARTS[card.id].destroy(); delete BAR_CHARTS[card.id]; }
+  if (!card) return false;
+  if (BAR_CHARTS[card.id]) { BAR_CHARTS[card.id].destroy(); delete BAR_CHARTS[card.id]; }  // its canvas went with the card's last content
+  if (typeof Chart === "undefined" || curveForPrint) return false;
   card.innerHTML = "";
   const box = document.createElement("div");
   box.style.height = height + "px";

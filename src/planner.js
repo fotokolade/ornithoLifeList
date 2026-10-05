@@ -60,10 +60,12 @@ const planName = sp => (S.lang === "en" ? sp.en || sp.de : sp.de || sp.en) || sp
 /** @type {{seenLatin: Set<string>, seenName: Set<string>}|null} */
 let PLAN_SEEN = null;
 function planSeen() {
-  const stats = speciesStats(baseObs());
+  // collective taxa and hybrids (flag 2: "Larus argentatus / michahellis", "A x B") are left out: cut to two words
+  // they would pass for the first species named, which the life list itself does not count either
+  const seen = [...speciesStats(baseObs()).keys()].filter(s => !(SP[s].flags & 2));
   const binomial = latin => latin.split(" ").slice(0, 2).join(" ");
-  PLAN_SEEN = { seenLatin: new Set([...stats.keys()].map(s => binomial(SP[s].latin))),
-    seenName: new Set([...stats.keys()].flatMap(s => [SP[s].name, SP[s].english].filter(Boolean).map(n => n.toLowerCase()))) };
+  PLAN_SEEN = { seenLatin: new Set(seen.map(s => binomial(SP[s].latin))),
+    seenName: new Set(seen.flatMap(s => [SP[s].name, SP[s].english].filter(Boolean).map(n => n.toLowerCase()))) };
   return PLAN_SEEN;
 }
 /** the missing species: never seen (by Latin name, the ornitho.de alias or a German/English name); with the

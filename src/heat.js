@@ -103,9 +103,9 @@ function heatPanel(kind, spec, key) {
   const obs = spec.obs.filter(o => { const or = spec.rowOf(o), oc = spec.colOf(o);
     return or >= r0 && or <= r1 && oc >= c0 && oc <= c1; });
   if (!obs.length) return "";
-  // species whose very first record lies in here get the NEU mark
+  // species whose very first record (in the chosen region, as in the calendar, the list and the map) lies in here get the NEU mark
   const inHere = new Set(obs);
-  const newSp = new Set([...speciesStats(baseObs()).values()].filter(x => inHere.has(x.first)).map(x => x.s));
+  const newSp = new Set([...speciesStats(regionObs(baseObs())).values()].filter(x => inHere.has(x.first)).map(x => x.s));
   const acc = heatAcc();
   for (const o of obs) { acc.n++; acc.s.add(o.s); acc.d.add(o.d); }
   return cellPanel(title, t("heatTip", fmtN(acc.n), fmtN(acc.s.size), fmtN(acc.d.size)) + (newSp.size ? " · " + t("calDayLifers", newSp.size) : ""),
