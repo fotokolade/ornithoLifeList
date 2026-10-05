@@ -462,6 +462,16 @@ function init() {
     placeTip(e.clientX, e.clientY);
   };
   document.addEventListener("mousemove", showTip);
+  // a calendar day lights up its whole month; anywhere else puts the calendar back
+  document.addEventListener("mouseover", e => {
+    const box = $$all(".cal-days")[0];
+    if (!box) return;
+    const m = /** @type {any} */ (e.target).closest?.(".cal-days .cal-day[data-m]")?.dataset.m || "";
+    if ((box.dataset.glow || "") === m) return;
+    box.dataset.glow = m;
+    box.classList.toggle("glowing", !!m);
+    for (const d of $$all(".cal-days .cal-day[data-m]")) d.classList.toggle("glow", d.dataset.m === m);
+  });
   // every other cell of the hovered cell's table shows the difference to it: +4 green, 0 grey, −10 red;
   // the crosshair still marks the hovered cell's row and column
   /** @type {any[]} */

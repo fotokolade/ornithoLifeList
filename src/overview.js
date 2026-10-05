@@ -74,7 +74,8 @@ function calendarSection(list, statsAll) {
   const dowLetters = T.weekdays.map(w => w[0]);
   // the year as one continuous run of weeks (a column each, Monday on top): the months flow into each other
   // instead of standing as separate blocks. A month's edge is a stepped line (m-top / m-left); the empty days of
-  // every other month are a shade darker, so the months stay readable in a sparse year, too.
+  // every other month are a shade darker, and so are its coloured days (m-odd), so the months stay readable in a sparse year, too.
+  // Hovering a day lights up its whole month (app.js).
   const startDow = (new Date(Date.UTC(year, 0, 1)).getUTCDay() + 6) % 7;  // 0 = Monday
   let cells = `<div class="cal-day cal-empty"></div>`.repeat(startDow), idx = startDow, lastIdx = startDow;
   const monthLabels = [];
@@ -88,11 +89,11 @@ function calendarSection(list, statsAll) {
       const lifer = liferDays.has(dateStr);
       const bg = n ? scale.color(scale.step(n)) : mi % 2 ? "var(--cal-empty-alt)" : "var(--cal-empty)";
       // the day above is the one before (a month's 1st unless it tops its column), the one to the left is a week back
-      const edge = `${day === 1 && idx % 7 ? " m-top" : ""}${day <= 7 && mi ? " m-left" : ""}`;
+      const edge = `${mi % 2 ? " m-odd" : ""}${day === 1 && idx % 7 ? " m-top" : ""}${day <= 7 && mi ? " m-left" : ""}`;
       const title = n ? `${fmtD(dateStr)}: ${n} ${t("mapSpecies")}${lifer ? " · " + t("newBadge") : ""}` : fmtD(dateStr);
       cells += n
-        ? `<button type="button" class="cal-day${lifer ? " cal-lifer" : ""}${S.calDay === dateStr ? " cal-sel" : ""}${edge}" data-day="${dateStr}" style="background:${bg}" data-tip="${esc(title)}" aria-label="${esc(title)}" aria-pressed="${S.calDay === dateStr}"></button>`
-        : `<div class="cal-day${edge}" style="background:${bg}" data-tip="${esc(title)}"></div>`;
+        ? `<button type="button" class="cal-day${lifer ? " cal-lifer" : ""}${S.calDay === dateStr ? " cal-sel" : ""}${edge}" data-day="${dateStr}" data-m="${m}" style="background:${bg}" data-tip="${esc(title)}" aria-label="${esc(title)}" aria-pressed="${S.calDay === dateStr}"></button>`
+        : `<div class="cal-day${edge}" data-m="${m}" style="background:${bg}" data-tip="${esc(title)}"></div>`;
     }
     lastIdx = idx;
   }

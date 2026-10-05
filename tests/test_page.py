@@ -238,6 +238,18 @@ class PageTest(unittest.TestCase):
         self.assertEqual(pos[7][1], pos[0][1])
         # a month's edge is drawn along its first week, in every month but January
         self.assertEqual(page.locator(".cal-day.m-left").count(), 11 * 7)
+        # every other month is a shade darker, and hovering a day lights up exactly its month
+        self.assertEqual(page.evaluate("[...new Set([...document.querySelectorAll('.cal-day.m-odd')].map(d => d.dataset.m))].join()"), "2,4,6,8,10,12")
+        self.assertEqual(page.locator(".cal-day.glow").count(), 0)
+        day = page.locator(".cal-day[data-m='3']").nth(10)
+        day.hover()
+        month = page.evaluate("[...document.querySelectorAll('.cal-day[data-m=\"3\"]')].length")
+        self.assertEqual(page.locator(".cal-day.glow").count(), month)
+        self.assertEqual(page.evaluate("[...document.querySelectorAll('.cal-day.glow')].every(d => d.dataset.m === '3')"), True)
+        self.assertTrue(page.evaluate("document.querySelector('.cal-days').classList.contains('glowing')"))
+        page.mouse.move(2, 2)
+        self.assertEqual(page.locator(".cal-day.glow").count(), 0)
+        self.assertFalse(page.evaluate("document.querySelector('.cal-days').classList.contains('glowing')"))
         self.assertEqual(self.errors, [])
 
     def test_calendar_day_and_jumps_to_life_list(self):
