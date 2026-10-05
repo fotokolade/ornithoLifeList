@@ -93,8 +93,11 @@ function tlSprite(r) {
   return s;
 }
 /** 256 colours for the sum of the blobs, from clear through the map's amber and orange to a dark red-brown. */
+let TL_PALETTE = { key: "", lut: new Uint8ClampedArray(0) };  // the last palette, reused while the map's two colours (theme) stay the same
 function tlPalette() {
-  const lo = tlRgb(cssVar("--mk-lo")), hi = tlRgb(cssVar("--mk-hi")), deep = [92, 26, 8];
+  const cLo = cssVar("--mk-lo"), cHi = cssVar("--mk-hi"), key = cLo + "|" + cHi;
+  if (TL_PALETTE.key === key) return TL_PALETTE.lut;
+  const lo = tlRgb(cLo), hi = tlRgb(cHi), deep = [92, 26, 8];
   /** @type {[number, number[], number][]} */
   const stops = [[0, lo, 0], [0.18, lo, 0.5], [0.55, hi, 0.82], [1, deep, 0.95]];
   const lut = new Uint8ClampedArray(256 * 4);
@@ -106,6 +109,7 @@ function tlPalette() {
     for (let j = 0; j < 3; j++) lut[i * 4 + j] = c0[j] + (c1[j] - c0[j]) * f;
     lut[i * 4 + 3] = 255 * (a0 + (a1 - a0) * f);
   }
+  TL_PALETTE = { key, lut };
   return lut;
 }
 /** @param {number} lat @returns {number} a blob's radius in screen px at the map's zoom: its reach on the ground, within limits */
@@ -204,7 +208,9 @@ function tlPlay() {
     TL_POS += Math.min(now - last, 100) / 1000 * S.tl.speed;
     last = now;
     if (TL_POS >= TL_MODEL.n - 1) { TL_POS = TL_MODEL.n - 1; tlShow(TL_POS); tlPause(); return; }
-    tlShow(Math.floor(TL_POS));
+    // several frames fall on one day at the slower speeds: draw only when the day changes
+    const day = Math.floor(TL_POS);
+    if (day !== S.tl.day) tlShow(day);
     TL_RAF = requestAnimationFrame(step);
   };
   TL_RAF = requestAnimationFrame(step);
