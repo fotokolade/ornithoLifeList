@@ -55,6 +55,7 @@ function applyRedact(on) {
   for (const id of ["tab-overview", "list-out", "tab-regions", "tab-targets", "tab-tours"]) $(id).innerHTML = "";
   S.tourRoute = null;
   if (MAP_LAYER) MAP_LAYER.clearLayers();
+  tlReset();
   if (MAP_ROUTE) MAP_ROUTE.clearLayers();  // the tour's stops carry place names in their tooltips
   $("map-note").textContent = "";
   buildRegionSelect();
@@ -80,6 +81,7 @@ function setTab(tab) {
     // tabs share one scroll position (they're just toggled via display, not real navigation); reset
     // it on every switch so the new tab never opens wherever the previous one happened to be scrolled to
     window.scrollTo(0, 0);
+    if (tab !== "map") tlPause();
     S.tab = tab;
     for (const b of $$all("#tabs button")) b.classList.toggle("on", b.dataset.tab === tab);
     for (const s of $$all("div.tab")) s.classList.toggle("on", s.id === "tab-" + tab);
@@ -151,6 +153,13 @@ function renderChrome() {
   $("q-sort").setAttribute("aria-label", t("ariaSort"));
   $("q-atlas").setAttribute("aria-label", t("ariaAtlas"));
   $("m-metric").setAttribute("aria-label", t("ariaMapMetric"));
+  $("m-tl").textContent = t("tlToggle");
+  $("tl-range").setAttribute("aria-label", t("ariaTlDay"));
+  $("tl-year").setAttribute("aria-label", t("ariaTlYear"));
+  $("tl-speed").setAttribute("aria-label", t("ariaTlSpeed"));
+  $("tl-speed").innerHTML = TL_SPEEDS.map(v => `<option value="${v}">${t("tlSpeed", v)}</option>`).join("");
+  $("tl-speed").value = String(S.tl.speed);
+  tlSyncPlay();
   $("t-all").textContent = t("timeAll");
   $("t-range").min = 0; $("t-range").max = timeYMIndex(MAX_Y, 12);
   $("t-range").setAttribute("aria-label", t("ariaTimePoint"));
@@ -305,6 +314,11 @@ function init() {
     renderActive();
   });
   $("m-metric").addEventListener("change", e => { S.metric = e.target.value; renderMap(); });
+  $("m-tl").addEventListener("click", () => { S.tl.on = !S.tl.on; if (S.tl.on) S.tourRoute = null; else tlPause(); renderMap(); });
+  $("tl-play").addEventListener("click", () => { if (S.tl.playing) tlPause(); else tlPlay(); });
+  $("tl-range").addEventListener("input", e => { TL_POS = +e.target.value; tlShow(TL_POS); });
+  $("tl-year").addEventListener("change", e => { S.tl.year = +e.target.value; renderMap(); });
+  $("tl-speed").addEventListener("change", e => { S.tl.speed = +e.target.value; });
   $("tab-tours").addEventListener("toggle", e => {
     if (e.target.matches?.("details.tour-settings")) S.tourSetOpen = e.target.open;
     if (e.target.matches?.("details.tour-diagram")) S.tourDiagOpen = e.target.open;

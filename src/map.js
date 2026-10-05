@@ -59,6 +59,12 @@ function drawMap() {
   $("m-metric").options[2].text = t("mapObs", timePeriodLabel());
   $("m-metric").options[3].text = cutoffLabel("mapNewHereAll", "mapNewHere");
   MAP.invalidateSize();
+  if (S.tourRoute) S.tl.on = false;  // a tour shown on the map takes the map for itself
+  tlSyncUi();
+  if (S.tl.on) { if (MAP.hasLayer(MAP_LAYER)) MAP.removeLayer(MAP_LAYER); drawTimelapse(); return; }
+  tlReset();
+  if (TL_LAYER && MAP.hasLayer(TL_LAYER)) MAP.removeLayer(TL_LAYER);
+  if (!MAP.hasLayer(MAP_LAYER)) MAP_LAYER.addTo(MAP);
   MAP_LAYER.clearLayers();
   const regionList = regionObs(baseObs());
   // true when (y,m) falls on/before the selected time-bar cutoff, or "Gesamt" is active (no cutoff);

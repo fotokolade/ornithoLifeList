@@ -337,10 +337,18 @@ svg.curve text{fill:var(--muted);font-size:11px}
 .value-marker:hover > .dot{transform:scale(1.18);filter:brightness(1.1)}
 .time-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:9px 0;margin-top:2px;border-top:1px solid var(--line)}
 .time-bar input[type=range]{flex:1 1 200px;min-width:140px;accent-color:var(--accent)}
-.time-all{font:inherit;font-size:.78rem;padding:4px 12px;border-radius:999px;border:1px solid var(--line);background:none;color:var(--muted);cursor:pointer;flex:0 0 auto;transition:background-color .12s ease,border-color .12s ease,color .12s ease}
-.time-all:not(.on):hover{border-color:var(--accent);color:var(--text)}
-.time-all.on{background:var(--accent);border-color:var(--accent);color:#fff}
-.time-all.on:hover{background:color-mix(in srgb,var(--accent) 85%,black)}
+.time-all,.tl-toggle{font:inherit;font-size:.78rem;padding:4px 12px;border-radius:999px;border:1px solid var(--line);background:none;color:var(--muted);cursor:pointer;flex:0 0 auto;transition:background-color .12s ease,border-color .12s ease,color .12s ease}
+.time-all:not(.on):hover,.tl-toggle:not(.on):hover{border-color:var(--accent);color:var(--text)}
+.time-all.on,.tl-toggle.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.time-all.on:hover,.tl-toggle.on:hover{background:color-mix(in srgb,var(--accent) 85%,black)}
+.tl-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 12px}
+.tl-bar[hidden]{display:none}
+.tl-bar input[type=range]{flex:1 1 220px;min-width:140px;accent-color:var(--accent)}
+.tl-play{min-width:9.5ch}
+.tl-date{font-weight:700;min-width:10ch;font-variant-numeric:tabular-nums}
+.tl-stats{color:var(--muted);font-size:.8rem}
+/* the time-lapse markers only show; the wrapper keeps the biggest size so a dot grows and shrinks around its centre */
+.tl-marker{display:flex;align-items:center;justify-content:center;pointer-events:none}
 .time-label{font-weight:700;font-size:1rem;min-width:9ch;text-align:right;color:var(--text);text-shadow:0 1px 1px rgba(0,0,0,.12);flex:0 0 auto}
 @media (max-width:700px){
   .hide-sm{display:none}
@@ -464,6 +472,15 @@ footer.meta-footer .btn{flex:0 0 auto;padding:3px 10px}
   <div class="tab" id="tab-map">
     <div class="pick">
       <select id="m-metric" aria-label="Kartenwert"></select>
+      <button class="tl-toggle" id="m-tl" type="button" aria-pressed="false"></button>
+    </div>
+    <div class="tl-bar" id="tl-bar" hidden>
+      <button class="btn tl-play" id="tl-play" type="button"></button>
+      <input type="range" id="tl-range" min="0" max="364" value="0" step="1">
+      <span class="tl-date" id="tl-date"></span>
+      <select id="tl-year"></select>
+      <select id="tl-speed"></select>
+      <span class="tl-stats" id="tl-stats"></span>
     </div>
     <div id="map"></div>
     <p class="prose" id="map-note"></p>

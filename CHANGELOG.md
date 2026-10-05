@@ -2,6 +2,11 @@
 
 Die neueste Version steht oben. Die Downloads (`lifelist.exe`) gibt es auf der [Releases-Seite](../../releases).
 
+## Noch nicht veröffentlicht
+
+### Seite
+- **Karte, Zeitraffer:** Ein Jahr Beobachtungen, Tag für Tag abgespielt. Ein Ort leuchtet am Tag der Beobachtung auf (Größe: Arten an dem Tag, grüner Ring: Erstbeobachtung) und verblasst binnen zwei Wochen; ein kleiner Punkt bleibt, wo du im Jahr schon warst. Mit Abspielen/Pause, Schieberegler, Jahr und Tempo (7 bis 60 Tage pro Sekunde). Er startet nie von selbst und folgt der gewählten Region.
+
 ## 0.6.0 (2026-09-29)
 
 ### Programm

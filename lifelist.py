@@ -45,7 +45,7 @@ FLAG_COLLECTIVE = 2
 # order stands in for one: later files rely on function hoisting to see earlier consts/functions.
 APP_JS_FILES = [
     "i18n.js", "counties.js", "data.js", "charts.js", "heat.js", "overview.js", "list.js",
-    "regions.js", "targets.js", "planner.js", "activity.js", "tours.js", "map.js", "app.js",
+    "regions.js", "targets.js", "planner.js", "activity.js", "tours.js", "map.js", "timelapse.js", "app.js",
 ]
 
 # Leaflet, its marker-cluster plugin, and Chart.js are vendored (see vendor/, tools/update_vendor.py)

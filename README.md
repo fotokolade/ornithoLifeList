@@ -12,7 +12,7 @@ Macht aus deinem [ornitho.de](https://www.ornitho.de/)-Export eine interaktive V
 - **Tagesaktivität:** zu welcher Uhrzeit, an welchen Wochentagen und in welchen Monaten du unterwegs bist
 - **Regionen:** Arten nach Bundesland, Landkreis, Gemeinde und Ort, und wann du dich wo aufhältst
 - **Touren:** Spaziergänge und Radtouren, rekonstruiert aus Meldungen, die zeitlich und räumlich nah beieinanderliegen, mit Strecke auf der Karte
-- **Karte** deiner Beobachtungsorte
+- **Karte** deiner Beobachtungsorte, auch als Zeitraffer über ein Jahr
 
 <details><summary>Wie die Touren entstehen: Schaubild der Einstellungen</summary>
 

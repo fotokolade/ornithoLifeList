@@ -129,7 +129,7 @@ function loadPrintTabs() {
 const S = { tab: "overview", region: "all", year: TIME_START.y, month: TIME_START.m, timeAll: true, lang: initialLang, theme: initialTheme,
   escaped: false, collective: false, atlasF: "all", actMetric: "obs", redact: !!RAW.meta.redacted, metric: "life", q: "", sort: "nr", dir: -1, open: new Set(),
   regSort: {}, regAll: {}, targetSrc: "all", customTargets: loadCustomTargets(), wishSort: { k: "season", d: 1 },
-  wishOpen: null, wishQ: "", plan: { scope: "de", month: 0, view: "dest", q: "", open: null, all: false, openG: null, gview: "d", sort: "n", gall: false }, calDay: null, heatMetric: { ym: "species", m: "obs", w: "obs", rm: "days" }, heatSel: {}, regMonthLvl: "c", tourCfg: null, tourSetOpen: false, printTabs: loadPrintTabs(), tourDiagOpen: false, tourSort: { k: "date", d: -1 }, tourOpen: new Set(), tourAll: false, tourRoute: null, focusSp: null };
+  wishOpen: null, wishQ: "", plan: { scope: "de", month: 0, view: "dest", q: "", open: null, all: false, openG: null, gview: "d", sort: "n", gall: false }, calDay: null, heatMetric: { ym: "species", m: "obs", w: "obs", rm: "days" }, heatSel: {}, regMonthLvl: "c", tourCfg: null, tourSetOpen: false, printTabs: loadPrintTabs(), tourDiagOpen: false, tourSort: { k: "date", d: -1 }, tourOpen: new Set(), tourAll: false, tourRoute: null, focusSp: null, tl: { on: false, year: 0, day: 0, speed: 30, playing: false } };
 T = STR[S.lang];
 
 /* ---------- helpers ---------- */
