@@ -258,6 +258,7 @@ function drawTourRoute() {
     icon: L.divIcon({ className: "route-stop", html: `<div>${i + 1}</div>`, iconSize: [22, 22] }), zIndexOffset: 3000,
   }).bindTooltip(`${i + 1}. ${esc(st.name)}: ${new Set(st.obs.map(o => o.s)).size} ${esc(t("mapSpecies"))}`).addTo(MAP_ROUTE));
   MAP.fitBounds(pts, { padding: [40, 40], maxZoom: 16 });
+  MAP_FIT_KEY = "";  // without the tour, the map fits its own places again
   $("map-note").innerHTML = `${esc(t("tourOnMap", fmtD(tr.d), tr.stops.length, fmtKm(tr.km)))} <button class="lnk" data-route-off>${t("tourHide")}</button>`;
   return true;
 }

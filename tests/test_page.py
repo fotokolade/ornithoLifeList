@@ -1119,7 +1119,7 @@ class PageTest(unittest.TestCase):
         page.fill("#tl-sp", name)
         page.press("#tl-sp", "Enter")
         page.wait_for_timeout(300)
-        self.assertEqual(page.evaluate("S.tl.sp"), sp)
+        self.assertEqual(page.evaluate("S.tl.sp"), [sp])
         # only the places of that species in the year shown, a year it occurs in, and the bar counts records and places
         year = page.evaluate("S.tl.year")
         expected = page.evaluate(f"new Set(regionObs(baseObs()).filter(o => o.s === {sp} && o.y === S.tl.year && PL[o.p].lat).map(o => o.p)).size")
@@ -1137,13 +1137,34 @@ class PageTest(unittest.TestCase):
         page.fill("#tl-sp", "kein Vogel")
         page.press("#tl-sp", "Enter")
         self.assertEqual(page.input_value("#tl-sp"), name)
-        self.assertEqual(page.evaluate("S.tl.sp"), sp)
+        self.assertEqual(page.evaluate("S.tl.sp"), [sp])
         page.fill("#tl-sp", "")
         page.press("#tl-sp", "Enter")
         page.wait_for_timeout(300)
         self.assertIsNone(page.evaluate("S.tl.sp"))
         self.assertGreaterEqual(page.evaluate("TL_MODEL.places.length"), expected)
         self.assertEqual(page.evaluate("TL_MODEL.sp"), None)
+        self.assertEqual(self.errors, [])
+
+    def test_timelapse_follows_every_taxon_of_a_name(self):
+        # a wild Rostgans and an escaped one are two taxa of one name: the picker offers the name once and follows both
+        s = [sighting("Tadorna ferruginea", "Rostgans", "2024-04-01", place_id="w", place="Teich", lat="51.1", lon="14.5"),
+             sighting("Tadorna ferruginea", "Rostgans", "2024-05-01", place_id="e", place="Park", lat="51.3", lon="14.2", rarity="escaped"),
+             sighting("Parus major", "Kohlmeise", "2024-05-02", place_id="w", place="Teich", lat="51.1", lon="14.5")]
+        path = os.path.join(self.tmp.name, "escapes.html")
+        with open(path, "w", encoding="utf-8") as fh:
+            fh.write(lifelist.render_html(lifelist.build_page_data(s, "export_test.json", False)))
+        self.url["escapes"] = "file:///" + path.replace(os.sep, "/").lstrip("/")
+        page = self.open(redact="escapes", hash="#map")  # open() takes the key of self.url
+        page.evaluate("S.escaped = true; renderMap()")
+        page.click("#m-tl")
+        page.wait_for_timeout(300)
+        self.assertEqual(page.evaluate("[...document.querySelectorAll('#tl-suggest option')].filter(o => o.value === 'Rostgans').length"), 1)
+        page.fill("#tl-sp", "Rostgans")
+        page.press("#tl-sp", "Enter")
+        page.wait_for_timeout(300)
+        self.assertEqual(len(page.evaluate("S.tl.sp")), 2)
+        self.assertEqual(page.evaluate("TL_MODEL.places.length"), 2)  # the wild bird's pond and the escape's park
         self.assertEqual(self.errors, [])
 
     def test_redacted_build_hides_map_and_places(self):

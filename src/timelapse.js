@@ -14,14 +14,16 @@ const dayOfYear = (y, m, d) => Math.round((Date.UTC(y, m - 1, d) - Date.UTC(y, 0
 const tlDate = (year, day) => new Date(Date.UTC(year, 0, 1 + day)).toISOString().slice(0, 10);
 /** @param {Observation[]} list @returns {number[]} the years with a record at a place with coordinates, ascending */
 const tlYears = list => [...new Set(list.filter(o => PL[o.p].lat).map(o => o.y))].sort((a, b) => a - b);
-// the species the picker offers (those with a located record) by lower-case name, German and English alike
-let TL_SP_BY_NAME = new Map();
+// the species the picker offers (those with a located record) by lower-case name, German and English alike: every taxon
+// of that name (a wild bird and its escapes share one), and what the list was built for (region, filters, language)
+/** @type {Map<string, number[]>} */
+let TL_SP_BY_NAME = new Map(), TL_SP_KEY = "";
 /**
  * With a species chosen, only its records play: a visit counts the birds seen that day (not the species), and
  * the bar counts its records and the places it was seen at, since "species so far" would always be 1.
  * @param {Observation[]} list regionObs(baseObs()), date-sorted
  * @param {number} year
- * @param {number|null} sp index into SP of the species to follow, null for all
+ * @param {number[]|null} sp the taxa (indices into SP) of the species to follow, null for all
  */
 function tlModel(list, year, sp) {
   // a first record is the very first of its species in `list`, as on the normal map
@@ -32,7 +34,7 @@ function tlModel(list, year, sp) {
   const dayRecords = new Array(n).fill(0);  // one species: the records of a day
   const byPlace = new Map();
   for (const o of list) {
-    if (o.y !== year || !PL[o.p].lat || (sp !== null && o.s !== sp)) continue;
+    if (o.y !== year || !PL[o.p].lat || (sp !== null && !sp.includes(o.s))) continue;
     const di = dayOfYear(year, o.m, +o.d.slice(8));
     // what a day counts: the species seen, or (one species) the records made
     if (sp === null) daySp[di].add(o.s); else dayRecords[di]++;
@@ -46,8 +48,7 @@ function tlModel(list, year, sp) {
     if (first.get(o.s) === o) v.lifer = true;
   }
   const seen = new Set();
-  const cum = sp === null ? daySp.map(s => { for (const x of s) seen.add(x); return seen.size; })
-    : dayPlaces.map(s => { for (const x of s) seen.add(x); return seen.size; });
+  const cum = (sp === null ? daySp : dayPlaces).map(s => { for (const x of s) seen.add(x); return seen.size; });
   const places = [...byPlace].map(([p, visits]) => ({
     p,
     visits: [...visits.values()].sort((a, b) => a.di - b.di).map(v => ({ di: v.di, n: sp === null ? v.sp.size : v.birds, lifer: v.lifer })),
@@ -225,25 +226,34 @@ function tlSyncUi() {
   $("tl-bar").hidden = !S.tl.on;
   $("m-metric").hidden = S.tl.on;
 }
-/** The picker's suggestions: the species with a located record in `list`, in the order of the life list. */
+const tlSpName = () => S.tl.sp === null ? "" : speciesName(SP[S.tl.sp[0]]);
+/** The picker's suggestions: the species with a located record in `list`, each name once, in the order of the life
+ *  list. Built again only when region, filters or language change, not for every year or redraw. */
 function tlFillSpecies(list) {
-  const located = new Set(list.filter(o => PL[o.p].lat).map(o => o.s));
-  TL_SP_BY_NAME = new Map();
-  for (const s of located) for (const name of [SP[s].name, SP[s].english]) if (name) TL_SP_BY_NAME.set(name.toLowerCase(), s);
-  $("tl-suggest").innerHTML = [...located].sort((a, b) => SP[a].order - SP[b].order).map(s => `<option value="${esc(speciesName(SP[s]))}">`).join("");
-  $("tl-sp").value = S.tl.sp === null ? "" : speciesName(SP[S.tl.sp]);
+  const key = `${S.region}|${S.escaped}|${S.collective}|${S.lang}`;
+  if (key !== TL_SP_KEY) {
+    TL_SP_KEY = key;
+    const located = [...new Set(list.filter(o => PL[o.p].lat).map(o => o.s))].sort((a, b) => SP[a].order - SP[b].order);
+    TL_SP_BY_NAME = new Map();
+    for (const s of located) for (const name of new Set([SP[s].name, SP[s].english].filter(Boolean).map(n => n.toLowerCase()))) {
+      if (!TL_SP_BY_NAME.has(name)) TL_SP_BY_NAME.set(name, []);
+      TL_SP_BY_NAME.get(name).push(s);
+    }
+    $("tl-suggest").innerHTML = [...new Set(located.map(s => speciesName(SP[s])))].map(n => `<option value="${esc(n)}">`).join("");
+  }
+  $("tl-sp").value = tlSpName();
 }
 /** The picker took a name: that species, or all again when it is emptied; a name that is none is put back. */
 function tlPickSpecies() {
   const box = $("tl-sp"), name = box.value.trim().toLowerCase();
-  if (name && !TL_SP_BY_NAME.has(name)) { box.value = S.tl.sp === null ? "" : speciesName(SP[S.tl.sp]); return; }
+  if (name && !TL_SP_BY_NAME.has(name)) { box.value = tlSpName(); return; }
   S.tl.sp = name ? TL_SP_BY_NAME.get(name) : null;
   renderMap();
 }
 function drawTimelapse() {
   const list = regionObs(baseObs());
   tlFillSpecies(list);
-  const only = S.tl.sp === null ? list : list.filter(o => o.s === S.tl.sp), years = tlYears(only);
+  const only = S.tl.sp === null ? list : list.filter(o => S.tl.sp.includes(o.s)), years = tlYears(only);
   if (MAP_ROUTE) MAP_ROUTE.clearLayers();
   if (!TL_LAYER) { TL_LAYER_CLASS = TL_LAYER_CLASS || tlMakeLayer(); TL_LAYER = new TL_LAYER_CLASS(); }
   if (!MAP.hasLayer(TL_LAYER)) TL_LAYER.addTo(MAP);
@@ -258,7 +268,7 @@ function drawTimelapse() {
   if (!years.includes(S.tl.year)) S.tl.year = !S.timeAll && years.includes(S.year) ? S.year : years[years.length - 1];
   $("tl-year").innerHTML = years.slice().reverse().map(y => `<option value="${y}">${y}</option>`).join("");
   $("tl-year").value = String(S.tl.year);
-  const key = `${S.tl.year}|${S.region}|${S.tl.sp}|${S.escaped}|${S.collective}`;
+  const key = `${S.tl.year}|${S.region}|${S.tl.sp ? S.tl.sp.join(",") : ""}|${S.escaped}|${S.collective}`;
   if (key !== TL_KEY) {
     const fresh = TL_KEY.split("|", 3).join("|") !== key.split("|", 3).join("|");
     tlReset();

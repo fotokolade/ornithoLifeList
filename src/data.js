@@ -114,7 +114,7 @@ if (initialTheme !== "system") document.documentElement.setAttribute("data-theme
  * @property {Set<string>} tourOpen - keys of tours with an open detail row
  * @property {boolean} tourAll - show every tour instead of the newest ones
  * @property {string|null} tourRoute - key of the tour drawn on the map
- * @property {{on: boolean, year: number, day: number, speed: number, playing: boolean, sp: number|null, glow: number}} tl - the map's time-lapse: shown, year, day, days per second, playing, the one species followed (null: all), afterglow in days
+ * @property {{on: boolean, year: number, day: number, speed: number, playing: boolean, sp: number[]|null, glow: number}} tl - the map's time-lapse: shown, year, day, days per second, playing, the taxa of the one species followed (null: all), afterglow in days
  * @property {number|null} focusSp - species index the life list scrolls to and highlights once, after a jump from another view
  */
 // the point in time the page opens with, and "Gesamt" returns to

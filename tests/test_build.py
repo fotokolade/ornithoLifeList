@@ -348,6 +348,21 @@ class BadInputTest(unittest.TestCase):
         # a skipped record leaves nothing behind: no taxon, no place of its own
         self.assertEqual(len(data["sp"]), len(build(good)["sp"]))
 
+    def test_malformed_records_are_skipped_not_crashing_the_merge(self):
+        good = sample_export()[:3]
+        weird = [None, "text", {"observers": [None]}, {"observers": {"count": "1"}},
+                 dict(good[0], date={"@ISO8601": "20240101"}), dict(good[0], date={"@ISO8601": "2024-W01-1T00:00"}),
+                 dict(good[0], place={"@id": ["1"], "name": "Teich"})]
+        merged = lifelist.merge_exports([("a.json", good + weird)])
+        skipped = []
+        data = lifelist.build_data(merged, {}, skipped)
+        self.assertEqual(len(data["obs"]), 3)
+        self.assertEqual(sorted(set(skipped)), ["no observer data", "no place", "no valid date"])
+        # a time that is no dict is no time
+        s = sighting("Parus major", "Kohlmeise", "2024-03-02")
+        s["observers"][0]["timing"] = "08:15"
+        self.assertEqual(build([s])["obs"][0][6], -1)
+
     def test_small_flaws_are_mended(self):
         s = sighting("Grus grus", "Kranich", "2024-03-01", place_id="9", lat="", lon="x", count="1-5", sys_order="?")
         s["observers"][0]["timing"] = {"@notime": "0", "@ISO8601": "2024-03-01Txx:yy:00"}

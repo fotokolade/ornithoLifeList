@@ -48,14 +48,16 @@ function curveSvg(chrono) {
     ${g}<path d="${area}" fill="url(#${gradId})" stroke="none"/><path d="${d}" fill="none" stroke="url(#${lineId})" stroke-width="2.25" stroke-linejoin="round"/>${dots}</svg>`;
 }
 // sequential scale in one hue, light (few) to dark (many); --heat-lo/--heat-hi flip for the dark theme
+/** @param {number} frac @returns {number} how many percent of --heat-hi heatColor() mixes into --heat-lo */
+const heatMixPct = frac => Math.round(8 + Math.max(0, Math.min(1, frac)) * 92);
 function heatColor(frac) {
-  return `color-mix(in srgb, var(--heat-hi) ${Math.round(8 + Math.max(0, Math.min(1, frac)) * 92)}%, var(--heat-lo))`;
+  return `color-mix(in srgb, var(--heat-hi) ${heatMixPct(frac)}%, var(--heat-lo))`;
 }
 // A cell's number is white or black, whichever reads better on the cell's colour: each of the two reaches 4.5:1 up to
 // a point, and together they cover the whole scale, which a theme's softer text colours do not (the middle steps fall in between).
 const relLum = rgb => { const [r, g, b] = rgb.map(c => { c /= 255; return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4; }); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
 /** @param {number[]} rgb @returns {boolean} white text reads better on this colour than black */
-const whiteInk = rgb => 1.05 / (relLum(rgb) + 0.05) >= (relLum(rgb) + 0.05) / 0.05;
+const whiteInk = rgb => { const l = relLum(rgb) + 0.05; return 1.05 / l >= l / 0.05; };
 /**
  * A colour scale of at most five clearly different steps (easier to read, to print and for colour-blind
  * eyes than a smooth gradient), for counts up to `max`.
@@ -69,14 +71,14 @@ function heatScale(max) {
   else for (let k = 1; k <= 5; k++) { const b = k === 5 ? max : Math.round(max * k / 5); if (!bounds.length || b > bounds[bounds.length - 1]) bounds.push(b); }
   const n = bounds.length;
   const color = i => heatColor((i + 1) / n);
-  // heatColor() mixes --heat-hi into --heat-lo in sRGB; the same mix, to know what the text sits on
+  // heatColor() mixes --heat-hi into --heat-lo in sRGB; the same mix, to know what the text sits on (once per step, not per cell)
   const lo = cssRgb(cssVar("--heat-lo")), hi = cssRgb(cssVar("--heat-hi"));
-  const under = i => { const p = Math.round(8 + Math.max(0, Math.min(1, (i + 1) / n)) * 92) / 100; return lo.map((c, k) => c * (1 - p) + hi[k] * p); };
+  const hotSteps = bounds.map((_, i) => { const p = heatMixPct((i + 1) / n) / 100; return whiteInk(lo.map((c, k) => c * (1 - p) + hi[k] * p)); });
   const labels = bounds.map((b, i) => (i ? bounds[i - 1] + 1 : 1) === b ? fmtN(b) : `${fmtN(i ? bounds[i - 1] + 1 : 1)}–${fmtN(b)}`);
   return {
     step: v => v <= 0 ? -1 : bounds.findIndex(b => v <= b + 1e-9),
     color,
-    hot: i => whiteInk(under(i)),
+    hot: i => hotSteps[i],
     legend: `<div class="legend heat-steps">${labels.map((l, i) => `<span class="hs"><i style="background:${color(i)}"></i>${l}</span>`).join("")}</div>`,
   };
 }

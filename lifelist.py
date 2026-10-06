@@ -120,7 +120,9 @@ def sighting_id(s):
     """ornitho's own sighting id; the whole record serves as fallback for exports without one.
     id_universal comes first: it is unique across the ornitho portals, whereas id_sighting is only
     unique within one, so exports from e.g. ornitho.de and ornitho.lu could share an id_sighting."""
-    o = (s.get("observers") or [{}])[0]
+    # a malformed record (no dict, no observer list) gets no id of its own here: build_data skips it with a reason
+    o = s.get("observers") if isinstance(s, dict) else None
+    o = o[0] if isinstance(o, list) and o and isinstance(o[0], dict) else {}
     if o.get("id_universal"):
         return "u" + str(o["id_universal"])
     if o.get("id_sighting"):
@@ -199,8 +201,9 @@ def species_key(latin, name, escaped):
 
 def minute_of_day(o):
     """Local minute of the day of the sighting, or -1 when the export has no time."""
-    tm = o.get("timing") or {}
-    iso = tm.get("@ISO8601", "")
+    tm = o.get("timing")
+    tm = tm if isinstance(tm, dict) else {}
+    iso = str(tm.get("@ISO8601") or "")
     if tm.get("@notime") != "0" or len(iso) < 16:
         return -1
     try:
@@ -287,10 +290,13 @@ def check_sighting(s):
     sp, pl, date = s.get("species"), s.get("place"), s.get("date")
     if not isinstance(sp, dict) or not str(sp.get("latin_name") or "").strip() or not str(sp.get("name") or "").strip():
         raise ValueError("no species")
-    if not isinstance(pl, dict) or not pl.get("@id"):
+    if not isinstance(pl, dict) or not isinstance(pl.get("@id"), (str, int)) or not pl.get("@id"):
         raise ValueError("no place")
     day = str(date.get("@ISO8601") or "")[:10] if isinstance(date, dict) else ""
+    # YYYY-MM-DD only: the page reads year, month and day by position, and Python 3.11+ would also take "20240101"
     try:
+        if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", day):
+            raise ValueError
         datetime.date.fromisoformat(day)
     except ValueError:
         raise ValueError("no valid date") from None
