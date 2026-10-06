@@ -151,7 +151,11 @@ details.tour-settings summary::before{content:"⚙ ";color:var(--muted)}
 .lv-seg.cur{outline:1.5px solid var(--accent);outline-offset:1px;position:relative}
 /* the current level's five steps */
 .lv-seg.cur::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 calc(20% - 1.5px),var(--card) calc(20% - 1.5px) 20%)}
-.level .lv-sub{font-size:.95rem;font-weight:600;color:var(--muted);letter-spacing:.02em}
+/* the step within the level as a medal: its metal in the disc and a tint, the word in the text colour */
+.medal{--mc:#b0743c;display:inline-flex;align-items:center;gap:5px;vertical-align:middle;font-size:.74rem;font-weight:600;color:var(--text);
+  background:color-mix(in srgb,var(--mc) 16%,var(--card));border:1px solid color-mix(in srgb,var(--mc) 55%,var(--card));border-radius:999px;padding:1px 9px 1px 4px;margin-left:4px;position:relative;top:-2px}
+.medal i{width:12px;height:12px;border-radius:50%;background:radial-gradient(circle at 35% 30%,color-mix(in srgb,var(--mc) 35%,#fff),var(--mc) 60%,color-mix(in srgb,var(--mc) 70%,#000));box-shadow:0 0 0 1px color-mix(in srgb,var(--mc) 70%,#000)}
+.medal.m-silver{--mc:#a3abb3}.medal.m-gold{--mc:#d9a521}.medal.m-platinum{--mc:#8fb3c4}.medal.m-diamond{--mc:#4fc3e8}
 .lv-tiers{margin-top:4px}
 .lv-tiers span{color:var(--muted);font-size:.7rem;text-align:center;border-top:1px solid var(--line);padding-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .lv-tiers span.cur{color:var(--text);font-weight:600;border-top-color:var(--accent)}
@@ -492,7 +496,7 @@ footer.meta-footer .btn{flex:0 0 auto;padding:3px 10px}
   .hide-sm{display:revert!important}
   th.hide-sm,td.hide-sm{display:table-cell!important}
   .show-sm{display:none!important}
-  .heat-steps .hs i,.wd-ring circle,.bar,.bar i,.heat td,.pheno div,.cal-day,.season-strip,.season-strip *,.plan-strip i,.stat-lbl i,.stat .meter,.stat .meter i,.stat .tag,.level .tag,.lv-seg,.lv-seg i,.level .stat-lbl i{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .heat-steps .hs i,.wd-ring circle,.bar,.bar i,.heat td,.pheno div,.cal-day,.season-strip,.season-strip *,.plan-strip i,.stat-lbl i,.stat .meter,.stat .meter i,.stat .tag,.level .tag,.medal,.medal i,.lv-seg,.lv-seg i,.level .stat-lbl i{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   details.info summary{display:none!important}
   h2 + details.info{margin-top:0;text-align:left}
   h2 .ctl select{appearance:none;border:0;padding:0;background:none;font-weight:600;color:var(--text)}

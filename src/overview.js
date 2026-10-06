@@ -146,8 +146,8 @@ const LEVEL_FROM = [0, 25, 50, 100, 150, 200, 250, 300];
 const LEVEL_TIER = [0, 0, 1, 1, 2, 2, 2, 3];
 /** @param {number} n life species @returns {number} the level reached, 0-based */
 const birderLevel = n => LEVEL_FROM.filter(f => n >= f).length - 1;
-// every level in five steps (I to V) of equal width; the open-ended top level steps on every 25 species, up to V
-const SUB_STEPS = 5, SUB_NAMES = ["I", "II", "III", "IV", "V"];
+// every level in five steps of equal width, bronze to diamond (T.medals); the open-ended top level steps on every 25 species, up to diamond
+const SUB_STEPS = 5, MEDALS = ["bronze", "silver", "gold", "platinum", "diamond"];
 /** @param {number} n life species @returns {{lv: number, sub: number, subNext: number|null, lvNext: number|null}} the level and step reached (0-based) and where the next step and level start */
 function birderStep(n) {
   const lv = birderLevel(n), from = LEVEL_FROM[lv], lvNext = lv < LEVEL_FROM.length - 1 ? LEVEL_FROM[lv + 1] : null;
@@ -162,7 +162,7 @@ function levelCard(n) {
   const { lv, sub, subNext, lvNext } = birderStep(n), last = LEVEL_FROM.length - 1;
   const [name, line] = T.levels[lv];
   const toLevel = lvNext === null ? "" : t("levelNext", fmtN(lvNext - n));
-  const toSub = subNext === null ? "" : t("levelNextSub", fmtN(subNext - n), SUB_NAMES[sub + 1]);
+  const toSub = subNext === null ? "" : t("levelNextSub", fmtN(subNext - n), T.medals[sub + 1]);
   const next = [toSub, toLevel].filter(Boolean).join(" · ") || t("levelTop");
   const segs = LEVEL_FROM.map((from, i) => {
     const to = i < last ? LEVEL_FROM[i + 1] : from;
@@ -171,10 +171,10 @@ function levelCard(n) {
     return `<span class="lv-seg${i === lv ? " cur" : ""}" data-tip="${tip}" aria-label="${tip}"><i style="width:${fill.toFixed(1)}%"></i></span>`;
   }).join("");
   const tiers = T.tiers.map((tier, k) => `<span class="${LEVEL_TIER[lv] === k ? "cur" : ""}" style="grid-column:span ${LEVEL_TIER.filter(x => x === k).length}">${esc(tier)}</span>`).join("");
-  const where = t("levelOf", lv + 1, last + 1, SUB_NAMES[sub]);
+  const where = t("levelOf", lv + 1, last + 1, T.medals[sub]);
   return `<div class="level t-species" data-level="${lv + 1}" data-step="${sub + 1}">
       <div class="level-head"><div><div class="stat-lbl"><i></i>${t("levelTitle")}</div>
-        <b>${esc(name)} <span class="lv-sub">${SUB_NAMES[sub]}</span></b><div class="stat-sub">${esc(line)}</div></div>
+        <b>${esc(name)} <span class="medal m-${MEDALS[sub]}"><i></i>${esc(T.medals[sub])}</span></b><div class="stat-sub">${esc(line)}</div></div>
         <div class="level-rank"><span class="tag">${esc(T.tiers[LEVEL_TIER[lv]])}</span><div class="stat-sub">${where}</div><div class="stat-sub">${next}</div></div></div>
       <div class="lv-bar" role="img" aria-label="${esc(where + ". " + next)}">${segs}</div>
       <div class="lv-tiers">${tiers}</div>
