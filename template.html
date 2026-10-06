@@ -184,6 +184,11 @@ tr.detail td{background:var(--accent-soft)!important;padding:8px}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
 .chip{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:.74rem}
 .detailgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+/* two tables side by side only while each gets 340px, enough for species with two number columns (a long name like
+   "Fichtenkreuzschnabel" cannot wrap); narrower, on paper too, one goes under the other instead of running off */
+.detailgrid.tables{grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr))}
+.detailgrid.tables>div{min-width:0}
+.detailgrid.tables th{white-space:normal}
 table.heat{table-layout:fixed;min-width:560px}
 .heat th:first-child{width:3.4rem}
 .heat td,.heat th{text-align:center;padding:3px 2px;font-size:.72rem}
@@ -429,6 +434,7 @@ footer.meta-footer .btn{flex:0 0 auto;padding:3px 10px}
   div.tab{display:block!important;padding-top:0}
   .wrap{max-width:none;padding:0}
   .card,.kpi{overflow:visible;border-color:var(--line);box-shadow:none}
+  .detailgrid.tables>div{break-inside:avoid}  /* "Frühe Arten" stays with its table */
   tr,.yrow,.kpi{break-inside:avoid}
   /* a heading never ends a page on its own: neither after it nor after the info text below it */
   h2,h2 + details.info{break-after:avoid;margin-top:14px}

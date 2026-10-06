@@ -918,6 +918,19 @@ class PageTest(unittest.TestCase):
         self.assertEqual(hidden, [])
         self.assertEqual(self.errors, [])
 
+    def test_printed_side_by_side_tables_fit_their_cards(self):
+        # on paper "Späte Arten" ran over its card and lost its last column: at no width may a table leave its card
+        for width in (560, 620, 700, 800):
+            page = self.open(hash="#activity", width=width)
+            page.evaluate("S.printTabs = new Set(['activity'])")
+            page.emulate_media(media="print")
+            page.evaluate("window.dispatchEvent(new Event('beforeprint'))")
+            over = page.evaluate("""[...document.querySelectorAll('#tab-activity .detailgrid table')]
+                .map(t => Math.round(t.getBoundingClientRect().right - t.closest('.card').getBoundingClientRect().right))""")
+            self.assertEqual(len(over), 2)
+            self.assertTrue(all(o <= 0 for o in over), (width, over))
+            self.assertEqual(self.errors, [])
+
     def test_phone_width_has_no_sideways_scroll(self):
         page = self.open(width=390)
         for tab in TABS:
