@@ -194,7 +194,7 @@ function overviewTiles(list, stats, new30, latest) {
   const cur = cmp.find(r => r.y === S.year), before = cmp.find(r => r.y === S.year - 1);
   const vs = before ? running ? t("kpiVsUntil", before.y, shortMD(END_MD)) : t("kpiVs", before.y) : "";
   // "2025: 2.179 ▲ +45" (what it is compared with stands once over the tiles, and in the hint over the arrow);
-  // without `value` only the comparison, for a tile whose large number is the year's
+  // without `value` only the arrow, for a tile whose large number is the year's (it goes behind the tile's name)
   /** @param {"obs"|"days"|"places"|"species"|"lifers"} k @param {string} [sign] @param {boolean} [value] */
   const yearLine = (k, sign = "", value = true) => {
     if (!cur) return "";
@@ -204,7 +204,7 @@ function overviewTiles(list, stats, new30, latest) {
     if (!before) return head + record;
     const dv = a - before[k], tip = `data-tip="${esc(vs)}"`;
     const delta = dv > 0 ? `<span class="delta up" ${tip}>▲ +${fmtN(dv)}</span>` : dv < 0 ? `<span class="delta down" ${tip}>▼ −${fmtN(-dv)}</span>` : `<span class="delta" ${tip}>±0</span>`;
-    return value ? `${head} ${delta}${record}` : `${delta} ${t("kpiVs", before.y)}${record}`;
+    return value ? `${head} ${delta}${record}` : `${delta}${record}`;
   };
   /** @param {"obs"|"days"|"places"|"lifers"} k @param {string} [sign] */
   const spark = (k, sign = "") => {
@@ -216,7 +216,7 @@ function overviewTiles(list, stats, new30, latest) {
   };
   /** @param {string} theme @param {string} label @param {string} value @param {string} sub @param {string} [extra] */
   const tile = (theme, label, value, sub, extra = "") =>
-    `<div class="stat t-${theme}"><div class="stat-lbl"><i></i>${label}</div><b>${value}</b><div class="stat-sub">${sub}</div>${extra}</div>`;
+    `<div class="stat t-${theme}"><div class="stat-lbl"><i></i>${label}</div><b>${value}</b>${sub ? `<div class="stat-sub">${sub}</div>` : ""}${extra}</div>`;
   const photos = list.filter(o => o.ph).length, photoPct = pctDisplay(photos, list.length);
   const daySp = new Map();
   for (const o of list) if (o.y === S.year) { if (!daySp.has(o.d)) daySp.set(o.d, new Set()); daySp.get(o.d).add(o.s); }
@@ -232,7 +232,7 @@ function overviewTiles(list, stats, new30, latest) {
       ${tile("places", t("places"), fmtN(new Set(list.map(o => o.p)).size), yearLine("places"), spark("places"))}
     </div>
     <div class="kpis stats minor">
-      ${cur ? tile("species", t("speciesInYear", S.year), fmtN(cur.species), yearLine("species", "", false)) : ""}
+      ${cur ? tile("species", `${t("speciesInYear", S.year)} ${yearLine("species", "", false)}`, fmtN(cur.species), "") : ""}
       ${new30 ? tile("species", t("newLast30"), `+${fmtN(new30)}`, t("curveLast", esc(speciesName(SP[latest.s])))) : ""}
       ${tile("photos", t("photoShare"), `${photoPct}%`, t("photoOf", fmtN(photos), fmtN(list.length)), `<div class="meter"><i style="width:${photoPct}%"></i></div>`)}
       ${bestCount ? tile("activity", t("bestDay", S.year), `${fmtN(bestCount)} <small>${t(bestCount === 1 ? "speciesWordOne" : "speciesWord")}</small>`,

@@ -675,6 +675,10 @@ class PageTest(unittest.TestCase):
         # "new in the last 30 days" only when there are some (the sample's records are older)
         self.assertNotIn("Neu in den letzten 30 Tagen", page.inner_text("#tab-overview .kpis.minor"))
         self.assertIn("Arten in 2024", page.inner_text("#tab-overview .kpis.minor"))
+        # the species of the year: its arrow right behind the tile's name, no second line
+        year_tile = page.locator("#tab-overview .kpis.minor .stat").first
+        self.assertEqual(year_tile.locator(".stat-lbl .delta").count(), 1)
+        self.assertEqual(year_tile.locator(".stat-sub").count(), 0)
         # the first year has nothing before it: its figure without a comparison
         page.evaluate("S.year = 2023; renderOverview()")
         sub = page.locator("#tab-overview .stats .stat").nth(1).locator(".stat-sub").inner_text()
