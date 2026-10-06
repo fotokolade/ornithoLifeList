@@ -650,7 +650,14 @@ class PageTest(unittest.TestCase):
         self.assertIn(("▲ +" if dv > 0 else "▼ −" if dv < 0 else "±") + str(abs(dv)), sub)
         # the export ends in 2024 before New Year's Eve: both years only up to the day of its last observation, not today
         self.assertEqual(figs[6], 2024)
-        self.assertIn(f"ggü. 2023 bis {figs[5]}", sub)
+        # what the tiles compare with stands once over them (and in the hint over each arrow), not in every tile
+        self.assertEqual(page.inner_text("#tab-overview .cmp-head"), f"2024 gegen 2023, jeweils bis {figs[5]}")
+        self.assertNotIn("ggü.", sub)
+        self.assertEqual(obs.locator(".delta").get_attribute("data-tip"), f"ggü. 2023 bis {figs[5]}")
+        # one line per tile: the year's figure and the arrow
+        self.assertEqual(sub.count("\n"), 0)
+        # the level comes first on the page
+        self.assertEqual(page.evaluate("document.querySelector('#tab-overview').firstElementChild.classList.contains('level')"), True)
         self.assertLess(figs[2], figs[4])
         # the table of the years cuts on the same day
         self.assertIn(f"bis {figs[5]}", page.inner_text("#tab-overview .yhead"))
@@ -668,10 +675,15 @@ class PageTest(unittest.TestCase):
         # "new in the last 30 days" only when there are some (the sample's records are older)
         self.assertNotIn("Neu in den letzten 30 Tagen", page.inner_text("#tab-overview .kpis.minor"))
         self.assertIn("Arten in 2024", page.inner_text("#tab-overview .kpis.minor"))
+        # the species of the year: its arrow right behind the tile's name, no second line
+        year_tile = page.locator("#tab-overview .kpis.minor .stat").first
+        self.assertEqual(year_tile.locator(".stat-lbl .delta").count(), 1)
+        self.assertEqual(year_tile.locator(".stat-sub").count(), 0)
         # the first year has nothing before it: its figure without a comparison
         page.evaluate("S.year = 2023; renderOverview()")
         sub = page.locator("#tab-overview .stats .stat").nth(1).locator(".stat-sub").inner_text()
         self.assertEqual(sub, f"2023: {figs[4]}")
+        self.assertEqual(page.locator("#tab-overview .cmp-head").count(), 0)
         page.select_option("#f-lang", "en")
         self.assertIn("Species in 2023", page.inner_text("#tab-overview .kpis.minor"))
         self.assertEqual(self.errors, [])
@@ -691,9 +703,11 @@ class PageTest(unittest.TestCase):
         self.assertEqual(card.get_attribute("data-level"), "1")
         medals = ["Bronze", "Silber", "Gold", "Platin", "Diamant"]
         self.assertEqual(card.locator("b").text_content(), f"Nestling {medals[n // 5]}")
-        self.assertIn(f"Stufe 1 von 8, {medals[n // 5]}", card.inner_text())
+        self.assertIn("Stufe 1 von 8", card.inner_text())
+        # only the nearest goal: the next medal
         self.assertIn(f"noch {5 - n % 5} Art", card.inner_text())
-        self.assertIn(f"noch {25 - n} Arten bis zur nächsten Stufe", card.inner_text())
+        self.assertIn(f"bis {medals[n // 5 + 1]}", card.inner_text())
+        self.assertNotIn("nächsten Stufe", card.inner_text())
         self.assertEqual(card.locator(".lv-tiers .cur").inner_text(), "Anfänger")
         # the levels above keep their names to themselves, in the card and in the hints over the bar
         text = card.inner_text() + "".join(card.locator(".lv-seg").nth(i).get_attribute("data-tip") for i in range(8))
@@ -707,15 +721,17 @@ class PageTest(unittest.TestCase):
         show(174)
         probe = page.locator("#lv-probe")
         self.assertEqual(probe.locator("b").text_content(), "Möwen-Bestimmer Gold")
-        self.assertIn("noch 6 Arten bis Platin · noch 26 Arten bis zur nächsten Stufe", probe.inner_text())
+        self.assertIn("noch 6 Arten bis Platin", probe.inner_text())
+        self.assertNotIn("nächsten Stufe", probe.inner_text())
         self.assertNotIn("Laubsänger", probe.inner_text())
         self.assertEqual(widths("#lv-probe"), [100, 100, 100, 100, 48, 0, 0, 0])
         self.assertEqual(probe.locator(".lv-seg").nth(3).get_attribute("data-tip"), "Stufe 4: Spektiv-Schlepper, ab 100 Arten")
         page.evaluate("document.getElementById('lv-probe').remove()")
         # the fifth step only says how far the next level is
         show(195)
-        self.assertIn("Stufe 5 von 8, Diamant", probe.inner_text())
-        self.assertNotIn("bis Diamant", probe.inner_text())
+        # at diamond, the next level is the goal
+        self.assertEqual(probe.locator("b").text_content(), "Möwen-Bestimmer Diamant")
+        self.assertIn("noch 5 Arten bis zur nächsten Stufe", probe.inner_text())
         page.evaluate("document.getElementById('lv-probe').remove()")
         show(312)
         self.assertEqual(probe.locator("b").text_content(), "Orakel von Helgoland Bronze")
@@ -729,8 +745,8 @@ class PageTest(unittest.TestCase):
         self.assertEqual(widths("#lv-probe"), [100] * 8)
         page.evaluate("document.getElementById('lv-probe').remove()")
         page.select_option("#f-lang", "en")
-        self.assertIn(f"Level 1 of 8, {['Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond'][n // 5]}", page.inner_text("#tab-overview .level"))
-        self.assertIn(f"{25 - n} more species to the next level", page.inner_text("#tab-overview .level"))
+        self.assertIn("Level 1 of 8", page.inner_text("#tab-overview .level"))
+        self.assertIn(f"{5 - n % 5} more species to {['Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond'][n // 5 + 1]}", page.inner_text("#tab-overview .level"))
         self.assertEqual(self.errors, [])
 
     def test_best_day_opens_in_the_calendar(self):

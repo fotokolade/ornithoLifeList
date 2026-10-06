@@ -163,7 +163,8 @@ function levelCard(n) {
   const [name, line] = T.levels[lv];
   const toLevel = lvNext === null ? "" : t("levelNext", fmtN(lvNext - n));
   const toSub = subNext === null ? "" : t("levelNextSub", fmtN(subNext - n), T.medals[sub + 1]);
-  const next = [toSub, toLevel].filter(Boolean).join(" · ") || t("levelTop");
+  // only the nearest goal: the next medal, after diamond the next level
+  const next = toSub || toLevel || t("levelTop");
   const segs = LEVEL_FROM.map((from, i) => {
     // the current level filled as far as reached (five steps of `size`); the open-ended top one is full at diamond
     const fill = i < lv ? 100 : i > lv ? 0 : i === last && sub === SUB_STEPS - 1 ? 100 : (n - from) / (size * SUB_STEPS) * 100;
@@ -171,12 +172,12 @@ function levelCard(n) {
     return `<span class="lv-seg${i === lv ? " cur" : ""}" data-tip="${tip}" aria-label="${tip}"><i style="width:${fill.toFixed(1)}%"></i></span>`;
   }).join("");
   const tiers = T.tiers.map((tier, k) => `<span class="${LEVEL_TIER[lv] === k ? "cur" : ""}" style="grid-column:span ${LEVEL_TIER.filter(x => x === k).length}">${esc(tier)}</span>`).join("");
-  const where = t("levelOf", lv + 1, last + 1, T.medals[sub]);
+  const where = t("levelOf", lv + 1, last + 1);
   return `<div class="level t-species" data-level="${lv + 1}" data-step="${sub + 1}">
       <div class="level-head"><div><div class="stat-lbl"><i></i>${t("levelTitle")}</div>
         <b>${esc(name)} <span class="medal m-${MEDALS[sub]}"><i></i>${esc(T.medals[sub])}</span></b><div class="stat-sub">${esc(line)}</div></div>
-        <div class="level-rank"><span class="tag">${esc(T.tiers[LEVEL_TIER[lv]])}</span><div class="stat-sub">${where}</div><div class="stat-sub">${next}</div></div></div>
-      <div class="lv-bar" role="img" aria-label="${esc(where + ". " + next)}">${segs}</div>
+        <div class="level-rank"><div class="stat-sub">${where}</div><div class="stat-sub">${next}</div></div></div>
+      <div class="lv-bar" role="img" aria-label="${esc(`${T.tiers[LEVEL_TIER[lv]]}, ${where}, ${T.medals[sub]}. ${next}`)}">${segs}</div>
       <div class="lv-tiers">${tiers}</div>
     </div>`;
 }
@@ -192,17 +193,19 @@ function overviewTiles(list, stats, new30, latest) {
   const cmp = running ? yearFigures(list, stats, END_MD) : full;
   const cur = cmp.find(r => r.y === S.year), before = cmp.find(r => r.y === S.year - 1);
   const vs = before ? running ? t("kpiVsUntil", before.y, shortMD(END_MD)) : t("kpiVs", before.y) : "";
-  // "2025: 2.179", under it "▲ +45 vs 2024"; without `value` only the comparison (for a tile whose large number is the year's)
+  // "2025: 2.179 ▲ +45" (what it is compared with stands once over the tiles, and in the hint over the arrow);
+  // without `value` only the arrow, for a tile whose large number is the year's (it goes behind the tile's name)
   /** @param {"obs"|"days"|"places"|"species"|"lifers"} k @param {string} [sign] @param {boolean} [value] */
   const yearLine = (k, sign = "", value = true) => {
     if (!cur) return "";
     const a = cur[k], others = full.filter(r => r.y !== S.year && r[k]);
     const record = others.length && a > Math.max(...others.map(r => r[k])) ? ` <span class="tag">${t("kpiRecord")}</span>` : "";
-    const head = value ? `<div>${S.year}: ${sign}${fmtN(a)}${before ? "" : record}</div>` : "";
-    if (!before) return head || record;
+    const head = value ? `${S.year}: ${sign}${fmtN(a)}` : "";
+    if (!before) return head + record;
     const dv = a - before[k];
-    const delta = dv > 0 ? `<span class="delta up">▲ +${fmtN(dv)}</span>` : dv < 0 ? `<span class="delta down">▼ −${fmtN(-dv)}</span>` : `<span class="delta">±0</span>`;
-    return `${head}<div>${delta} ${vs}${record}</div>`;
+    const [cls, txt] = dv > 0 ? [" up", `▲ +${fmtN(dv)}`] : dv < 0 ? [" down", `▼ −${fmtN(-dv)}`] : ["", "±0"];
+    const delta = `<span class="delta${cls}" data-tip="${esc(vs)}">${txt}</span>`;
+    return value ? `${head} ${delta}${record}` : `${delta}${record}`;
   };
   /** @param {"obs"|"days"|"places"|"lifers"} k @param {string} [sign] */
   const spark = (k, sign = "") => {
@@ -214,28 +217,29 @@ function overviewTiles(list, stats, new30, latest) {
   };
   /** @param {string} theme @param {string} label @param {string} value @param {string} sub @param {string} [extra] */
   const tile = (theme, label, value, sub, extra = "") =>
-    `<div class="stat t-${theme}"><div class="stat-lbl"><i></i>${label}</div><b>${value}</b><div class="stat-sub">${sub}</div>${extra}</div>`;
+    `<div class="stat t-${theme}"><div class="stat-lbl"><i></i>${label}</div><b>${value}</b>${sub ? `<div class="stat-sub">${sub}</div>` : ""}${extra}</div>`;
   const photos = list.filter(o => o.ph).length, photoPct = pctDisplay(photos, list.length);
   const daySp = new Map();
   for (const o of list) if (o.y === S.year) { if (!daySp.has(o.d)) daySp.set(o.d, new Set()); daySp.get(o.d).add(o.s); }
   let bestDay = "", bestCount = 0;
   for (const [d, sp] of daySp) if (sp.size > bestCount) { bestCount = sp.size; bestDay = d; }
-  return `<div class="kpis k4 stats">
+  const head = before ? running ? t("kpiCmpHeadUntil", S.year, before.y, shortMD(END_MD)) : t("kpiCmpHead", S.year, before.y) : "";
+  return `${levelCard(stats.size)}
+    ${head ? `<p class="sub cmp-head">${head}</p>` : ""}
+    <div class="kpis k4 stats">
       ${tile("species", t("speciesLife"), fmtN(stats.size), yearLine("lifers", "+"), spark("lifers", "+"))}
       ${tile("activity", t("observations"), fmtN(list.length), yearLine("obs"), spark("obs"))}
       ${tile("activity", t("days"), fmtN(new Set(list.map(o => o.d)).size), yearLine("days"), spark("days"))}
       ${tile("places", t("places"), fmtN(new Set(list.map(o => o.p)).size), yearLine("places"), spark("places"))}
     </div>
     <div class="kpis stats minor">
-      ${cur ? tile("species", t("speciesInYear", S.year), fmtN(cur.species), yearLine("species", "", false)) : ""}
+      ${cur ? tile("species", `${t("speciesInYear", S.year)} ${yearLine("species", "", false)}`, fmtN(cur.species), "") : ""}
       ${new30 ? tile("species", t("newLast30"), `+${fmtN(new30)}`, t("curveLast", esc(speciesName(SP[latest.s])))) : ""}
       ${tile("photos", t("photoShare"), `${photoPct}%`, t("photoOf", fmtN(photos), fmtN(list.length)), `<div class="meter"><i style="width:${photoPct}%"></i></div>`)}
       ${bestCount ? tile("activity", t("bestDay", S.year), `${fmtN(bestCount)} <small>${t(bestCount === 1 ? "speciesWordOne" : "speciesWord")}</small>`,
-        `${fmtD(bestDay)}<span class="to-cal"> · <button type="button" class="linkbtn" data-show-day="${bestDay}">${t("showInCal")}</button></span>`) : ""}
+        `<button type="button" class="linkbtn" data-show-day="${bestDay}" data-tip="${t("showInCal")}" aria-label="${fmtD(bestDay)}, ${t("showInCal")}">${fmtD(bestDay)}<span class="to-cal"> ›</span></button>`) : ""}
     </div>
-    ${infoText(t("kpiHelp"))}
-    ${levelCard(stats.size)}
-    ${infoText(t("levelHelp"))}`;
+    ${infoText(t("levelHelp") + " " + t("kpiHelp"))}`;
 }
 function renderOverview() {
   const list = regionObs(baseObs());
