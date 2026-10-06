@@ -114,6 +114,7 @@ if (initialTheme !== "system") document.documentElement.setAttribute("data-theme
  * @property {Set<string>} tourOpen - keys of tours with an open detail row
  * @property {boolean} tourAll - show every tour instead of the newest ones
  * @property {string|null} tourRoute - key of the tour drawn on the map
+ * @property {{on: boolean, year: number, day: number, speed: number, playing: boolean, sp: number[]|null, glow: number}} tl - the map's time-lapse: shown, year, day, days per second, playing, the taxa of the one species followed (null: all), afterglow in days
  * @property {number|null} focusSp - species index the life list scrolls to and highlights once, after a jump from another view
  */
 // the point in time the page opens with, and "Gesamt" returns to
@@ -129,7 +130,7 @@ function loadPrintTabs() {
 const S = { tab: "overview", region: "all", year: TIME_START.y, month: TIME_START.m, timeAll: true, lang: initialLang, theme: initialTheme,
   escaped: false, collective: false, atlasF: "all", actMetric: "obs", redact: !!RAW.meta.redacted, metric: "life", q: "", sort: "nr", dir: -1, open: new Set(),
   regSort: {}, regAll: {}, targetSrc: "all", customTargets: loadCustomTargets(), wishSort: { k: "season", d: 1 },
-  wishOpen: null, wishQ: "", plan: { scope: "de", month: 0, view: "dest", q: "", open: null, all: false, openG: null, gview: "d", sort: "n", gall: false }, calDay: null, heatMetric: { ym: "species", m: "obs", w: "obs", rm: "days" }, heatSel: {}, regMonthLvl: "c", tourCfg: null, tourSetOpen: false, printTabs: loadPrintTabs(), tourDiagOpen: false, tourSort: { k: "date", d: -1 }, tourOpen: new Set(), tourAll: false, tourRoute: null, focusSp: null };
+  wishOpen: null, wishQ: "", plan: { scope: "de", month: 0, view: "dest", q: "", open: null, all: false, openG: null, gview: "d", sort: "n", gall: false }, calDay: null, heatMetric: { ym: "species", m: "obs", w: "obs", rm: "days" }, heatSel: {}, regMonthLvl: "c", tourCfg: null, tourSetOpen: false, printTabs: loadPrintTabs(), tourDiagOpen: false, tourSort: { k: "date", d: -1 }, tourOpen: new Set(), tourAll: false, tourRoute: null, focusSp: null, tl: { on: false, year: 0, day: 0, speed: 30, playing: false, sp: null, glow: 30 } };
 T = STR[S.lang];
 
 /* ---------- helpers ---------- */
@@ -150,8 +151,9 @@ const kpiTile = (value, label, theme, { main = false, zero = false } = {}) =>
 const fmtN = n => n.toLocaleString(S.lang === "en" ? "en-GB" : "de-DE");
 // rounds for display but never claims 100% unless truly complete, or 0% when something is actually there
 const pctDisplay = (count, total) => !total ? 0 : count === 0 ? 0 : count === total ? 100 : Math.min(99, Math.max(1, Math.round(count / total * 100)));
-const fmtD = d => d.slice(8) + "." + d.slice(5, 7) + "." + d.slice(0, 4);
-const shortMD = md => (+md.slice(3)) + ". " + T.monthsShort[+md.slice(0, 2) - 1];
+// "03.01.2024" in German; "3 Jan 2024" in English, where "03/01/2024" would read as March in the US
+const fmtD = d => S.lang === "en" ? `${+d.slice(8)} ${T.monthsShort[+d.slice(5, 7) - 1]} ${d.slice(0, 4)}` : d.slice(8) + "." + d.slice(5, 7) + "." + d.slice(0, 4);
+const shortMD = md => (+md.slice(3)) + (S.lang === "en" ? " " : ". ") + T.monthsShort[+md.slice(0, 2) - 1];
 const byDateDesc = (a, b) => (a < b ? 1 : a > b ? -1 : 0);
 const REDACT_MASK = "██████████";
 const placeName = i => S.redact ? REDACT_MASK : PL[i].name;
@@ -164,6 +166,9 @@ let collator = new Intl.Collator(S.lang === "en" ? "en" : "de");
 const speciesName = sp => S.lang === "en" && sp.english ? sp.english : sp.name;
 // the small secondary line under the primary name: German + Latin when showing English, else just Latin.
 const speciesSub = sp => S.lang === "en" && sp.english ? `${sp.name} · ${sp.latin}` : sp.latin;
+/** A sortable column head for every table: `attrs` tell the click handler which column it is, `dir` is 1 (ascending)
+ *  or -1 when the table is sorted by it, else 0. Reachable with Tab; Enter or Space sort like a click (app.js). */
+const sortTh = (attrs, label, cls, dir) => `<th class="sortable ${cls}${dir ? " sorted" : ""}" ${attrs} tabindex="0" aria-sort="${dir > 0 ? "ascending" : dir < 0 ? "descending" : "none"}">${label}${dir > 0 ? " ▲" : dir < 0 ? " ▼" : ""}</th>`;
 const speciesLine = sp => `${esc(speciesName(sp))}<span class="latin">${esc(speciesSub(sp))}</span>`;
 // wraps an explanatory paragraph in a collapsed <details> so it doesn't clutter the page by default;
 // print CSS forces it open again so the explanation is still in a PDF report.

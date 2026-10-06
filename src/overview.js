@@ -72,33 +72,44 @@ function calendarSection(list, statsAll) {
   const scale = heatScale(max);
   const liferDays = new Set([...statsAll.values()].filter(r => r.first.y === year).map(r => r.first.d));
   const dowLetters = T.weekdays.map(w => w[0]);
-  const months = T.months.map((name, mi) => {
-    const m = mi + 1;
-    const first = new Date(Date.UTC(year, mi, 1));
-    const startDow = (first.getUTCDay() + 6) % 7;  // 0 = Monday
-    const daysInMonth = new Date(Date.UTC(year, mi + 1, 0)).getUTCDate();
-    let cells = "";
-    for (let i = 0; i < startDow; i++) cells += `<div class="cal-day cal-empty"></div>`;
-    for (let day = 1; day <= daysInMonth; day++) {
+  // the year as one continuous run of weeks (a column each, Monday on top): the months flow into each other
+  // instead of standing as separate blocks. Every other month is a shade darker (m-odd; the empty days too), and the
+  // edge between two months is one stepped line over the grid (an SVG in week/weekday units), not a border per day.
+  // The gap between two days belongs to the days (a transparent border), so the pointer is never "between" them.
+  // Hovering a day lights up its whole month (app.js).
+  const startDow = (new Date(Date.UTC(year, 0, 1)).getUTCDay() + 6) % 7;  // 0 = Monday
+  let cells = `<div class="cal-day cal-empty"></div>`.repeat(startDow), idx = startDow;
+  const monthLabels = [], edges = [];
+  for (let mi = 0; mi < 12; mi++) {
+    const m = mi + 1, daysInMonth = new Date(Date.UTC(year, mi + 1, 0)).getUTCDate();
+    monthLabels.push(`<span style="--w:${Math.floor(idx / 7) + 1}">${esc(T.monthsShort[mi].replace(".", ""))}</span>`);
+    if (mi) {
+      // the 1st sits in column c at weekday r: the month before ends above it (and to its left), so the line runs down
+      // the right of column c's first r days, along the top of the 1st, and down the left of the rest of the column
+      const c = Math.floor(idx / 7), r = idx % 7;
+      edges.push(r ? `M${c + 1} 0V${r}H${c}V7` : `M${c} 0V7`);
+    }
+    for (let day = 1; day <= daysInMonth; day++, idx++) {
       const dateStr = `${year}-${pad(m)}-${pad(day)}`;
       const sp = dayData.get(dateStr);
       const n = sp ? sp.size : 0;
       const lifer = liferDays.has(dateStr);
-      const bg = n ? scale.color(scale.step(n)) : "var(--cal-empty)";
+      const bg = n ? scale.color(scale.step(n)) : mi % 2 ? "var(--cal-empty-alt)" : "var(--cal-empty)";
+      const odd = mi % 2 ? " m-odd" : "";
       const title = n ? `${fmtD(dateStr)}: ${n} ${t("mapSpecies")}${lifer ? " · " + t("newBadge") : ""}` : fmtD(dateStr);
       cells += n
-        ? `<button type="button" class="cal-day${lifer ? " cal-lifer" : ""}${S.calDay === dateStr ? " cal-sel" : ""}" data-day="${dateStr}" style="background:${bg}" data-tip="${esc(title)}" aria-label="${esc(title)}" aria-pressed="${S.calDay === dateStr}"></button>`
-        : `<div class="cal-day" style="background:${bg}" data-tip="${esc(title)}"></div>`;
+        ? `<button type="button" class="cal-day${lifer ? " cal-lifer" : ""}${S.calDay === dateStr ? " cal-sel" : ""}${odd}" data-day="${dateStr}" data-m="${m}" style="background-color:${bg}" data-tip="${esc(title)}" aria-label="${esc(title)}" aria-pressed="${S.calDay === dateStr}"></button>`
+        : `<div class="cal-day${odd}" data-m="${m}" style="background-color:${bg}" data-tip="${esc(title)}"></div>`;
     }
-    // always pad to 6 full weeks (42 cells): keeps every month's grid the same height, so the
-    // section doesn't jump as S.year changes (some years need 6 rows for a month, others only 4-5)
-    for (let i = startDow + daysInMonth; i < 42; i++) cells += `<div class="cal-day cal-empty"></div>`;
-    return `<div class="cal-month"><h3>${name}</h3>
-      <div class="cal-grid">${dowLetters.map(l => `<span class="cal-dow">${l}</span>`).join("")}${cells}</div></div>`;
-  }).join("");
+  }
+  const weeks = Math.ceil(idx / 7);
+  const months = `<div class="cal-scroll"><div class="cal-flow" style="--weeks:${weeks}">
+      <div class="cal-months">${monthLabels.join("")}</div>
+      <div class="cal-dows">${dowLetters.map(l => `<span>${l}</span>`).join("")}</div>
+      <div class="cal-days">${cells}<svg class="cal-edges" viewBox="0 0 ${weeks} 7" preserveAspectRatio="none" aria-hidden="true">${edges.map(d => `<path d="${d}"/>`).join("")}</svg></div></div></div>`;
   return `<h2 data-toc="${esc(t("tocCal"))}">${t("calTitle", year)}</h2>
     ${infoText(t("calHelp"))}
-    <div class="card"><div class="cal-months-wrap">${months}</div>${dayData.has(S.calDay || "") ? calDayPanel(list, statsAll, S.calDay) : ""}</div>
+    <div class="card">${months}${dayData.has(S.calDay || "") ? calDayPanel(list, statsAll, S.calDay) : ""}</div>
     ${scale.legend}`;
 }
 // what was seen on one calendar day, grouped by place; each species opens its row in the life list
@@ -154,7 +165,7 @@ function renderOverview() {
     <div class="card">${curveSvg(chrono)}</div>
     <h2>${t("latest")}</h2>
     ${infoText(t("latestHelp"))}
-    <div class="card"><table><tbody>${latest.map(r => `<tr class="row" data-sp="${r.s}"><td class="nr">${r.nr}</td>
+    <div class="card"><table><tbody>${latest.map(r => `<tr class="row" data-sp="${r.s}" tabindex="0"><td class="nr">${r.nr}</td>
       <td>${speciesLine(SP[r.s])}</td>
       <td class="num">${fmtD(r.first.d)}<span class="small">${esc(placeName(r.first.p))}</span></td></tr>`).join("")}</tbody></table></div>
     <h2 data-toc="${esc(t("tocPerYear"))}">${t("perYear")}</h2>

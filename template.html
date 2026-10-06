@@ -6,34 +6,34 @@
 <title>Meine Lebensliste</title>
 <style>
 :root{
-  --bg:#f7f8f6; --card:#ffffff; --text:#1d2521; --muted:#6a746e; --line:#e4e8e4;
-  --accent:#2f8f4e; --accent-soft:#eaf4ed; --bar:#4a86b6; --bar-soft:#dbe7f0;
+  --bg:#f7f8f6; --card:#ffffff; --text:#1d2521; --muted:#5f6963; --line:#e4e8e4; --line-ui:#858f89;
+  --accent:#277a42; --on-accent:#fff; --accent-soft:#eaf4ed; --bar:#4a86b6; --bar-soft:#dbe7f0;
   --hl:#fff7cc; --link:#3d6a8c; --stripe:#f6f8f5;
-  --k1:#2f8f4e; --k2:#c98a1b; --k3:#3d78a8; --k4:#8659b3; --k5:#c1554a; --k6:#2f9e93;
-  --heat-lo:#dcefe2; --heat-hi:#1a6334; --heat-ink:#fff;
+  --k1:#2f8f4e; --k2:#bd7f12; --k3:#3d78a8; --k4:#8659b3; --k5:#c1554a; --k6:#2f9e93;
+  --heat-lo:#dcefe2; --heat-hi:#1a6334;
   --shadow:0 1px 2px rgba(20,32,26,.05),0 3px 10px rgba(20,32,26,.04);
-  --mk-lo:#f6c36b; --mk-hi:#b8420f; --cal-empty:#e8ece8;
+  --mk-lo:#f6c36b; --mk-hi:#b8420f; --cal-empty:#e8ece8; --cal-empty-alt:#dde3dd;
   --d-up:#cfe9d6; --d-up-ink:#1b5e20; --d-eq:#e4e6e4; --d-eq-ink:#555; --d-down:#f7d0cc; --d-down-ink:#a4251a;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --bg:#121614; --card:#1b201d; --text:#e8ece9; --muted:#96a19a; --line:#2c332f;
-    --accent:#4cc275; --accent-soft:#1f3327; --bar:#5b9bcf; --bar-soft:#2b3b48;
+    --bg:#121614; --card:#1b201d; --text:#e8ece9; --muted:#96a19a; --line:#2c332f; --line-ui:#727e77;
+    --accent:#4cc275; --on-accent:#0b1f12; --accent-soft:#1f3327; --bar:#5b9bcf; --bar-soft:#2b3b48;
     --hl:#3b3717; --link:#8ab8dc; --stripe:#202622;
     --k1:#4cc275; --k2:#e0a23c; --k3:#5b9bcf; --k4:#b28ee0; --k5:#e08578; --k6:#4cc2b3;
-    --heat-lo:#1f3a2a; --heat-hi:#7ee0a2; --heat-ink:#0f2418;
-    --shadow:none; --cal-empty:#252c28;
+    --heat-lo:#1f3a2a; --heat-hi:#7ee0a2;
+    --shadow:none; --cal-empty:#252c28; --cal-empty-alt:#2e3732;
     --d-up:#1f4a2c; --d-up-ink:#9be3b0; --d-eq:#2c322e; --d-eq-ink:#b8bfba; --d-down:#4d2420; --d-down-ink:#ffb3a9;
   }
 }
 /* explicit override from the theme select in Einstellungen, regardless of OS preference */
 :root[data-theme="dark"]{
-  --bg:#121614; --card:#1b201d; --text:#e8ece9; --muted:#96a19a; --line:#2c332f;
-  --accent:#4cc275; --accent-soft:#1f3327; --bar:#5b9bcf; --bar-soft:#2b3b48;
+  --bg:#121614; --card:#1b201d; --text:#e8ece9; --muted:#96a19a; --line:#2c332f; --line-ui:#727e77;
+  --accent:#4cc275; --on-accent:#0b1f12; --accent-soft:#1f3327; --bar:#5b9bcf; --bar-soft:#2b3b48;
   --hl:#3b3717; --link:#8ab8dc; --stripe:#202622;
   --k1:#4cc275; --k2:#e0a23c; --k3:#5b9bcf; --k4:#b28ee0; --k5:#e08578; --k6:#4cc2b3;
-  --heat-lo:#1f3a2a; --heat-hi:#7ee0a2; --heat-ink:#0f2418;
-  --shadow:none; --cal-empty:#252c28;
+  --heat-lo:#1f3a2a; --heat-hi:#7ee0a2;
+  --shadow:none; --cal-empty:#252c28; --cal-empty-alt:#2e3732;
     --d-up:#1f4a2c; --d-up-ink:#9be3b0; --d-eq:#2c322e; --d-eq-ink:#b8bfba; --d-down:#4d2420; --d-down-ink:#ffb3a9;
 }
 *{box-sizing:border-box}
@@ -60,7 +60,7 @@ h1 .logo.peck .bird{animation:peck .75s ease-in-out}
 @media (prefers-reduced-motion:reduce){h1 .logo.peck .bird{animation:none}}
 .sub{color:var(--muted);font-size:.78rem;margin:0}
 .filters{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-select,input[type=search]{font:inherit;font-size:.82rem;padding:5px 8px;border:1px solid var(--line);
+select,input[type=search]{font:inherit;font-size:.82rem;padding:5px 8px;border:1px solid var(--line-ui);
   border-radius:7px;background:var(--card);color:var(--text);max-width:100%}
 input[type=search]{min-width:0;flex:1 1 200px}
 details.opts{position:relative;font-size:.8rem;color:var(--muted)}
@@ -70,7 +70,7 @@ details.opts .opts-panel{position:absolute;bottom:100%;right:0;margin-bottom:6px
   background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.18);white-space:nowrap;z-index:21}
 details.opts label{display:block;margin:5px 0}
 details.opts .opt-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-bottom:8px;margin-bottom:5px;border-bottom:1px solid var(--line)}
-details.opts .opt-row select{font:inherit;font-size:.8rem;padding:2px 4px;border:1px solid var(--line);border-radius:5px;background:var(--card);color:var(--text)}
+details.opts .opt-row select{font:inherit;font-size:.8rem;padding:2px 4px;border:1px solid var(--line-ui);border-radius:5px;background:var(--card);color:var(--text)}
 nav.tabs{display:flex;gap:2px;margin-top:8px;overflow-x:auto}
 nav.tabs button{font:inherit;font-size:.85rem;border:0;background:none;color:var(--muted);
   padding:8px 14px;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;transition:color .12s ease,border-color .12s ease}
@@ -78,7 +78,10 @@ nav.tabs button.on{color:var(--accent);border-bottom-color:var(--accent);font-we
 nav.tabs button:not(.on):hover{color:var(--text);border-bottom-color:var(--line)}
 div.tab{display:none;padding-top:16px}
 div.tab.on{display:block}
-h2{font-size:.95rem;line-height:1.4;margin:30px 0 10px;scroll-margin-top:calc(var(--header-h, 167px) + 14px)}
+h2{font-size:.95rem;line-height:1.4;margin:30px 0 10px;scroll-margin-top:14px}
+/* whatever is scrolled to (a jump, the keyboard focus) stays clear of the sticky header and the fixed footer */
+html{scroll-padding-bottom:3rem}
+@media (min-width:701px){html{scroll-padding-top:var(--header-h, 167px)}}
 h2 small{font-weight:400;color:var(--muted);margin-left:6px}
 h2 .ctl{font-weight:400;font-size:.8rem;color:var(--muted);margin-left:10px}
 h2 .ctl select{margin-left:4px}
@@ -111,7 +114,7 @@ details.tour-settings summary::before{content:"⚙ ";color:var(--muted)}
 .tour-diagram-img svg{display:block;width:100%;min-width:560px;max-width:1000px;height:auto}
 .tour-sliders output{font-variant-numeric:tabular-nums;color:var(--text);text-align:right}
 .tour-path{font-size:.8rem;color:var(--muted);margin:2px 0 8px}
-.route-stop div{background:var(--accent);color:#fff;border:2px solid #fff;border-radius:50%;width:100%;height:100%;display:flex;align-items:center;justify-content:center;
+.route-stop div{background:var(--accent);color:var(--on-accent);border:2px solid #fff;border-radius:50%;width:100%;height:100%;display:flex;align-items:center;justify-content:center;
   font:700 11px/1 system-ui,sans-serif;box-shadow:0 1px 4px rgba(0,0,0,.35)}
 /* key-figure tiles are coloured by what they count, in the colours the charts use for the same things
    (see kpiTile()): species green, activity blue, places and distances amber, photos violet; a zero stays grey */
@@ -171,6 +174,9 @@ button.lnk[data-remove]:hover{text-decoration:none;color:var(--k5)}
 .wish-io .lnk{color:var(--link);cursor:pointer}
 .wish-io .lnk:hover{text-decoration:underline;color:var(--accent)}
 tr.row{cursor:pointer}
+tr.row:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+tr.row:focus-visible td{background:var(--accent-soft)}
+th.sortable:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;border-radius:3px}
 tr.detail td{background:var(--accent-soft)!important;padding:8px}
 .pheno{display:grid;grid-template-columns:repeat(12,1fr);gap:2px;align-items:end;height:54px;max-width:360px}
 .pheno div{background:var(--bar);border-radius:2px 2px 0 0;min-height:1px;position:relative}
@@ -178,12 +184,18 @@ tr.detail td{background:var(--accent-soft)!important;padding:8px}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
 .chip{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:.74rem}
 .detailgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+/* two tables side by side only while each gets 340px, enough for species with two number columns (a long name like
+   "Fichtenkreuzschnabel" cannot wrap); narrower, on paper too, one goes under the other instead of running off */
+.detailgrid.tables{grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr))}
+.detailgrid.tables>div{min-width:0}
+.detailgrid.tables th{white-space:normal}
 table.heat{table-layout:fixed;min-width:560px}
 .heat th:first-child{width:3.4rem}
 .heat td,.heat th{text-align:center;padding:3px 2px;font-size:.72rem}
 .heat td.y{text-align:left;font-weight:600;padding-left:4px}
 .heat td{border:1px solid var(--card);border-radius:3px}
-.heat td.hot{color:var(--heat-ink)}
+.heat td[data-v]{color:#000}
+.heat td.hot{color:#fff}
 .heat .m-short{display:none}
 /* heat tables (heat.js): crosshair on the hovered row and column, totals as bars at the right and bottom */
 .heat-x td.d-up,.heat-x td.d-eq,.heat-x td.d-down,.heat-x td.d-self{font-size:.72rem;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;letter-spacing:-.02em}
@@ -240,7 +252,7 @@ table.plan-sp td{padding:4px 6px;background:transparent!important}
 .plan-t tr.plan-sub td.nr{font-size:.72rem;text-align:right}
 .plan-t tr.plan-sub-tabs td{padding:8px 8px 6px}
 .plan-switch{display:inline-flex;gap:6px;flex-wrap:wrap}
-.plan-switch .pill{font:inherit;font-size:.8rem;padding:3px 12px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--text);cursor:pointer}
+.plan-switch .pill{font:inherit;font-size:.8rem;padding:3px 12px;border-radius:999px;border:1px solid var(--line-ui);background:var(--card);color:var(--text);cursor:pointer}
 .plan-switch .pill.on{background:var(--accent);border-color:var(--accent);color:var(--card);font-weight:600}
 .season-strip{height:12px;border-radius:3px;background:var(--bar-soft);
   background-image:repeating-linear-gradient(90deg,transparent 0 calc(100% / 12 - 1px),var(--card) calc(100% / 12 - 1px) calc(100% / 12))}
@@ -259,16 +271,26 @@ tr.grp .grp-t:hover{background:var(--stripe);color:var(--accent)}
 tr.grp .grp-t:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 tr.grp .grp-t::before{content:"▸";display:inline-block;width:1em;color:var(--muted);transition:transform .12s ease}
 tr.grp .grp-t[aria-expanded=true]::before{transform:rotate(90deg)}
-.new-badge{background:var(--accent);color:#fff;border-radius:999px;padding:0 6px;font-size:.62rem;font-weight:700;margin-left:6px;vertical-align:middle}
-.cal-months-wrap{display:grid;grid-template-columns:repeat(6,1fr);gap:18px 14px}
-@media (max-width:900px){.cal-months-wrap{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}}
-.cal-month h3{margin:0 0 5px;font-size:.76rem;color:var(--muted);font-weight:600}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
-.cal-dow{font-size:.6rem;color:var(--muted);text-align:center;line-height:1.6}
-.cal-day{aspect-ratio:1;border-radius:2px;background:var(--bar-soft)}
+.new-badge{background:var(--accent);color:var(--on-accent);border-radius:999px;padding:0 6px;font-size:.62rem;font-weight:700;margin-left:6px;vertical-align:middle}
+/* the year's calendar: one run of weeks, a column each; narrow screens scroll it sideways rather than shrink the days to dots */
+.cal-scroll{overflow-x:auto;padding:2px}
+.cal-flow{display:grid;grid-template-columns:auto 1fr;grid-template-areas:". months" "dows days";gap:5px 6px;min-width:620px}
+.cal-months{grid-area:months;display:grid;grid-template-columns:repeat(var(--weeks),1fr);font-size:.68rem;color:var(--muted);font-weight:600}
+.cal-months span{grid-column:var(--w)/span 4;white-space:nowrap}
+.cal-dows{grid-area:dows;display:grid;grid-template-rows:repeat(7,1fr);font-size:.58rem;color:var(--muted);text-align:right;align-items:center}
+.cal-days{grid-area:days;position:relative;display:grid;grid-auto-flow:column;grid-template-rows:repeat(7,auto);grid-template-columns:repeat(var(--weeks),1fr)}
+/* the gap between two days is a transparent border of the days, so the pointer never lands "between" them */
+.cal-day{aspect-ratio:1;border:1px solid transparent;border-radius:3px;background-color:var(--bar-soft);background-clip:padding-box;position:relative;filter:var(--cal-tone,brightness(1));transition:filter .15s ease,opacity .15s ease}
+/* every other month a shade darker (the empty days by their colour, the coloured ones by a filter); the hovered day's month glows while the rest steps back */
+button.cal-day.m-odd{--cal-tone:brightness(.86) saturate(1.1)}
+.cal-days.glowing .cal-day{opacity:.5}
+.cal-days.glowing .cal-day.glow{opacity:1;z-index:1;filter:var(--cal-tone,brightness(1)) brightness(1.18) drop-shadow(0 0 3px var(--accent))}
+/* the edges between the months: one line each, along the cell edges (the SVG is in week/weekday units) */
+.cal-edges{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none;overflow:visible}
+.cal-edges path{fill:none;stroke:color-mix(in srgb,var(--text) 38%,transparent);stroke-width:1.5;stroke-linejoin:round;stroke-linecap:round;vector-effect:non-scaling-stroke}
 .cal-day.cal-lifer{box-shadow:0 0 0 2px var(--k2) inset}
-.cal-day.cal-empty{background:transparent}
-button.cal-day{display:block;width:100%;padding:0;border:0;font:inherit;cursor:pointer;transition:transform .1s ease}
+.cal-day.cal-empty{background-color:transparent}
+button.cal-day{display:block;width:100%;padding:0;font:inherit;cursor:pointer;transition:transform .1s ease,filter .15s ease,opacity .15s ease}
 button.cal-day:hover{transform:scale(1.25);position:relative;z-index:1}
 button.cal-day:focus-visible,.cal-day.cal-sel{outline:2px solid var(--text);outline-offset:1px;position:relative;z-index:1}
 .cal-panel{margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
@@ -303,19 +325,24 @@ svg.curve text{fill:var(--muted);font-size:11px}
 #map{height:70vh;min-height:360px;border-radius:12px;border:1px solid var(--line);isolation:isolate;box-shadow:var(--shadow)}
 /* map furniture stays light in both themes, like the tiles underneath */
 .leaflet-popup-content-wrapper{border-radius:10px;box-shadow:0 6px 24px rgba(0,0,0,.18)}
-.leaflet-popup-content{font:13px/1.4 system-ui,sans-serif;color:#1d2521;margin:12px 14px}
+/* the popup is light in both themes, so it has its own greys instead of the theme's --muted (4.5:1 on its panels) */
+.leaflet-popup-content{--pop-muted:#5f6963;font:13px/1.4 system-ui,sans-serif;color:#1d2521;margin:12px 14px}
 .leaflet-popup-content .pop-h{font-weight:700;font-size:14px;line-height:1.25;padding-right:10px}
-.leaflet-popup-content .pop-sub{color:#6a746e;font-size:12px}
+.leaflet-popup-content .pop-sub{color:var(--pop-muted);font-size:12px}
 .leaflet-popup-content .pop-stats{display:flex;gap:6px;margin:8px 0 6px}
-.leaflet-popup-content .pop-stats span{flex:1;background:#f1f5f2;border-radius:7px;padding:5px 8px;font-size:11px;color:#6a746e;line-height:1.2}
+.leaflet-popup-content .pop-stats span{flex:1;background:#f1f5f2;border-radius:7px;padding:5px 8px;font-size:11px;color:var(--pop-muted);line-height:1.2}
 .leaflet-popup-content .pop-stats b{display:block;font-size:15px;color:#1d2521}
 .leaflet-popup-content .visits{max-height:190px;overflow:auto;margin:8px 0 6px;border-top:1px solid #e4e8e4;padding-top:6px}
 .leaflet-popup-content .visits details{margin:2px 0}
 .leaflet-popup-content .visits summary{cursor:pointer}
 .leaflet-popup-content .visits ul{margin:2px 0 4px;padding-left:18px}
 .leaflet-popup-content .lnk{color:#3d6a8c}
+/* Leaflet's close cross (#757575) is 4.6:1 on the popup's white corner, which is where it is drawn; a little darker keeps it
+   clear of the map around the popup, and the hover still differs */
+.leaflet-container .leaflet-popup a.leaflet-popup-close-button{color:#4a544e}
+.leaflet-container .leaflet-popup a.leaflet-popup-close-button:hover,.leaflet-container .leaflet-popup a.leaflet-popup-close-button:focus-visible{color:#111815}
 .leaflet-tooltip{font:12px/1.3 system-ui,sans-serif;border-radius:6px}
-.marker-cluster-custom div{background:var(--k3);color:#fff;border:2px solid #fff;border-radius:50%;display:flex;align-items:center;justify-content:center;
+.marker-cluster-custom div{background:#3d78a8;color:#fff;border:2px solid #fff;border-radius:50%;display:flex;align-items:center;justify-content:center;
   font:700 12px/1 system-ui,sans-serif;width:100%;height:100%;box-shadow:0 1px 4px rgba(0,0,0,.35);transition:transform .12s ease}
 .marker-cluster-custom:hover div{transform:scale(1.12)}
 /* Leaflet sets marker z-index inline (small places are lifted above big ones); clusters stay on top of both */
@@ -330,17 +357,26 @@ svg.curve text{fill:var(--muted);font-size:11px}
 .map-legend.no-cluster .cluster-key{display:none}
 .map-legend-row span{display:flex;align-items:center;gap:5px}
 .map-legend .dot{border-radius:50%;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.35);box-sizing:border-box}
-.map-legend-cluster{display:inline-block;width:18px;height:18px;border-radius:50%;background:var(--k3);border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.35);box-sizing:border-box}
+.map-legend-cluster{display:inline-block;width:18px;height:18px;border-radius:50%;background:#3d78a8;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.35);box-sizing:border-box}
 /* hover targets the inner circle div, not the outer .value-marker wrapper: Leaflet positions that
    wrapper via its own inline transform, and a competing CSS transform there would fight it */
 .value-marker > .dot{transition:transform .12s ease,filter .12s ease}
 .value-marker:hover > .dot{transform:scale(1.18);filter:brightness(1.1)}
 .time-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:9px 0;margin-top:2px;border-top:1px solid var(--line)}
 .time-bar input[type=range]{flex:1 1 200px;min-width:140px;accent-color:var(--accent)}
-.time-all{font:inherit;font-size:.78rem;padding:4px 12px;border-radius:999px;border:1px solid var(--line);background:none;color:var(--muted);cursor:pointer;flex:0 0 auto;transition:background-color .12s ease,border-color .12s ease,color .12s ease}
-.time-all:not(.on):hover{border-color:var(--accent);color:var(--text)}
-.time-all.on{background:var(--accent);border-color:var(--accent);color:#fff}
-.time-all.on:hover{background:color-mix(in srgb,var(--accent) 85%,black)}
+.time-all,.tl-toggle{font:inherit;font-size:.78rem;padding:4px 12px;border-radius:999px;border:1px solid var(--line-ui);background:none;color:var(--muted);cursor:pointer;flex:0 0 auto;transition:background-color .12s ease,border-color .12s ease,color .12s ease}
+.time-all:not(.on):hover,.tl-toggle:not(.on):hover{border-color:var(--accent);color:var(--text)}
+.time-all.on,.tl-toggle.on{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.time-all.on:hover,.tl-toggle.on:hover{background:color-mix(in srgb,var(--accent) 85%,black)}
+.tl-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 12px}
+.tl-bar[hidden]{display:none}
+.tl-bar input[type=range]{flex:1 1 220px;min-width:140px;accent-color:var(--accent)}
+.tl-play{min-width:9.5ch}
+.tl-sp{flex:0 1 190px;min-width:130px}
+.tl-canvas{position:absolute;left:0;top:0;pointer-events:none}
+.tl-ramp{display:inline-block;width:46px;height:10px;border-radius:5px;background:linear-gradient(90deg,transparent,var(--mk-lo),var(--mk-hi),#5c1a08);box-shadow:inset 0 0 0 1px rgba(0,0,0,.18)}
+.tl-date{font-weight:700;min-width:10ch;font-variant-numeric:tabular-nums}
+.tl-stats{color:var(--muted);font-size:.8rem}
 .time-label{font-weight:700;font-size:1rem;min-width:9ch;text-align:right;color:var(--text);text-shadow:0 1px 1px rgba(0,0,0,.12);flex:0 0 auto}
 @media (max-width:700px){
   .hide-sm{display:none}
@@ -355,8 +391,8 @@ svg.curve text{fill:var(--muted);font-size:11px}
   .yhead,.yrow{grid-template-columns:2.4rem 2.8rem 1fr 2.6rem 2.2rem;gap:4px}
 }
 .ab{display:inline-block;min-width:1.9rem;text-align:center;border-radius:5px;padding:0 5px;font-size:.74rem;font-weight:600;color:#fff}
-.ab-A{background:#8a949d}.ab-B{background:#d18a1b}.ab-C{background:#2f8f4e}
-.btn{font:inherit;font-size:.82rem;padding:3px 10px;border:1px solid var(--accent);border-radius:6px;background:var(--accent);color:#fff;cursor:pointer;transition:background-color .12s ease,border-color .12s ease}
+.ab-A{background:#656f78}.ab-B{background:#a2660a}.ab-C{background:#277a42}
+.btn{font:inherit;font-size:.82rem;padding:3px 10px;border:1px solid var(--accent);border-radius:6px;background:var(--accent);color:var(--on-accent);cursor:pointer;transition:background-color .12s ease,border-color .12s ease}
 .btn:hover{background:color-mix(in srgb,var(--accent) 85%,black);border-color:color-mix(in srgb,var(--accent) 85%,black)}
 footer.meta-footer{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:12px;
   padding:6px 16px;background:var(--card);border-top:1px solid var(--line)}
@@ -382,7 +418,7 @@ footer.meta-footer .btn{flex:0 0 auto;padding:3px 10px}
      beats the higher-specificity :root[data-theme="dark"] override */
   :root{--bg:#fff!important;--card:#fff!important;--text:#111!important;--muted:#555!important;--line:#ccc!important;--accent:#1f7a3d!important;--accent-soft:#eef6f0!important;
     --bar:#3d78a8!important;--bar-soft:#d3e2ee!important;--hl:#fff!important;--link:#111!important;--stripe:#f5f5f5!important;
-    --heat-lo:#dcefe2!important;--heat-hi:#1a6334!important;--heat-ink:#fff!important;--cal-empty:#eef0ee!important}
+    --heat-lo:#dcefe2!important;--heat-hi:#1a6334!important;--cal-empty:#eef0ee!important;--cal-empty-alt:#e3e7e3!important}
   body{font-size:10pt}
   header.top{position:static;border:0}
   .filters,nav.tabs,.pick,.time-bar,#tab-map,.more{display:none!important}
@@ -398,6 +434,7 @@ footer.meta-footer .btn{flex:0 0 auto;padding:3px 10px}
   div.tab{display:block!important;padding-top:0}
   .wrap{max-width:none;padding:0}
   .card,.kpi{overflow:visible;border-color:var(--line);box-shadow:none}
+  .detailgrid.tables>div{break-inside:avoid}  /* "Frühe Arten" stays with its table */
   tr,.yrow,.kpi{break-inside:avoid}
   /* a heading never ends a page on its own: neither after it nor after the info text below it */
   h2,h2 + details.info{break-after:avoid;margin-top:14px}
@@ -464,6 +501,18 @@ footer.meta-footer .btn{flex:0 0 auto;padding:3px 10px}
   <div class="tab" id="tab-map">
     <div class="pick">
       <select id="m-metric" aria-label="Kartenwert"></select>
+      <button class="tl-toggle" id="m-tl" type="button" aria-pressed="false"></button>
+    </div>
+    <div class="tl-bar" id="tl-bar" hidden>
+      <input type="search" id="tl-sp" class="tl-sp" list="tl-suggest" autocomplete="off">
+      <datalist id="tl-suggest"></datalist>
+      <button class="btn tl-play" id="tl-play" type="button"></button>
+      <input type="range" id="tl-range" min="0" max="364" value="0" step="1">
+      <span class="tl-date" id="tl-date"></span>
+      <select id="tl-year"></select>
+      <select id="tl-speed"></select>
+      <select id="tl-glow"></select>
+      <span class="tl-stats" id="tl-stats"></span>
     </div>
     <div id="map"></div>
     <p class="prose" id="map-note"></p>

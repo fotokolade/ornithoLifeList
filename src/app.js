@@ -55,9 +55,11 @@ function applyRedact(on) {
   for (const id of ["tab-overview", "list-out", "tab-regions", "tab-targets", "tab-tours"]) $(id).innerHTML = "";
   S.tourRoute = null;
   if (MAP_LAYER) MAP_LAYER.clearLayers();
+  tlReset();
   if (MAP_ROUTE) MAP_ROUTE.clearLayers();  // the tour's stops carry place names in their tooltips
   $("map-note").textContent = "";
   buildRegionSelect();
+  renderSubtitle();
   syncHeaderHeight();
   setTab(S.tab);
 }
@@ -80,6 +82,7 @@ function setTab(tab) {
     // tabs share one scroll position (they're just toggled via display, not real navigation); reset
     // it on every switch so the new tab never opens wherever the previous one happened to be scrolled to
     window.scrollTo(0, 0);
+    if (tab !== "map") tlPause();
     S.tab = tab;
     for (const b of $$all("#tabs button")) b.classList.toggle("on", b.dataset.tab === tab);
     for (const s of $$all("div.tab")) s.classList.toggle("on", s.id === "tab-" + tab);
@@ -126,13 +129,7 @@ function openPrintDialog() {
 }
 function renderChrome() {
   $("h-title").textContent = t("title");
-  // several exports (e.g. one per year) are merged by lifelist.py; their names go into the tooltip.
-  // A redacted page carries no file names, as they contain the ornitho user ID.
-  const sources = RAW.meta.sources || [];
-  $("h-sub").textContent = (sources.length === 0 ? t("subtitleNoFile", fmtN(OBS.length))
-    : sources.length === 1 ? t("subtitle", sources[0], fmtN(OBS.length))
-    : t("subtitleMulti", sources.length, fmtN(OBS.length))) + " · " + t("version", APP_VERSION);
-  $("h-sub").title = sources.join("\n");
+  renderSubtitle();
   $("o-sum").textContent = t("optsSummary");
   $("o-theme-t").textContent = t("themeLabel");
   $("o-theme").innerHTML = ["system", "light", "dark"].map(v => `<option value="${v}">${t("theme" + v[0].toUpperCase() + v.slice(1))}</option>`).join("");
@@ -151,6 +148,18 @@ function renderChrome() {
   $("q-sort").setAttribute("aria-label", t("ariaSort"));
   $("q-atlas").setAttribute("aria-label", t("ariaAtlas"));
   $("m-metric").setAttribute("aria-label", t("ariaMapMetric"));
+  $("m-tl").textContent = t("tlToggle");
+  $("tl-range").setAttribute("aria-label", t("ariaTlDay"));
+  $("tl-year").setAttribute("aria-label", t("ariaTlYear"));
+  $("tl-speed").setAttribute("aria-label", t("ariaTlSpeed"));
+  $("tl-sp").placeholder = t("tlSpPh");
+  $("tl-sp").setAttribute("aria-label", t("ariaTlSp"));
+  $("tl-speed").innerHTML = TL_SPEEDS.map(v => `<option value="${v}">${t("tlSpeed", v)}</option>`).join("");
+  $("tl-speed").value = String(S.tl.speed);
+  $("tl-glow").setAttribute("aria-label", t("ariaTlGlow"));
+  $("tl-glow").innerHTML = TL_GLOWS.map(v => `<option value="${v}">${t("tlGlowDays", v)}</option>`).join("");
+  $("tl-glow").value = String(S.tl.glow);
+  tlSyncPlay();
   $("t-all").textContent = t("timeAll");
   $("t-range").min = 0; $("t-range").max = timeYMIndex(MAX_Y, 12);
   $("t-range").setAttribute("aria-label", t("ariaTimePoint"));
@@ -168,6 +177,16 @@ function renderChrome() {
   $("m-metric").innerHTML = `<option value="life">${cutoffLabel("mapLiferAll", "mapLifer")}</option><option value="year">${t("mapYear", timePeriodLabel())}</option><option value="obs">${t("mapObs", timePeriodLabel())}</option><option value="lifer">${cutoffLabel("mapNewHereAll", "mapNewHere")}</option>`;
   $("m-metric").value = S.metric;
   syncHeaderHeight();
+}
+// the header's second line: where the data comes from
+function renderSubtitle() {
+  // several exports (e.g. one per year) are merged by lifelist.py; their names go into the tooltip. They contain
+  // the ornitho user ID, so a redacted page shows none: neither one built with --redact nor the switch on screen
+  const sources = S.redact ? [] : RAW.meta.sources || [];
+  $("h-sub").textContent = (sources.length === 0 ? t("subtitleNoFile", fmtN(OBS.length))
+    : sources.length === 1 ? t("subtitle", sources[0], fmtN(OBS.length))
+    : t("subtitleMulti", sources.length, fmtN(OBS.length))) + " · " + t("version", APP_VERSION);
+  $("h-sub").title = sources.join("\n");
 }
 function applyLang(lang) {
   if (lang === S.lang) return;
@@ -305,6 +324,13 @@ function init() {
     renderActive();
   });
   $("m-metric").addEventListener("change", e => { S.metric = e.target.value; renderMap(); });
+  $("m-tl").addEventListener("click", () => { S.tl.on = !S.tl.on; if (S.tl.on) S.tourRoute = null; else tlPause(); renderMap(); });
+  $("tl-play").addEventListener("click", () => { if (S.tl.playing) tlPause(); else tlPlay(); });
+  $("tl-range").addEventListener("input", e => { TL_POS = +e.target.value; tlShow(TL_POS); });
+  $("tl-year").addEventListener("change", e => { S.tl.year = +e.target.value; renderMap(); });
+  $("tl-speed").addEventListener("change", e => { S.tl.speed = +e.target.value; });
+  $("tl-glow").addEventListener("change", e => { S.tl.glow = +e.target.value; tlShow(S.tl.day); });
+  $("tl-sp").addEventListener("change", tlPickSpecies);
   $("tab-tours").addEventListener("toggle", e => {
     if (e.target.matches?.("details.tour-settings")) S.tourSetOpen = e.target.open;
     if (e.target.matches?.("details.tour-diagram")) S.tourDiagOpen = e.target.open;
@@ -445,6 +471,16 @@ function init() {
     placeTip(e.clientX, e.clientY);
   };
   document.addEventListener("mousemove", showTip);
+  // a calendar day lights up its whole month; anywhere else (or leaving the window) puts the calendar back
+  const calGlow = (/** @type {string} */ m) => {
+    const box = /** @type {HTMLElement|null} */ ($$(".cal-days"));
+    if (!box || (box.dataset.glow || "") === m) return;
+    box.dataset.glow = m;
+    box.classList.toggle("glowing", !!m);
+    for (const d of box.querySelectorAll(".cal-day[data-m]")) d.classList.toggle("glow", /** @type {HTMLElement} */ (d).dataset.m === m);
+  };
+  document.addEventListener("mouseover", e => calGlow(/** @type {any} */ (e.target).closest?.(".cal-days .cal-day[data-m]")?.dataset.m || ""));
+  document.documentElement.addEventListener("mouseleave", () => calGlow(""));
   // every other cell of the hovered cell's table shows the difference to it: +4 green, 0 grey, −10 red;
   // the crosshair still marks the hovered cell's row and column
   /** @type {any[]} */
@@ -491,9 +527,17 @@ function init() {
   });
   document.addEventListener("scroll", () => { tip.hidden = true; }, true);
   // heat table cells that open a details panel and the planner's destinations react to Enter/Space like real buttons
+  // Enter or Space on a heat cell, a planner row, a table row that opens or a sortable column head acts like a click.
+  // The click redraws the table, so a row or head gets the focus back in the new one (the same data-* attributes).
   document.addEventListener("keydown", e => {
     const el = /** @type {any} */ (e.target);
-    if (el.matches?.('td[data-heat], tr[data-plan-r], tr[data-plan-g]') && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); el.click(); }
+    if (!el.matches?.('td[data-heat], tr[data-plan-r], tr[data-plan-g], tr.row[tabindex], th.sortable') || (e.key !== "Enter" && e.key !== " ")) return;
+    e.preventDefault();
+    const tab = el.closest("div.tab"), again = el.matches("tr.row, th.sortable")
+      ? el.tagName.toLowerCase() + Object.entries(el.dataset).map(([k, v]) => `[data-${k.replace(/[A-Z]/g, c => "-" + c.toLowerCase())}="${CSS.escape(v)}"]`).join("")
+      : null;
+    el.click();
+    if (again && tab && !el.isConnected) tab.querySelector(again)?.focus({ preventScroll: true });
   });
   $("list-curve").addEventListener("click", e => {
     const sp = e.target.closest("[data-sp]");

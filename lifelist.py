@@ -12,6 +12,7 @@ nothing is sent) and builds nothing. A normal build never goes online.
 """
 import argparse
 import base64
+import collections
 import datetime
 import glob
 import http.client
@@ -19,6 +20,7 @@ import json
 import os
 import re
 import sys
+import traceback
 import urllib.request
 
 # Two different base directories are needed once this script can also run as a PyInstaller-frozen
@@ -45,7 +47,7 @@ FLAG_COLLECTIVE = 2
 # order stands in for one: later files rely on function hoisting to see earlier consts/functions.
 APP_JS_FILES = [
     "i18n.js", "counties.js", "data.js", "charts.js", "heat.js", "overview.js", "list.js",
-    "regions.js", "targets.js", "planner.js", "activity.js", "tours.js", "map.js", "app.js",
+    "regions.js", "targets.js", "planner.js", "activity.js", "tours.js", "map.js", "timelapse.js", "app.js",
 ]
 
 # Leaflet, its marker-cluster plugin, and Chart.js are vendored (see vendor/, tools/update_vendor.py)
@@ -92,7 +94,8 @@ def build_vendor_css():
 
 
 def find_exports():
-    files = glob.glob(os.path.join(HERE, "export_*.json"))
+    # escaped: a folder like "Vögel [2024]" would otherwise be read as a pattern and match nothing
+    files = glob.glob(os.path.join(glob.escape(HERE), "export_*.json"))
     if not files:
         sys.exit("No export_*.json found.")
     return files
@@ -107,6 +110,8 @@ def expand_sources(patterns):
         matches = glob.glob(pattern) if glob.has_magic(pattern) and not os.path.exists(pattern) else [pattern]
         if not matches:
             sys.exit(f"No file matches {pattern}.")
+        if matches == [pattern] and not os.path.isfile(pattern):
+            sys.exit(f"File not found: {pattern}")
         files.extend(matches)
     return files
 
@@ -115,7 +120,9 @@ def sighting_id(s):
     """ornitho's own sighting id; the whole record serves as fallback for exports without one.
     id_universal comes first: it is unique across the ornitho portals, whereas id_sighting is only
     unique within one, so exports from e.g. ornitho.de and ornitho.lu could share an id_sighting."""
-    o = (s.get("observers") or [{}])[0]
+    # a malformed record (no dict, no observer list) gets no id of its own here: build_data skips it with a reason
+    o = s.get("observers") if isinstance(s, dict) else None
+    o = o[0] if isinstance(o, list) and o and isinstance(o[0], dict) else {}
     if o.get("id_universal"):
         return "u" + str(o["id_universal"])
     if o.get("id_sighting"):
@@ -148,13 +155,34 @@ def export_time(path):
     return os.path.getmtime(path)
 
 
+NOT_AN_EXPORT = "Is it the JSON export from ornitho.de? See HOWTO.md."
+
+
+def load_export(path):
+    """The sightings of one export file. A file that cannot be read, or is no ornitho.de JSON export, stops
+    the run with a message naming it (no traceback: double-clicking users of the exe only see this)."""
+    name = os.path.basename(path)
+    try:
+        # utf-8-sig: a file saved again by a Windows editor may start with a byte order mark
+        with open(path, encoding="utf-8-sig") as fh:
+            doc = json.load(fh)
+    except OSError as e:
+        sys.exit(f"Cannot read {name}: {e.strerror or e}.")
+    except UnicodeDecodeError:
+        sys.exit(f"{name} is not a text file in UTF-8. {NOT_AN_EXPORT}")
+    except json.JSONDecodeError as e:
+        sys.exit(f"{name} is not valid JSON ({e.msg}, line {e.lineno}). {NOT_AN_EXPORT}")
+    data = doc.get("data") if isinstance(doc, dict) else None
+    sightings = data.get("sightings") if isinstance(data, dict) else None
+    if not isinstance(sightings, list):
+        sys.exit(f"{name} contains no list of sightings (data.sightings). {NOT_AN_EXPORT}")
+    return sightings
+
+
 def load_exports(paths):
     """Reads the given export files, oldest (see export_time) first. Returns [(basename, sightings)]."""
-    exports = []
-    for path in sorted({os.path.abspath(p) for p in paths}, key=lambda p: (export_time(p), p)):
-        with open(path, encoding="utf-8") as fh:
-            exports.append((os.path.basename(path), json.load(fh)["data"]["sightings"]))
-    return exports
+    return [(os.path.basename(path), load_export(path))
+            for path in sorted({os.path.abspath(p) for p in paths}, key=lambda p: (export_time(p), p))]
 
 
 def species_key(latin, name, escaped):
@@ -173,11 +201,15 @@ def species_key(latin, name, escaped):
 
 def minute_of_day(o):
     """Local minute of the day of the sighting, or -1 when the export has no time."""
-    tm = o.get("timing") or {}
-    iso = tm.get("@ISO8601", "")
+    tm = o.get("timing")
+    tm = tm if isinstance(tm, dict) else {}
+    iso = str(tm.get("@ISO8601") or "")
     if tm.get("@notime") != "0" or len(iso) < 16:
         return -1
-    return int(iso[11:13]) * 60 + int(iso[14:16])
+    try:
+        return int(iso[11:13]) * 60 + int(iso[14:16])
+    except ValueError:
+        return -1
 
 
 def atlas_code(o):
@@ -230,46 +262,90 @@ def load_species_reference():
     return english_by_latin, wishlist_rows, rare_rows
 
 
-def build_data(sightings, english_by_latin):
+def to_int(value, default):
+    try:
+        return int(str(value).strip())
+    except (TypeError, ValueError):
+        return default
+
+
+def place_coords(pl):
+    """(lat, lon) of a place, rounded; (0, 0), which the page reads as "no coordinates", when they are
+    missing or no numbers."""
+    try:
+        lat, lon = float(pl.get("coord_lat")), float(pl.get("coord_lon"))
+    except (TypeError, ValueError):
+        return 0, 0
+    return round(lat, 4), round(lon, 4)
+
+
+def check_sighting(s):
+    """The parts of an export record the page cannot do without: (observer, species, place, day).
+    Raises ValueError naming what is missing. Smaller flaws are mended where they are read instead
+    (a count that is no number counts as 0, a place without usable coordinates is kept without them)."""
+    o = s.get("observers") if isinstance(s, dict) else None
+    o = o[0] if isinstance(o, list) and o else None
+    if not isinstance(o, dict):
+        raise ValueError("no observer data")
+    sp, pl, date = s.get("species"), s.get("place"), s.get("date")
+    if not isinstance(sp, dict) or not str(sp.get("latin_name") or "").strip() or not str(sp.get("name") or "").strip():
+        raise ValueError("no species")
+    if not isinstance(pl, dict) or not isinstance(pl.get("@id"), (str, int)) or not pl.get("@id"):
+        raise ValueError("no place")
+    day = str(date.get("@ISO8601") or "")[:10] if isinstance(date, dict) else ""
+    # YYYY-MM-DD only: the page reads year, month and day by position, and Python 3.11+ would also take "20240101"
+    try:
+        if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", day):
+            raise ValueError
+        datetime.date.fromisoformat(day)
+    except ValueError:
+        raise ValueError("no valid date") from None
+    return o, sp, pl, day
+
+
+def build_data(sightings, english_by_latin, skipped=None):
+    """skipped: a list that gets the reason for each record left out because it lacks what the page needs."""
     taxa = {}     # key -> dict
     places = {}   # ornitho place id -> index
     place_rows = []
     obs = []
 
     for s in sightings:
-        o = s["observers"][0]
+        try:
+            o, sp, pl, day = check_sighting(s)
+        except ValueError as e:
+            if skipped is not None:
+                skipped.append(str(e))
+            continue
         if o.get("count") == "0" and o.get("estimation_code") == "EXACT_VALUE":
             continue  # explicit zero count: reported as not seen
-        sp = s["species"]
-        latin = sp["latin_name"]
+        latin, sp_name = str(sp["latin_name"]), str(sp["name"])
         escaped = sp.get("rarity") == "escaped" or "domestica" in latin
-        key, collective = species_key(latin, sp["name"], escaped)
+        key, collective = species_key(latin, sp_name, escaped)
         t = taxa.setdefault(key, {
             "names": [], "escaped": True, "collective": collective,
             "order": [], "exact": None, "idx": len(taxa),
         })
         t["escaped"] = t["escaped"] and escaped
-        t["order"].append(int(sp["sys_order"]))
-        name = sp["name"].replace("_", " ")
+        t["order"].append(to_int(sp.get("sys_order"), 99999))  # unknown: sorted last
+        name = sp_name.replace("_", " ")
         if latin.strip() == key:
             t["exact"] = name
         t["names"].append(name)
 
-        pl = s["place"]
         pid = pl["@id"]
         if pid not in places:
-            muni, state, county = parse_municipality(pl.get("municipality"))
+            muni, state, county = parse_municipality(str(pl.get("municipality") or ""))
             place_rows.append([
-                re.sub(r"\s*\[[^\]]*\]\s*$", "", pl["name"]),
-                muni, state, county,
-                round(float(pl["coord_lat"]), 4), round(float(pl["coord_lon"]), 4),
+                re.sub(r"\s*\[[^\]]*\]\s*$", "", str(pl.get("name") or "?")),
+                muni, state, county, *place_coords(pl),
             ])
             places[pid] = len(place_rows) - 1
 
-        count = int(o.get("count") or 0)
+        count = to_int(o.get("count"), 0)
         obs.append([
-            t["idx"], s["date"]["@ISO8601"][:10], places[pid], count,
-            1 if any(m.get("type") == "PHOTO" for m in o.get("medias") or []) else 0, atlas_code(o), minute_of_day(o),
+            t["idx"], day, places[pid], count,
+            1 if any(isinstance(m, dict) and m.get("type") == "PHOTO" for m in o.get("medias") or []) else 0, atlas_code(o), minute_of_day(o),
             *(own_position(o) or ()),  # only when there is one: keeps the page small
         ])
 
@@ -310,12 +386,13 @@ def load_tour_diagram():
     return out
 
 
-def build_page_data(sightings, source_names, redact):
-    """source_names: the export file name, or a list of them when several exports were merged."""
+def build_page_data(sightings, source_names, redact, skipped=None):
+    """source_names: the export file name, or a list of them when several exports were merged.
+    skipped: see build_data."""
     if isinstance(source_names, str):
         source_names = [source_names]
     english_by_latin, wishlist_rows, rare_rows = load_species_reference()
-    data = build_data(sightings, english_by_latin)
+    data = build_data(sightings, english_by_latin, skipped)
     data["euro"] = wishlist_rows
     data["rare"] = rare_rows
     data["planner"] = load_planner_data()
@@ -334,16 +411,18 @@ def build_page_data(sightings, source_names, redact):
 def render_html(data):
     with open(os.path.join(RESOURCES, "template.html"), encoding="utf-8") as fh:
         tpl = fh.read()
-    blob = json.dumps(data, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
-    app_js = build_app_js().replace("</script", "<\\/script")
-    vendor_js = build_vendor_js().replace("</script", "<\\/script")
-    vendor_css = build_vendor_css().replace("</style", "<\\/style")
-    # vendor/data/app placeholders first, in increasing order of "how likely is this blob to
-    # accidentally contain another placeholder's literal text" — str.replace() replaces every
-    # occurrence, so once a large blob is substituted in, any later replace() pass would also hit
-    # a stray match inside *that* blob (this bit us once: a JS comment mentioning "__VENDOR_JS__")
-    return (tpl.replace("__VENDOR_CSS__", vendor_css).replace("__VENDOR_JS__", vendor_js)
-            .replace("__DATA_JSON__", blob).replace("__APP_JS__", app_js))
+    # The data may hold any text (place names are free text on ornitho): "<" only ever occurs inside
+    # JSON strings, so writing it as \\u003c keeps the JSON the same and leaves nothing the HTML parser
+    # could read as markup, not even "<!--<script>", which would otherwise swallow the end of the block.
+    parts = {
+        "DATA_JSON": json.dumps(data, ensure_ascii=False, separators=(",", ":")).replace("<", "\\u003c"),
+        "APP_JS": re.sub(r"</(script)", r"<\\/\1", build_app_js(), flags=re.IGNORECASE),
+        "VENDOR_JS": re.sub(r"</(script)", r"<\\/\1", build_vendor_js(), flags=re.IGNORECASE),
+        "VENDOR_CSS": re.sub(r"</(style)", r"<\\/\1", build_vendor_css(), flags=re.IGNORECASE),
+    }
+    # one pass over the template: what is put in is not searched again, so a placeholder's name inside
+    # the data or the code (a place called "__APP_JS__", a comment) stays as it is
+    return re.sub(r"__(DATA_JSON|APP_JS|VENDOR_JS|VENDOR_CSS)__", lambda m: parts[m.group(1)], tpl)
 
 
 def app_version():
@@ -412,7 +491,13 @@ def main():
     if duplicates:
         print(f"Duplicates (contained in more than one export, counted once): {duplicates}")
 
-    data = build_page_data(sightings, [name for name, _ in exports], redact)
+    skipped = []
+    data = build_page_data(sightings, [name for name, _ in exports], redact, skipped)
+    if skipped:
+        reasons = ", ".join(f"{n}x {why}" for why, n in collections.Counter(skipped).most_common())
+        print(f"Skipped {len(skipped)} of {len(sightings)} records the page cannot use ({reasons}).")
+    if not data["obs"]:
+        sys.exit("No observations to show: the export contains no usable sightings. Nothing was written.")
     dst = os.path.join(HERE, "lifelist_redacted.html" if redact else "lifelist.html")
     with open(dst, "w", encoding="utf-8") as fh:
         fh.write(render_html(data))
@@ -423,17 +508,31 @@ def main():
     print("Written:", dst, f"({os.path.getsize(dst) / 1e6:.2f} MB)")
 
 
-if __name__ == "__main__":
-    # When frozen into an exe, the console window closes the instant the process exits, so a
-    # double-clicking user would never see the output (including an error like "no export found").
-    # Keep the window open with a pause in that case, on both success and a controlled sys.exit().
-    frozen = getattr(sys, "frozen", False)
+def run_frozen():
+    """main() for the exe: its console window closes the instant the process ends, so a double-clicking
+    user would never see what happened. Every ending, an unexpected error too, is shown and the window
+    waits for Enter; the exit code still tells a calling script whether it worked."""
+    code = 0
     try:
         main()
-    except SystemExit as e:
+    except SystemExit as e:  # sys.exit("message") of a known problem, or argparse's --help/--version/errors
         if isinstance(e.code, str):
             print(e.code, file=sys.stderr)
-        if not frozen:
-            raise
-    if frozen:
-        input("\nDone. Press Enter to close.")
+            code = 1
+        else:
+            code = e.code or 0
+    except Exception:  # anything unforeseen: the details, and where to report them
+        traceback.print_exc()
+        print(f"\nSomething went wrong. Please report the message above at https://github.com/{REPO}/issues", file=sys.stderr)
+        code = 1
+    try:
+        input("\nDone. Press Enter to close." if code == 0 else "\nStopped. Press Enter to close.")
+    except EOFError:  # started without a console to answer from (e.g. by a scheduled task)
+        pass
+    return code
+
+
+if __name__ == "__main__":
+    if getattr(sys, "frozen", False):
+        sys.exit(run_frozen())
+    main()

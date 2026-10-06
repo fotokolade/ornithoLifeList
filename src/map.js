@@ -1,4 +1,6 @@
 let MAP = null, MAP_LAYER = null, MAP_LEGEND = null;
+// what the map was last fitted to: a new value metric or point in time keeps the user's pan and zoom
+let MAP_FIT_KEY = "";
 const markerDia = frac => Math.round(2 * (5 + 17 * Math.sqrt(frac)));
 // warm sequential scale (light amber = low, burnt orange = high) that stays visible on every tile layer
 const markerColor = frac => `color-mix(in srgb, var(--mk-hi) ${Math.round(15 + frac * 85)}%, var(--mk-lo))`;
@@ -59,6 +61,12 @@ function drawMap() {
   $("m-metric").options[2].text = t("mapObs", timePeriodLabel());
   $("m-metric").options[3].text = cutoffLabel("mapNewHereAll", "mapNewHere");
   MAP.invalidateSize();
+  if (S.tourRoute) S.tl.on = false;  // a tour shown on the map takes the map for itself
+  tlSyncUi();
+  if (S.tl.on) { if (MAP.hasLayer(MAP_LAYER)) MAP.removeLayer(MAP_LAYER); drawTimelapse(); return; }
+  tlReset();
+  if (TL_LAYER && MAP.hasLayer(TL_LAYER)) MAP.removeLayer(TL_LAYER);
+  if (!MAP.hasLayer(MAP_LAYER)) MAP_LAYER.addTo(MAP);
   MAP_LAYER.clearLayers();
   const regionList = regionObs(baseObs());
   // true when (y,m) falls on/before the selected time-bar cutoff, or "Gesamt" is active (no cutoff);
@@ -114,7 +122,8 @@ function drawMap() {
     marker.on("popupopen", () => marker.closeTooltip());
     bounds.push([p.lat, p.lon]);
   }
-  MAP.fitBounds(bounds, { padding: [30, 30], maxZoom: 15 });
+  const fitKey = `${S.region}|${S.escaped}|${S.collective}`;
+  if (fitKey !== MAP_FIT_KEY) { MAP.fitBounds(bounds, { padding: [30, 30], maxZoom: 15 }); MAP_FIT_KEY = fitKey; }
   syncClusterKey();
   drawTourRoute();  // a tour opened from the Touren tab: its path on top, zoomed to it
 }

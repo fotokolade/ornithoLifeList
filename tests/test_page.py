@@ -222,6 +222,190 @@ class PageTest(unittest.TestCase):
         page.wait_for_function("document.getElementById('tgt-io-msg').textContent.includes('keine')")
         self.assertEqual(self.errors, [])
 
+    # text on its real background, as WCAG AA wants it: 4.5:1 (3:1 for large text), measured in the page itself
+    CONTRAST_JS = """() => {
+        const cv = document.createElement('canvas').getContext('2d', { willReadFrequently: true });
+        const rgba = c => { cv.clearRect(0, 0, 1, 1); cv.fillStyle = '#000'; cv.fillStyle = c; cv.fillRect(0, 0, 1, 1); const d = cv.getImageData(0, 0, 1, 1).data; return [d[0], d[1], d[2], d[3] / 255]; };
+        const lum = ([r, g, b]) => { const f = c => { c /= 255; return c <= .03928 ? c / 12.92 : ((c + .055) / 1.055) ** 2.4; }; return .2126 * f(r) + .7152 * f(g) + .0722 * f(b); };
+        const over = (top, under) => [0, 1, 2].map(i => top[i] * top[3] + under[i] * (1 - top[3])).concat([1]);
+        // Leaflet draws the popup's close cross over the corner of the popup's panel, but puts it beside the panel in the DOM
+        const bgOf = el => { const layers = []; const panel = el.closest('.leaflet-popup') && el.closest('.leaflet-popup').querySelector('.leaflet-popup-content-wrapper');
+            for (let e = panel || el; e; e = e.parentElement) { const c = rgba(getComputedStyle(e).backgroundColor); if (c[3] > 0) { layers.push(c); if (c[3] >= 1) break; } }
+            let base = [255, 255, 255, 1]; for (const c of layers.reverse()) base = over(c, base); return base; };
+        const bad = [], seen = new Set(), walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+        while (walker.nextNode()) {
+            const n = walker.currentNode, el = n.parentElement;
+            if (!n.textContent.trim() || !el || seen.has(el) || el.closest('[hidden],script,style')) continue;
+            seen.add(el);
+            const r = el.getBoundingClientRect(), cs = getComputedStyle(el);
+            if (!r.width || !r.height || cs.visibility === 'hidden' || +cs.opacity === 0) continue;
+            const bg = bgOf(el), fg = over(rgba(cs.color), bg), l1 = lum(fg), l2 = lum(bg);
+            const ratio = (Math.max(l1, l2) + .05) / (Math.min(l1, l2) + .05), size = parseFloat(cs.fontSize);
+            const large = size >= 24 || (+cs.fontWeight >= 700 && size >= 18.66);
+            if (ratio < (large ? 3 : 4.5)) bad.push(el.tagName.toLowerCase() + (el.className ? '.' + String(el.className).split(' ')[0] : '') + ' ' + ratio.toFixed(2) + ' "' + n.textContent.trim().slice(0, 20) + '"');
+        }
+        return bad;
+    }"""
+
+    def test_text_contrast_is_at_least_aa_in_both_themes(self):
+        for scheme in ("light", "dark"):
+            page = self.open()
+            page.emulate_media(color_scheme=scheme)
+            for tab in ("overview", "list", "targets", "activity", "regions", "tours", "map"):
+                page.evaluate(f"setTab('{tab}')")
+                page.wait_for_timeout(350)
+                self.assertEqual(page.evaluate(self.CONTRAST_JS), [], f"{scheme} {tab}")
+            # the calendar's day, a heat table's cell and the time-lapse bar stay readable on their colours, too
+            page.evaluate("setTab('map')")
+            page.click("#m-tl")
+            page.wait_for_timeout(300)
+            self.assertEqual(page.evaluate(self.CONTRAST_JS), [], f"{scheme} time-lapse")
+            self.assertEqual(self.errors, [])
+
+    # Chart.js draws its text (axes, the day bands, the weekday values) on a canvas, where the DOM walk above sees nothing:
+    # every fillText is intercepted, and the pixels under the text, as they are before it is drawn, give its background
+    CANVAS_CONTRAST_JS = """() => {
+        const cv = document.createElement('canvas').getContext('2d', { willReadFrequently: true });
+        const rgba = c => { cv.clearRect(0, 0, 1, 1); cv.fillStyle = '#000'; cv.fillStyle = c; cv.fillRect(0, 0, 1, 1); const d = cv.getImageData(0, 0, 1, 1).data; return [d[0], d[1], d[2], d[3] / 255]; };
+        const lum = ([r, g, b]) => { const f = c => { c /= 255; return c <= .03928 ? c / 12.92 : ((c + .055) / 1.055) ** 2.4; }; return .2126 * f(r) + .7152 * f(g) + .0722 * f(b); };
+        const over = (top, under, a = top[3]) => [0, 1, 2].map(i => top[i] * a + under[i] * (1 - a));
+        const pageBg = el => { const layers = []; for (let e = el; e; e = e.parentElement) { const c = rgba(getComputedStyle(e).backgroundColor); if (c[3] > 0) { layers.push(c); if (c[3] >= 1) break; } }
+            let base = [255, 255, 255]; for (const c of layers.reverse()) base = over(c, base); return base; };
+        window.__canvasTexts = [];
+        if (window.Chart) Chart.defaults.animation = false;
+        const real = CanvasRenderingContext2D.prototype.fillText;
+        CanvasRenderingContext2D.prototype.fillText = function (text, x, y, ...rest) {
+            try {
+                const t = this.getTransform(), m = this.measureText(String(text));
+                if (!t.b && !t.c && String(text).trim()) {
+                    const x0 = Math.max(0, Math.floor((x - m.actualBoundingBoxLeft) * t.a + t.e)), x1 = Math.min(this.canvas.width, Math.ceil((x + m.actualBoundingBoxRight) * t.a + t.e));
+                    const y0 = Math.max(0, Math.floor((y - m.actualBoundingBoxAscent) * t.d + t.f)), y1 = Math.min(this.canvas.height, Math.ceil((y + m.actualBoundingBoxDescent) * t.d + t.f));
+                    if (x1 > x0 && y1 > y0) {
+                        const px = this.getImageData(x0, y0, x1 - x0, y1 - y0).data, under = pageBg(this.canvas), ratios = [];
+                        const ink = rgba(String(this.fillStyle)), alpha = ink[3] * this.globalAlpha;
+                        for (let i = 0; i < px.length; i += 4) {
+                            const bg = over([px[i], px[i + 1], px[i + 2]], under, px[i + 3] / 255), fg = over(ink, bg, alpha);
+                            const a = lum(fg), b = lum(bg); ratios.push((Math.max(a, b) + .05) / (Math.min(a, b) + .05));
+                        }
+                        ratios.sort((p, q) => p - q);
+                        window.__canvasTexts.push({ text: String(text), ratio: ratios[Math.floor(ratios.length / 2)] });  // the median pixel: gridlines may cross a label
+                    }
+                }
+            } catch (e) { /* a measuring problem must not stop the drawing */ }
+            return real.call(this, text, x, y, ...rest);
+        };
+    }"""
+
+    def test_chart_text_contrast_is_at_least_aa_in_both_themes(self):
+        for scheme in ("light", "dark"):
+            page = self.open()
+            page.emulate_media(color_scheme=scheme)
+            page.evaluate(self.CANVAS_CONTRAST_JS)
+            for tab in ("overview", "activity", "regions"):
+                page.evaluate(f"setTab('{tab}')")
+                page.wait_for_timeout(500)
+            seen = page.evaluate("window.__canvasTexts")
+            names = {t["text"] for t in seen}
+            # the test sees what it should: axis numbers, the day bands and the weekday values
+            self.assertTrue({"Nacht", "Morgen", "Tag", "Abend"} <= names, (scheme, sorted(names)[:20]))
+            self.assertTrue(any(n.endswith(" %") for n in names), (scheme, sorted(names)[:20]))
+            self.assertGreater(len(names), 15)
+            self.assertEqual([f"{t['text']} {t['ratio']:.2f}" for t in seen if t["ratio"] < 4.5], [], scheme)
+            self.assertEqual(self.errors, [])
+
+    @staticmethod
+    def hover_for_tooltip(page, element):
+        """Scrolling an element into view hides the page's tooltip (a scroll closes it), and only a mouse move shows it again."""
+        element.scroll_into_view_if_needed()
+        page.wait_for_timeout(300)
+        box = element.bounding_box()
+        page.mouse.move(box["x"] + 2, box["y"] + 2)
+        page.mouse.move(box["x"] + 4, box["y"] + 3)
+
+    def test_tooltip_and_popup_contrast_is_at_least_aa_in_both_themes(self):
+        for scheme in ("light", "dark"):
+            page = self.open()
+            page.emulate_media(color_scheme=scheme)
+            page.evaluate(self.CANVAS_CONTRAST_JS)
+            # the page's own tooltip, on a calendar day
+            page.evaluate("setTab('overview')")
+            page.wait_for_timeout(300)
+            self.hover_for_tooltip(page, page.locator("button.cal-day").first)
+            page.wait_for_function("!document.getElementById('tip').hidden")
+            self.assertTrue(page.is_visible("#tip"), scheme)
+            self.assertTrue(page.inner_text("#tip").strip(), scheme)
+            self.assertEqual(page.evaluate(self.CONTRAST_JS), [], f"{scheme} calendar tooltip")
+            # and on a heat table's cell, which shows every other cell as the difference to it (+ green, = grey, - red)
+            page.evaluate("setTab('activity')")
+            page.wait_for_timeout(400)
+            self.hover_for_tooltip(page, page.locator("#tab-activity table.heat-x td[data-heat]:not(.tot)").first)
+            page.wait_for_function("!document.getElementById('tip').hidden && document.querySelector('td.d-up, td.d-down, td.d-eq')")
+            self.assertTrue(page.is_visible("#tip"), scheme)
+            self.assertGreater(page.locator("td.d-up, td.d-down, td.d-eq").count(), 0, scheme)
+            self.assertEqual(page.evaluate(self.CONTRAST_JS), [], f"{scheme} heat tooltip and differences")
+            page.mouse.move(2, 2)
+            # Chart.js tooltips are drawn on the canvas: hover a point of the day curve and a bar of the weekdays
+            for card in ("hour-card", "weekday-card"):
+                point = page.evaluate("""id => { const c = BAR_CHARTS[id], data = c.getDatasetMeta(0).data, el = data[Math.min(3, data.length - 1)].getCenterPoint();
+                    c.canvas.scrollIntoView({ block: 'center' }); const r = c.canvas.getBoundingClientRect(); return [r.left + el.x, r.top + el.y]; }""", card)
+                page.evaluate("window.__canvasTexts = []")
+                page.mouse.move(point[0] - 6, point[1] - 6)
+                page.mouse.move(point[0], point[1])
+                page.wait_for_function(f"BAR_CHARTS['{card}'].tooltip.opacity === 1")
+                body = page.evaluate("id => { const t = BAR_CHARTS[id].tooltip; return [t.opacity, t.body.flatMap(b => b.lines)]; }", card)
+                self.assertEqual(body[0], 1, (scheme, card))
+                seen = page.evaluate("window.__canvasTexts")
+                self.assertTrue(any(t["text"] in body[1] for t in seen), (scheme, card, body, [t["text"] for t in seen][:12]))
+                self.assertEqual([f"{t['text']} {t['ratio']:.2f}" for t in seen if t["ratio"] < 4.5], [], f"{scheme} {card} tooltip")
+                page.mouse.move(2, 2)
+            # the map's hint over a place and its popup (the map's furniture is light in both themes)
+            page.evaluate("setTab('map')")
+            page.wait_for_function("MAP_LAYER && MAP_LAYER.getLayers().length > 0")
+            # zoomed in past CLUSTER_OFF_ZOOM, so the place is a marker of its own and not part of a group
+            page.evaluate("""() => { const mk = MAP_LAYER.getLayers()[0]; MAP.setView(mk.getLatLng(), Math.max(16, CLUSTER_OFF_ZOOM + 1), { animate: false }); mk.openTooltip(); }""")
+            page.wait_for_selector(".leaflet-tooltip", state="visible")
+            self.assertEqual(page.evaluate(self.CONTRAST_JS), [], f"{scheme} map hint")
+            page.evaluate("MAP_LAYER.getLayers()[0].openPopup()")
+            page.wait_for_selector(".leaflet-popup .pop-stats", state="visible")
+            self.assertEqual(page.evaluate(self.CONTRAST_JS), [], f"{scheme} map popup")
+            self.assertEqual(self.errors, [])
+
+    def test_calendar_is_one_run_of_weeks(self):
+        page = self.open()
+        # every day of the year once, in date order, in one grid (not one block per month)
+        days = page.evaluate("""() => { const y = S.year, n = Math.round((Date.UTC(y + 1, 0, 1) - Date.UTC(y, 0, 1)) / 864e5);
+            return Array.from({ length: n }, (_, i) => new Date(Date.UTC(y, 0, 1 + i)).toISOString().slice(0, 10)).map(fmtD); }""")
+        shown = page.evaluate("[...document.querySelectorAll('.cal-days > .cal-day:not(.cal-empty)')].map(d => d.dataset.tip.slice(0, 10))")
+        self.assertEqual(shown, days)
+        self.assertEqual(page.locator(".cal-months span").count(), 12)
+        # the weeks are columns: the next day is below, and after a Sunday at the top of the next column
+        pos = page.evaluate("""() => [...document.querySelectorAll('.cal-days > .cal-day')].slice(0, 14).map(d => { const r = d.getBoundingClientRect(); return [Math.round(r.left), Math.round(r.top)]; })""")
+        self.assertEqual(pos[0][0], pos[1][0])
+        self.assertGreater(pos[1][1], pos[0][1])
+        self.assertGreater(pos[7][0], pos[0][0])
+        self.assertEqual(pos[7][1], pos[0][1])
+        # the edge between two months is one line each (eleven of them), over the grid and out of the pointer's way
+        self.assertEqual(page.locator(".cal-edges path").count(), 11)
+        self.assertEqual(page.evaluate("getComputedStyle(document.querySelector('.cal-edges')).pointerEvents"), "none")
+        # every other month is a shade darker, and hovering a day lights up exactly its month
+        self.assertEqual(page.evaluate("[...new Set([...document.querySelectorAll('.cal-day.m-odd')].map(d => d.dataset.m))].join()"), "2,4,6,8,10,12")
+        self.assertEqual(page.locator(".cal-day.glow").count(), 0)
+        day = page.locator(".cal-day[data-m='3']").nth(10)
+        day.hover()
+        month = page.evaluate("[...document.querySelectorAll('.cal-day[data-m=\"3\"]')].length")
+        self.assertEqual(page.locator(".cal-day.glow").count(), month)
+        self.assertEqual(page.evaluate("[...document.querySelectorAll('.cal-day.glow')].every(d => d.dataset.m === '3')"), True)
+        self.assertTrue(page.evaluate("document.querySelector('.cal-days').classList.contains('glowing')"))
+        # the space between two days in the middle of the month is no "outside": moving over it keeps the glow
+        box = page.evaluate("""() => { const a = document.querySelectorAll('.cal-day.glow')[10].getBoundingClientRect(); return [a.left, a.top, a.width]; }""")
+        for dx, dy in ((box[2], box[2] / 2), (box[2] / 2, box[2]), (box[2], box[2])):
+            page.mouse.move(box[0] + dx, box[1] + dy)
+            self.assertEqual(page.locator(".cal-day.glow").count(), month)
+        page.mouse.move(2, 2)
+        self.assertEqual(page.locator(".cal-day.glow").count(), 0)
+        self.assertFalse(page.evaluate("document.querySelector('.cal-days').classList.contains('glowing')"))
+        self.assertEqual(self.errors, [])
+
     def test_calendar_day_and_jumps_to_life_list(self):
         page = self.open()
         day = page.locator("button.cal-day").first
@@ -592,6 +776,181 @@ class PageTest(unittest.TestCase):
         self.assertFalse(page.is_visible('#tabs button[data-tab="tours"]'))
         self.assertEqual(self.errors, [])
 
+    def test_place_names_that_look_like_markup_leave_the_page_working(self):
+        names = ["Teich <!--<script>", "Heide </script><b>", "__APP_JS__"]
+        extra = sample_export() + [sighting("Pica pica", "Elster", "2024-03-10", place_id=f"x{i}", place=n,
+                                            municipality="Anderort (BB, SPN)", lat="51.2", lon="14.4") for i, n in enumerate(names)]
+        path = os.path.join(self.tmp.name, "markup.html")
+        with open(path, "w", encoding="utf-8") as fh:
+            fh.write(lifelist.render_html(lifelist.build_page_data(extra, "export_test.json", False)))
+        self.url["markup"] = "file:///" + path.replace(os.sep, "/").lstrip("/")
+        page = self.open(redact="markup", hash="#regions")  # open() takes the key of self.url
+        page.wait_for_function("typeof OBS !== 'undefined' && OBS.length > 0")
+        self.assertEqual(sorted(page.evaluate("PL.map(p => p.name).filter(n => !/^(Teich am Wald|Heide Nord|Flussaue)$/.test(n))")), sorted(names))
+        self.assertIn("Teich <!--<script>", page.inner_text("#tab-regions"))  # shown as text, not taken for markup
+        self.assertEqual(self.errors, [])
+
+    def test_redact_switch_hides_the_export_file_name(self):
+        page = self.open()
+        self.assertIn("export_test.json", page.inner_text("#h-sub"))
+        page.click("#o-sum")
+        self.assertIn("--redact", page.inner_text("#o-redact-l"))  # says that it only hides, and how to share
+        page.check("#o-redact")
+        self.assertNotIn("export_test", page.inner_text("#h-sub"))
+        self.assertEqual(page.get_attribute("#h-sub", "title"), "")
+        page.uncheck("#o-redact")
+        self.assertIn("export_test.json", page.inner_text("#h-sub"))
+        self.assertEqual(self.errors, [])
+
+    def test_print_keeps_the_svg_charts(self):
+        # Chart.js animates and measures its (on screen hidden) tab: printed right after beforeprint, it was blank
+        page = self.open(hash="#overview")
+        page.evaluate("S.printTabs = new Set(['activity'])")
+        page.evaluate("window.dispatchEvent(new Event('beforeprint'))")
+        for card in ("#hour-card", "#weekday-card"):
+            self.assertEqual(page.locator(f"{card} canvas").count(), 0, card)
+            self.assertGreater(page.locator(f"{card} svg rect, {card} svg path").count(), 5, card)
+        page.evaluate("window.dispatchEvent(new Event('afterprint'))")
+        page.evaluate("setTab('activity')")
+        page.wait_for_timeout(300)
+        self.assertEqual(page.locator("#hour-card canvas").count(), 1)  # the screen gets Chart.js again
+        self.assertEqual(self.errors, [])
+
+    def test_heat_panel_marks_new_species_per_region(self):
+        # Rotkehlchen first in Bautzen county in 2023, in Görlitz county only in 2024: with Görlitz chosen it is new in 2024
+        s = [sighting("Erithacus rubecula", "Rotkehlchen", "2023-04-01", place_id="b", place="Bautzen-Ort", municipality="Bautzen (SN, BZ)"),
+             sighting("Erithacus rubecula", "Rotkehlchen", "2024-04-01", place_id="g", place="Görlitz-Ort", municipality="Görlitz (SN, GR)"),
+             sighting("Parus major", "Kohlmeise", "2023-05-01", place_id="g", place="Görlitz-Ort", municipality="Görlitz (SN, GR)")]
+        path = os.path.join(self.tmp.name, "regions_new.html")
+        with open(path, "w", encoding="utf-8") as fh:
+            fh.write(lifelist.render_html(lifelist.build_page_data(s, "export_test.json", False)))
+        self.url["regions_new"] = "file:///" + path.replace(os.sep, "/").lstrip("/")
+        page = self.open(redact="regions_new")  # open() takes the key of self.url
+        page.evaluate("S.region = 'c:SN/GR'; buildRegionSelect(); renderActive()")
+        page.wait_for_timeout(300)
+        row = page.locator("#heat-ym tbody tr", has_text="2024").locator("td.tot")
+        row.click()
+        self.assertIn("1 neu", page.inner_text("#heat-ym .cal-panel-h"))
+        self.assertIn("NEU", page.inner_text("#heat-ym .cal-panel"))
+        self.assertEqual(self.errors, [])
+
+    def test_planner_does_not_count_collective_taxa_as_seen(self):
+        page = self.open()
+        # the sample has "Larus argentatus / michahellis": with collective taxa shown it must not pass for Larus argentatus
+        page.evaluate("S.collective = true; PLAN_SEEN = null")
+        seen = page.evaluate("[...planSeen().seenLatin]")
+        self.assertNotIn("Larus argentatus", seen)
+        self.assertIn("Parus major", seen)
+        self.assertEqual(self.errors, [])
+
+    def test_map_keeps_its_view_until_the_places_change(self):
+        page = self.open(hash="#map")
+        page.wait_for_timeout(500)
+        page.evaluate("MAP.setView([51.3, 14.2], 14, { animate: false })")
+        page.select_option("#m-metric", "obs")
+        page.eval_on_selector("#t-range", "e => { e.value = 3; e.dispatchEvent(new Event('input')); }")
+        page.wait_for_timeout(400)
+        self.assertEqual(page.evaluate("[MAP.getZoom(), +MAP.getCenter().lat.toFixed(2)]"), [14, 51.3])
+        # another region: other places, so the map fits them
+        page.evaluate("S.region = 'c:SN/BZ'; buildRegionSelect(); renderActive()")
+        page.wait_for_timeout(400)
+        self.assertNotEqual(page.evaluate("[MAP.getZoom(), +MAP.getCenter().lat.toFixed(2)]"), [14, 51.3])
+        self.assertEqual(self.errors, [])
+
+    def test_life_list_works_with_the_keyboard(self):
+        page = self.open(hash="#list")
+        page.focus("#q-atlas")
+        page.keyboard.press("Tab")  # next stop after the filters: the first column head
+        self.assertEqual(page.evaluate("document.activeElement.dataset.sort"), "nr")
+        page.keyboard.press("Tab")
+        self.assertEqual(page.evaluate("document.activeElement.dataset.sort"), "name")
+        # Enter sorts by the column, the head says so, and the focus stays on it in the redrawn table
+        page.keyboard.press("Enter")
+        self.assertEqual(page.evaluate("[S.sort, S.dir]"), ["name", 1])
+        self.assertEqual(page.evaluate("[document.activeElement.dataset.sort, document.activeElement.getAttribute('aria-sort')]"), ["name", "ascending"])
+        page.keyboard.press(" ")
+        self.assertEqual(page.evaluate("document.activeElement.getAttribute('aria-sort')"), "descending")
+        # on to the first row: Enter opens it, Space closes it, the focus stays on the row
+        while not page.evaluate("document.activeElement.matches('tr.row')"):
+            page.keyboard.press("Tab")
+        sp = page.evaluate("document.activeElement.dataset.sp")
+        self.assertEqual(page.evaluate("document.activeElement.getAttribute('aria-expanded')"), "false")
+        page.keyboard.press("Enter")
+        self.assertEqual(page.evaluate("[document.activeElement.dataset.sp, document.activeElement.getAttribute('aria-expanded')]"), [sp, "true"])
+        self.assertEqual(page.locator("#list-out tr.detail").count(), 1)
+        page.keyboard.press(" ")
+        self.assertEqual(page.locator("#list-out tr.detail").count(), 0)
+        self.assertEqual(self.errors, [])
+
+    def test_other_tables_work_with_the_keyboard(self):
+        page = self.open(hash="#overview")
+        # a latest lifer opens its species in the life list, and the focus goes along
+        row = page.locator("#tab-overview tr.row").first
+        sp = row.get_attribute("data-sp")
+        row.focus()
+        page.keyboard.press("Enter")
+        page.wait_for_function("S.tab === 'list'")
+        self.assertEqual(page.evaluate("document.activeElement.dataset.sp"), sp)
+        # a region table sorts by keyboard
+        page.evaluate("setTab('regions')")
+        page.wait_for_timeout(300)
+        head = page.locator('#tab-regions th.sortable[data-k="name"]').first
+        lvl = head.get_attribute("data-lvl")
+        head.focus()
+        page.keyboard.press("Enter")
+        self.assertEqual(page.evaluate(f"S.regSort['{lvl}'].k"), "name")
+        self.assertEqual(page.evaluate("[document.activeElement.dataset.k, document.activeElement.getAttribute('aria-sort')]"), ["name", "ascending"])
+        self.assertEqual(self.errors, [])
+
+    def test_focused_elements_stay_clear_of_the_sticky_header(self):
+        page = self.open(hash="#activity")
+        page.wait_for_timeout(300)
+        page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+        hidden = []
+        for _ in range(40):  # backwards through the tab, scrolling up as the focus moves
+            page.keyboard.press("Shift+Tab")
+            covered = page.evaluate("""() => { const el = document.activeElement; if (!el || el.closest('header.top, footer')) return null;
+                const r = el.getBoundingClientRect(); if (!r.width) return null;
+                const hit = document.elementFromPoint(r.left + r.width / 2, r.top + Math.min(r.height / 2, 6));
+                return hit && !el.contains(hit) && hit.closest('header.top, footer') ? el.outerHTML.slice(0, 60) : null; }""")
+            if covered:
+                hidden.append(covered)
+        self.assertEqual(hidden, [])
+        self.assertEqual(self.errors, [])
+
+    def test_printed_side_by_side_tables_fit_their_cards(self):
+        # on paper "Späte Arten" ran over its card and lost its last column: at no width may a table leave its card
+        for width in (560, 620, 700, 800):
+            page = self.open(hash="#activity", width=width)
+            page.evaluate("S.printTabs = new Set(['activity'])")
+            page.emulate_media(media="print")
+            page.evaluate("window.dispatchEvent(new Event('beforeprint'))")
+            over = page.evaluate("""[...document.querySelectorAll('#tab-activity .detailgrid table')]
+                .map(t => Math.round(t.getBoundingClientRect().right - t.closest('.card').getBoundingClientRect().right))""")
+            self.assertEqual(len(over), 2)
+            self.assertTrue(all(o <= 0 for o in over), (width, over))
+            self.assertEqual(self.errors, [])
+
+    def test_texts_singular_special_characters_and_english_dates(self):
+        page = self.open()
+        t = lambda *a: page.evaluate("a => t(...a)", list(a))
+        self.assertEqual(t("calDaySummary", 1, 1), "1 Art an 1 Ort")
+        self.assertEqual(t("calDaySummary", 3, 2), "3 Arten an 2 Orten")
+        self.assertEqual(t("heatTip", "1", "1", "1"), "1 Beobachtung · 1 Art · 1 Tag")
+        self.assertEqual(t("heatTip", "1.234", "11", "21"), "1.234 Beobachtungen · 11 Arten · 21 Tage")
+        # an argument is put in as it is: neither "$&" nor "{1}" in a file name is read as anything
+        self.assertEqual(t("subtitle", "export_$&_{1}.json", 5), "Ornitho.de, Exportdatei export_$&_{1}.json, 5 Beobachtungen")
+        # German and English have the same placeholders in every text
+        self.assertEqual(page.evaluate("""() => { const ph = v => typeof v === 'string' ? [...v.matchAll(/\\{(\\d)/g)].map(m => m[1]).sort().join() : null;
+            return Object.keys(STR.de).filter(k => ph(STR.de[k]) !== ph(STR.en[k])); }"""), [])
+        page.select_option("#f-lang", "en")
+        self.assertEqual(t("calDaySummary", 1, 1), "1 species at 1 place")
+        self.assertEqual(page.evaluate("fmtD('2024-01-03')"), "3 Jan 2024")
+        self.assertEqual(page.evaluate("shortMD('10-06')"), "6 Oct")
+        page.select_option("#f-lang", "de")
+        self.assertEqual(page.evaluate("fmtD('2024-01-03')"), "03.01.2024")
+        self.assertEqual(self.errors, [])
+
     def test_phone_width_has_no_sideways_scroll(self):
         page = self.open(width=390)
         for tab in TABS:
@@ -663,6 +1022,167 @@ class PageTest(unittest.TestCase):
             for (const o of regionObs(baseObs())) if (!first.has(o.s)) first.set(o.s, o);
             return new Set([...first.values()].filter(o => PL[o.p].lat && (o.y < S.year || (o.y === S.year && o.m <= S.month))).map(o => o.p)).size; }""")
         self.assertEqual(ringed(), until)
+        self.assertEqual(self.errors, [])
+
+    def test_map_timelapse_plays_a_year_day_by_day(self):
+        page = self.open(hash="#map")
+        page.wait_for_timeout(500)
+        normal = page.evaluate("MAP_LAYER.getLayers().length")
+        self.assertFalse(page.is_visible("#tl-bar"))
+        page.click("#m-tl")
+        page.wait_for_timeout(300)
+        self.assertTrue(page.is_visible("#tl-bar"))
+        self.assertFalse(page.is_visible("#m-metric"))
+        self.assertEqual(page.get_attribute("#m-tl", "aria-pressed"), "true")
+        year = page.evaluate("S.tl.year")
+        # the latest year with located records, drawn on a canvas layer of its own
+        self.assertEqual(year, page.evaluate("Math.max(...OBS.filter(o => PL[o.p].lat).map(o => o.y))"))
+        self.assertTrue(page.evaluate("MAP.hasLayer(TL_LAYER)"))
+        self.assertGreater(page.evaluate("TL_MODEL.places.length"), 0)
+        self.assertFalse(page.evaluate("MAP.hasLayer(MAP_LAYER)"))
+        self.assertEqual(page.evaluate("document.querySelector('#tl-range').max"), "365" if year % 4 == 0 else "364")
+        # a day of a visit: that place glows, and the canvas holds colour there
+        painted = """() => { const c = TL_LAYER._canvas, d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+            let n = 0; for (let i = 3; i < d.length; i += 4) if (d[i]) n++; return n; }"""
+        first = page.evaluate("Math.min(...TL_MODEL.places.map(p => p.visits[0].di))")
+        day = page.evaluate("""() => { const v = TL_MODEL.places[0].visits[0]; tlShow(v.di); return v.di; }""")
+        self.assertTrue(page.evaluate(f"TL_FRAME.some(f => f.lat === PL[TL_MODEL.places[0].p].lat && f.w > 0.4)"))
+        self.assertGreater(page.evaluate(painted), 0)
+        self.assertEqual(page.evaluate("S.tl.day"), day)
+        self.assertEqual(page.input_value("#tl-range"), str(day))
+        self.assertRegex(page.inner_text("#tl-date"), r"^\d\d\.\d\d\.%d$" % year)
+        # before the year's first visit nothing glows and the canvas is clear
+        if first > 0:
+            page.evaluate(f"tlShow({first - 1})")
+            self.assertEqual(page.evaluate("TL_FRAME.length"), 0)
+            self.assertEqual(page.evaluate(painted), 0)
+        # a visit's glow fades with the days after it, more slowly with a longer afterglow, and a first record's ring with it
+        fade = page.evaluate("""() => { const v = [{ di: 10, n: 3, lifer: true }], g = (day, tau) => tlGlow(v, day, tau, 3);
+            return { a: g(10, 30), b: g(24, 30), c: g(70, 30), slow: g(70, 365), short: g(24, 14), sum: tlGlow([...v, { di: 12, n: 3, lifer: false }], 12, 30, 3).w, one: g(12, 30).w }; }""")
+        self.assertGreater(fade["a"]["w"], fade["b"]["w"])
+        self.assertGreater(fade["b"]["w"], fade["c"]["w"])
+        self.assertGreater(fade["c"]["w"], 0)
+        self.assertGreater(fade["slow"]["w"], fade["c"]["w"])
+        self.assertLess(fade["short"]["w"], fade["b"]["w"])
+        self.assertGreater(fade["a"]["ring"], fade["b"]["ring"])
+        self.assertGreater(fade["sum"], fade["one"] * 1.5)  # a second visit adds to the first
+        # the blobs' size follows the zoom, within limits, whatever the day
+        radii = page.evaluate("""() => { const r = z => { MAP.setZoom(z, { animate: false }); return tlRadius(51); };
+            return [r(6), r(10), r(13), r(18)]; }""")
+        self.assertEqual(radii[0], 10)
+        self.assertGreater(radii[2], radii[1])
+        self.assertEqual(radii[3], 140)
+        # the afterglow is a setting
+        page.select_option("#tl-glow", "90")
+        self.assertEqual(page.evaluate("S.tl.glow"), 90)
+        # playing moves the day on by itself, pausing keeps it, and the end stops it
+        page.evaluate("tlShow(0); TL_POS = 0; S.tl.speed = 60")
+        page.click("#tl-play")
+        self.assertIn("Pause", page.inner_text("#tl-play"))
+        page.wait_for_timeout(500)
+        self.assertGreater(page.evaluate("S.tl.day"), 5)
+        page.click("#tl-play")
+        stopped = page.evaluate("S.tl.day")
+        page.wait_for_timeout(300)
+        self.assertEqual(page.evaluate("S.tl.day"), stopped)
+        self.assertFalse(page.evaluate("S.tl.playing"))
+        page.evaluate("TL_POS = TL_MODEL.n - 20")
+        page.click("#tl-play")
+        page.wait_for_function("!S.tl.playing", timeout=3000)
+        self.assertEqual(page.evaluate("S.tl.day"), page.evaluate("TL_MODEL.n - 1"))
+        # another year, then back to the normal map with its places
+        other = page.evaluate("[...document.querySelector('#tl-year').options].map(o => +o.value).find(y => y !== S.tl.year)")
+        page.select_option("#tl-year", str(other))
+        page.wait_for_timeout(200)
+        self.assertEqual(page.evaluate("S.tl.year"), other)
+        self.assertEqual(page.evaluate("S.tl.day"), 0)
+        page.click("#m-tl")
+        page.wait_for_timeout(300)
+        self.assertFalse(page.is_visible("#tl-bar"))
+        self.assertTrue(page.is_visible("#m-metric"))
+        self.assertEqual(page.evaluate("MAP_LAYER.getLayers().length"), normal)
+        self.assertFalse(page.evaluate("MAP.hasLayer(TL_LAYER)"))
+        self.assertEqual(self.errors, [])
+
+    def test_map_timelapse_follows_one_species(self):
+        page = self.open(hash="#map")
+        page.wait_for_timeout(500)
+        page.click("#m-tl")
+        page.wait_for_timeout(300)
+        everything = page.evaluate("TL_MODEL.places.length")
+        # a species seen in more than one year, with a place: the suggestions offer it by name
+        sp, name = page.evaluate("""() => { const years = new Map();
+            for (const o of OBS) if (PL[o.p].lat) { if (!years.has(o.s)) years.set(o.s, new Set()); years.get(o.s).add(o.y); }
+            const s = [...years].find(([, ys]) => ys.size > 1)[0]; return [s, speciesName(SP[s])]; }""")
+        self.assertGreater(page.locator("#tl-suggest option").count(), 1)
+        self.assertTrue(page.evaluate("n => [...document.querySelectorAll('#tl-suggest option')].some(o => o.value === n)", name))
+        page.fill("#tl-sp", name)
+        page.press("#tl-sp", "Enter")
+        page.wait_for_timeout(300)
+        self.assertEqual(page.evaluate("S.tl.sp"), [sp])
+        # only the places of that species in the year shown, a year it occurs in, and the bar counts records and places
+        year = page.evaluate("S.tl.year")
+        expected = page.evaluate(f"new Set(regionObs(baseObs()).filter(o => o.s === {sp} && o.y === S.tl.year && PL[o.p].lat).map(o => o.p)).size")
+        self.assertEqual(page.evaluate("TL_MODEL.places.length"), expected)
+        self.assertLessEqual(expected, everything)
+        self.assertIn(year, page.evaluate(f"OBS.filter(o => o.s === {sp}).map(o => o.y)"))
+        page.evaluate("tlShow(TL_MODEL.n - 1)")
+        self.assertIn("Orte seit Jahresbeginn", page.inner_text("#tl-stats"))
+        self.assertEqual(page.evaluate("TL_MODEL.cum[TL_MODEL.n - 1]"), expected)
+        self.assertIn("Vögel", page.inner_text(".map-legend"))
+        # the years offered are those of the species only
+        offered = page.evaluate("[...document.querySelector('#tl-year').options].map(o => +o.value).sort()")
+        self.assertEqual(offered, page.evaluate(f"[...new Set(OBS.filter(o => o.s === {sp} && PL[o.p].lat).map(o => o.y))].sort()"))
+        # a name that is none goes back to the species; an emptied field means all species again
+        page.fill("#tl-sp", "kein Vogel")
+        page.press("#tl-sp", "Enter")
+        self.assertEqual(page.input_value("#tl-sp"), name)
+        self.assertEqual(page.evaluate("S.tl.sp"), [sp])
+        page.fill("#tl-sp", "")
+        page.press("#tl-sp", "Enter")
+        page.wait_for_timeout(300)
+        self.assertIsNone(page.evaluate("S.tl.sp"))
+        self.assertGreaterEqual(page.evaluate("TL_MODEL.places.length"), expected)
+        self.assertEqual(page.evaluate("TL_MODEL.sp"), None)
+        self.assertEqual(self.errors, [])
+
+    def test_timelapse_follows_every_taxon_of_a_name(self):
+        # a wild Rostgans and an escaped one are two taxa of one name: the picker offers the name once and follows both
+        s = [sighting("Tadorna ferruginea", "Rostgans", "2024-04-01", place_id="w", place="Teich", lat="51.1", lon="14.5"),
+             sighting("Tadorna ferruginea", "Rostgans", "2024-05-01", place_id="e", place="Park", lat="51.3", lon="14.2", rarity="escaped"),
+             sighting("Parus major", "Kohlmeise", "2024-05-02", place_id="w", place="Teich", lat="51.1", lon="14.5")]
+        path = os.path.join(self.tmp.name, "escapes.html")
+        with open(path, "w", encoding="utf-8") as fh:
+            fh.write(lifelist.render_html(lifelist.build_page_data(s, "export_test.json", False)))
+        self.url["escapes"] = "file:///" + path.replace(os.sep, "/").lstrip("/")
+        page = self.open(redact="escapes", hash="#map")  # open() takes the key of self.url
+        page.evaluate("S.escaped = true; renderMap()")
+        page.click("#m-tl")
+        page.wait_for_timeout(300)
+        self.assertEqual(page.evaluate("[...document.querySelectorAll('#tl-suggest option')].filter(o => o.value === 'Rostgans').length"), 1)
+        page.fill("#tl-sp", "Rostgans")
+        page.press("#tl-sp", "Enter")
+        page.wait_for_timeout(300)
+        self.assertEqual(len(page.evaluate("S.tl.sp")), 2)
+        self.assertEqual(page.evaluate("TL_MODEL.places.length"), 2)  # the wild bird's pond and the escape's park
+        self.assertEqual(self.errors, [])
+
+    def test_timelapse_keeps_its_places_clear_of_the_legend(self):
+        # a year from the North Sea to Lake Constance: the southernmost place must not end up under the legend
+        s = [sighting("Parus major", "Kohlmeise", "2024-04-01", place_id="n", place="Leybucht", lat="53.53", lon="7.12"),
+             sighting("Parus major", "Kohlmeise", "2024-05-01", place_id="s", place="Wollmatinger Ried", lat="47.69", lon="9.13"),
+             sighting("Parus major", "Kohlmeise", "2024-06-01", place_id="o", place="Görlitz", lat="51.15", lon="14.99")]
+        path = os.path.join(self.tmp.name, "wide.html")
+        with open(path, "w", encoding="utf-8") as fh:
+            fh.write(lifelist.render_html(lifelist.build_page_data(s, "export_test.json", False)))
+        self.url["wide"] = "file:///" + path.replace(os.sep, "/").lstrip("/")
+        page = self.open(redact="wide", hash="#map", height=700)  # open() takes the key of self.url
+        page.click("#m-tl")
+        page.wait_for_timeout(300)
+        clear = page.evaluate("""() => { const legend = document.querySelector('.map-legend').getBoundingClientRect(), box = MAP.getContainer().getBoundingClientRect();
+            return TL_MODEL.places.map(pl => { const pt = MAP.latLngToContainerPoint([PL[pl.p].lat, PL[pl.p].lon]);
+                return !(box.left + pt.x < legend.right && box.top + pt.y > legend.top); }); }""")
+        self.assertEqual(clear, [True, True, True])
         self.assertEqual(self.errors, [])
 
     def test_redacted_build_hides_map_and_places(self):
@@ -753,7 +1273,9 @@ class PageTest(unittest.TestCase):
         self.assertNotEqual(light, dark)
         page.evaluate("S.printTabs.add('activity')")  # only the tabs chosen for printing are drawn for it
         page.evaluate("window.dispatchEvent(new Event('beforeprint'))")
-        self.assertEqual(grid(), light)
+        # paper gets the SVG chart (drawn at once, see mountChart), in the light colours
+        self.assertEqual(page.evaluate("BAR_CHARTS['weekday-card']"), None)
+        self.assertEqual(page.eval_on_selector("#weekday-card svg line", "l => getComputedStyle(l).stroke"), "rgb(228, 232, 228)")
         page.evaluate("window.dispatchEvent(new Event('afterprint'))")
         self.assertEqual(grid(), dark)
         self.assertEqual(page.get_attribute("html", "data-theme"), "dark")

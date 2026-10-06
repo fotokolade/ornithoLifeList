@@ -12,7 +12,7 @@ Macht aus deinem [ornitho.de](https://www.ornitho.de/)-Export eine interaktive V
 - **Tagesaktivität:** zu welcher Uhrzeit, an welchen Wochentagen und in welchen Monaten du unterwegs bist
 - **Regionen:** Arten nach Bundesland, Landkreis, Gemeinde und Ort, und wann du dich wo aufhältst
 - **Touren:** Spaziergänge und Radtouren, rekonstruiert aus Meldungen, die zeitlich und räumlich nah beieinanderliegen, mit Strecke auf der Karte
-- **Karte** deiner Beobachtungsorte
+- **Karte** deiner Beobachtungsorte, auch als Zeitraffer über ein Jahr
 
 <details><summary>Wie die Touren entstehen: Schaubild der Einstellungen</summary>
 
@@ -37,6 +37,10 @@ Die Bilder zeigen eine Lebensliste aus erfundenen Beispieldaten.
 **Ziele:** Arten, die noch fehlen, mit ihrer Saison:
 
 ![Nie gesehene Arten mit Saisonstreifen](docs/screenshots/targets.png)
+
+**Reiseziele:** wo und in welchem Monat du fehlende Arten am ehesten siehst, nach Bundesland und Landkreis:
+
+![Reiseziele im Mai, Bayern aufgeklappt mit seinen Landkreisen](docs/screenshots/planner.png)
 
 **Tagesaktivität** über den Tag und nach Wochentagen:
 
@@ -102,13 +106,15 @@ Die Ausgabe zeigt, welche Dateien gelesen wurden und wie viele doppelte Beobacht
 | `python lifelist.py --check-update` | sieht auf GitHub nach, ob es eine neuere Version gibt, und erstellt nichts |
 | `python lifelist.py --version` | zeigt die installierte Version |
 
-In der Version mit `--redact` fehlen Beobachtungsorte, Gemeinden, Koordinaten, die Karte und die Touren. Alle Arten, Daten und Auswertungen bleiben erhalten.
+In der Version mit `--redact` fehlen Beobachtungsorte, Gemeinden, Koordinaten, die Karte und die Touren. Alle Arten, Daten und Auswertungen bleiben erhalten, ebenso Bundesland und Landkreis; bei heiklen Arten (etwa Brutplätzen) können Art, Tag, Uhrzeit, Brutzeitcode und Landkreis zusammen noch viel verraten. Der Schalter „Ortsangaben schwärzen“ in den Einstellungen blendet die Orte nur aus: Die Datei enthält sie weiter, zum Weitergeben also immer die Version mit `--redact` erstellen.
 
 ## Ohne Python: lifelist.exe für Windows
 
 Auf der [Releases-Seite](../../releases) gibt es eine fertige `lifelist.exe`. Sie macht dasselbe wie `python lifelist.py` und versteht dieselben Optionen. Lege sie wie oben beschrieben in denselben Ordner wie deinen Export und starte sie per Doppelklick.
 
 **Vor dem ersten Start prüfen, ob die Datei echt ist:** Lade vom Release auch `lifelist.exe.sha256`, `verify.bat` und `verify.ps1` in denselben Ordner und starte `verify.bat` per Doppelklick. Es vergleicht die Prüfsumme (SHA256) der exe mit der veröffentlichten und meldet „OK“ oder eine Warnung. Fehlt die `.sha256`-Datei, fragt es nach der Prüfsumme aus den Release-Notizen. Bei einer Warnung die exe nicht starten: Sie stammt dann nicht aus diesem Release.
+
+**Warnung von Windows (SmartScreen):** Beim ersten Start meldet Windows unter Umständen „Der Computer wurde durch Windows geschützt“. Das liegt daran, dass die `lifelist.exe` nicht digital signiert ist und noch nicht weit verbreitet; über den Inhalt sagt es nichts. Prüfe die Datei erst mit `verify.bat` (siehe oben), klicke dann in der Meldung auf „Weitere Informationen“ und auf „Trotzdem ausführen“. Alternativ vorher einen Rechtsklick auf die Datei, „Eigenschaften“ und unten „Zulassen“ ankreuzen: Dann fragt Windows nicht mehr nach.
 
 Ohne die Skripte geht es auch von Hand in PowerShell: `Get-FileHash lifelist.exe -Algorithm SHA256` ausführen und das Ergebnis mit der Prüfsumme auf der Releases-Seite vergleichen.
 

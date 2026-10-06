@@ -101,7 +101,7 @@ function renderActivity() {
     ${heatSection("m", hourSpec(T.months, T.monthsShort.map(m => m.replace(".", "")), o => o.m - 1))}
     <h2 data-toc="${esc(t("tocActSpecies"))}">${t("actSpecies")}</h2>
     ${infoText(t("actSpeciesHelp", MIN_TIMED))}
-    <div class="detailgrid"><div><b>${t("actEarly")}</b>${speciesTable(early)}</div><div><b>${t("actLate")}</b>${speciesTable(late)}</div></div>`;
+    <div class="detailgrid tables"><div><b>${t("actEarly")}</b>${speciesTable(early)}</div><div><b>${t("actLate")}</b>${speciesTable(late)}</div></div>`;
   upgradeDayCurve($("hour-card"), series, hours.map(hourLabel), t({ obs: "actMObs", species: "actMSpecies", days: "actMDays" }[S.actMetric]), stops);
   upgradeWeekdayChart($("weekday-card"), T.weekdays, wdPct, wdTips);
   updateToc();

@@ -4,7 +4,8 @@ Usage:  python tools/make_screenshots.py [--map]
 
 Builds a page from tools/make_demo_export.py's fictional export (no real data involved), opens it
 in headless Chromium with the clock set to a fixed spring day, and saves one picture per feature.
---map also takes the map, which needs internet access for the map tiles.
+--map also takes the map and the time-lapse as an animated GIF (that needs Pillow), which need internet access
+for the map tiles.
 Needs `pip install playwright` and `playwright install chromium`.
 """
 import argparse
@@ -37,12 +38,35 @@ def section(page, first, last=None, pad=12):
             "height": bottom["y"] + bottom["height"] - top["y"] + 2 * pad}
 
 
+def timelapse_gif(page, path, step=5, width=640, ms=100):
+    """The year of the time-lapse as an animated GIF: a frame every `step` days of the bar and the map, `width` px
+    wide, `ms` per frame. All frames share one palette (taken from midsummer, when most places glow), and Pillow
+    stores of each frame only what changed since the one before: the map underneath stays, so the file stays small."""
+    try:
+        from PIL import Image
+    except ImportError:
+        print("Pillow is missing, so no timelapse.gif: pip install pillow")
+        return
+    import io
+    clip = section(page, "#tl-bar", "#map", pad=6)
+    page.mouse.move(0, 0)
+    frames = []
+    for day in range(0, page.evaluate("TL_MODEL.n"), step):
+        page.evaluate(f"TL_POS = {day}; tlShow({day})")
+        img = Image.open(io.BytesIO(page.screenshot(clip=clip, full_page=True))).convert("RGB")
+        frames.append(img.resize((width, round(img.height * width / img.width)), Image.LANCZOS))
+    palette = frames[len(frames) // 2].quantize(colors=128, dither=Image.Dither.NONE)
+    frames = [f.quantize(palette=palette, dither=Image.Dither.NONE) for f in frames]
+    frames[0].save(path, save_all=True, append_images=frames[1:], duration=ms, loop=0, optimize=True, disposal=1)
+    print("Written:", os.path.relpath(path, ROOT), f"({len(frames)} frames, {os.path.getsize(path) / 1e6:.1f} MB)")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--map", action="store_true", help="also take the map (needs internet for the tiles)")
     opts = parser.parse_args()
     os.makedirs(OUT, exist_ok=True)
-    data = lifelist.build_page_data(make_demo_export.generate(), "export_demo.json", False)
+    data = lifelist.build_page_data(make_demo_export.generate(), "demo_export.json", False)
     with tempfile.TemporaryDirectory() as tmp:
         path = os.path.join(tmp, "demo.html")
         with open(path, "w", encoding="utf-8") as fh:
@@ -96,10 +120,19 @@ def main():
 
             # Ziele: species still missing, grouped by season
             page = open_page(hash="#targets")
-            h2 = "#tab-targets h2:last-of-type"
+            # by its text: since the holiday planner came, the tab's last h2 is the planner's, below this table
+            h2 = "#tab-targets h2:has-text('Nie gesehene Arten')"
             last_row = page.locator("#wish-out tbody tr").nth(12)
             last_row.scroll_into_view_if_needed()
             shot(page, "targets.png", section(page, h2, f"#wish-out tbody tr >> nth=12"))
+
+            # Reiseziele: where missing species are likeliest in May, the first state opened with its counties
+            page = open_page(hash="#targets")
+            page.select_option("#plan-month", "5")
+            page.wait_for_timeout(300)
+            page.locator("#plan-out tr.plan-grp").first.click()
+            page.wait_for_timeout(300)
+            shot(page, "planner.png", section(page, "#tab-targets h2:has-text('Reiseziele für fehlende Arten')", "#plan-out tbody tr >> nth=9"))
 
             # Tagesaktivität: course of the day and weekdays
             page = open_page(hash="#activity")
@@ -133,10 +166,21 @@ def main():
                 page = open_page(hash="#map")
                 page.wait_for_timeout(4000)
                 shot(page, "map.png", section(page, "#map"))
+                # the time-lapse of the year that reaches into the most states, played as an animated GIF
+                page = open_page(hash="#map")
+                page.click("#m-tl")
+                year = page.evaluate("""() => { const states = new Map();
+                    for (const o of OBS) if (PL[o.p].lat) { if (!states.has(o.y)) states.set(o.y, new Set()); states.get(o.y).add(PL[o.p].state); }
+                    return [...states].sort((a, b) => b[1].size - a[1].size || b[0] - a[0])[0][0]; }""")
+                page.select_option("#tl-year", str(year))
+                page.select_option("#tl-glow", "90")  # trips of two or three days stay in sight, so the year fills the map
+                page.wait_for_timeout(4000)  # the tiles
+                timelapse_gif(page, os.path.join(OUT, "timelapse.gif"))
                 try:  # map tiles make a big PNG; 256 colours look the same at a third of the size
                     from PIL import Image
-                    out = os.path.join(OUT, "map.png")
-                    Image.open(out).convert("RGB").quantize(colors=256).save(out, optimize=True)
+                    for name in ("map.png",):
+                        out = os.path.join(OUT, name)
+                        Image.open(out).convert("RGB").quantize(colors=256).save(out, optimize=True)
                 except ImportError:
                     pass
             browser.close()
