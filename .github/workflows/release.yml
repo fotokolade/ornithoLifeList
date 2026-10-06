@@ -1,6 +1,6 @@
 # Builds lifelist.exe on Windows and publishes a GitHub release.
 # Release steps: bump APP_VERSION in src/i18n.js, write the notes to .github/release-notes/v<version>.md,
-# commit, then either push the tag (git tag v0.3.0 && git push origin v0.3.0) or start this workflow
+# commit, then either push the tag (git tag v0.7.0 && git push origin v0.7.0) or start this workflow
 # by hand ("Run workflow" on the Actions tab), which creates the tag from APP_VERSION itself.
 # A published release is never replaced by accident: a run for a version that already has one stops
 # before building, unless it was started by hand with "replace" ticked (a new exe has a new checksum).

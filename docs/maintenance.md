@@ -5,8 +5,8 @@ Aufgaben, die nur die Projektleitung erledigt: Releases veröffentlichen, die mi
 ## Ein Release veröffentlichen
 
 1. Die Versionsnummer `APP_VERSION` in `src/i18n.js` erhöhen.
-2. Die Release-Notizen nach `.github/release-notes/v<Version>.md` schreiben, zum Beispiel `v0.3.0.md`, und in `CHANGELOG.md` den Abschnitt „Noch nicht veröffentlicht“ zur neuen Version machen; alles committen und pushen.
-3. Auf GitHub im Tab **Actions** den Workflow **Release** mit **Run workflow** starten. Alternativ das Tag selbst pushen: `git tag v0.3.0 && git push origin v0.3.0`.
+2. Die Release-Notizen nach `.github/release-notes/v<Version>.md` schreiben, zum Beispiel `v0.7.0.md`, und in `CHANGELOG.md` den Abschnitt „Noch nicht veröffentlicht“ zur neuen Version machen; alles committen und pushen.
+3. Auf GitHub im Tab **Actions** den Workflow **Release** mit **Run workflow** starten. Alternativ das Tag selbst pushen: `git tag v0.7.0 && git push origin v0.7.0`.
 
 Ein veröffentlichtes Release ersetzt der Workflow nie aus Versehen: Gibt es zur Versionsnummer schon ein Release (oder liegt ihr Tag auf einem anderen Commit), bricht er vor dem Bauen ab. Für ein neues Release also immer erst `APP_VERSION` erhöhen. Soll eine Version bewusst neu gebaut werden, den Workflow von Hand mit dem Häkchen **replace** starten; die neue exe hat dann eine neue Prüfsumme, eine früher veröffentlichte (etwa ein nachgetragener Abschnitt „Prüfsumme“ in den Notizen) passt nicht mehr und wird in den neuen Notizen durch die neue ersetzt. Fehlen die Notizen, bricht der Workflow ebenfalls ab.
 
@@ -18,7 +18,7 @@ Zum Ausprobieren lässt sich die exe auch selbst bauen: unter Windows `python bu
 
 ## Screenshots der README
 
-`tools/make_screenshots.py` erstellt daraus die Bilder in `docs/screenshots/` (braucht Playwright, siehe [Tests](../CONTRIBUTING.md#tests)). Mit `--map` kommt ein Bild der Karte dazu, dafür braucht es Internet für die Kartenkacheln.
+`tools/make_screenshots.py` erstellt die Bilder in `docs/screenshots/` aus den erfundenen Daten von `tools/make_demo_export.py` (braucht Playwright, siehe [Tests](../CONTRIBUTING.md#tests)). Mit `--map` kommt ein Bild der Karte dazu, dafür braucht es Internet für die Kartenkacheln.
 
 ## Welche Felder hat ein Export?
 
@@ -28,7 +28,7 @@ Zum Ausprobieren lässt sich die exe auch selbst bauen: unter Windows `python bu
 
 - `tools/extract_species_reference.py` aktualisiert `species_reference.json` aus der ornitho-Referenzliste (`reference/ornitho-Referenzliste-Arten-*.xlsx`, braucht `pip install openpyxl`). Der Ordner `reference/` ist wegen unklarer Weitergaberechte nicht im Repository.
 - `tools/fetch_occurrence_windows.py` ermittelt die Beobachtungszeiträume der Zug- und Gastvögel über die öffentliche GBIF-API.
-- `tools/fetch_gbif_planner.py` erzeugt die Daten der Reiseziele (`data/gbif_planner_de.json`, `_eu.json`) über die GBIF-API. Zuerst `--check`, dann `--scope de` oder `--scope eu`. Die Antworten werden in `tools/.gbif_cache/` zwischengespeichert: Ein abgebrochener Lauf setzt dort wieder an, und mit `--offline` lassen sich die Dateien aus dem Zwischenspeicher neu berechnen, ohne GBIF erneut zu fragen.
+- `tools/fetch_gbif_planner.py` erzeugt die Daten der Reiseziele (`data/gbif_planner_de.json`; `_eu.json` für Europa gibt es noch nicht) über die GBIF-API. Zuerst `--check`, dann `--scope de` oder `--scope eu`. Die Antworten werden in `tools/.gbif_cache/` zwischengespeichert: Ein abgebrochener Lauf setzt dort wieder an, und mit `--offline` lassen sich die Dateien aus dem Zwischenspeicher neu berechnen, ohne GBIF erneut zu fragen.
 - `tools/make_tour_diagram.py` zeichnet das Schaubild der Touren-Einstellungen (Deutsch und Englisch, für die Seite und die README) neu, etwa nach einer Änderung der Standardwerte oder der Namen.
 - `tools/update_vendor.py` lädt die Bibliotheken in `vendor/` neu, zum Beispiel für ein Versions-Update.
 

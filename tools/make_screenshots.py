@@ -96,7 +96,8 @@ def main():
 
             # Ziele: species still missing, grouped by season
             page = open_page(hash="#targets")
-            h2 = "#tab-targets h2:last-of-type"
+            # by its text: since the holiday planner came, the tab's last h2 is the planner's, below this table
+            h2 = "#tab-targets h2:has-text('Nie gesehene Arten')"
             last_row = page.locator("#wish-out tbody tr").nth(12)
             last_row.scroll_into_view_if_needed()
             shot(page, "targets.png", section(page, h2, f"#wish-out tbody tr >> nth=12"))
