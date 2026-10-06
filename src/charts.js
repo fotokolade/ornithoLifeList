@@ -2,50 +2,118 @@ let curveSvgSeq = 0;
 let curveForPrint = false;  // set around printing: paper gets the full-size drawing, not the screen's width
 // the width the curve is drawn at: about its shown width, so the axis text stays legible on a phone instead of shrinking with the whole picture
 const curveWidth = () => curveForPrint ? 720 : Math.round(Math.max(320, Math.min(720, document.documentElement.clientWidth - 66)));
+// about how wide a line of the curve's 11px text is
+const curveTextW = (s, bold = false) => s.length * (bold ? 6.6 : 6);
+/**
+ * The life list as steps, one per new species, with a few labels that tell its story (round numbers, the day with
+ * the most new species, where it stands now) and below, on the same time axis, the new species of each year.
+ * @param {{first: Observation, s: number}[]} chrono the life species in the order of their first records
+ */
 function curveSvg(chrono) {
   const pts = chrono.map(r => r.first);
   if (!pts.length) return "";
-  // unique per call: the curve now renders in two tabs at once (Overview + Lebensliste), and
+  // unique per call: the curve renders in two tabs at once (Overview + Lebensliste), and
   // <linearGradient> ids must be unique in the document or url(#id) can resolve to the wrong (or a hidden, non-rendering) one
-  const gradId = "curveGrad" + curveSvgSeq, lineId = "curveLine" + curveSvgSeq;
-  curveSvgSeq++;
-  const W = curveWidth(), H = 230, L = 38, R = 10, Tp = 10, B = 24;
+  const gradId = "curveGrad" + curveSvgSeq++;
+  const n = pts.length;
+  // the steps from Tp down to CB; under them the caption, the bars of each year (BT to BB) and the years
+  const W = curveWidth(), L = 38, R = 10, Tp = 30, CB = 190, BT = 222, BB = 274, H = 296;
   // the curve ends with the export's last observation, not today: an older export would otherwise trail off in a long flat line
   const t0 = Date.UTC(MIN_Y, 0, 1), t1 = Date.UTC(MAX_Y + 1, 0, 1), tEnd = Date.parse(OBS[OBS.length - 1].d + "T00:00:00Z");
   const x = ms => L + (ms - t0) / (t1 - t0) * (W - L - R);
-  const mag = Math.pow(10, Math.floor(Math.log10(pts.length)));
-  const step = Math.max(1, mag / (pts.length / mag < 2.5 ? 2 : 1));
-  const yMax = Math.ceil(pts.length / step) * step;
-  const y = n => H - B - n / yMax * (H - B - Tp);
+  const xd = d => x(Date.parse(d + "T00:00:00Z"));
+  const mag = Math.pow(10, Math.floor(Math.log10(n)));
+  const step = Math.max(1, mag / (n / mag < 2.5 ? 2 : 1));
+  const yMax = Math.ceil(n / step) * step;
+  const y = v => CB - v / yMax * (CB - Tp);
   let g = "", d = `M${x(t0)},${y(0)}`, prev = 0, dots = "";
   for (let v = 0; v <= yMax; v += step) g += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${L - 6}" y="${y(v) + 4}" text-anchor="end">${v}</text>`;
-  // a year label needs about 40 units of width; thin them out when the years get too narrow for that
-  const every = Math.max(1, Math.ceil(40 / ((W - L - R) / (MAX_Y - MIN_Y + 1))));
-  for (let yr = MIN_Y; yr <= MAX_Y; yr += every)
-    g += `<text x="${x(Date.UTC(yr, 0, 1)) + 2}" y="${H - 6}">${yr}</text>`;
   pts.forEach((o, i) => {
-    const ms = Date.parse(o.d + "T00:00:00Z");
-    d += ` L${x(ms)},${y(prev)} L${x(ms)},${y(i + 1)}`;
+    const px = xd(o.d);
+    d += ` L${px},${y(prev)} L${px},${y(i + 1)}`;
     prev = i + 1;
     const cur = o.y === S.year;
-    // each dot sits in a larger invisible hit area, so it can be clicked (opens the species in the life list) and hovered easily
-    dots += `<g class="dot" data-sp="${o.s}"><circle cx="${x(ms)}" cy="${y(i + 1)}" r="9" fill="transparent"/><circle cx="${x(ms)}" cy="${y(i + 1)}" r="${cur ? 4.5 : 2.5}" fill="${cur ? "var(--accent)" : "var(--bar)"}" stroke="var(--card)" stroke-width="${cur ? 1.5 : 1}"/><title>${i + 1}. ${esc(speciesName(SP[o.s]))}, ${fmtD(o.d)}</title></g>`;
+    // each step's corner is a species, in a larger invisible hit area: hover names it, a click opens it in the life list
+    dots += `<g class="dot" data-sp="${o.s}"><circle cx="${px}" cy="${y(i + 1)}" r="9" fill="transparent"/><circle cx="${px}" cy="${y(i + 1)}" r="${cur ? 3 : 2}" fill="${cur ? "var(--accent)" : "var(--card)"}" stroke="var(--accent)" stroke-width="1.2"/><title>${i + 1}. ${esc(speciesName(SP[o.s]))}, ${fmtD(o.d)}</title></g>`;
   });
-  const baseline = ` L${x(tEnd)},${y(0)} L${x(t0)},${y(0)} Z`;
-  const area = d + ` L${x(tEnd)},${y(prev)}` + baseline;
-  d += ` L${x(tEnd)},${y(prev)}`;
+  const xEnd = x(tEnd);
+  const area = d + ` L${xEnd},${y(prev)} L${xEnd},${y(0)} L${x(t0)},${y(0)} Z`;
+  d += ` L${xEnd},${y(prev)}`;
+
+  // the labels: where the list stands now, the last two round numbers and the day that added the most species.
+  // Each one goes up and to the left of its point (empty sky over a rising curve) or down and to the right (under it),
+  // wherever it overlaps nothing else; one that fits nowhere is left out.
+  /** @type {{x1: number, y1: number, x2: number, y2: number}[]} */
+  const boxes = [];
+  const free = b => b.x1 >= L && b.x2 <= W - R && b.y1 >= 0 && b.y2 <= CB &&
+    boxes.every(o => b.x2 < o.x1 || b.x1 > o.x2 || b.y2 < o.y1 || b.y1 > o.y2);
+  const last = pts[n - 1], endHead = t("kpiSpeciesN", fmtN(n)), endTail = " · " + t("curveLast", speciesName(SP[last.s]));
+  const endW = curveTextW(endHead, true) + curveTextW(endTail), endY = y(n) - 10;
+  const endX = xEnd - endW >= L ? xEnd : L + endW;
+  boxes.push({ x1: endX - endW, y1: endY - 11, x2: endX, y2: endY + 3 });
+  let notes = `<text class="lab" x="${endX}" y="${endY}" text-anchor="end"><tspan class="hd">${esc(endHead)}</tspan><tspan class="dt">${esc(endTail)}</tspan></text>`;
+  const note = (/** @type {number} */ i, /** @type {string} */ head, /** @type {string} */ sub) => {
+    const px = xd(pts[i].d), py = y(i + 1), w = Math.max(curveTextW(head, true), curveTextW(sub));
+    for (const [side, off] of [[-1, 0], [1, 0], [-1, 24], [1, 24]]) {
+      // side -1: up-left, the lines' baselines above the point; 1: down-right, below it
+      const b1 = side < 0 ? py - 20 - off : py + 16 + off;
+      const box = side < 0 ? { x1: px - 6 - w, x2: px - 6, y1: b1 - 11, y2: b1 + 16 } : { x1: px + 6, x2: px + 6 + w, y1: b1 - 11, y2: b1 + 16 };
+      // the marker and the dashed line up or down to the label are kept clear too, not only the text
+      // (clamped to the plot: a point on its very edge, e.g. a species of the first days, still gets its label)
+      const sx1 = Math.max(L, px - 5), sx2 = Math.min(W - R, px + 5);
+      const stem = side < 0 ? { x1: sx1, x2: sx2, y1: box.y1, y2: Math.min(CB, py + 5) } : { x1: sx1, x2: sx2, y1: py - 5, y2: box.y2 };
+      if (!free(box) || !free(stem)) continue;
+      boxes.push(box, stem);
+      const tx = side < 0 ? px - 6 : px + 6, anchor = side < 0 ? "end" : "start";
+      const lead = side < 0 ? `M${px} ${py - 5}V${box.y1}` : `M${px} ${py + 5}V${box.y2}`;
+      notes += `<path class="lead" d="${lead}"/><circle class="mark" cx="${px}" cy="${py}" r="4.5"/>` +
+        `<text class="lab" x="${tx}" y="${b1}" text-anchor="${anchor}"><tspan class="hd">${esc(head)}</tspan><tspan class="dt" x="${tx}" dy="13">${esc(sub)}</tspan></text>`;
+      return;
+    }
+  };
+  // the last two round numbers below the current count, e.g. the 100th and 150th of 174
+  const mStep = [10, 25, 50, 100, 250, 500, 1000].find(s => n / s <= 4) || 2500;
+  for (let k = Math.ceil(n / mStep) * mStep - mStep, c = 0; k >= mStep && c < 2; k -= mStep, c++)
+    note(k - 1, t("curveNth", k, speciesName(SP[pts[k - 1].s])), fmtD(pts[k - 1].d));
+  // the day with the most new species, leaving out the first year of records, where nearly every day adds some
+  const firstYear = Date.parse(pts[0].d + "T00:00:00Z") + 365 * 864e5;
+  /** @type {Map<string, number[]>} */
+  const byDay = new Map();
+  pts.forEach((o, i) => { if (Date.parse(o.d + "T00:00:00Z") >= firstYear) byDay.set(o.d, [...(byDay.get(o.d) || []), i]); });
+  let big = /** @type {number[]} */ ([]);
+  for (const idx of byDay.values()) if (idx.length >= big.length) big = idx;
+  if (big.length >= 3) {
+    const top = big[big.length - 1], day = pts[top].d;
+    const where = new Map();
+    for (const i of big) where.set(pts[i].p, (where.get(pts[i].p) || 0) + 1);
+    const place = [...where].sort((a, b) => b[1] - a[1])[0][0];
+    note(top, t("curveBigDay", big.length), S.redact ? fmtD(day) : `${placeName(place)}, ${fmtD(day)}`);
+  }
+
+  // the new species of each year, as bars under their year
+  const perYear = new Map();
+  for (const o of pts) perYear.set(o.y, (perYear.get(o.y) || 0) + 1);
+  const most = Math.max(...perYear.values()), slot = (W - L - R) / (MAX_Y - MIN_Y + 1);
+  // a year label needs about 40 units of width; thin them out when the years get too narrow for that
+  const every = Math.max(1, Math.ceil(40 / slot));
+  let bars = `<text x="${L}" y="${BT - 10}">${t("curveNewPerYear")}</text>`;
+  for (let yr = MIN_Y; yr <= MAX_Y; yr++) {
+    const v = perYear.get(yr) || 0, bx = x(Date.UTC(yr, 0, 1)), bw = Math.max(2, slot - Math.min(10, slot * .25));
+    const bh = v / most * (BB - BT - 14), mid = bx + slot / 2;
+    const cur = yr === S.year;
+    bars += `<g class="ybar"><rect x="${mid - bw / 2}" y="${BB - bh}" width="${bw}" height="${bh}" rx="2" fill="var(--accent)" opacity="${cur ? 1 : .45}"/>` +
+      (v && slot >= 18 ? `<text class="v" x="${mid}" y="${BB - bh - 4}" text-anchor="middle">${v}</text>` : "") +
+      `<title>${esc(t("curveYearTip", yr, v))}</title></g>`;
+    if ((yr - MIN_Y) % every === 0) g += `<text x="${mid}" y="${H - 6}" text-anchor="middle"${cur ? ' class="cur"' : ""}>${yr}</text>`;
+  }
   return `<svg class="curve" viewBox="0 0 ${W} ${H}" role="img" aria-label="${t("curve")}">
     <defs>
       <linearGradient id="${gradId}" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stop-color="var(--accent)" stop-opacity="0.3"/>
-        <stop offset="100%" stop-color="var(--accent)" stop-opacity="0"/>
-      </linearGradient>
-      <linearGradient id="${lineId}" x1="0" y1="0" x2="1" y2="0">
-        <stop offset="0%" stop-color="var(--k3)"/>
-        <stop offset="100%" stop-color="var(--accent)"/>
+        <stop offset="0%" stop-color="var(--accent)" stop-opacity="0.22"/>
+        <stop offset="100%" stop-color="var(--accent)" stop-opacity="0.02"/>
       </linearGradient>
     </defs>
-    ${g}<path d="${area}" fill="url(#${gradId})" stroke="none"/><path d="${d}" fill="none" stroke="url(#${lineId})" stroke-width="2.25" stroke-linejoin="round"/>${dots}</svg>`;
+    ${g}<path d="${area}" fill="url(#${gradId})" stroke="none"/><path d="${d}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round"/>${dots}<g class="notes">${notes}</g>${bars}</svg>`;
 }
 // sequential scale in one hue, light (few) to dark (many); --heat-lo/--heat-hi flip for the dark theme
 /** @param {number} frac @returns {number} how many percent of --heat-hi heatColor() mixes into --heat-lo */

@@ -38,6 +38,20 @@ def section(page, first, last=None, pad=12):
             "height": bottom["y"] + bottom["height"] - top["y"] + 2 * pad}
 
 
+def wait_for_tiles(page):
+    """Waits until the map's tiles are in, and stops when none could be loaded (no internet, a slow or blocked tile
+    server): a grey map with dots is no picture for the README."""
+    try:
+        page.wait_for_function("""() => { const t = [...document.querySelectorAll('#map .leaflet-tile')];
+            return t.length && t.every(i => i.classList.contains('leaflet-tile-loaded')); }""", timeout=60000)
+    except Exception:
+        pass
+    loaded = page.evaluate("[...document.querySelectorAll('#map .leaflet-tile')].filter(i => i.complete && i.naturalWidth).length")
+    if not loaded:
+        sys.exit("The map tiles did not load (internet, or the tile server is slow): map.png and timelapse.gif were not written. Try again later.")
+    page.wait_for_timeout(500)  # the last tiles fade in
+
+
 def timelapse_gif(page, path, step=5, width=640, ms=100):
     """The year of the time-lapse as an animated GIF: a frame every `step` days of the bar and the map, `width` px
     wide, `ms` per frame. All frames share one palette (taken from midsummer, when most places glow), and Pillow
@@ -157,14 +171,14 @@ def main():
             # dark theme and phone
             page = open_page(theme="dark", hash="#overview")
             last_full_year(page)
-            shot(page, "dark.png", section(page, "#tab-overview .kpis", "#tab-overview .card:has(svg.curve)"))
+            shot(page, "dark.png", section(page, "#tab-overview .level", "#tab-overview .card:has(svg.curve)"))
             page = open_page(width=390, height=844)
             page.screenshot(path=os.path.join(OUT, "phone.png"))
             print("Written:", os.path.join("docs", "screenshots", "phone.png"))
 
             if opts.map:
                 page = open_page(hash="#map")
-                page.wait_for_timeout(4000)
+                wait_for_tiles(page)
                 shot(page, "map.png", section(page, "#map"))
                 # the time-lapse of the year that reaches into the most states, played as an animated GIF
                 page = open_page(hash="#map")
@@ -174,7 +188,7 @@ def main():
                     return [...states].sort((a, b) => b[1].size - a[1].size || b[0] - a[0])[0][0]; }""")
                 page.select_option("#tl-year", str(year))
                 page.select_option("#tl-glow", "90")  # trips of two or three days stay in sight, so the year fills the map
-                page.wait_for_timeout(4000)  # the tiles
+                wait_for_tiles(page)
                 timelapse_gif(page, os.path.join(OUT, "timelapse.gif"))
                 try:  # map tiles make a big PNG; 256 colours look the same at a third of the size
                     from PIL import Image

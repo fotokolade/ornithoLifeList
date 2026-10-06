@@ -633,6 +633,173 @@ class PageTest(unittest.TestCase):
         self.assertEqual(width(), 720)
         self.assertEqual(self.errors, [])
 
+    def test_overview_tiles_set_the_year_against_the_one_before(self):
+        page = self.open()
+        self.assertEqual(page.evaluate("S.year"), 2024)
+        tiles = page.locator("#tab-overview .kpis.k4.stats .stat")
+        self.assertEqual(tiles.count(), 4)
+        # each large number since the start, the year's figure under it, and the difference to the year before
+        figs = page.evaluate("""() => { const list = regionObs(baseObs());
+            const end = OBS[OBS.length - 1], per = yr => list.filter(o => o.y === yr && o.md <= end.md);
+            return [list.length, per(2024).length, per(2023).length, new Set(per(2024).map(o => o.d)).size, list.filter(o => o.y === 2023).length, shortMD(end.md), end.y]; }""")
+        obs = tiles.nth(1)
+        self.assertEqual(obs.locator("b").inner_text(), f"{figs[0]:,}".replace(",", "."))
+        sub = obs.locator(".stat-sub").inner_text()
+        self.assertIn(f"2024: {figs[1]}", sub)
+        dv = figs[1] - figs[2]
+        self.assertIn(("▲ +" if dv > 0 else "▼ −" if dv < 0 else "±") + str(abs(dv)), sub)
+        # the export ends in 2024 before New Year's Eve: both years only up to the day of its last observation, not today
+        self.assertEqual(figs[6], 2024)
+        # what the tiles compare with stands once over them (and in the hint over each arrow), not in every tile
+        self.assertEqual(page.inner_text("#tab-overview .cmp-head"), f"2024 gegen 2023, jeweils bis {figs[5]}")
+        self.assertNotIn("ggü.", sub)
+        self.assertEqual(obs.locator(".delta").get_attribute("data-tip"), f"ggü. 2023 bis {figs[5]}")
+        # one line per tile: the year's figure and the arrow
+        self.assertEqual(sub.count("\n"), 0)
+        # the level comes first on the page
+        self.assertEqual(page.evaluate("document.querySelector('#tab-overview').firstElementChild.classList.contains('level')"), True)
+        self.assertLess(figs[2], figs[4])
+        # the table of the years cuts on the same day
+        self.assertIn(f"bis {figs[5]}", page.inner_text("#tab-overview .yhead"))
+        # (the sample ends on 28 Dec: a record of 1 Nov counts "up to that day", whatever today's date)
+        self.assertEqual(page.evaluate("END_MD"), "12-28")
+        self.assertEqual(page.evaluate("yearSets([{ y: 2024, md: '11-01', m: 11, s: 0 }]).find(r => r.y === 2024).ytd.size"), 1)
+        # the small bars: one per year, the chosen one strong, its title the year's figure
+        bars = obs.locator("svg.spark rect")
+        self.assertEqual(bars.count(), 2)
+        self.assertEqual(bars.nth(1).get_attribute("opacity"), "1")
+        self.assertEqual(bars.nth(1).locator("title").text_content(), f"2024: {figs[1]}")
+        # the figures in the text colour; the colour of what they count only in the dot
+        colors = page.evaluate("""() => [getComputedStyle(document.body).color, ...[...document.querySelectorAll('#tab-overview .stat b')].map(b => getComputedStyle(b).color)]""")
+        self.assertEqual(set(colors), {colors[0]})
+        # "new in the last 30 days" only when there are some (the sample's records are older)
+        self.assertNotIn("Neu in den letzten 30 Tagen", page.inner_text("#tab-overview .kpis.minor"))
+        self.assertIn("Arten in 2024", page.inner_text("#tab-overview .kpis.minor"))
+        # the species of the year: its arrow right behind the tile's name, no second line
+        year_tile = page.locator("#tab-overview .kpis.minor .stat").first
+        self.assertEqual(year_tile.locator(".stat-lbl .delta").count(), 1)
+        self.assertEqual(year_tile.locator(".stat-sub").count(), 0)
+        # the first year has nothing before it: its figure without a comparison
+        page.evaluate("S.year = 2023; renderOverview()")
+        sub = page.locator("#tab-overview .stats .stat").nth(1).locator(".stat-sub").inner_text()
+        self.assertEqual(sub, f"2023: {figs[4]}")
+        self.assertEqual(page.locator("#tab-overview .cmp-head").count(), 0)
+        page.select_option("#f-lang", "en")
+        self.assertIn("Species in 2023", page.inner_text("#tab-overview .kpis.minor"))
+        self.assertEqual(self.errors, [])
+
+    def test_birder_level_follows_the_life_species(self):
+        page = self.open()
+        # a new level at 25, 50, 100, 150, 200 and 250 species, the top one (legend) from 300 on
+        levels = page.evaluate("[0, 24, 25, 49, 50, 99, 100, 149, 150, 199, 200, 249, 250, 299, 300, 1000].map(birderLevel)")
+        self.assertEqual(levels, [0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7])
+        # five steps (bronze to diamond) per level; at the top one every 25 species, up to diamond
+        steps = page.evaluate("[0, 4, 5, 24, 25, 29, 30, 50, 59, 60, 99, 174, 199, 300, 324, 325, 400, 1000].map(n => { const s = birderStep(n); return [s.lv, s.sub]; })")
+        self.assertEqual(steps, [[0, 0], [0, 0], [0, 1], [0, 4], [1, 0], [1, 0], [1, 1], [2, 0], [2, 0], [2, 1], [2, 4], [4, 2], [4, 4],
+                                 [7, 0], [7, 0], [7, 1], [7, 4], [7, 4]])
+        n = page.evaluate("speciesStats(regionObs(baseObs())).size")
+        self.assertLess(n, 20)
+        card = page.locator("#tab-overview .level")
+        self.assertEqual(card.get_attribute("data-level"), "1")
+        medals = ["Bronze", "Silber", "Gold", "Platin", "Diamant"]
+        self.assertEqual(card.locator("b").text_content(), f"Nestling {medals[n // 5]}")
+        self.assertIn("Stufe 1 von 8", card.inner_text())
+        # only the nearest goal: the next medal
+        self.assertIn(f"noch {5 - n % 5} Art", card.inner_text())
+        self.assertIn(f"bis {medals[n // 5 + 1]}", card.inner_text())
+        self.assertNotIn("nächsten Stufe", card.inner_text())
+        self.assertEqual(card.locator(".lv-tiers .cur").inner_text(), "Anfänger")
+        # the levels above keep their names to themselves, in the card and in the hints over the bar
+        text = card.inner_text() + "".join(card.locator(".lv-seg").nth(i).get_attribute("data-tip") for i in range(8))
+        for name in ("Ästling", "Futterhaus-Profi", "Orakel"):
+            self.assertNotIn(name, text)
+        self.assertEqual(card.locator(".lv-seg").nth(1).get_attribute("data-tip"), "Stufe 2: noch geheim, ab 25 Arten")
+        # the way through the levels: the reached part of the current piece filled, the later ones empty
+        widths = lambda sel: page.evaluate(f"[...document.querySelectorAll('{sel} .lv-seg i')].map(i => parseFloat(i.style.width))")
+        self.assertEqual(widths("#tab-overview"), [round(n / 25 * 100, 1)] + [0] * 7)
+        show = lambda k: page.evaluate(f"document.getElementById('tab-overview').insertAdjacentHTML('beforeend', `<div id='lv-probe'>${{levelCard({k})}}</div>`)")
+        show(174)
+        probe = page.locator("#lv-probe")
+        self.assertEqual(probe.locator("b").text_content(), "Möwen-Bestimmer Gold")
+        self.assertIn("noch 6 Arten bis Platin", probe.inner_text())
+        self.assertNotIn("nächsten Stufe", probe.inner_text())
+        self.assertNotIn("Laubsänger", probe.inner_text())
+        self.assertEqual(widths("#lv-probe"), [100, 100, 100, 100, 48, 0, 0, 0])
+        self.assertEqual(probe.locator(".lv-seg").nth(3).get_attribute("data-tip"), "Stufe 4: Spektiv-Schlepper, ab 100 Arten")
+        page.evaluate("document.getElementById('lv-probe').remove()")
+        # the fifth step only says how far the next level is
+        show(195)
+        # at diamond, the next level is the goal
+        self.assertEqual(probe.locator("b").text_content(), "Möwen-Bestimmer Diamant")
+        self.assertIn("noch 5 Arten bis zur nächsten Stufe", probe.inner_text())
+        page.evaluate("document.getElementById('lv-probe').remove()")
+        show(312)
+        self.assertEqual(probe.locator("b").text_content(), "Orakel von Helgoland Bronze")
+        self.assertIn("noch 13 Arten bis Silber", probe.inner_text())
+        self.assertEqual(probe.locator(".lv-tiers .cur").text_content(), "Legen\u00adde")
+        self.assertEqual(widths("#lv-probe"), [100] * 7 + [9.6])
+        page.evaluate("document.getElementById('lv-probe').remove()")
+        show(420)
+        self.assertEqual(probe.locator("b").text_content(), "Orakel von Helgoland Diamant")
+        self.assertIn("Höchste Stufe", probe.inner_text())
+        self.assertEqual(widths("#lv-probe"), [100] * 8)
+        page.evaluate("document.getElementById('lv-probe').remove()")
+        page.select_option("#f-lang", "en")
+        self.assertIn("Level 1 of 8", page.inner_text("#tab-overview .level"))
+        self.assertIn(f"{5 - n % 5} more species to {['Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond'][n // 5 + 1]}", page.inner_text("#tab-overview .level"))
+        self.assertEqual(self.errors, [])
+
+    def test_best_day_opens_in_the_calendar(self):
+        page = self.open(height=500)
+        link = page.locator("#tab-overview [data-show-day]")
+        day = link.get_attribute("data-show-day")
+        best = page.evaluate("""() => { const m = new Map(); for (const o of regionObs(baseObs())) if (o.y === S.year) { if (!m.has(o.d)) m.set(o.d, new Set()); m.get(o.d).add(o.s); }
+            return [...m].map(([d, sp]) => [d, sp.size]).sort((a, b) => b[1] - a[1])[0]; }""")
+        self.assertEqual(best[0], day)
+        self.assertIn(f"{best[1]} Arten", page.inner_text("#tab-overview .kpis.minor"))
+        link.click()
+        self.assertEqual(page.evaluate("S.calDay"), day)
+        sel = page.locator(f"#tab-overview .cal-day.cal-sel[data-day='{day}']")
+        self.assertEqual(sel.count(), 1)
+        self.assertEqual(page.evaluate("document.activeElement.dataset.day"), day)
+        self.assertEqual(page.locator("#tab-overview .cal-panel").count(), 1)
+        # a second click leaves the day open (it does not toggle like the day itself)
+        page.locator("#tab-overview [data-show-day]").click()
+        self.assertEqual(page.evaluate("S.calDay"), day)
+        self.assertEqual(self.errors, [])
+
+    def test_curve_labels_its_milestones_without_overlap(self):
+        page = self.open()
+        # the sample's own curve: the end label and one bar per year, the chosen year strong
+        self.assertIn("Arten", page.text_content("#tab-overview svg.curve .notes"))
+        rects = page.locator("#tab-overview svg.curve g.ybar rect")
+        self.assertEqual(rects.count(), 2)
+        self.assertEqual(rects.nth(1).get_attribute("opacity"), "1")
+        # 30 made-up life species, four of them on one day of the second year: the 10th and 20th are labelled,
+        # and so is that day, none of the labels on top of another
+        for width in (390, 1400):
+            page.set_viewport_size({"width": width, "height": 900})
+            res = page.evaluate("""() => {
+                const days = [...Array(26)].map((_, i) => `2023-${String(1 + Math.floor(i / 3)).padStart(2, "0")}-${String(1 + i % 3 * 9).padStart(2, "0")}`);
+                const fake = [...days, "2024-05-20", "2024-05-20", "2024-05-20", "2024-05-20"].map((d, i) => ({ s: i % SP.length, first: { d, y: +d.slice(0, 4), p: OBS[0].p, s: i % SP.length } }));
+                const box = document.createElement("div"); box.innerHTML = curveSvg(fake); document.getElementById("tab-overview").append(box);
+                const labs = [...box.querySelectorAll(".notes text.lab")];
+                const rs = labs.map(l => l.getBoundingClientRect());
+                const overlap = rs.some((a, i) => rs.some((b, j) => i < j && a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom));
+                const svg = box.querySelector("svg").getBoundingClientRect();
+                const inside = rs.every(r => r.left >= svg.left - 1 && r.right <= svg.right + 1 && r.top >= svg.top - 1);
+                const out = [labs.map(l => l.textContent), overlap, inside];
+                box.remove(); return out; }""")
+            texts, overlap, inside = res
+            self.assertFalse(overlap, (width, texts))
+            self.assertTrue(inside, (width, texts))
+            self.assertTrue(any(s.startswith("30 Arten") for s in texts), texts)
+            self.assertTrue(any(s.startswith("20. Art: ") for s in texts), texts)
+            if width == 1400:
+                self.assertTrue(any(s.startswith("10. Art: ") for s in texts), texts)
+                self.assertTrue(any(s.startswith("+4 an einem Tag") and "20.05.2024" in s for s in texts), texts)
+        self.assertEqual(self.errors, [])
+
     def test_region_month_table(self):
         page = self.open(hash="#regions")
         rows = page.locator("table.heat.rm tbody tr")

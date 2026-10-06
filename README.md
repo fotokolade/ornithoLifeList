@@ -54,6 +54,10 @@ Die Bilder zeigen eine Lebensliste aus erfundenen Beispieldaten.
 
 ![Karte mit den Beobachtungsorten in ganz Deutschland](docs/screenshots/map.png)
 
+Als **Zeitraffer** spielt die Karte ein Jahr Tag für Tag ab:
+
+![Zeitraffer der Karte über ein Jahr](docs/screenshots/timelapse.gif)
+
 **Touren**, zusammengesetzt aus Meldungen, die zeitlich und räumlich nah beieinanderliegen. Unter „Einstellungen“ wählst du, ob du zu Fuß oder mit dem Rad unterwegs warst und wie schnell (Schnecke bis Jaguar), und kannst jeden Wert mit einem Schieberegler anpassen:
 
 ![Liste der Touren mit Kennzahlen und einer geöffneten Tour](docs/screenshots/tours.png)

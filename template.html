@@ -116,12 +116,52 @@ details.tour-settings summary::before{content:"⚙ ";color:var(--muted)}
 .tour-path{font-size:.8rem;color:var(--muted);margin:2px 0 8px}
 .route-stop div{background:var(--accent);color:var(--on-accent);border:2px solid #fff;border-radius:50%;width:100%;height:100%;display:flex;align-items:center;justify-content:center;
   font:700 11px/1 system-ui,sans-serif;box-shadow:0 1px 4px rgba(0,0,0,.35)}
-/* key-figure tiles are coloured by what they count, in the colours the charts use for the same things
-   (see kpiTile()): species green, activity blue, places and distances amber, photos violet; a zero stays grey */
+/* key-figure tiles carry the colour of what they count in their edge (the overview's in a dot), in the colours the
+   charts use for the same things (see kpiTile()): species green, activity blue, places and distances amber, photos
+   violet; a zero stays grey. The figure itself is in the text colour. */
 .kpi{--tc:var(--muted);background:var(--card);border:1px solid var(--line);border-left:4px solid var(--tc);border-radius:12px;padding:12px 16px 12px 13px;box-shadow:var(--shadow)}
-.kpi.t-species{--tc:var(--accent)}.kpi.t-activity{--tc:var(--k3)}.kpi.t-places{--tc:var(--k2)}.kpi.t-photos{--tc:var(--k4)}
+.t-species{--tc:var(--accent)}.t-activity{--tc:var(--k3)}.t-places{--tc:var(--k2)}.t-photos{--tc:var(--k4)}
 .kpi.zero{--tc:var(--line)}
-.kpi b{display:block;font-size:1.55rem;line-height:1.15;font-variant-numeric:tabular-nums;letter-spacing:-.01em;color:color-mix(in srgb,var(--tc) 80%,var(--text))}
+/* the overview's tiles: the figure in the text colour, the colour of what it counts only in the dot and the small bars */
+.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;box-shadow:var(--shadow);display:flex;flex-direction:column;min-width:0}
+.stat-lbl{color:var(--muted);font-size:.76rem;display:flex;flex-wrap:wrap;align-items:center;gap:2px 6px}
+.stat-lbl i{width:8px;height:8px;border-radius:50%;background:var(--tc);flex:0 0 auto}
+.stat b{font-size:1.55rem;line-height:1.15;font-variant-numeric:tabular-nums;letter-spacing:-.01em;margin:3px 0 2px}
+.stat b small{font-size:.9rem;font-weight:500;color:var(--muted)}
+.stat-sub{color:var(--muted);font-size:.74rem;line-height:1.35;font-variant-numeric:tabular-nums}
+.stat .delta{color:var(--text);font-weight:600;white-space:nowrap}
+.stat .delta.up{color:var(--accent)}
+.stat .delta.down{color:color-mix(in srgb,var(--k5) 82%,var(--text))}
+.stat .tag{display:inline-block;background:var(--accent-soft);color:var(--text);border-radius:999px;padding:0 7px;font-size:.7rem;margin-left:2px}
+.stat svg.spark{display:block;width:100%;height:28px;margin-top:auto;padding-top:8px;box-sizing:content-box;fill:var(--tc)}
+.stat .meter{height:8px;border-radius:4px;background:var(--bar-soft);margin-top:auto;overflow:hidden}
+.stat .meter i{display:block;height:100%;background:var(--tc);border-radius:4px}
+.stat .linkbtn{font:inherit;color:var(--link);background:none;border:0;padding:0;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+.kpis.stats.minor{margin-top:12px}
+.cmp-head{margin:14px 0 8px}
+/* the birder's level: name and step on top, the way through all levels as a segmented bar, the ranks under it */
+.level{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;box-shadow:var(--shadow);margin:0 0 12px}
+.level-head{display:flex;justify-content:space-between;align-items:flex-end;gap:8px 16px;flex-wrap:wrap}
+.level b{display:block;font-size:1.3rem;line-height:1.2;margin:3px 0 2px}
+.level-rank{text-align:right}
+.lv-bar,.lv-tiers{display:grid;grid-template-columns:repeat(8,1fr);gap:3px}
+.lv-bar{margin-top:10px}
+.lv-seg{height:8px;border-radius:2px;background:var(--bar-soft);overflow:hidden}
+.lv-seg i{display:block;height:100%;background:var(--accent)}
+.lv-seg.cur{outline:1.5px solid var(--accent);outline-offset:1px;position:relative}
+/* the current level's five steps */
+.lv-seg.cur::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 calc(20% - 1.5px),var(--card) calc(20% - 1.5px) 20%)}
+/* the step within the level as a medal: its metal in the disc and a tint, the word in the text colour */
+.medal{--mc:#b0743c;display:inline-flex;align-items:center;gap:5px;vertical-align:middle;font-size:.74rem;font-weight:600;color:var(--text);
+  background:color-mix(in srgb,var(--mc) 16%,var(--card));border:1px solid color-mix(in srgb,var(--mc) 55%,var(--card));border-radius:999px;padding:1px 9px 1px 4px;margin-left:4px;position:relative;top:-2px}
+.medal i{width:12px;height:12px;border-radius:50%;background:radial-gradient(circle at 35% 30%,color-mix(in srgb,var(--mc) 35%,#fff),var(--mc) 60%,color-mix(in srgb,var(--mc) 70%,#000));box-shadow:0 0 0 1px color-mix(in srgb,var(--mc) 70%,#000)}
+.medal.m-silver{--mc:#a3abb3}.medal.m-gold{--mc:#d9a521}.medal.m-platinum{--mc:#8fb3c4}.medal.m-diamond{--mc:#4fc3e8}
+.lv-tiers{margin-top:4px}
+.lv-tiers span{color:var(--muted);font-size:.7rem;text-align:center;border-top:1px solid var(--line);padding-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lv-tiers span.cur{color:var(--text);font-weight:600;border-top-color:var(--accent)}
+@media (max-width:520px){.level-rank{text-align:left}.lv-tiers span{white-space:normal;hyphens:manual;font-size:.66rem;line-height:1.2}}
+.kpis.stats.minor .stat b{font-size:1.3rem}
+.kpi b{display:block;font-size:1.55rem;line-height:1.15;font-variant-numeric:tabular-nums;letter-spacing:-.01em;color:var(--text)}
 .kpi.zero b{color:var(--muted)}
 .kpi span{color:var(--muted);font-size:.76rem;line-height:1.3;display:block;margin-top:3px}
 .kpi.main{background:color-mix(in srgb,var(--tc) 11%,var(--card));border-color:color-mix(in srgb,var(--tc) 35%,var(--line));border-left-color:var(--tc)}
@@ -312,7 +352,13 @@ button.chip-sp:hover{border-color:var(--accent);color:var(--accent)}
 .heat td[data-heat]:hover{filter:brightness(1.12)}
 .heat td[data-heat]:focus-visible,.heat td.sel{outline:2px solid var(--text);outline-offset:-2px}
 svg.curve g.dot{cursor:pointer}
-svg.curve g.dot:hover circle:last-of-type{stroke:var(--accent);stroke-width:2}
+svg.curve g.dot:hover circle:last-of-type{r:4.5;stroke-width:2;fill:var(--accent)}
+svg.curve .notes{pointer-events:none}
+svg.curve .mark{fill:var(--accent);stroke:var(--card);stroke-width:2}
+svg.curve .lead{stroke:var(--line-ui);stroke-dasharray:2 3;fill:none}
+svg.curve text.lab .hd{fill:var(--text);font-weight:600}
+svg.curve text.v,svg.curve text.cur{fill:var(--text)}
+svg.curve text.cur{font-weight:600}
 @keyframes flash{from{background:var(--hl)}to{background:transparent}}
 tr.row.flash td{animation:flash 2.4s ease-out}
 svg.curve{width:100%;height:auto;display:block}
@@ -433,9 +479,11 @@ footer.meta-footer .btn{flex:0 0 auto;padding:3px 10px}
   #h-print{margin-left:auto;text-align:right}
   div.tab{display:block!important;padding-top:0}
   .wrap{max-width:none;padding:0}
-  .card,.kpi{overflow:visible;border-color:var(--line);box-shadow:none}
+  .card,.kpi,.stat,.level{overflow:visible;border-color:var(--line);box-shadow:none}
   .detailgrid.tables>div{break-inside:avoid}  /* "Frühe Arten" stays with its table */
-  tr,.yrow,.kpi{break-inside:avoid}
+  tr,.yrow,.kpi,.stat,.level{break-inside:avoid}
+  .stat .to-cal{display:none}
+  .stat .linkbtn{color:inherit;text-decoration:none}
   /* a heading never ends a page on its own: neither after it nor after the info text below it */
   h2,h2 + details.info{break-after:avoid;margin-top:14px}
   details.info{break-inside:avoid}
@@ -449,7 +497,7 @@ footer.meta-footer .btn{flex:0 0 auto;padding:3px 10px}
   .hide-sm{display:revert!important}
   th.hide-sm,td.hide-sm{display:table-cell!important}
   .show-sm{display:none!important}
-  .heat-steps .hs i,.wd-ring circle,.bar,.bar i,.heat td,.pheno div,.cal-day,.season-strip,.season-strip *,.plan-strip i{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .heat-steps .hs i,.wd-ring circle,.bar,.bar i,.heat td,.pheno div,.cal-day,.season-strip,.season-strip *,.plan-strip i,.stat-lbl i,.stat .meter,.stat .meter i,.stat .tag,.medal,.medal i,.lv-seg,.lv-seg i,.level .stat-lbl i{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   details.info summary{display:none!important}
   h2 + details.info{margin-top:0;text-align:left}
   h2 .ctl select{appearance:none;border:0;padding:0;background:none;font-weight:600;color:var(--text)}

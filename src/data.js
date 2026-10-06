@@ -58,6 +58,9 @@ const OBS = RAW.obs.map(([s, d, p, c, ph, ac, tm, la = 0, lo = 0, ls = 0]) => {
 });
 const YEARS = [...new Set(OBS.map(o => o.y))].sort((a, b) => a - b);
 const MIN_Y = YEARS[0], MAX_Y = YEARS[YEARS.length - 1];
+// the day of the year the export ends on: views that set the years against each other "up to this day" cut there, not
+// at today's date, or an export ending in March would set its last year's three months against most of the year before
+const END_MD = OBS.length ? OBS[OBS.length - 1].md : TODAY_MD, END_M = +END_MD.slice(0, 2);
 
 const initialLang = (() => {
   try { return localStorage.getItem("lifelist-lang") === "en" ? "en" : "de"; } catch (e) { return "de"; }

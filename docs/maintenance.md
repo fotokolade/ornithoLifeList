@@ -18,7 +18,7 @@ Zum Ausprobieren lässt sich die exe auch selbst bauen: unter Windows `python bu
 
 ## Screenshots der README
 
-`tools/make_screenshots.py` erstellt die Bilder in `docs/screenshots/` aus den erfundenen Daten von `tools/make_demo_export.py` (braucht Playwright, siehe [Tests](../CONTRIBUTING.md#tests)). Mit `--map` kommen die Karte (`map.png`) und der Zeitraffer als animiertes GIF (`timelapse.gif`, ein Jahr in etwa sieben Sekunden) dazu; dafür braucht es Internet für die Kartenkacheln und Pillow (`pip install -r requirements-dev.txt`). `timelapse.gif` ist in der README noch nicht eingebunden: nach dem ersten Lauf mit `--map` unter „Karte“ die Zeile `![Zeitraffer der Karte über ein Jahr](docs/screenshots/timelapse.gif)` ergänzen.
+`tools/make_screenshots.py` erstellt die Bilder in `docs/screenshots/` aus den erfundenen Daten von `tools/make_demo_export.py` (braucht Playwright, siehe [Tests](../CONTRIBUTING.md#tests)). Mit `--map` kommen die Karte (`map.png`) und der Zeitraffer als animiertes GIF (`timelapse.gif`, ein Jahr in etwa sieben Sekunden) dazu; dafür braucht es Internet für die Kartenkacheln und Pillow (`pip install -r requirements-dev.txt`). Die README zeigt beide unter „Karte“.
 
 ## Welche Felder hat ein Export?
 
