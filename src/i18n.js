@@ -1,5 +1,5 @@
 "use strict";
-const APP_VERSION = "0.6.0";  // SemVer of this page's HTML/JS, independent of the ornitho.de export it was built from
+const APP_VERSION = "0.7.0";  // SemVer of this page's HTML/JS, independent of the ornitho.de export it was built from
 /* ---------- text resources ---------- */
 const STR = {
 de: {
