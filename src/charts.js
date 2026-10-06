@@ -58,8 +58,10 @@ function curveSvg(chrono) {
       // side -1: up-left, the lines' baselines above the point; 1: down-right, below it
       const b1 = side < 0 ? py - 20 - off : py + 16 + off;
       const box = side < 0 ? { x1: px - 6 - w, x2: px - 6, y1: b1 - 11, y2: b1 + 16 } : { x1: px + 6, x2: px + 6 + w, y1: b1 - 11, y2: b1 + 16 };
-      if (!free(box)) continue;
-      boxes.push(box);
+      // the marker and the dashed line up or down to the label are kept clear too, not only the text
+      const stem = side < 0 ? { x1: px - 5, x2: px + 5, y1: box.y1, y2: py + 5 } : { x1: px - 5, x2: px + 5, y1: py - 5, y2: box.y2 };
+      if (!free(box) || !free(stem)) continue;
+      boxes.push(box, stem);
       const tx = side < 0 ? px - 6 : px + 6, anchor = side < 0 ? "end" : "start";
       const lead = side < 0 ? `M${px} ${py - 5}V${box.y1}` : `M${px} ${py + 5}V${box.y2}`;
       notes += `<path class="lead" d="${lead}"/><circle class="mark" cx="${px}" cy="${py}" r="4.5"/>` +

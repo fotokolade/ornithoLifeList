@@ -116,8 +116,9 @@ details.tour-settings summary::before{content:"⚙ ";color:var(--muted)}
 .tour-path{font-size:.8rem;color:var(--muted);margin:2px 0 8px}
 .route-stop div{background:var(--accent);color:var(--on-accent);border:2px solid #fff;border-radius:50%;width:100%;height:100%;display:flex;align-items:center;justify-content:center;
   font:700 11px/1 system-ui,sans-serif;box-shadow:0 1px 4px rgba(0,0,0,.35)}
-/* key-figure tiles are coloured by what they count, in the colours the charts use for the same things
-   (see kpiTile()): species green, activity blue, places and distances amber, photos violet; a zero stays grey */
+/* key-figure tiles carry the colour of what they count in their edge (the overview's in a dot), in the colours the
+   charts use for the same things (see kpiTile()): species green, activity blue, places and distances amber, photos
+   violet; a zero stays grey. The figure itself is in the text colour. */
 .kpi{--tc:var(--muted);background:var(--card);border:1px solid var(--line);border-left:4px solid var(--tc);border-radius:12px;padding:12px 16px 12px 13px;box-shadow:var(--shadow)}
 .t-species{--tc:var(--accent)}.t-activity{--tc:var(--k3)}.t-places{--tc:var(--k2)}.t-photos{--tc:var(--k4)}
 .kpi.zero{--tc:var(--line)}
@@ -147,7 +148,10 @@ details.tour-settings summary::before{content:"⚙ ";color:var(--muted)}
 .lv-bar{margin-top:10px}
 .lv-seg{height:8px;border-radius:2px;background:var(--bar-soft);overflow:hidden}
 .lv-seg i{display:block;height:100%;background:var(--accent)}
-.lv-seg.cur{outline:1.5px solid var(--accent);outline-offset:1px}
+.lv-seg.cur{outline:1.5px solid var(--accent);outline-offset:1px;position:relative}
+/* the current level's five steps */
+.lv-seg.cur::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 calc(20% - 1.5px),var(--card) calc(20% - 1.5px) 20%)}
+.level .lv-sub{font-size:.95rem;font-weight:600;color:var(--muted);letter-spacing:.02em}
 .lv-tiers{margin-top:4px}
 .lv-tiers span{color:var(--muted);font-size:.7rem;text-align:center;border-top:1px solid var(--line);padding-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .lv-tiers span.cur{color:var(--text);font-weight:600;border-top-color:var(--accent)}

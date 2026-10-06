@@ -489,8 +489,9 @@ function init() {
   };
   document.addEventListener("mouseover", e => {
     const el = /** @type {any} */ (e.target);
-    // a sliver of the grid between two days (where four meet, at a fraction of a pixel) is no "outside": keep the month lit
-    if (el.closest?.(".cal-days") && !el.closest(".cal-day[data-m]")) return;
+    // a sliver of the grid itself between two days (where four meet, at a fraction of a pixel) is no "outside": keep the
+    // month lit; the empty cells before 1 January are outside every month and put it out
+    if (el.classList?.contains("cal-days")) return;
     calGlow(el.closest?.(".cal-days .cal-day[data-m]")?.dataset.m || "");
   });
   document.documentElement.addEventListener("mouseleave", () => calGlow(""));

@@ -141,38 +141,50 @@ function yearFigures(list, stats, md = "12-31") {
   for (const st of stats.values()) if (st.first.md <= md) per.get(st.first.y).lifers++;
   return [...per.values()].map(r => ({ y: r.y, obs: r.obs, days: r.days.size, places: r.places.size, species: r.species.size, lifers: r.lifers }));
 }
-// The tiles on top of the overview: everything since the start in large, and under it the chosen year against the
-// year before (an arrow and the difference, so it reads without the colour), with all the years as small bars.
-/** @param {Observation[]} list @param {Map<number, {first: Observation}>} stats @param {number} new30 */
-/** @param {Map<number, {first: Observation, s: number}>} stats */
-const latestLifer = stats => [...stats.values()].reduce((a, b) => b.first.d > a.first.d ? b : a);
 // the life species from which each level starts (T.levels), and which of the four ranks (T.tiers) it belongs to
 const LEVEL_FROM = [0, 25, 50, 100, 150, 200, 250, 300];
 const LEVEL_TIER = [0, 0, 1, 1, 2, 2, 2, 3];
 /** @param {number} n life species @returns {number} the level reached, 0-based */
 const birderLevel = n => LEVEL_FROM.filter(f => n >= f).length - 1;
-// the birder's level: name and line, the rank, how far to the next level, and the way through all of them
+// every level in five steps (I to V) of equal width; the open-ended top level steps on every 25 species, up to V
+const SUB_STEPS = 5, SUB_NAMES = ["I", "II", "III", "IV", "V"];
+/** @param {number} n life species @returns {{lv: number, sub: number, subNext: number|null, lvNext: number|null}} the level and step reached (0-based) and where the next step and level start */
+function birderStep(n) {
+  const lv = birderLevel(n), from = LEVEL_FROM[lv], lvNext = lv < LEVEL_FROM.length - 1 ? LEVEL_FROM[lv + 1] : null;
+  const size = lvNext === null ? 25 : (lvNext - from) / SUB_STEPS;
+  const sub = Math.min(SUB_STEPS - 1, Math.floor((n - from) / size));
+  return { lv, sub, subNext: sub < SUB_STEPS - 1 ? from + (sub + 1) * size : null, lvNext };
+}
+// the birder's level: name, step and line, the rank, how far to the next step, and the way through all levels.
+// The levels not yet reached keep their names to themselves.
 /** @param {number} n life species */
 function levelCard(n) {
-  const lv = birderLevel(n), last = LEVEL_FROM.length - 1;
+  const { lv, sub, subNext, lvNext } = birderStep(n), last = LEVEL_FROM.length - 1;
   const [name, line] = T.levels[lv];
-  const next = lv < last ? t("levelNext", fmtN(LEVEL_FROM[lv + 1] - n), T.levels[lv + 1][0]) : t("levelTop");
+  const toLevel = lvNext === null ? "" : t("levelNext", fmtN(lvNext - n));
+  const toSub = subNext === null ? "" : t("levelNextSub", fmtN(subNext - n), SUB_NAMES[sub + 1]);
+  const next = [toSub, toLevel].filter(Boolean).join(" · ") || t("levelTop");
   const segs = LEVEL_FROM.map((from, i) => {
     const to = i < last ? LEVEL_FROM[i + 1] : from;
-    const fill = n >= to && i < last ? 100 : i === lv ? (i < last ? (n - from) / (to - from) * 100 : 100) : 0;
-    const tip = esc(t("levelTip", i + 1, T.levels[i][0], fmtN(from)));
+    const fill = i < lv ? 100 : i > lv ? 0 : i < last ? (n - from) / (to - from) * 100 : sub === SUB_STEPS - 1 ? 100 : (n - from) / (25 * SUB_STEPS) * 100;
+    const tip = esc(i <= lv ? t("levelTip", i + 1, T.levels[i][0], fmtN(from)) : t("levelTipHidden", i + 1, fmtN(from)));
     return `<span class="lv-seg${i === lv ? " cur" : ""}" data-tip="${tip}" aria-label="${tip}"><i style="width:${fill.toFixed(1)}%"></i></span>`;
   }).join("");
   const tiers = T.tiers.map((tier, k) => `<span class="${LEVEL_TIER[lv] === k ? "cur" : ""}" style="grid-column:span ${LEVEL_TIER.filter(x => x === k).length}">${esc(tier)}</span>`).join("");
-  return `<div class="level t-species" data-level="${lv + 1}">
+  const where = t("levelOf", lv + 1, last + 1, SUB_NAMES[sub]);
+  return `<div class="level t-species" data-level="${lv + 1}" data-step="${sub + 1}">
       <div class="level-head"><div><div class="stat-lbl"><i></i>${t("levelTitle")}</div>
-        <b>${esc(name)}</b><div class="stat-sub">${esc(line)}</div></div>
-        <div class="level-rank"><span class="tag">${esc(T.tiers[LEVEL_TIER[lv]])}</span><div class="stat-sub">${t("levelOf", lv + 1, last + 1, next)}</div></div></div>
-      <div class="lv-bar" role="img" aria-label="${esc(t("levelOf", lv + 1, last + 1, next))}">${segs}</div>
+        <b>${esc(name)} <span class="lv-sub">${SUB_NAMES[sub]}</span></b><div class="stat-sub">${esc(line)}</div></div>
+        <div class="level-rank"><span class="tag">${esc(T.tiers[LEVEL_TIER[lv]])}</span><div class="stat-sub">${where}</div><div class="stat-sub">${next}</div></div></div>
+      <div class="lv-bar" role="img" aria-label="${esc(where + ". " + next)}">${segs}</div>
       <div class="lv-tiers">${tiers}</div>
     </div>`;
 }
-function overviewTiles(list, stats, new30) {
+// The tiles on top of the overview: everything since the start in large, and under it the chosen year against the
+// year before (an arrow and the difference, so it reads without the colour), with all the years as small bars.
+// `latest` is the last life species in the one numbering of every view (numberLifers), as the curve names it.
+/** @param {Observation[]} list @param {Map<number, {first: Observation}>} stats @param {number} new30 @param {{s: number}} latest */
+function overviewTiles(list, stats, new30, latest) {
   const full = yearFigures(list, stats);
   // the running year has only got to today: compare it with the year before up to the same day
   const running = S.year === TODAY_Y;
@@ -215,7 +227,7 @@ function overviewTiles(list, stats, new30) {
     </div>
     <div class="kpis stats minor">
       ${cur ? tile("species", t("speciesInYear", S.year), fmtN(cur.species), yearLine("species", "", false)) : ""}
-      ${new30 ? tile("species", t("newLast30"), `+${fmtN(new30)}`, t("curveLast", esc(speciesName(SP[latestLifer(stats).s])))) : ""}
+      ${new30 ? tile("species", t("newLast30"), `+${fmtN(new30)}`, t("curveLast", esc(speciesName(SP[latest.s])))) : ""}
       ${tile("photos", t("photoShare"), `${photoPct}%`, t("photoOf", fmtN(photos), fmtN(list.length)), `<div class="meter"><i style="width:${photoPct}%"></i></div>`)}
       ${bestCount ? tile("activity", t("bestDay", S.year), `${fmtN(bestCount)} <small>${t(bestCount === 1 ? "speciesWordOne" : "speciesWord")}</small>`,
         `${fmtD(bestDay)}<span class="to-cal"> · <button type="button" class="linkbtn" data-show-day="${bestDay}">${t("showInCal")}</button></span>`) : ""}
@@ -228,7 +240,6 @@ function renderOverview() {
   const list = regionObs(baseObs());
   if (!list.length) { $("tab-overview").innerHTML = `<p class="empty">${t("noData")}</p>`; updateToc(); return; }
   const stats = speciesStats(list);
-  const days = new Set(list.map(o => o.d)).size, places = new Set(list.map(o => o.p)).size;
   const rows = yearRows(list, stats);
   const c30 = new Date(NOW.getFullYear(), NOW.getMonth(), NOW.getDate() - 30);  // local dates, like the export
   const cutoff = c30.getFullYear() + "-" + pad(c30.getMonth() + 1) + "-" + pad(c30.getDate());
@@ -239,7 +250,7 @@ function renderOverview() {
   const monthLabel = T.months[S.month - 1];
   const years = Array.from({ length: MAX_Y - MIN_Y + 1 }, (_, i) => String(MAX_Y - i));
   $("tab-overview").innerHTML = `
-    ${overviewTiles(list, stats, new30)}
+    ${overviewTiles(list, stats, new30, chrono[chrono.length - 1])}
     <p class="sub" style="margin-top:8px">${t("period")}: ${fmtD(first)} ${t("to")} ${fmtD(last)}</p>
     ${calendarSection(list, stats)}
     <h2>${t("curve")}</h2>
