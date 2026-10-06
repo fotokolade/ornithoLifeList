@@ -673,7 +673,7 @@ class PageTest(unittest.TestCase):
 
     def test_birder_level_follows_the_life_species(self):
         page = self.open()
-        # a new level at 25, 50, 100, 150, 200 and 250 species, the top one (bird god) from 300 on
+        # a new level at 25, 50, 100, 150, 200 and 250 species, the top one (legend) from 300 on
         levels = page.evaluate("[0, 24, 25, 49, 50, 99, 100, 149, 150, 199, 200, 249, 250, 299, 300, 1000].map(birderLevel)")
         self.assertEqual(levels, [0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7])
         # five steps (bronze to diamond) per level; at the top one every 25 species, up to diamond
@@ -715,7 +715,7 @@ class PageTest(unittest.TestCase):
         show(312)
         self.assertEqual(probe.locator("b").text_content(), "Orakel von Helgoland Bronze")
         self.assertIn("noch 13 Arten bis Silber", probe.inner_text())
-        self.assertEqual(probe.locator(".lv-tiers .cur").text_content(), "Vogel\u00adgott")
+        self.assertEqual(probe.locator(".lv-tiers .cur").text_content(), "Legen\u00adde")
         self.assertEqual(widths("#lv-probe"), [100] * 7 + [9.6])
         page.evaluate("document.getElementById('lv-probe').remove()")
         show(420)
