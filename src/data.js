@@ -151,8 +151,9 @@ const kpiTile = (value, label, theme, { main = false, zero = false } = {}) =>
 const fmtN = n => n.toLocaleString(S.lang === "en" ? "en-GB" : "de-DE");
 // rounds for display but never claims 100% unless truly complete, or 0% when something is actually there
 const pctDisplay = (count, total) => !total ? 0 : count === 0 ? 0 : count === total ? 100 : Math.min(99, Math.max(1, Math.round(count / total * 100)));
-const fmtD = d => d.slice(8) + "." + d.slice(5, 7) + "." + d.slice(0, 4);
-const shortMD = md => (+md.slice(3)) + ". " + T.monthsShort[+md.slice(0, 2) - 1];
+// "03.01.2024" in German; "3 Jan 2024" in English, where "03/01/2024" would read as March in the US
+const fmtD = d => S.lang === "en" ? `${+d.slice(8)} ${T.monthsShort[+d.slice(5, 7) - 1]} ${d.slice(0, 4)}` : d.slice(8) + "." + d.slice(5, 7) + "." + d.slice(0, 4);
+const shortMD = md => (+md.slice(3)) + (S.lang === "en" ? " " : ". ") + T.monthsShort[+md.slice(0, 2) - 1];
 const byDateDesc = (a, b) => (a < b ? 1 : a > b ? -1 : 0);
 const REDACT_MASK = "██████████";
 const placeName = i => S.redact ? REDACT_MASK : PL[i].name;

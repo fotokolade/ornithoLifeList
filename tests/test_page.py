@@ -931,6 +931,26 @@ class PageTest(unittest.TestCase):
             self.assertTrue(all(o <= 0 for o in over), (width, over))
             self.assertEqual(self.errors, [])
 
+    def test_texts_singular_special_characters_and_english_dates(self):
+        page = self.open()
+        t = lambda *a: page.evaluate("a => t(...a)", list(a))
+        self.assertEqual(t("calDaySummary", 1, 1), "1 Art an 1 Ort")
+        self.assertEqual(t("calDaySummary", 3, 2), "3 Arten an 2 Orten")
+        self.assertEqual(t("heatTip", "1", "1", "1"), "1 Beobachtung · 1 Art · 1 Tag")
+        self.assertEqual(t("heatTip", "1.234", "11", "21"), "1.234 Beobachtungen · 11 Arten · 21 Tage")
+        # an argument is put in as it is: neither "$&" nor "{1}" in a file name is read as anything
+        self.assertEqual(t("subtitle", "export_$&_{1}.json", 5), "Ornitho.de, Exportdatei export_$&_{1}.json, 5 Beobachtungen")
+        # German and English have the same placeholders in every text
+        self.assertEqual(page.evaluate("""() => { const ph = v => typeof v === 'string' ? [...v.matchAll(/\\{(\\d)/g)].map(m => m[1]).sort().join() : null;
+            return Object.keys(STR.de).filter(k => ph(STR.de[k]) !== ph(STR.en[k])); }"""), [])
+        page.select_option("#f-lang", "en")
+        self.assertEqual(t("calDaySummary", 1, 1), "1 species at 1 place")
+        self.assertEqual(page.evaluate("fmtD('2024-01-03')"), "3 Jan 2024")
+        self.assertEqual(page.evaluate("shortMD('10-06')"), "6 Oct")
+        page.select_option("#f-lang", "de")
+        self.assertEqual(page.evaluate("fmtD('2024-01-03')"), "03.01.2024")
+        self.assertEqual(self.errors, [])
+
     def test_phone_width_has_no_sideways_scroll(self):
         page = self.open(width=390)
         for tab in TABS:
