@@ -202,8 +202,9 @@ function overviewTiles(list, stats, new30, latest) {
     const record = others.length && a > Math.max(...others.map(r => r[k])) ? ` <span class="tag">${t("kpiRecord")}</span>` : "";
     const head = value ? `${S.year}: ${sign}${fmtN(a)}` : "";
     if (!before) return head + record;
-    const dv = a - before[k], tip = `data-tip="${esc(vs)}"`;
-    const delta = dv > 0 ? `<span class="delta up" ${tip}>▲ +${fmtN(dv)}</span>` : dv < 0 ? `<span class="delta down" ${tip}>▼ −${fmtN(-dv)}</span>` : `<span class="delta" ${tip}>±0</span>`;
+    const dv = a - before[k];
+    const [cls, txt] = dv > 0 ? [" up", `▲ +${fmtN(dv)}`] : dv < 0 ? [" down", `▼ −${fmtN(-dv)}`] : ["", "±0"];
+    const delta = `<span class="delta${cls}" data-tip="${esc(vs)}">${txt}</span>`;
     return value ? `${head} ${delta}${record}` : `${delta}${record}`;
   };
   /** @param {"obs"|"days"|"places"|"lifers"} k @param {string} [sign] */

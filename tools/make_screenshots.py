@@ -157,7 +157,7 @@ def main():
             # dark theme and phone
             page = open_page(theme="dark", hash="#overview")
             last_full_year(page)
-            shot(page, "dark.png", section(page, "#tab-overview .kpis", "#tab-overview .card:has(svg.curve)"))
+            shot(page, "dark.png", section(page, "#tab-overview .level", "#tab-overview .card:has(svg.curve)"))
             page = open_page(width=390, height=844)
             page.screenshot(path=os.path.join(OUT, "phone.png"))
             print("Written:", os.path.join("docs", "screenshots", "phone.png"))
