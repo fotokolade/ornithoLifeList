@@ -4,7 +4,7 @@ Usage:  python tools/make_screenshots.py [--map]
 
 Builds a page from tools/make_demo_export.py's fictional export (no real data involved), opens it
 in headless Chromium with the clock set to a fixed spring day, and saves one picture per feature.
---map also takes the map, which needs internet access for the map tiles.
+--map also takes the map and its time-lapse, which need internet access for the map tiles.
 Needs `pip install playwright` and `playwright install chromium`.
 """
 import argparse
@@ -102,6 +102,14 @@ def main():
             last_row.scroll_into_view_if_needed()
             shot(page, "targets.png", section(page, h2, f"#wish-out tbody tr >> nth=12"))
 
+            # Reiseziele: where missing species are likeliest in May, the first state opened with its counties
+            page = open_page(hash="#targets")
+            page.select_option("#plan-month", "5")
+            page.wait_for_timeout(300)
+            page.locator("#plan-out tr.plan-grp").first.click()
+            page.wait_for_timeout(300)
+            shot(page, "planner.png", section(page, "#tab-targets h2:has-text('Reiseziele für fehlende Arten')", "#plan-out tbody tr >> nth=9"))
+
             # Tagesaktivität: course of the day and weekdays
             page = open_page(hash="#activity")
             page.wait_for_selector("#weekday-card canvas")
@@ -134,10 +142,19 @@ def main():
                 page = open_page(hash="#map")
                 page.wait_for_timeout(4000)
                 shot(page, "map.png", section(page, "#map"))
+                # the time-lapse of the last full year on its liveliest day of May (most species): spring trips glowing
+                page = open_page(hash="#map")
+                page.click("#m-tl")
+                page.select_option("#tl-year", str(int(page.evaluate("MAX_Y")) - 1))
+                page.evaluate("""() => { const may = [...TL_MODEL.daySp.keys()].filter(d => tlDate(TL_MODEL.year, d).slice(5, 7) === '05');
+                    const day = may.reduce((a, d) => TL_MODEL.daySp[d] > TL_MODEL.daySp[a] ? d : a); TL_POS = day; tlShow(day); }""")
+                page.wait_for_timeout(4000)
+                shot(page, "timelapse.png", section(page, "#tl-bar", "#map-note"))
                 try:  # map tiles make a big PNG; 256 colours look the same at a third of the size
                     from PIL import Image
-                    out = os.path.join(OUT, "map.png")
-                    Image.open(out).convert("RGB").quantize(colors=256).save(out, optimize=True)
+                    for name in ("map.png", "timelapse.png"):
+                        out = os.path.join(OUT, name)
+                        Image.open(out).convert("RGB").quantize(colors=256).save(out, optimize=True)
                 except ImportError:
                     pass
             browser.close()

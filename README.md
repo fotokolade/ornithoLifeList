@@ -38,6 +38,10 @@ Die Bilder zeigen eine Lebensliste aus erfundenen Beispieldaten.
 
 ![Nie gesehene Arten mit Saisonstreifen](docs/screenshots/targets.png)
 
+**Reiseziele:** wo und in welchem Monat du fehlende Arten am ehesten siehst, nach Bundesland und Landkreis:
+
+![Reiseziele im Mai, Bayern aufgeklappt mit seinen Landkreisen](docs/screenshots/planner.png)
+
 **Tagesaktivität** über den Tag und nach Wochentagen:
 
 ![Tagesverlauf als Kurve und Wochentage mit Werktag/Wochenende-Ring](docs/screenshots/activity.png)

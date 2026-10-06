@@ -18,7 +18,7 @@ Zum Ausprobieren lässt sich die exe auch selbst bauen: unter Windows `python bu
 
 ## Screenshots der README
 
-`tools/make_screenshots.py` erstellt die Bilder in `docs/screenshots/` aus den erfundenen Daten von `tools/make_demo_export.py` (braucht Playwright, siehe [Tests](../CONTRIBUTING.md#tests)). Mit `--map` kommt ein Bild der Karte dazu, dafür braucht es Internet für die Kartenkacheln.
+`tools/make_screenshots.py` erstellt die Bilder in `docs/screenshots/` aus den erfundenen Daten von `tools/make_demo_export.py` (braucht Playwright, siehe [Tests](../CONTRIBUTING.md#tests)). Mit `--map` kommen Bilder der Karte (`map.png`) und des Zeitraffers (`timelapse.png`) dazu, dafür braucht es Internet für die Kartenkacheln. `timelapse.png` ist in der README noch nicht eingebunden: nach dem ersten Lauf mit `--map` unter „Karte“ eine Zeile `![Zeitraffer der Karte an einem Tag im Mai](docs/screenshots/timelapse.png)` ergänzen.
 
 ## Welche Felder hat ein Export?
 
