@@ -31,7 +31,6 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install pyinstaller
       - name: Work out the tag and check it against APP_VERSION
         shell: bash
         run: |
@@ -71,8 +70,20 @@ jobs:
             echo "::error::No release notes for $TAG: write .github/release-notes/$TAG.md (see docs/maintenance.md)."
             exit 1
           fi
-      - name: Build (runs the tests first)
-        run: python build.py
+      # Every check the Tests workflow runs, after the quick checks above (a refused run installs nothing): without
+      # Playwright, build.py's test run would skip the browser tests and still build; tsc is the JSDoc type check.
+      - run: pip install pyinstaller -r requirements-dev.txt
+      - run: playwright install chromium
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: JSDoc type check
+        run: npx --yes --package typescript -- tsc -p tsconfig.json
+      - name: Build (runs the tests first, browser tests included)
+        shell: bash
+        run: |
+          python -c "import playwright" || { echo "::error::Playwright is missing: the browser tests would be skipped."; exit 1; }
+          python build.py
       - name: Build the demo page from made-up data
         run: python tools/make_demo_page.py dist/lifelist-demo.html
       - name: Publish the release

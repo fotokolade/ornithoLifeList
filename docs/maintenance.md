@@ -12,7 +12,7 @@ Ein veröffentlichtes Release ersetzt der Workflow nie aus Versehen: Gibt es zur
 
 Die Demo-Seite `lifelist-demo.html` baut der Workflow aus erfundenen Daten und hängt sie ans Release; die README verlinkt immer auf die des neuesten Releases.
 
-Den Rest erledigt GitHub Actions (`.github/workflows/release.yml`) auf einem Windows-Rechner: Es legt beim Start von Hand das Tag aus der Versionsnummer an (ein gepushtes Tag prüft es gegen die Versionsnummer), lässt die Tests laufen, baut die `lifelist.exe` und legt das Release an, mit `lifelist.exe`, `lifelist.exe.sha256`, `verify.bat`, `verify.ps1` und `lifelist-demo.html` und der Prüfsumme in den Notizen. Das Tag muss zur Versionsnummer passen, sonst meldet `--check-update` keine neue Version.
+Den Rest erledigt GitHub Actions (`.github/workflows/release.yml`) auf einem Windows-Rechner: Es legt beim Start von Hand das Tag aus der Versionsnummer an (ein gepushtes Tag prüft es gegen die Versionsnummer), lässt alle Tests laufen (auch die Browsertests) und die Typprüfung, baut die `lifelist.exe` und legt das Release an, mit `lifelist.exe`, `lifelist.exe.sha256`, `verify.bat`, `verify.ps1` und `lifelist-demo.html` und der Prüfsumme in den Notizen. Das Tag muss zur Versionsnummer passen, sonst meldet `--check-update` keine neue Version.
 
 Zum Ausprobieren lässt sich die exe auch selbst bauen: unter Windows `python build.py` (oder `build.bat` doppelklicken), nach `pip install pyinstaller`. Das Skript lässt zuerst die Tests laufen und schreibt dann `dist\lifelist.exe` samt `dist\lifelist.exe.sha256`. PyInstaller baut immer für das System, auf dem es läuft.
 
