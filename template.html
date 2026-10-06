@@ -137,6 +137,21 @@ details.tour-settings summary::before{content:"⚙ ";color:var(--muted)}
 .stat .meter i{display:block;height:100%;background:var(--tc);border-radius:4px}
 .stat .linkbtn{font:inherit;color:var(--link);background:none;border:0;padding:0;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
 .kpis.stats.minor{margin-top:12px}
+/* the birder's level: name and rank on top, the way through all levels as a segmented bar, the ranks under it */
+.level{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;box-shadow:var(--shadow);margin-top:12px}
+.level-head{display:flex;justify-content:space-between;align-items:flex-end;gap:8px 16px;flex-wrap:wrap}
+.level b{display:block;font-size:1.3rem;line-height:1.2;margin:3px 0 2px}
+.level-rank{text-align:right}
+.level-rank .tag{display:inline-block;background:var(--accent-soft);color:var(--text);border-radius:999px;padding:1px 9px;font-size:.74rem;font-weight:600;margin-bottom:3px}
+.lv-bar,.lv-tiers{display:grid;grid-template-columns:repeat(8,1fr);gap:3px}
+.lv-bar{margin-top:10px}
+.lv-seg{height:8px;border-radius:2px;background:var(--bar-soft);overflow:hidden}
+.lv-seg i{display:block;height:100%;background:var(--accent)}
+.lv-seg.cur{outline:1.5px solid var(--accent);outline-offset:1px}
+.lv-tiers{margin-top:4px}
+.lv-tiers span{color:var(--muted);font-size:.7rem;text-align:center;border-top:1px solid var(--line);padding-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lv-tiers span.cur{color:var(--text);font-weight:600;border-top-color:var(--accent)}
+@media (max-width:520px){.level-rank{text-align:left}.lv-tiers span{white-space:normal;hyphens:manual;font-size:.66rem;line-height:1.2}}
 .kpis.stats.minor .stat b{font-size:1.3rem}
 .kpi b{display:block;font-size:1.55rem;line-height:1.15;font-variant-numeric:tabular-nums;letter-spacing:-.01em;color:var(--text)}
 .kpi.zero b{color:var(--muted)}
@@ -456,9 +471,9 @@ footer.meta-footer .btn{flex:0 0 auto;padding:3px 10px}
   #h-print{margin-left:auto;text-align:right}
   div.tab{display:block!important;padding-top:0}
   .wrap{max-width:none;padding:0}
-  .card,.kpi,.stat{overflow:visible;border-color:var(--line);box-shadow:none}
+  .card,.kpi,.stat,.level{overflow:visible;border-color:var(--line);box-shadow:none}
   .detailgrid.tables>div{break-inside:avoid}  /* "Frühe Arten" stays with its table */
-  tr,.yrow,.kpi,.stat{break-inside:avoid}
+  tr,.yrow,.kpi,.stat,.level{break-inside:avoid}
   .stat .to-cal{display:none}
   /* a heading never ends a page on its own: neither after it nor after the info text below it */
   h2,h2 + details.info{break-after:avoid;margin-top:14px}
@@ -473,7 +488,7 @@ footer.meta-footer .btn{flex:0 0 auto;padding:3px 10px}
   .hide-sm{display:revert!important}
   th.hide-sm,td.hide-sm{display:table-cell!important}
   .show-sm{display:none!important}
-  .heat-steps .hs i,.wd-ring circle,.bar,.bar i,.heat td,.pheno div,.cal-day,.season-strip,.season-strip *,.plan-strip i,.stat-lbl i,.stat .meter,.stat .meter i,.stat .tag{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .heat-steps .hs i,.wd-ring circle,.bar,.bar i,.heat td,.pheno div,.cal-day,.season-strip,.season-strip *,.plan-strip i,.stat-lbl i,.stat .meter,.stat .meter i,.stat .tag,.level .tag,.lv-seg,.lv-seg i,.level .stat-lbl i{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   details.info summary{display:none!important}
   h2 + details.info{margin-top:0;text-align:left}
   h2 .ctl select{appearance:none;border:0;padding:0;background:none;font-weight:600;color:var(--text)}

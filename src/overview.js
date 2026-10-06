@@ -146,6 +146,32 @@ function yearFigures(list, stats, md = "12-31") {
 /** @param {Observation[]} list @param {Map<number, {first: Observation}>} stats @param {number} new30 */
 /** @param {Map<number, {first: Observation, s: number}>} stats */
 const latestLifer = stats => [...stats.values()].reduce((a, b) => b.first.d > a.first.d ? b : a);
+// the life species from which each level starts (T.levels), and which of the four ranks (T.tiers) it belongs to
+const LEVEL_FROM = [0, 25, 50, 100, 150, 200, 250, 300];
+const LEVEL_TIER = [0, 0, 1, 1, 2, 2, 2, 3];
+/** @param {number} n life species @returns {number} the level reached, 0-based */
+const birderLevel = n => LEVEL_FROM.filter(f => n >= f).length - 1;
+// the birder's level: name and line, the rank, how far to the next level, and the way through all of them
+/** @param {number} n life species */
+function levelCard(n) {
+  const lv = birderLevel(n), last = LEVEL_FROM.length - 1;
+  const [name, line] = T.levels[lv];
+  const next = lv < last ? t("levelNext", fmtN(LEVEL_FROM[lv + 1] - n), T.levels[lv + 1][0]) : t("levelTop");
+  const segs = LEVEL_FROM.map((from, i) => {
+    const to = i < last ? LEVEL_FROM[i + 1] : from;
+    const fill = n >= to && i < last ? 100 : i === lv ? (i < last ? (n - from) / (to - from) * 100 : 100) : 0;
+    const tip = esc(t("levelTip", i + 1, T.levels[i][0], fmtN(from)));
+    return `<span class="lv-seg${i === lv ? " cur" : ""}" data-tip="${tip}" aria-label="${tip}"><i style="width:${fill.toFixed(1)}%"></i></span>`;
+  }).join("");
+  const tiers = T.tiers.map((tier, k) => `<span class="${LEVEL_TIER[lv] === k ? "cur" : ""}" style="grid-column:span ${LEVEL_TIER.filter(x => x === k).length}">${esc(tier)}</span>`).join("");
+  return `<div class="level t-species" data-level="${lv + 1}">
+      <div class="level-head"><div><div class="stat-lbl"><i></i>${t("levelTitle")}</div>
+        <b>${esc(name)}</b><div class="stat-sub">${esc(line)}</div></div>
+        <div class="level-rank"><span class="tag">${esc(T.tiers[LEVEL_TIER[lv]])}</span><div class="stat-sub">${t("levelOf", lv + 1, last + 1, next)}</div></div></div>
+      <div class="lv-bar" role="img" aria-label="${esc(t("levelOf", lv + 1, last + 1, next))}">${segs}</div>
+      <div class="lv-tiers">${tiers}</div>
+    </div>`;
+}
 function overviewTiles(list, stats, new30) {
   const full = yearFigures(list, stats);
   // the running year has only got to today: compare it with the year before up to the same day
@@ -194,7 +220,9 @@ function overviewTiles(list, stats, new30) {
       ${bestCount ? tile("activity", t("bestDay", S.year), `${fmtN(bestCount)} <small>${t(bestCount === 1 ? "speciesWordOne" : "speciesWord")}</small>`,
         `${fmtD(bestDay)}<span class="to-cal"> · <button type="button" class="linkbtn" data-show-day="${bestDay}">${t("showInCal")}</button></span>`) : ""}
     </div>
-    ${infoText(t("kpiHelp"))}`;
+    ${infoText(t("kpiHelp"))}
+    ${levelCard(stats.size)}
+    ${infoText(t("levelHelp"))}`;
 }
 function renderOverview() {
   const list = regionObs(baseObs());

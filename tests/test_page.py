@@ -668,6 +668,38 @@ class PageTest(unittest.TestCase):
         self.assertIn("Species in 2023", page.inner_text("#tab-overview .kpis.minor"))
         self.assertEqual(self.errors, [])
 
+    def test_birder_level_follows_the_life_species(self):
+        page = self.open()
+        # a new level at 25, 50, 100, 150, 200 and 250 species, the top one (bird god) from 300 on
+        levels = page.evaluate("[0, 24, 25, 49, 50, 99, 100, 149, 150, 199, 200, 249, 250, 299, 300, 1000].map(birderLevel)")
+        self.assertEqual(levels, [0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7])
+        n = page.evaluate("speciesStats(regionObs(baseObs())).size")
+        card = page.locator("#tab-overview .level")
+        self.assertEqual(card.get_attribute("data-level"), "1")
+        self.assertEqual(card.locator("b").inner_text(), "Nestling")
+        self.assertIn(f"Stufe 1 von 8 · noch {25 - n} Arten bis „Ästling“", card.inner_text())
+        self.assertEqual(card.locator(".lv-tiers .cur").inner_text(), "Anfänger")
+        # the way through the levels: the reached part of the current piece filled, the later ones empty
+        widths = lambda: page.evaluate("[...document.querySelectorAll('#tab-overview .lv-seg i')].map(i => parseFloat(i.style.width))")
+        self.assertEqual(widths(), [round(n / 25 * 100, 1)] + [0] * 7)
+        show = lambda k: page.evaluate(f"document.getElementById('tab-overview').insertAdjacentHTML('beforeend', `<div id='lv-probe'>${{levelCard({k})}}</div>`)")
+        show(174)
+        probe = page.locator("#lv-probe")
+        self.assertEqual(probe.locator("b").inner_text(), "Möwen-Bestimmer")
+        self.assertIn("noch 26 Arten bis „Laubsänger-Flüsterer“", probe.inner_text())
+        self.assertEqual(page.evaluate("[...document.querySelectorAll('#lv-probe .lv-seg i')].map(i => parseFloat(i.style.width))"), [100, 100, 100, 100, 48, 0, 0, 0])
+        self.assertEqual(probe.locator(".lv-seg").nth(4).get_attribute("data-tip"), "Stufe 5: Möwen-Bestimmer, ab 150 Arten")
+        page.evaluate("document.getElementById('lv-probe').remove()")
+        show(312)
+        self.assertEqual(probe.locator("b").inner_text(), "Orakel von Helgoland")
+        self.assertIn("Höchste Stufe", probe.inner_text())
+        self.assertEqual(probe.locator(".lv-tiers .cur").text_content(), "Vogel­gott")
+        self.assertEqual(page.evaluate("[...document.querySelectorAll('#lv-probe .lv-seg i')].map(i => parseFloat(i.style.width))"), [100] * 8)
+        page.evaluate("document.getElementById('lv-probe').remove()")
+        page.select_option("#f-lang", "en")
+        self.assertIn(f"Level 1 of 8 · {25 - n} more species to “Brancher”", page.inner_text("#tab-overview .level"))
+        self.assertEqual(self.errors, [])
+
     def test_best_day_opens_in_the_calendar(self):
         page = self.open(height=500)
         link = page.locator("#tab-overview [data-show-day]")
