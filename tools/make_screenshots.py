@@ -4,7 +4,8 @@ Usage:  python tools/make_screenshots.py [--map]
 
 Builds a page from tools/make_demo_export.py's fictional export (no real data involved), opens it
 in headless Chromium with the clock set to a fixed spring day, and saves one picture per feature.
---map also takes the map and its time-lapse, which need internet access for the map tiles.
+--map also takes the map and the time-lapse as an animated GIF (that needs Pillow), which need internet access
+for the map tiles.
 Needs `pip install playwright` and `playwright install chromium`.
 """
 import argparse
@@ -35,6 +36,29 @@ def section(page, first, last=None, pad=12):
     scroll = page.evaluate("window.scrollY")
     return {"x": main["x"] - pad, "y": top["y"] + scroll - pad, "width": main["width"] + 2 * pad,
             "height": bottom["y"] + bottom["height"] - top["y"] + 2 * pad}
+
+
+def timelapse_gif(page, path, step=5, width=640, ms=100):
+    """The year of the time-lapse as an animated GIF: a frame every `step` days of the bar and the map, `width` px
+    wide, `ms` per frame. All frames share one palette (taken from midsummer, when most places glow), and Pillow
+    stores of each frame only what changed since the one before: the map underneath stays, so the file stays small."""
+    try:
+        from PIL import Image
+    except ImportError:
+        print("Pillow is missing, so no timelapse.gif: pip install pillow")
+        return
+    import io
+    clip = section(page, "#tl-bar", "#map", pad=6)
+    page.mouse.move(0, 0)
+    frames = []
+    for day in range(0, page.evaluate("TL_MODEL.n"), step):
+        page.evaluate(f"TL_POS = {day}; tlShow({day})")
+        img = Image.open(io.BytesIO(page.screenshot(clip=clip, full_page=True))).convert("RGB")
+        frames.append(img.resize((width, round(img.height * width / img.width)), Image.LANCZOS))
+    palette = frames[len(frames) // 2].quantize(colors=128, dither=Image.Dither.NONE)
+    frames = [f.quantize(palette=palette, dither=Image.Dither.NONE) for f in frames]
+    frames[0].save(path, save_all=True, append_images=frames[1:], duration=ms, loop=0, optimize=True, disposal=1)
+    print("Written:", os.path.relpath(path, ROOT), f"({len(frames)} frames, {os.path.getsize(path) / 1e6:.1f} MB)")
 
 
 def main():
@@ -142,17 +166,15 @@ def main():
                 page = open_page(hash="#map")
                 page.wait_for_timeout(4000)
                 shot(page, "map.png", section(page, "#map"))
-                # the time-lapse of the last full year on its liveliest day of May (most species): spring trips glowing
+                # the time-lapse of the last full year, played as an animated GIF
                 page = open_page(hash="#map")
                 page.click("#m-tl")
                 page.select_option("#tl-year", str(int(page.evaluate("MAX_Y")) - 1))
-                page.evaluate("""() => { const may = [...TL_MODEL.daySp.keys()].filter(d => tlDate(TL_MODEL.year, d).slice(5, 7) === '05');
-                    const day = may.reduce((a, d) => TL_MODEL.daySp[d] > TL_MODEL.daySp[a] ? d : a); TL_POS = day; tlShow(day); }""")
-                page.wait_for_timeout(4000)
-                shot(page, "timelapse.png", section(page, "#tl-bar", "#map-note"))
+                page.wait_for_timeout(4000)  # the tiles
+                timelapse_gif(page, os.path.join(OUT, "timelapse.gif"))
                 try:  # map tiles make a big PNG; 256 colours look the same at a third of the size
                     from PIL import Image
-                    for name in ("map.png", "timelapse.png"):
+                    for name in ("map.png",):
                         out = os.path.join(OUT, name)
                         Image.open(out).convert("RGB").quantize(colors=256).save(out, optimize=True)
                 except ImportError:
