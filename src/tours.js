@@ -200,7 +200,7 @@ function sortTours(tours) {
 }
 function tourTh(k, label, cls = "") {
   const s = S.tourSort;
-  return `<th class="sortable ${cls}${s.k === k ? " sorted" : ""}" data-tour-sort="${k}">${label}${s.k === k ? (s.d > 0 ? " ▲" : " ▼") : ""}</th>`;
+  return sortTh(`data-tour-sort="${k}"`, label, cls, s.k === k ? s.d : 0);
 }
 // the whole tab: help, settings menu and the results; the sliders only redraw the results (renderTourOut)
 function renderTours() {
@@ -221,7 +221,7 @@ function renderTourOut() {
   const shown = S.tourAll ? sorted : sorted.slice(0, TOURS_SHOWN);
   const rows = shown.map(tr => {
     const open = S.tourOpen.has(tr.key);
-    let h = `<tr class="row" data-tour="${tr.key}"><td>${fmtD(tr.d)}</td><td class="hide-sm">${fmtTime(tr.start)}–${fmtTime(tr.end)}</td>
+    let h = `<tr class="row" data-tour="${tr.key}" tabindex="0" aria-expanded="${open}"><td>${fmtD(tr.d)}</td><td class="hide-sm">${fmtTime(tr.start)}–${fmtTime(tr.end)}</td>
       <td class="num">${fmtDuration(tr.end - tr.start)}</td><td class="num">${fmtKm(tr.km)} km</td>
       <td class="num hide-sm">${tr.stops.length}</td><td class="num">${tr.sp}</td></tr>`;
     if (open) {

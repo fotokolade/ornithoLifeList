@@ -12,6 +12,8 @@ Die neueste Version steht oben. Die Downloads (`lifelist.exe`) gibt es auf der [
 - Exporte mit Byte-Order-Mark (etwa nach dem Speichern in einem Windows-Editor) werden gelesen, und Exporte in einem Ordner mit eckigen Klammern im Namen (`Vögel [2024]`) werden gefunden.
 
 ### Seite
+- **Bedienung mit der Tastatur:** Die Zeilen der Lebensliste, der neuesten Lifer und der Touren sowie alle sortierbaren Spaltenköpfe sind jetzt mit Tab erreichbar; Enter oder Leertaste öffnen, schließen oder sortieren wie ein Klick, und der Fokus bleibt danach auf derselben Zeile oder Spalte. Spaltenköpfe sagen Screenreadern, wonach sortiert ist, Zeilen, ob sie offen sind. Ein Sprung von einer neuen Art zur Lebensliste nimmt den Fokus mit.
+- Was den Fokus bekommt oder angesprungen wird, verschwindet nicht mehr unter der festen Kopfzeile.
 - **Diagramme im Druck:** „Verlauf über den Tag“ und „Wochentage“ waren im Ausdruck und im PDF leere Kästen, weil sie erst nach dem Druckbeginn gezeichnet wurden. Gedruckt werden sie jetzt als Balkendiagramm, das sofort fertig ist; am Bildschirm bleibt die bisherige Darstellung.
 - **NEU in den Heatmaps:** Ein Klick auf eine Zelle markiert neue Arten jetzt in der gewählten Region, wie Kalender, Lebensliste und Karte. Vorher zählte dort nur der erste Nachweis überhaupt, sodass etwa „+10 Neu in 2023“ neben „3 neu“ stand.
 - **Urlaubsplaner:** Sammeltaxa und Hybriden (etwa „Silber- oder Mittelmeermöwe“) gelten nicht mehr als gesehene Art; vorher fehlte dadurch die Silbermöwe in der Liste der noch nicht gesehenen Arten, wenn Sammeltaxa eingeblendet waren.

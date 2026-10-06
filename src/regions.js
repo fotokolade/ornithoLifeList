@@ -20,7 +20,7 @@ function regionTable(lv, list, first = false) {
     : sort.d * (val[sort.k](a) - val[sort.k](b)) || collator.compare(a.name, b.name));
   const showAll = S.regAll[lv.lvl], shown = showAll ? rows : rows.slice(0, 10);
   const maxLife = Math.max(1, ...rows.map(r => r.life.size));
-  const th = (k, label, cls) => `<th class="sortable ${cls}${sort.k === k ? " sorted" : ""}" data-lvl="${lv.lvl}" data-k="${k}">${label}${sort.k === k ? (sort.d > 0 ? " ▲" : " ▼") : ""}</th>`;
+  const th = (k, label, cls) => sortTh(`data-lvl="${lv.lvl}" data-k="${k}"`, label, cls, sort.k === k ? sort.d : 0);
   // the tables' names are the clickable ones: the hint sits with the first of them
   return `<h2 data-toc="${esc(t(lv.title))}">${t("regionsBy", t(lv.title))}<small>${rows.length}</small></h2>${first ? infoText(t("regionsHelp")) : ""}<div class="card"><table class="rtable"><thead><tr>
     <th class="nr">#</th>${th("name", t(lv.title), "")}<th class="rbar"></th>${th("life", t("colLife"), "num")}${th("year", t("colYearShort") + " " + S.year, "num")}${th("month", T.monthsShort[S.month - 1].replace(".", "") + " " + S.year, "num")}</tr></thead><tbody>` +

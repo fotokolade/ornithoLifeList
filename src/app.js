@@ -527,9 +527,17 @@ function init() {
   });
   document.addEventListener("scroll", () => { tip.hidden = true; }, true);
   // heat table cells that open a details panel and the planner's destinations react to Enter/Space like real buttons
+  // Enter or Space on a heat cell, a planner row, a table row that opens or a sortable column head acts like a click.
+  // The click redraws the table, so a row or head gets the focus back in the new one (the same data-* attributes).
   document.addEventListener("keydown", e => {
     const el = /** @type {any} */ (e.target);
-    if (el.matches?.('td[data-heat], tr[data-plan-r], tr[data-plan-g]') && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); el.click(); }
+    if (!el.matches?.('td[data-heat], tr[data-plan-r], tr[data-plan-g], tr.row[tabindex], th.sortable') || (e.key !== "Enter" && e.key !== " ")) return;
+    e.preventDefault();
+    const tab = el.closest("div.tab"), again = el.matches("tr.row, th.sortable")
+      ? el.tagName.toLowerCase() + Object.entries(el.dataset).map(([k, v]) => `[data-${k.replace(/[A-Z]/g, c => "-" + c.toLowerCase())}="${CSS.escape(v)}"]`).join("")
+      : null;
+    el.click();
+    if (again && tab && !el.isConnected) tab.querySelector(again)?.focus({ preventScroll: true });
   });
   $("list-curve").addEventListener("click", e => {
     const sp = e.target.closest("[data-sp]");

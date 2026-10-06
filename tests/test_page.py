@@ -857,6 +857,67 @@ class PageTest(unittest.TestCase):
         self.assertNotEqual(page.evaluate("[MAP.getZoom(), +MAP.getCenter().lat.toFixed(2)]"), [14, 51.3])
         self.assertEqual(self.errors, [])
 
+    def test_life_list_works_with_the_keyboard(self):
+        page = self.open(hash="#list")
+        page.focus("#q-atlas")
+        page.keyboard.press("Tab")  # next stop after the filters: the first column head
+        self.assertEqual(page.evaluate("document.activeElement.dataset.sort"), "nr")
+        page.keyboard.press("Tab")
+        self.assertEqual(page.evaluate("document.activeElement.dataset.sort"), "name")
+        # Enter sorts by the column, the head says so, and the focus stays on it in the redrawn table
+        page.keyboard.press("Enter")
+        self.assertEqual(page.evaluate("[S.sort, S.dir]"), ["name", 1])
+        self.assertEqual(page.evaluate("[document.activeElement.dataset.sort, document.activeElement.getAttribute('aria-sort')]"), ["name", "ascending"])
+        page.keyboard.press(" ")
+        self.assertEqual(page.evaluate("document.activeElement.getAttribute('aria-sort')"), "descending")
+        # on to the first row: Enter opens it, Space closes it, the focus stays on the row
+        while not page.evaluate("document.activeElement.matches('tr.row')"):
+            page.keyboard.press("Tab")
+        sp = page.evaluate("document.activeElement.dataset.sp")
+        self.assertEqual(page.evaluate("document.activeElement.getAttribute('aria-expanded')"), "false")
+        page.keyboard.press("Enter")
+        self.assertEqual(page.evaluate("[document.activeElement.dataset.sp, document.activeElement.getAttribute('aria-expanded')]"), [sp, "true"])
+        self.assertEqual(page.locator("#list-out tr.detail").count(), 1)
+        page.keyboard.press(" ")
+        self.assertEqual(page.locator("#list-out tr.detail").count(), 0)
+        self.assertEqual(self.errors, [])
+
+    def test_other_tables_work_with_the_keyboard(self):
+        page = self.open(hash="#overview")
+        # a latest lifer opens its species in the life list, and the focus goes along
+        row = page.locator("#tab-overview tr.row").first
+        sp = row.get_attribute("data-sp")
+        row.focus()
+        page.keyboard.press("Enter")
+        page.wait_for_function("S.tab === 'list'")
+        self.assertEqual(page.evaluate("document.activeElement.dataset.sp"), sp)
+        # a region table sorts by keyboard
+        page.evaluate("setTab('regions')")
+        page.wait_for_timeout(300)
+        head = page.locator('#tab-regions th.sortable[data-k="name"]').first
+        lvl = head.get_attribute("data-lvl")
+        head.focus()
+        page.keyboard.press("Enter")
+        self.assertEqual(page.evaluate(f"S.regSort['{lvl}'].k"), "name")
+        self.assertEqual(page.evaluate("[document.activeElement.dataset.k, document.activeElement.getAttribute('aria-sort')]"), ["name", "ascending"])
+        self.assertEqual(self.errors, [])
+
+    def test_focused_elements_stay_clear_of_the_sticky_header(self):
+        page = self.open(hash="#activity")
+        page.wait_for_timeout(300)
+        page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+        hidden = []
+        for _ in range(40):  # backwards through the tab, scrolling up as the focus moves
+            page.keyboard.press("Shift+Tab")
+            covered = page.evaluate("""() => { const el = document.activeElement; if (!el || el.closest('header.top, footer')) return null;
+                const r = el.getBoundingClientRect(); if (!r.width) return null;
+                const hit = document.elementFromPoint(r.left + r.width / 2, r.top + Math.min(r.height / 2, 6));
+                return hit && !el.contains(hit) && hit.closest('header.top, footer') ? el.outerHTML.slice(0, 60) : null; }""")
+            if covered:
+                hidden.append(covered)
+        self.assertEqual(hidden, [])
+        self.assertEqual(self.errors, [])
+
     def test_phone_width_has_no_sideways_scroll(self):
         page = self.open(width=390)
         for tab in TABS:

@@ -165,6 +165,9 @@ let collator = new Intl.Collator(S.lang === "en" ? "en" : "de");
 const speciesName = sp => S.lang === "en" && sp.english ? sp.english : sp.name;
 // the small secondary line under the primary name: German + Latin when showing English, else just Latin.
 const speciesSub = sp => S.lang === "en" && sp.english ? `${sp.name} · ${sp.latin}` : sp.latin;
+/** A sortable column head for every table: `attrs` tell the click handler which column it is, `dir` is 1 (ascending)
+ *  or -1 when the table is sorted by it, else 0. Reachable with Tab; Enter or Space sort like a click (app.js). */
+const sortTh = (attrs, label, cls, dir) => `<th class="sortable ${cls}${dir ? " sorted" : ""}" ${attrs} tabindex="0" aria-sort="${dir > 0 ? "ascending" : dir < 0 ? "descending" : "none"}">${label}${dir > 0 ? " ▲" : dir < 0 ? " ▼" : ""}</th>`;
 const speciesLine = sp => `${esc(speciesName(sp))}<span class="latin">${esc(speciesSub(sp))}</span>`;
 // wraps an explanatory paragraph in a collapsed <details> so it doesn't clutter the page by default;
 // print CSS forces it open again so the explanation is still in a PDF report.

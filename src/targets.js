@@ -110,7 +110,7 @@ function wishSortRows(rows) {
 }
 function wishTh(k, label, cls = "") {
   const s = S.wishSort;
-  return `<th class="sortable ${cls}${s.k === k ? " sorted" : ""}" data-k="${k}">${label}${s.k === k ? (s.d > 0 ? " ▲" : " ▼") : ""}</th>`;
+  return sortTh(`data-k="${k}"`, label, cls, s.k === k ? s.d : 0);
 }
 // the rows of the last renderTargets(), so search and group toggles only redraw the table and keep the search field's focus
 /** @type {any[]} */

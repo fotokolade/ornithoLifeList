@@ -29,12 +29,12 @@ function renderList() {
     atlas: (a, b) => a.ar - b.ar,
   }[S.sort];
   rows.sort((a, b) => S.dir * cmp(a, b));
-  const th = (key, label, cls = "") => `<th class="sortable ${cls}${S.sort === key ? " sorted" : ""}" data-sort="${key}">${label}${S.sort === key ? (S.dir > 0 ? " ▲" : " ▼") : ""}</th>`;
+  const th = (key, label, cls = "") => sortTh(`data-sort="${key}"`, label, cls, S.sort === key ? S.dir : 0);
   let h = `<p class="sub" style="margin:4px 4px 6px">${t("hits", rows.length, stats.size)}</p>
     <table><thead><tr>${th("nr", t("nr"))}${th("name", t("name"))}${th("first", t("first"), "hide-sm")}${th("last", t("last"), "hide-sm")}${th("n", t("obsShort"), "num")}${th("max", t("max"), "num hide-sm")}${th("years", t("yearsShort"), "num hide-sm")}${th("atlas", t("colAtlas"))}</tr></thead><tbody>`;
   for (const r of rows) {
     const sp = SP[r.s], open = S.open.has(r.s);
-    h += `<tr class="row" data-sp="${r.s}"><td class="nr">${r.nr}</td>
+    h += `<tr class="row" data-sp="${r.s}" tabindex="0" aria-expanded="${open}"><td class="nr">${r.nr}</td>
       <td>${esc(speciesName(sp))}${r.first.y === S.year ? `<span class="new-badge">${t("newBadge")}</span>` : ""}<span class="latin">${esc(speciesSub(sp))}</span></td>
       <td class="hide-sm">${fmtD(r.first.d)}<span class="small">${esc(placeName(r.first.p))}</span></td>
       <td class="hide-sm">${fmtD(r.last.d)}</td>
@@ -50,7 +50,8 @@ function renderList() {
   if (S.focusSp !== null) {
     const tr = $$(`#list-out tr.row[data-sp="${S.focusSp}"]`);
     S.focusSp = null;
-    if (tr) { tr.scrollIntoView({ block: "center" }); tr.classList.add("flash"); }
+    // the focus comes along, so a keyboard user who came from another view can go on from here
+    if (tr) { tr.scrollIntoView({ block: "center" }); tr.classList.add("flash"); tr.focus({ preventScroll: true }); }
   }
 }
 // jump from another view (calendar day, curve, latest lifers) to a species: clear what could hide

@@ -165,7 +165,7 @@ function renderOverview() {
     <div class="card">${curveSvg(chrono)}</div>
     <h2>${t("latest")}</h2>
     ${infoText(t("latestHelp"))}
-    <div class="card"><table><tbody>${latest.map(r => `<tr class="row" data-sp="${r.s}"><td class="nr">${r.nr}</td>
+    <div class="card"><table><tbody>${latest.map(r => `<tr class="row" data-sp="${r.s}" tabindex="0"><td class="nr">${r.nr}</td>
       <td>${speciesLine(SP[r.s])}</td>
       <td class="num">${fmtD(r.first.d)}<span class="small">${esc(placeName(r.first.p))}</span></td></tr>`).join("")}</tbody></table></div>
     <h2 data-toc="${esc(t("tocPerYear"))}">${t("perYear")}</h2>
