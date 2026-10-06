@@ -652,6 +652,11 @@ class PageTest(unittest.TestCase):
         self.assertEqual(figs[6], 2024)
         self.assertIn(f"ggü. 2023 bis {figs[5]}", sub)
         self.assertLess(figs[2], figs[4])
+        # the table of the years cuts on the same day
+        self.assertIn(f"bis {figs[5]}", page.inner_text("#tab-overview .yhead"))
+        # (the sample ends on 28 Dec: a record of 1 Nov counts "up to that day", whatever today's date)
+        self.assertEqual(page.evaluate("END_MD"), "12-28")
+        self.assertEqual(page.evaluate("yearSets([{ y: 2024, md: '11-01', m: 11, s: 0 }]).find(r => r.y === 2024).ytd.size"), 1)
         # the small bars: one per year, the chosen one strong, its title the year's figure
         bars = obs.locator("svg.spark rect")
         self.assertEqual(bars.count(), 2)

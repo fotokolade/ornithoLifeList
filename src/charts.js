@@ -59,7 +59,9 @@ function curveSvg(chrono) {
       const b1 = side < 0 ? py - 20 - off : py + 16 + off;
       const box = side < 0 ? { x1: px - 6 - w, x2: px - 6, y1: b1 - 11, y2: b1 + 16 } : { x1: px + 6, x2: px + 6 + w, y1: b1 - 11, y2: b1 + 16 };
       // the marker and the dashed line up or down to the label are kept clear too, not only the text
-      const stem = side < 0 ? { x1: px - 5, x2: px + 5, y1: box.y1, y2: py + 5 } : { x1: px - 5, x2: px + 5, y1: py - 5, y2: box.y2 };
+      // (clamped to the plot: a point on its very edge, e.g. a species of the first days, still gets its label)
+      const sx1 = Math.max(L, px - 5), sx2 = Math.min(W - R, px + 5);
+      const stem = side < 0 ? { x1: sx1, x2: sx2, y1: box.y1, y2: Math.min(CB, py + 5) } : { x1: sx1, x2: sx2, y1: py - 5, y2: box.y2 };
       if (!free(box) || !free(stem)) continue;
       boxes.push(box, stem);
       const tx = side < 0 ? px - 6 : px + 6, anchor = side < 0 ? "end" : "start";

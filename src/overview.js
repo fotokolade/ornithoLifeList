@@ -1,5 +1,5 @@
 /**
- * Distinct species per year (whole year and up to today's date); `keep` narrows the observations, e.g. to one month.
+ * Distinct species per year (whole year and up to the day the export ends, END_MD); `keep` narrows the observations, e.g. to one month.
  * @param {Observation[]} list
  * @param {(o: Observation) => boolean} [keep]
  */
@@ -10,7 +10,7 @@ function yearSets(list, keep = () => true) {
     if (!keep(o)) continue;
     const r = ys.get(o.y);
     r.all.add(o.s);
-    if (o.md <= TODAY_MD) r.ytd.add(o.s);
+    if (o.md <= END_MD) r.ytd.add(o.s);
   }
   return [...ys.values()].sort((a, b) => b.y - a.y);
 }
@@ -22,7 +22,7 @@ function yearRows(list, stats) {
 const monthRows = list => yearSets(list, o => o.m === S.month);
 function renderYearBlock(rows, opts) {
   const max = Math.max(1, ...rows.map(r => r.all.size));
-  const head = `<div class="yhead"><span>${t("colYear")}</span><span>${opts.showYtd ? t("colUntil", shortMD(TODAY_MD)) : ""}</span><span></span><span>${t("colTotal")}</span><span>${opts.showNew ? t("colNew") : ""}</span></div>`;
+  const head = `<div class="yhead"><span>${t("colYear")}</span><span>${opts.showYtd ? t("colUntil", shortMD(END_MD)) : ""}</span><span></span><span>${t("colTotal")}</span><span>${opts.showNew ? t("colNew") : ""}</span></div>`;
   return `<div class="card">${head}` + rows.map(r => {
     const tot = r.all.size, ytd = r.ytd.size;
     const cur = r.y === S.year ? " cur" : "";
@@ -148,25 +148,25 @@ const LEVEL_TIER = [0, 0, 1, 1, 2, 2, 2, 3];
 const birderLevel = n => LEVEL_FROM.filter(f => n >= f).length - 1;
 // every level in five steps of equal width, bronze to diamond (T.medals); the open-ended top level steps on every 25 species, up to diamond
 const SUB_STEPS = 5, MEDALS = ["bronze", "silver", "gold", "platinum", "diamond"];
-/** @param {number} n life species @returns {{lv: number, sub: number, subNext: number|null, lvNext: number|null}} the level and step reached (0-based) and where the next step and level start */
+/** @param {number} n life species @returns {{lv: number, sub: number, size: number, subNext: number|null, lvNext: number|null}} the level and step reached (0-based), the species per step, and where the next step and level start */
 function birderStep(n) {
   const lv = birderLevel(n), from = LEVEL_FROM[lv], lvNext = lv < LEVEL_FROM.length - 1 ? LEVEL_FROM[lv + 1] : null;
   const size = lvNext === null ? 25 : (lvNext - from) / SUB_STEPS;
   const sub = Math.min(SUB_STEPS - 1, Math.floor((n - from) / size));
-  return { lv, sub, subNext: sub < SUB_STEPS - 1 ? from + (sub + 1) * size : null, lvNext };
+  return { lv, sub, size, subNext: sub < SUB_STEPS - 1 ? from + (sub + 1) * size : null, lvNext };
 }
 // the birder's level: name, step and line, the rank, how far to the next step, and the way through all levels.
 // The levels not yet reached keep their names to themselves.
 /** @param {number} n life species */
 function levelCard(n) {
-  const { lv, sub, subNext, lvNext } = birderStep(n), last = LEVEL_FROM.length - 1;
+  const { lv, sub, size, subNext, lvNext } = birderStep(n), last = LEVEL_FROM.length - 1;
   const [name, line] = T.levels[lv];
   const toLevel = lvNext === null ? "" : t("levelNext", fmtN(lvNext - n));
   const toSub = subNext === null ? "" : t("levelNextSub", fmtN(subNext - n), T.medals[sub + 1]);
   const next = [toSub, toLevel].filter(Boolean).join(" · ") || t("levelTop");
   const segs = LEVEL_FROM.map((from, i) => {
-    const to = i < last ? LEVEL_FROM[i + 1] : from;
-    const fill = i < lv ? 100 : i > lv ? 0 : i < last ? (n - from) / (to - from) * 100 : sub === SUB_STEPS - 1 ? 100 : (n - from) / (25 * SUB_STEPS) * 100;
+    // the current level filled as far as reached (five steps of `size`); the open-ended top one is full at diamond
+    const fill = i < lv ? 100 : i > lv ? 0 : i === last && sub === SUB_STEPS - 1 ? 100 : (n - from) / (size * SUB_STEPS) * 100;
     const tip = esc(i <= lv ? t("levelTip", i + 1, T.levels[i][0], fmtN(from)) : t("levelTipHidden", i + 1, fmtN(from)));
     return `<span class="lv-seg${i === lv ? " cur" : ""}" data-tip="${tip}" aria-label="${tip}"><i style="width:${fill.toFixed(1)}%"></i></span>`;
   }).join("");
@@ -188,10 +188,10 @@ function overviewTiles(list, stats, new30, latest) {
   const full = yearFigures(list, stats);
   // the export's last year has only got as far as its last observation (not today: an older export would otherwise
   // set a few months against the whole year before): compare it with the year before up to the same day
-  const end = OBS[OBS.length - 1], running = S.year === end.y && end.md < "12-31";
-  const cmp = running ? yearFigures(list, stats, end.md) : full;
+  const running = S.year === MAX_Y && END_MD < "12-31";
+  const cmp = running ? yearFigures(list, stats, END_MD) : full;
   const cur = cmp.find(r => r.y === S.year), before = cmp.find(r => r.y === S.year - 1);
-  const vs = before ? running ? t("kpiVsUntil", before.y, shortMD(end.md)) : t("kpiVs", before.y) : "";
+  const vs = before ? running ? t("kpiVsUntil", before.y, shortMD(END_MD)) : t("kpiVs", before.y) : "";
   // "2025: 2.179", under it "▲ +45 vs 2024"; without `value` only the comparison (for a tile whose large number is the year's)
   /** @param {"obs"|"days"|"places"|"species"|"lifers"} k @param {string} [sign] @param {boolean} [value] */
   const yearLine = (k, sign = "", value = true) => {
@@ -263,10 +263,10 @@ function renderOverview() {
       <td>${speciesLine(SP[r.s])}</td>
       <td class="num">${fmtD(r.first.d)}<span class="small">${esc(placeName(r.first.p))}</span></td></tr>`).join("")}</tbody></table></div>
     <h2 data-toc="${esc(t("tocPerYear"))}">${t("perYear")}</h2>
-    ${infoText(t("perYearHelp", shortMD(TODAY_MD)))}
+    ${infoText(t("perYearHelp", shortMD(END_MD)))}
     ${renderYearBlock(rows, { showYtd: true, showNew: true })}
     <h2 data-toc="${esc(t("tocPerMonth"))}">${t("perMonth", monthLabel)}</h2>
-    ${renderYearBlock(monthRows(list), { showYtd: S.month === TODAY_M, showNew: false })}
+    ${renderYearBlock(monthRows(list), { showYtd: S.month === END_M, showNew: false })}
     <h2 data-toc="${esc(t("tocHeat"))}">${t("heat")}${heatMetricPick("ym")}</h2>
     ${infoText(t("heatHelp"))}
     ${heatSection("ym", { obs: list, rows: years, rowLabels: years, rowNames: years, colLabels: monthColLabels(), colNames: T.months,
