@@ -65,7 +65,14 @@ TRIPS = [
     ("2023-10-21", 2, [("37", "Unteres Odertal, Criewen", "Schwedt/Oder (BB, UM)", 53.017, 14.233, "water open")]),
     ("2024-05-09", 4, [("38", "Badberg", "Vogtsburg im Kaiserstuhl (BW, FR*)", 48.101, 7.665, "south open forest")]),
     ("2024-09-28", 2, [("39", "Dümmer, Hüde", "Hüde (NI, DH)", 52.490, 8.345, "water open coast")]),
+    # 2025 is a big year, with trips all over Germany: the time-lapse of the README shows it
+    ("2025-01-25", 2, [("42", "Linumer Teichland", "Fehrbellin (BB, OPR)", 52.755, 12.865, "water open")]),
     ("2025-03-15", 2, [("40", "Kühkopf-Knoblochsaue", "Stockstadt am Rhein (HE, GG)", 49.825, 8.415, "water forest")]),
+    ("2025-04-26", 3, [("43", "Wollmatinger Ried", "Konstanz (BW, KN)", 47.690, 9.130, "water open")]),
+    ("2025-05-24", 3, [("44", "Leybucht", "Krummhörn (NI, AUR)", 53.530, 7.120, "coast water open")]),
+    ("2025-06-14", 2, [("45", "Lange Rhön", "Hausen (BY, NES)", 50.500, 10.050, "open mountain")]),
+    ("2025-07-19", 2, [("46", "Brocken", "Wernigerode (ST, HZ)", 51.799, 10.617, "mountain forest rock")]),
+    ("2025-08-30", 3, [("47", "Rieselfelder Münster", "Münster (NW, MS)", 52.030, 7.650, "water open")]),
     ("2025-11-08", 3, [("30", "Hauke-Haien-Koog", "Reußenköge (SH, NF)", 54.605, 8.870, "coast water open")]),
     ("2026-04-11", 3, [("41", "Hirschauer Bucht", "Grabenstätt (BY, TS)", 47.842, 12.508, "water open")]),
 ]

@@ -166,10 +166,14 @@ def main():
                 page = open_page(hash="#map")
                 page.wait_for_timeout(4000)
                 shot(page, "map.png", section(page, "#map"))
-                # the time-lapse of the last full year, played as an animated GIF
+                # the time-lapse of the year that reaches into the most states, played as an animated GIF
                 page = open_page(hash="#map")
                 page.click("#m-tl")
-                page.select_option("#tl-year", str(int(page.evaluate("MAX_Y")) - 1))
+                year = page.evaluate("""() => { const states = new Map();
+                    for (const o of OBS) if (PL[o.p].lat) { if (!states.has(o.y)) states.set(o.y, new Set()); states.get(o.y).add(PL[o.p].state); }
+                    return [...states].sort((a, b) => b[1].size - a[1].size || b[0] - a[0])[0][0]; }""")
+                page.select_option("#tl-year", str(year))
+                page.select_option("#tl-glow", "90")  # trips of two or three days stay in sight, so the year fills the map
                 page.wait_for_timeout(4000)  # the tiles
                 timelapse_gif(page, os.path.join(OUT, "timelapse.gif"))
                 try:  # map tiles make a big PNG; 256 colours look the same at a third of the size

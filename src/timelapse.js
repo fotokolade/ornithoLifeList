@@ -269,18 +269,20 @@ function drawTimelapse() {
   $("tl-year").innerHTML = years.slice().reverse().map(y => `<option value="${y}">${y}</option>`).join("");
   $("tl-year").value = String(S.tl.year);
   const key = `${S.tl.year}|${S.region}|${S.tl.sp ? S.tl.sp.join(",") : ""}|${S.escaped}|${S.collective}`;
+  legend.hidden = false;
+  legend.innerHTML = `<b>${t("tlKey")}</b><div class="map-legend-row"><span><i class="tl-ramp"></i>${t(S.tl.sp === null ? "tlKeyVisit" : "tlKeyVisitSp")}</span><span>${markerDot(0.25, 16, true)}${t("mapLiferKey")}</span></div>`;
   if (key !== TL_KEY) {
     const fresh = TL_KEY.split("|", 3).join("|") !== key.split("|", 3).join("|");
     tlReset();
     TL_KEY = key;
     TL_MODEL = tlModel(list, S.tl.year, S.tl.sp);
     if (fresh) TL_POS = 0;
-    MAP.fitBounds(TL_MODEL.places.map(pl => [PL[pl.p].lat, PL[pl.p].lon]), { padding: [30, 30], maxZoom: 15, animate: false });
+    // the legend (drawn above) sits over the map's bottom left: keep room for it, or a place down there hides under it
+    MAP.fitBounds(TL_MODEL.places.map(pl => [PL[pl.p].lat, PL[pl.p].lon]),
+      { paddingTopLeft: [30, 30], paddingBottomRight: [30, 30 + legend.offsetHeight], maxZoom: 15, animate: false });
     MAP_FIT_KEY = "";  // back on the normal map, it fits its own places again
     $("tl-range").max = String(TL_MODEL.n - 1);
   }
-  legend.hidden = false;
-  legend.innerHTML = `<b>${t("tlKey")}</b><div class="map-legend-row"><span><i class="tl-ramp"></i>${t(S.tl.sp === null ? "tlKeyVisit" : "tlKeyVisitSp")}</span><span>${markerDot(0.25, 16, true)}${t("mapLiferKey")}</span></div>`;
   $("map-note").textContent = t("tlNote", TL_MODEL.places.length);
   TL_POS = Math.min(TL_POS, TL_MODEL.n - 1);
   tlShow(Math.floor(TL_POS));

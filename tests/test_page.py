@@ -1167,6 +1167,24 @@ class PageTest(unittest.TestCase):
         self.assertEqual(page.evaluate("TL_MODEL.places.length"), 2)  # the wild bird's pond and the escape's park
         self.assertEqual(self.errors, [])
 
+    def test_timelapse_keeps_its_places_clear_of_the_legend(self):
+        # a year from the North Sea to Lake Constance: the southernmost place must not end up under the legend
+        s = [sighting("Parus major", "Kohlmeise", "2024-04-01", place_id="n", place="Leybucht", lat="53.53", lon="7.12"),
+             sighting("Parus major", "Kohlmeise", "2024-05-01", place_id="s", place="Wollmatinger Ried", lat="47.69", lon="9.13"),
+             sighting("Parus major", "Kohlmeise", "2024-06-01", place_id="o", place="Görlitz", lat="51.15", lon="14.99")]
+        path = os.path.join(self.tmp.name, "wide.html")
+        with open(path, "w", encoding="utf-8") as fh:
+            fh.write(lifelist.render_html(lifelist.build_page_data(s, "export_test.json", False)))
+        self.url["wide"] = "file:///" + path.replace(os.sep, "/").lstrip("/")
+        page = self.open(redact="wide", hash="#map", height=700)  # open() takes the key of self.url
+        page.click("#m-tl")
+        page.wait_for_timeout(300)
+        clear = page.evaluate("""() => { const legend = document.querySelector('.map-legend').getBoundingClientRect(), box = MAP.getContainer().getBoundingClientRect();
+            return TL_MODEL.places.map(pl => { const pt = MAP.latLngToContainerPoint([PL[pl.p].lat, PL[pl.p].lon]);
+                return !(box.left + pt.x < legend.right && box.top + pt.y > legend.top); }); }""")
+        self.assertEqual(clear, [True, True, True])
+        self.assertEqual(self.errors, [])
+
     def test_redacted_build_hides_map_and_places(self):
         page = self.open(redact=True)
         self.assertFalse(page.is_visible('#tabs button[data-tab="map"]'))
