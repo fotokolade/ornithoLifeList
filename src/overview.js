@@ -127,13 +127,81 @@ function calDayPanel(list, statsAll, day) {
       speciesChip(s, "", statsAll.get(s)?.first.d === day)).join("")}</div></div>`).join("");
   return cellPanel(fmtD(day), t("calDaySummary", all.size, byPlace.size) + (lifers ? " · " + t("calDayLifers", lifers) : ""), `data-day="${day}"`, places);
 }
+// The key figures of every year (MIN_Y..MAX_Y); `md` cuts each year at that day, e.g. today's, to set the
+// running year against the same part of the year before.
+/** @param {Observation[]} list @param {Map<number, {first: Observation}>} stats @param {string} [md] */
+function yearFigures(list, stats, md = "12-31") {
+  const per = new Map();
+  for (let y = MIN_Y; y <= MAX_Y; y++) per.set(y, { y, obs: 0, days: new Set(), places: new Set(), species: new Set(), lifers: 0 });
+  for (const o of list) {
+    if (o.md > md) continue;
+    const r = per.get(o.y);
+    r.obs++; r.days.add(o.d); r.places.add(o.p); r.species.add(o.s);
+  }
+  for (const st of stats.values()) if (st.first.md <= md) per.get(st.first.y).lifers++;
+  return [...per.values()].map(r => ({ y: r.y, obs: r.obs, days: r.days.size, places: r.places.size, species: r.species.size, lifers: r.lifers }));
+}
+// The tiles on top of the overview: everything since the start in large, and under it the chosen year against the
+// year before (an arrow and the difference, so it reads without the colour), with all the years as small bars.
+/** @param {Observation[]} list @param {Map<number, {first: Observation}>} stats @param {number} new30 */
+/** @param {Map<number, {first: Observation, s: number}>} stats */
+const latestLifer = stats => [...stats.values()].reduce((a, b) => b.first.d > a.first.d ? b : a);
+function overviewTiles(list, stats, new30) {
+  const full = yearFigures(list, stats);
+  // the running year has only got to today: compare it with the year before up to the same day
+  const running = S.year === TODAY_Y;
+  const cmp = running ? yearFigures(list, stats, TODAY_MD) : full;
+  const cur = cmp.find(r => r.y === S.year), before = cmp.find(r => r.y === S.year - 1);
+  const vs = before ? running ? t("kpiVsUntil", before.y, shortMD(TODAY_MD)) : t("kpiVs", before.y) : "";
+  // "2025: 2.179", under it "▲ +45 vs 2024"; without `value` only the comparison (for a tile whose large number is the year's)
+  /** @param {"obs"|"days"|"places"|"species"|"lifers"} k @param {string} [sign] @param {boolean} [value] */
+  const yearLine = (k, sign = "", value = true) => {
+    if (!cur) return "";
+    const a = cur[k], others = full.filter(r => r.y !== S.year && r[k]);
+    const record = others.length && a > Math.max(...others.map(r => r[k])) ? ` <span class="tag">${t("kpiRecord")}</span>` : "";
+    const head = value ? `<div>${S.year}: ${sign}${fmtN(a)}${before ? "" : record}</div>` : "";
+    if (!before) return head || record;
+    const dv = a - before[k];
+    const delta = dv > 0 ? `<span class="delta up">▲ +${fmtN(dv)}</span>` : dv < 0 ? `<span class="delta down">▼ −${fmtN(-dv)}</span>` : `<span class="delta">±0</span>`;
+    return `${head}<div>${delta} ${vs}${record}</div>`;
+  };
+  /** @param {"obs"|"days"|"places"|"lifers"} k @param {string} [sign] */
+  const spark = (k, sign = "") => {
+    const max = Math.max(1, ...full.map(r => r[k]));
+    return `<svg class="spark" viewBox="0 0 ${full.length * 10} 28" preserveAspectRatio="none" aria-hidden="true">${full.map((r, i) => {
+      const h = Math.max(r[k] ? 2 : 0, r[k] / max * 28), op = r.y === S.year ? 1 : r.y === S.year - 1 ? .55 : .3;
+      return `<rect x="${i * 10 + 1.5}" y="${28 - h}" width="7" height="${h}" opacity="${op}"><title>${r.y}: ${sign}${fmtN(r[k])}</title></rect>`;
+    }).join("")}</svg>`;
+  };
+  /** @param {string} theme @param {string} label @param {string} value @param {string} sub @param {string} [extra] */
+  const tile = (theme, label, value, sub, extra = "") =>
+    `<div class="stat t-${theme}"><div class="stat-lbl"><i></i>${label}</div><b>${value}</b><div class="stat-sub">${sub}</div>${extra}</div>`;
+  const photos = list.filter(o => o.ph).length, photoPct = pctDisplay(photos, list.length);
+  const daySp = new Map();
+  for (const o of list) if (o.y === S.year) { if (!daySp.has(o.d)) daySp.set(o.d, new Set()); daySp.get(o.d).add(o.s); }
+  let bestDay = "", bestCount = 0;
+  for (const [d, sp] of daySp) if (sp.size > bestCount) { bestCount = sp.size; bestDay = d; }
+  return `<div class="kpis k4 stats">
+      ${tile("species", t("speciesLife"), fmtN(stats.size), yearLine("lifers", "+"), spark("lifers", "+"))}
+      ${tile("activity", t("observations"), fmtN(list.length), yearLine("obs"), spark("obs"))}
+      ${tile("activity", t("days"), fmtN(new Set(list.map(o => o.d)).size), yearLine("days"), spark("days"))}
+      ${tile("places", t("places"), fmtN(new Set(list.map(o => o.p)).size), yearLine("places"), spark("places"))}
+    </div>
+    <div class="kpis stats minor">
+      ${cur ? tile("species", t("speciesInYear", S.year), fmtN(cur.species), yearLine("species", "", false)) : ""}
+      ${new30 ? tile("species", t("newLast30"), `+${fmtN(new30)}`, t("curveLast", esc(speciesName(SP[latestLifer(stats).s])))) : ""}
+      ${tile("photos", t("photoShare"), `${photoPct}%`, t("photoOf", fmtN(photos), fmtN(list.length)), `<div class="meter"><i style="width:${photoPct}%"></i></div>`)}
+      ${bestCount ? tile("activity", t("bestDay", S.year), `${fmtN(bestCount)} <small>${t(bestCount === 1 ? "speciesWordOne" : "speciesWord")}</small>`,
+        `${fmtD(bestDay)}<span class="to-cal"> · <button type="button" class="linkbtn" data-show-day="${bestDay}">${t("showInCal")}</button></span>`) : ""}
+    </div>
+    ${infoText(t("kpiHelp"))}`;
+}
 function renderOverview() {
   const list = regionObs(baseObs());
   if (!list.length) { $("tab-overview").innerHTML = `<p class="empty">${t("noData")}</p>`; updateToc(); return; }
   const stats = speciesStats(list);
   const days = new Set(list.map(o => o.d)).size, places = new Set(list.map(o => o.p)).size;
   const rows = yearRows(list, stats);
-  const newYear = rows.find(r => r.y === S.year)?.lifers || 0;
   const c30 = new Date(NOW.getFullYear(), NOW.getMonth(), NOW.getDate() - 30);  // local dates, like the export
   const cutoff = c30.getFullYear() + "-" + pad(c30.getMonth() + 1) + "-" + pad(c30.getDate());
   const new30 = [...stats.values()].filter(r => r.first.d >= cutoff).length;
@@ -141,23 +209,9 @@ function renderOverview() {
   const chrono = numberLifers(stats);
   const latest = chrono.slice(-10).reverse();
   const monthLabel = T.months[S.month - 1];
-  const photoPct = pctDisplay(list.filter(o => o.ph).length, list.length);
-  const dayMap = new Map();
-  for (const o of list) { if (!dayMap.has(o.d)) dayMap.set(o.d, new Set()); dayMap.get(o.d).add(o.s); }
-  let bestDay = list[0].d, bestCount = 0;
-  for (const [d, sp] of dayMap) if (sp.size > bestCount) { bestCount = sp.size; bestDay = d; }
   const years = Array.from({ length: MAX_Y - MIN_Y + 1 }, (_, i) => String(MAX_Y - i));
   $("tab-overview").innerHTML = `
-    <div class="kpis k8">
-      ${kpiTile(fmtN(stats.size), t("speciesLife"), "species", { main: true })}
-      ${kpiTile(fmtN(list.length), t("observations"), "activity")}
-      ${kpiTile(fmtN(days), t("days"), "activity")}
-      ${kpiTile(fmtN(places), t("places"), "places")}
-      ${kpiTile(`+${newYear}`, t("newInYear", S.year), "species", { zero: !newYear })}
-      ${kpiTile(`+${new30}`, t("newLast30"), "species", { zero: !new30 })}
-      ${kpiTile(`${photoPct}%`, t("photoShare"), "photos", { zero: !photoPct })}
-      ${kpiTile(bestCount, t("bestDay", fmtD(bestDay)), "activity")}
-    </div>
+    ${overviewTiles(list, stats, new30)}
     <p class="sub" style="margin-top:8px">${t("period")}: ${fmtD(first)} ${t("to")} ${fmtD(last)}</p>
     ${calendarSection(list, stats)}
     <h2>${t("curve")}</h2>

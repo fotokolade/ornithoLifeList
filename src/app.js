@@ -388,6 +388,14 @@ function init() {
   // the redraw replaces the clicked calendar day or table cell; put the keyboard focus back on its replacement
   const refocus = sel => { const el = $$(sel); if (el) el.focus({ preventScroll: true }); };
   $("tab-overview").addEventListener("click", e => {
+    // "Bester Tag": open that day in the calendar and bring it into view
+    const best = e.target.closest("[data-show-day]");
+    if (best) {
+      S.calDay = best.dataset.showDay; renderOverview();
+      const cell = $$(`#tab-overview .cal-day[data-day="${S.calDay}"]`);
+      if (cell) { cell.focus({ preventScroll: true }); cell.closest(".card").scrollIntoView({ block: "start", behavior: "smooth" }); }
+      return;
+    }
     const day = e.target.closest("[data-day]");
     if (day) {
       S.calDay = S.calDay === day.dataset.day ? null : day.dataset.day; renderOverview();
@@ -479,7 +487,12 @@ function init() {
     box.classList.toggle("glowing", !!m);
     for (const d of box.querySelectorAll(".cal-day[data-m]")) d.classList.toggle("glow", /** @type {HTMLElement} */ (d).dataset.m === m);
   };
-  document.addEventListener("mouseover", e => calGlow(/** @type {any} */ (e.target).closest?.(".cal-days .cal-day[data-m]")?.dataset.m || ""));
+  document.addEventListener("mouseover", e => {
+    const el = /** @type {any} */ (e.target);
+    // a sliver of the grid between two days (where four meet, at a fraction of a pixel) is no "outside": keep the month lit
+    if (el.closest?.(".cal-days") && !el.closest(".cal-day[data-m]")) return;
+    calGlow(el.closest?.(".cal-days .cal-day[data-m]")?.dataset.m || "");
+  });
   document.documentElement.addEventListener("mouseleave", () => calGlow(""));
   // every other cell of the hovered cell's table shows the difference to it: +4 green, 0 grey, −10 red;
   // the crosshair still marks the hovered cell's row and column

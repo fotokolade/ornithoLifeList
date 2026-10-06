@@ -119,9 +119,26 @@ details.tour-settings summary::before{content:"⚙ ";color:var(--muted)}
 /* key-figure tiles are coloured by what they count, in the colours the charts use for the same things
    (see kpiTile()): species green, activity blue, places and distances amber, photos violet; a zero stays grey */
 .kpi{--tc:var(--muted);background:var(--card);border:1px solid var(--line);border-left:4px solid var(--tc);border-radius:12px;padding:12px 16px 12px 13px;box-shadow:var(--shadow)}
-.kpi.t-species{--tc:var(--accent)}.kpi.t-activity{--tc:var(--k3)}.kpi.t-places{--tc:var(--k2)}.kpi.t-photos{--tc:var(--k4)}
+.t-species{--tc:var(--accent)}.t-activity{--tc:var(--k3)}.t-places{--tc:var(--k2)}.t-photos{--tc:var(--k4)}
 .kpi.zero{--tc:var(--line)}
-.kpi b{display:block;font-size:1.55rem;line-height:1.15;font-variant-numeric:tabular-nums;letter-spacing:-.01em;color:color-mix(in srgb,var(--tc) 80%,var(--text))}
+/* the overview's tiles: the figure in the text colour, the colour of what it counts only in the dot and the small bars */
+.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;box-shadow:var(--shadow);display:flex;flex-direction:column;min-width:0}
+.stat-lbl{color:var(--muted);font-size:.76rem;display:flex;align-items:center;gap:6px}
+.stat-lbl i{width:8px;height:8px;border-radius:50%;background:var(--tc);flex:0 0 auto}
+.stat b{font-size:1.55rem;line-height:1.15;font-variant-numeric:tabular-nums;letter-spacing:-.01em;margin:3px 0 2px}
+.stat b small{font-size:.9rem;font-weight:500;color:var(--muted)}
+.stat-sub{color:var(--muted);font-size:.74rem;line-height:1.35;font-variant-numeric:tabular-nums}
+.stat .delta{color:var(--text);font-weight:600;white-space:nowrap}
+.stat .delta.up{color:var(--accent)}
+.stat .delta.down{color:color-mix(in srgb,var(--k5) 82%,var(--text))}
+.stat .tag{display:inline-block;background:var(--accent-soft);color:var(--text);border-radius:999px;padding:0 7px;font-size:.7rem;margin-left:2px}
+.stat svg.spark{display:block;width:100%;height:28px;margin-top:auto;padding-top:8px;box-sizing:content-box;fill:var(--tc)}
+.stat .meter{height:8px;border-radius:4px;background:var(--bar-soft);margin-top:auto;overflow:hidden}
+.stat .meter i{display:block;height:100%;background:var(--tc);border-radius:4px}
+.stat .linkbtn{font:inherit;color:var(--link);background:none;border:0;padding:0;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+.kpis.stats.minor{margin-top:12px}
+.kpis.stats.minor .stat b{font-size:1.3rem}
+.kpi b{display:block;font-size:1.55rem;line-height:1.15;font-variant-numeric:tabular-nums;letter-spacing:-.01em;color:var(--text)}
 .kpi.zero b{color:var(--muted)}
 .kpi span{color:var(--muted);font-size:.76rem;line-height:1.3;display:block;margin-top:3px}
 .kpi.main{background:color-mix(in srgb,var(--tc) 11%,var(--card));border-color:color-mix(in srgb,var(--tc) 35%,var(--line));border-left-color:var(--tc)}
@@ -312,7 +329,13 @@ button.chip-sp:hover{border-color:var(--accent);color:var(--accent)}
 .heat td[data-heat]:hover{filter:brightness(1.12)}
 .heat td[data-heat]:focus-visible,.heat td.sel{outline:2px solid var(--text);outline-offset:-2px}
 svg.curve g.dot{cursor:pointer}
-svg.curve g.dot:hover circle:last-of-type{stroke:var(--accent);stroke-width:2}
+svg.curve g.dot:hover circle:last-of-type{r:4.5;stroke-width:2;fill:var(--accent)}
+svg.curve .notes{pointer-events:none}
+svg.curve .mark{fill:var(--accent);stroke:var(--card);stroke-width:2}
+svg.curve .lead{stroke:var(--line-ui);stroke-dasharray:2 3;fill:none}
+svg.curve text.lab .hd{fill:var(--text);font-weight:600}
+svg.curve text.v,svg.curve text.cur{fill:var(--text)}
+svg.curve text.cur{font-weight:600}
 @keyframes flash{from{background:var(--hl)}to{background:transparent}}
 tr.row.flash td{animation:flash 2.4s ease-out}
 svg.curve{width:100%;height:auto;display:block}
@@ -433,9 +456,10 @@ footer.meta-footer .btn{flex:0 0 auto;padding:3px 10px}
   #h-print{margin-left:auto;text-align:right}
   div.tab{display:block!important;padding-top:0}
   .wrap{max-width:none;padding:0}
-  .card,.kpi{overflow:visible;border-color:var(--line);box-shadow:none}
+  .card,.kpi,.stat{overflow:visible;border-color:var(--line);box-shadow:none}
   .detailgrid.tables>div{break-inside:avoid}  /* "Frühe Arten" stays with its table */
-  tr,.yrow,.kpi{break-inside:avoid}
+  tr,.yrow,.kpi,.stat{break-inside:avoid}
+  .stat .to-cal{display:none}
   /* a heading never ends a page on its own: neither after it nor after the info text below it */
   h2,h2 + details.info{break-after:avoid;margin-top:14px}
   details.info{break-inside:avoid}
@@ -449,7 +473,7 @@ footer.meta-footer .btn{flex:0 0 auto;padding:3px 10px}
   .hide-sm{display:revert!important}
   th.hide-sm,td.hide-sm{display:table-cell!important}
   .show-sm{display:none!important}
-  .heat-steps .hs i,.wd-ring circle,.bar,.bar i,.heat td,.pheno div,.cal-day,.season-strip,.season-strip *,.plan-strip i{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .heat-steps .hs i,.wd-ring circle,.bar,.bar i,.heat td,.pheno div,.cal-day,.season-strip,.season-strip *,.plan-strip i,.stat-lbl i,.stat .meter,.stat .meter i,.stat .tag{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   details.info summary{display:none!important}
   h2 + details.info{margin-top:0;text-align:left}
   h2 .ctl select{appearance:none;border:0;padding:0;background:none;font-weight:600;color:var(--text)}

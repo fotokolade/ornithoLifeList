@@ -633,6 +633,92 @@ class PageTest(unittest.TestCase):
         self.assertEqual(width(), 720)
         self.assertEqual(self.errors, [])
 
+    def test_overview_tiles_set_the_year_against_the_one_before(self):
+        page = self.open()
+        self.assertEqual(page.evaluate("S.year"), 2024)
+        tiles = page.locator("#tab-overview .kpis.k4.stats .stat")
+        self.assertEqual(tiles.count(), 4)
+        # each large number since the start, the year's figure under it, and the difference to the year before
+        figs = page.evaluate("""() => { const list = regionObs(baseObs());
+            const per = yr => list.filter(o => o.y === yr);
+            return [list.length, per(2024).length, per(2023).length, new Set(per(2024).map(o => o.d)).size, new Set(per(2023).map(o => o.d)).size]; }""")
+        obs = tiles.nth(1)
+        self.assertEqual(obs.locator("b").inner_text(), f"{figs[0]:,}".replace(",", "."))
+        sub = obs.locator(".stat-sub").inner_text()
+        self.assertIn(f"2024: {figs[1]}", sub)
+        dv = figs[1] - figs[2]
+        self.assertIn(("▲ +" if dv > 0 else "▼ −" if dv < 0 else "±") + str(abs(dv)), sub)
+        self.assertIn("ggü. 2023", sub)
+        # the small bars: one per year, the chosen one strong, its title the year's figure
+        bars = obs.locator("svg.spark rect")
+        self.assertEqual(bars.count(), 2)
+        self.assertEqual(bars.nth(1).get_attribute("opacity"), "1")
+        self.assertEqual(bars.nth(1).locator("title").text_content(), f"2024: {figs[1]}")
+        # the figures in the text colour; the colour of what they count only in the dot
+        colors = page.evaluate("""() => [getComputedStyle(document.body).color, ...[...document.querySelectorAll('#tab-overview .stat b')].map(b => getComputedStyle(b).color)]""")
+        self.assertEqual(set(colors), {colors[0]})
+        # "new in the last 30 days" only when there are some (the sample's records are older)
+        self.assertNotIn("Neu in den letzten 30 Tagen", page.inner_text("#tab-overview .kpis.minor"))
+        self.assertIn("Arten in 2024", page.inner_text("#tab-overview .kpis.minor"))
+        # the first year has nothing before it: its figure without a comparison
+        page.evaluate("S.year = 2023; renderOverview()")
+        sub = page.locator("#tab-overview .stats .stat").nth(1).locator(".stat-sub").inner_text()
+        self.assertEqual(sub, f"2023: {figs[2]}")
+        page.select_option("#f-lang", "en")
+        self.assertIn("Species in 2023", page.inner_text("#tab-overview .kpis.minor"))
+        self.assertEqual(self.errors, [])
+
+    def test_best_day_opens_in_the_calendar(self):
+        page = self.open(height=500)
+        link = page.locator("#tab-overview [data-show-day]")
+        day = link.get_attribute("data-show-day")
+        best = page.evaluate("""() => { const m = new Map(); for (const o of regionObs(baseObs())) if (o.y === S.year) { if (!m.has(o.d)) m.set(o.d, new Set()); m.get(o.d).add(o.s); }
+            return [...m].map(([d, sp]) => [d, sp.size]).sort((a, b) => b[1] - a[1])[0]; }""")
+        self.assertEqual(best[0], day)
+        self.assertIn(f"{best[1]} Arten", page.inner_text("#tab-overview .kpis.minor"))
+        link.click()
+        self.assertEqual(page.evaluate("S.calDay"), day)
+        sel = page.locator(f"#tab-overview .cal-day.cal-sel[data-day='{day}']")
+        self.assertEqual(sel.count(), 1)
+        self.assertEqual(page.evaluate("document.activeElement.dataset.day"), day)
+        self.assertEqual(page.locator("#tab-overview .cal-panel").count(), 1)
+        # a second click leaves the day open (it does not toggle like the day itself)
+        page.locator("#tab-overview [data-show-day]").click()
+        self.assertEqual(page.evaluate("S.calDay"), day)
+        self.assertEqual(self.errors, [])
+
+    def test_curve_labels_its_milestones_without_overlap(self):
+        page = self.open()
+        # the sample's own curve: the end label and one bar per year, the chosen year strong
+        self.assertIn("Arten", page.text_content("#tab-overview svg.curve .notes"))
+        rects = page.locator("#tab-overview svg.curve g.ybar rect")
+        self.assertEqual(rects.count(), 2)
+        self.assertEqual(rects.nth(1).get_attribute("opacity"), "1")
+        # 30 made-up life species, four of them on one day of the second year: the 10th and 20th are labelled,
+        # and so is that day, none of the labels on top of another
+        for width in (390, 1400):
+            page.set_viewport_size({"width": width, "height": 900})
+            res = page.evaluate("""() => {
+                const days = [...Array(26)].map((_, i) => `2023-${String(1 + Math.floor(i / 3)).padStart(2, "0")}-${String(1 + i % 3 * 9).padStart(2, "0")}`);
+                const fake = [...days, "2024-05-20", "2024-05-20", "2024-05-20", "2024-05-20"].map((d, i) => ({ s: i % SP.length, first: { d, y: +d.slice(0, 4), p: OBS[0].p, s: i % SP.length } }));
+                const box = document.createElement("div"); box.innerHTML = curveSvg(fake); document.getElementById("tab-overview").append(box);
+                const labs = [...box.querySelectorAll(".notes text.lab")];
+                const rs = labs.map(l => l.getBoundingClientRect());
+                const overlap = rs.some((a, i) => rs.some((b, j) => i < j && a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom));
+                const svg = box.querySelector("svg").getBoundingClientRect();
+                const inside = rs.every(r => r.left >= svg.left - 1 && r.right <= svg.right + 1 && r.top >= svg.top - 1);
+                const out = [labs.map(l => l.textContent), overlap, inside];
+                box.remove(); return out; }""")
+            texts, overlap, inside = res
+            self.assertFalse(overlap, (width, texts))
+            self.assertTrue(inside, (width, texts))
+            self.assertTrue(any(s.startswith("30 Arten") for s in texts), texts)
+            self.assertTrue(any(s.startswith("20. Art: ") for s in texts), texts)
+            if width == 1400:
+                self.assertTrue(any(s.startswith("10. Art: ") for s in texts), texts)
+                self.assertTrue(any(s.startswith("+4 an einem Tag") and "20.05.2024" in s for s in texts), texts)
+        self.assertEqual(self.errors, [])
+
     def test_region_month_table(self):
         page = self.open(hash="#regions")
         rows = page.locator("table.heat.rm tbody tr")
