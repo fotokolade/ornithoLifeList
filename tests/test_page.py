@@ -640,15 +640,18 @@ class PageTest(unittest.TestCase):
         self.assertEqual(tiles.count(), 4)
         # each large number since the start, the year's figure under it, and the difference to the year before
         figs = page.evaluate("""() => { const list = regionObs(baseObs());
-            const per = yr => list.filter(o => o.y === yr);
-            return [list.length, per(2024).length, per(2023).length, new Set(per(2024).map(o => o.d)).size, new Set(per(2023).map(o => o.d)).size]; }""")
+            const end = OBS[OBS.length - 1], per = yr => list.filter(o => o.y === yr && o.md <= end.md);
+            return [list.length, per(2024).length, per(2023).length, new Set(per(2024).map(o => o.d)).size, list.filter(o => o.y === 2023).length, shortMD(end.md), end.y]; }""")
         obs = tiles.nth(1)
         self.assertEqual(obs.locator("b").inner_text(), f"{figs[0]:,}".replace(",", "."))
         sub = obs.locator(".stat-sub").inner_text()
         self.assertIn(f"2024: {figs[1]}", sub)
         dv = figs[1] - figs[2]
         self.assertIn(("▲ +" if dv > 0 else "▼ −" if dv < 0 else "±") + str(abs(dv)), sub)
-        self.assertIn("ggü. 2023", sub)
+        # the export ends in 2024 before New Year's Eve: both years only up to the day of its last observation, not today
+        self.assertEqual(figs[6], 2024)
+        self.assertIn(f"ggü. 2023 bis {figs[5]}", sub)
+        self.assertLess(figs[2], figs[4])
         # the small bars: one per year, the chosen one strong, its title the year's figure
         bars = obs.locator("svg.spark rect")
         self.assertEqual(bars.count(), 2)
@@ -663,7 +666,7 @@ class PageTest(unittest.TestCase):
         # the first year has nothing before it: its figure without a comparison
         page.evaluate("S.year = 2023; renderOverview()")
         sub = page.locator("#tab-overview .stats .stat").nth(1).locator(".stat-sub").inner_text()
-        self.assertEqual(sub, f"2023: {figs[2]}")
+        self.assertEqual(sub, f"2023: {figs[4]}")
         page.select_option("#f-lang", "en")
         self.assertIn("Species in 2023", page.inner_text("#tab-overview .kpis.minor"))
         self.assertEqual(self.errors, [])

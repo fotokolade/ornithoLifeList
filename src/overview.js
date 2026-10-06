@@ -186,11 +186,12 @@ function levelCard(n) {
 /** @param {Observation[]} list @param {Map<number, {first: Observation}>} stats @param {number} new30 @param {{s: number}} latest */
 function overviewTiles(list, stats, new30, latest) {
   const full = yearFigures(list, stats);
-  // the running year has only got to today: compare it with the year before up to the same day
-  const running = S.year === TODAY_Y;
-  const cmp = running ? yearFigures(list, stats, TODAY_MD) : full;
+  // the export's last year has only got as far as its last observation (not today: an older export would otherwise
+  // set a few months against the whole year before): compare it with the year before up to the same day
+  const end = OBS[OBS.length - 1], running = S.year === end.y && end.md < "12-31";
+  const cmp = running ? yearFigures(list, stats, end.md) : full;
   const cur = cmp.find(r => r.y === S.year), before = cmp.find(r => r.y === S.year - 1);
-  const vs = before ? running ? t("kpiVsUntil", before.y, shortMD(TODAY_MD)) : t("kpiVs", before.y) : "";
+  const vs = before ? running ? t("kpiVsUntil", before.y, shortMD(end.md)) : t("kpiVs", before.y) : "";
   // "2025: 2.179", under it "▲ +45 vs 2024"; without `value` only the comparison (for a tile whose large number is the year's)
   /** @param {"obs"|"days"|"places"|"species"|"lifers"} k @param {string} [sign] @param {boolean} [value] */
   const yearLine = (k, sign = "", value = true) => {
