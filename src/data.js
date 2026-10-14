@@ -76,7 +76,7 @@ const initialTheme = (() => {
 if (initialTheme !== "system") document.documentElement.setAttribute("data-theme", initialTheme);
 /**
  * The single shared, mutable UI state object every render function reads and every event
- * handler writes. Not persisted (except lang and customTargets, via localStorage).
+ * handler writes. Not persisted, except what the fields below say is kept in localStorage.
  * @typedef {Object} AppState
  * @property {string} tab - active tab id, e.g. "overview"
  * @property {string} region - "all" or "<level>:<key>", e.g. "s:SN"
@@ -118,6 +118,7 @@ if (initialTheme !== "system") document.documentElement.setAttribute("data-theme
  * @property {boolean} tourAll - show every tour instead of the newest ones
  * @property {string|null} tourRoute - key of the tour drawn on the map
  * @property {{on: boolean, year: number, day: number, speed: number, playing: boolean, sp: number[]|null, glow: number}} tl - the map's time-lapse: shown, year, day, days per second, playing, the taxa of the one species followed (null: all), afterglow in days
+ * @property {{state: string, chosen: boolean, budget: number, eves: boolean, pick: Object<string, number>, from: number|null}} vac - vacation planner (vacation.js): federal state, whether the viewer picked it (only then is it kept in localStorage, with budget and eves), most days of leave per trip, 24 and 31 December off, the variant picked per group, a fixed first day instead of tomorrow (tests)
  * @property {number|null} focusSp - species index the life list scrolls to and highlights once, after a jump from another view
  */
 // the point in time the page opens with, and "Gesamt" returns to
@@ -133,7 +134,7 @@ function loadPrintTabs() {
 const S = { tab: "overview", region: "all", year: TIME_START.y, month: TIME_START.m, timeAll: true, lang: initialLang, theme: initialTheme,
   escaped: false, collective: false, atlasF: "all", actMetric: "obs", redact: !!RAW.meta.redacted, metric: "life", q: "", sort: "nr", dir: -1, open: new Set(),
   regSort: {}, regAll: {}, targetSrc: "all", customTargets: loadCustomTargets(), wishSort: { k: "season", d: 1 },
-  wishOpen: null, wishQ: "", plan: { scope: "de", month: 0, view: "dest", q: "", open: null, all: false, openG: null, gview: "d", sort: "n", gall: false }, calDay: null, heatMetric: { ym: "species", m: "obs", w: "obs", rm: "days" }, heatSel: {}, regMonthLvl: "c", tourCfg: null, tourSetOpen: false, printTabs: loadPrintTabs(), tourDiagOpen: false, tourSort: { k: "date", d: -1 }, tourOpen: new Set(), tourAll: false, tourRoute: null, focusSp: null, tl: { on: false, year: 0, day: 0, speed: 30, playing: false, sp: null, glow: 30 } };
+  wishOpen: null, wishQ: "", plan: { scope: "de", month: 0, view: "dest", q: "", open: null, all: false, openG: null, gview: "d", sort: "n", gall: false }, calDay: null, heatMetric: { ym: "species", m: "obs", w: "obs", rm: "days" }, heatSel: {}, regMonthLvl: "c", tourCfg: null, tourSetOpen: false, printTabs: loadPrintTabs(), tourDiagOpen: false, tourSort: { k: "date", d: -1 }, tourOpen: new Set(), tourAll: false, tourRoute: null, focusSp: null, vac: loadVac(), tl: { on: false, year: 0, day: 0, speed: 30, playing: false, sp: null, glow: 30 } };
 T = STR[S.lang];
 
 /* ---------- helpers ---------- */
@@ -146,6 +147,8 @@ const $ = id => document.getElementById(id);
 const $$ = sel => document.querySelector(sel);
 /** @param {string} sel @returns {any} */
 const $$all = sel => document.querySelectorAll(sel);
+/** an <option>, selected when its value is `cur` @param {string} v @param {string} label @param {string} cur */
+const optionHtml = (v, label, cur) => `<option value="${esc(v)}"${v === cur ? " selected" : ""}>${esc(label)}</option>`;
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 // a key-figure tile; `theme` colours it by what it counts ("species", "activity", "places", "photos"), `zero` greys it out
 /** @param {string|number} value @param {string} label @param {string} theme @param {{main?: boolean, zero?: boolean}} [opts] */
