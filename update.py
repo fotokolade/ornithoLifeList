@@ -41,6 +41,31 @@ def app_version(repo):
         return "?"
 
 
+def tracked(repo):
+    """the remote branch the checked-out one follows, e.g. "origin/master"; "" if none or GitHub no longer has it"""
+    res = git(repo, "rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}", check=False)
+    return "" if res.returncode else res.stdout.strip()  # on failure git may echo "@{u}" itself
+
+
+def switch_from_gone_branch(repo, branch, remote, changed, out, ask):
+    """The checked-out branch is gone on GitHub, mostly deleted after it was merged: offers to switch to the main
+    branch (the one GitHub opens with, else master) and update that. The old branch and its commits stay."""
+    main = git(repo, "symbolic-ref", "--short", f"refs/remotes/{remote}/HEAD", check=False).stdout.strip() or f"{remote}/master"
+    target = main[len(remote) + 1:]
+    if branch == target or git(repo, "rev-parse", "--verify", "--quiet", f"refs/remotes/{main}", check=False).returncode:
+        raise UpdateError(f"Branch '{branch}' no longer exists on GitHub. Check out another branch "
+                          "(`git branch -r` lists them), then run the update again.")
+    msg = (f"Branch '{branch}' no longer exists on GitHub; its changes were most likely merged into '{target}', "
+           f"where the updates are now. Your branch '{branch}' stays as it is.")
+    if not changed and ask and ask(f"{msg}\nSwitch to '{target}' now and update it? [y/N] "):
+        has_local = not git(repo, "rev-parse", "--verify", "--quiet", f"refs/heads/{target}", check=False).returncode
+        git(repo, "checkout", "--quiet", target) if has_local else git(repo, "checkout", "--quiet", "-b", target, "--track", main)
+        out(f"Switched to '{target}'.")
+        return update(repo, out, ask)
+    raise UpdateError(f"{msg}\nRun `git checkout {target}`, then run the update again."
+                      + (" Put your local changes aside first (`git stash`)." if changed else ""))
+
+
 def update(repo=HERE, out=print, ask=None):
     """Fast-forwards `repo` to its upstream branch. Returns the number of new commits applied.
     `ask(question)` -> bool may allow discarding local changes to program files; without it they stop the update."""
@@ -54,8 +79,12 @@ def update(repo=HERE, out=print, ask=None):
     branch = git(repo, "rev-parse", "--abbrev-ref", "HEAD").stdout.strip()
     if branch == "HEAD":
         raise UpdateError("No branch is checked out (detached HEAD). Run `git checkout master` first.")
-    upstream = git(repo, "rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}", check=False).stdout.strip()
-    if not upstream:
+    upstream = tracked(repo)
+    # the branch's configured remote, not the text before the first "/" (remote names may contain one)
+    remote = git(repo, "config", "--get", f"branch.{branch}.remote", check=False).stdout.strip() or upstream.split("/", 1)[0]
+    # set up to follow a branch that GitHub no longer has (deleted after a merge, then pruned by an earlier update)
+    follows = bool(git(repo, "config", "--get", f"branch.{branch}.merge", check=False).stdout.strip())
+    if not upstream and not (follows and remote):
         raise UpdateError(f"Branch '{branch}' doesn't follow a branch on GitHub. "
                           f"Run `git branch --set-upstream-to=origin/{branch}` first.")
     changed = git(repo, "status", "--porcelain", "--untracked-files=no").stdout.splitlines()
@@ -74,9 +103,10 @@ def update(repo=HERE, out=print, ask=None):
 
     old = app_version(repo)
     out(f"Checking GitHub for updates to '{branch}' ...")
-    # the branch's configured remote, not the text before the first "/" (remote names may contain one)
-    remote = git(repo, "config", "--get", f"branch.{branch}.remote", check=False).stdout.strip() or upstream.split("/", 1)[0]
     git(repo, "fetch", "--prune", remote)
+    upstream = tracked(repo)
+    if not upstream:
+        return switch_from_gone_branch(repo, branch, remote, bool(changed), out, ask)
     incoming = int(git(repo, "rev-list", "--count", f"HEAD..{upstream}").stdout)
     if not incoming:
         out(f"Already up to date (version {old}).")
