@@ -595,6 +595,9 @@ function init() {
     if (e.target.id === "plan-scope") { S.plan.scope = e.target.value; S.plan.open = S.plan.openG = null; S.plan.all = false; renderTargets(); }
     if (e.target.id === "plan-sort") { S.plan.sort = e.target.value === "name" ? "name" : "n"; redrawPlanner(); }
     if (e.target.id === "plan-month") { S.plan.month = +e.target.value; S.plan.all = false; redrawPlanner(); }
+    if (e.target.id === "vac-state") { vacState().state = e.target.value; vacState().pick = {}; saveVac(); redrawVacation(); }
+    if (e.target.id === "vac-budget") { vacState().budget = +e.target.value; vacState().pick = {}; saveVac(); redrawVacation(); }
+    if (e.target.id === "vac-eves") { vacState().eves = e.target.checked; vacState().pick = {}; saveVac(); redrawVacation(); }
     if (e.target.id === "plan-view") { S.plan.view = e.target.value === "sp" ? "sp" : "dest"; S.plan.q = ""; S.plan.all = false; renderTargets(); }
     if (e.target.id === "tgt-import" && e.target.files[0]) {
       e.target.files[0].text().then(text => {
@@ -625,6 +628,11 @@ function init() {
     const dest = e.target.closest("[data-plan-r]");
     if (dest) { const r = dest.dataset.planR; S.plan.open = S.plan.open === r ? null : r; planRedraw(`[data-plan-r="${CSS.escape(r)}"]`); return; }
     if (e.target.closest("[data-plan-more]")) { S.plan.all = !S.plan.all; planRedraw("[data-plan-more]"); return; }
+    const vac = e.target.closest("[data-vac-pick]");
+    if (vac) {
+      const [key, k] = vac.dataset.vacPick.split("|");
+      vacState().pick[key] = +k; redrawVacation(); refocus(`#vac-out [data-vac-pick="${CSS.escape(vac.dataset.vacPick)}"]`); return;
+    }
     const grp = e.target.closest("[data-grp]");
     if (grp) { toggleWishGroup(grp.dataset.grp); return; }
     const th = e.target.closest("th[data-k]");

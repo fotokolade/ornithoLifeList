@@ -59,7 +59,8 @@ Die Aufteilung in `src/*.js` dient nur der Bearbeitung. `lifelist.py` fügt die 
 | `list.js` | Lebensliste mit Suche, Sortierung und Detailzeilen |
 | `regions.js` | Regionen: Bundesländer, Landkreise, Gemeinden, Orte |
 | `targets.js` | Ziele: nie gesehene Arten, eigene Wunschliste |
-| `planner.js` | Urlaubsplaner mit den GBIF-Daten |
+| `planner.js` | Reiseziele mit den GBIF-Daten |
+| `vacation.js` | Urlaubsplaner: Feiertage je Bundesland, Brückentage, Ziele je Reise |
 | `activity.js` | Tagesaktivität: Uhrzeit, Wochentage, Tageszeit je Art |
 | `tours.js` | Touren, aus nahen Meldungen rekonstruiert |
 | `map.js` | Karte der Beobachtungsorte |

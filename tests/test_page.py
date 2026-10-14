@@ -536,6 +536,43 @@ class PageTest(unittest.TestCase):
         self.assertIn("Destinations", page.inner_text("#tab-targets"))
         self.assertEqual(self.errors, [])
 
+    def test_vacation_planner(self):
+        page = self.open(hash="#targets")
+        hol = lambda y, st: page.evaluate(f"Object.fromEntries(vacHolidays({y}, '{st}'))")
+        by, sn = hol(2026, "BY"), hol(2026, "SN")
+        self.assertEqual(by["2026-06-04"], "corpusChristi")
+        self.assertNotIn("2026-10-31", by)
+        self.assertEqual(sn["2026-11-18"], "repentance")  # the Wednesday before 23 November
+        self.assertEqual(sn["2026-10-31"], "reformation")
+        self.assertNotIn("2026-06-04", sn)
+        self.assertEqual(hol(2027, "SN")["2027-03-26"], "goodFriday")  # Easter Sunday 2027 is 28 March
+        self.assertEqual(len(hol(2026, "HE")), 10)
+        self.assertIn("2026-12-24", page.evaluate("Object.fromEntries(vacHolidays(2026, 'HE', true))"))
+        # Ascension Day 2027 (a Thursday) with one day of leave: Thursday to Sunday
+        plan = page.evaluate("vacPlan(vacDayNr('2027-05-01'), 'SN', 1, false).map(g => ({key: g.key, s: vacIso(g.pick.s), e: vacIso(g.pick.e), leave: g.pick.leave}))")
+        self.assertEqual(plan[0], {"key": "2027-05-06", "s": "2027-05-06", "e": "2027-05-09", "leave": 1})
+        # Christmas Day and New Year's Day 2027 (Fridays) are proposals of their own
+        keys = [g["key"] for g in page.evaluate("vacPlan(vacDayNr('2026-12-01'), 'SN', 3, false)")]
+        self.assertEqual(keys[:2], ["2026-12-25", "2027-01-01"])
+        # the home state is the one with the most observation days (the sample export: Saxony)
+        self.assertEqual(page.input_value("#vac-state"), "SN")
+        cards = page.locator("#vac-out .vac")
+        self.assertGreater(cards.count(), 3)
+        first = cards.first
+        pills = first.locator("[data-vac-pick]")
+        if pills.count() > 1:
+            before = first.locator(".vac-days").inner_text()
+            off = first.locator("[data-vac-pick]:not(.on)").first
+            off.click()
+            self.assertNotEqual(page.locator("#vac-out .vac").first.locator(".vac-days").inner_text(), before)
+        page.select_option("#vac-budget", "0")
+        self.assertEqual(page.locator("#vac-out .vac [data-vac-pick]").count(), 0)  # no leave: one trip per holiday
+        page.select_option("#vac-state", "BY")
+        self.assertEqual(page.evaluate("JSON.parse(localStorage.getItem('lifelist-vacation')).state"), "BY")
+        page.select_option("#f-lang", "en")
+        self.assertIn("Vacation planner", page.inner_text("#tab-targets"))
+        self.assertEqual(self.errors, [])
+
     def test_rare_vagrants_source(self):
         _, wishlist, rare = lifelist.load_species_reference()
         names = {r[1] for r in rare}

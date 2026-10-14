@@ -275,7 +275,8 @@ function renderTargets() {
     <h2>${t("wishTitle")}<small>${rows.length}</small></h2>
     ${rows.length ? `<div class="pick"><input type="search" id="wish-q" placeholder="${t("wishFilterPh")}" autocomplete="off" value="${esc(S.wishQ)}"></div>` : ""}
     <div id="wish-out">${wishTableHtml()}</div>
-    ${plannerSection()}`;
+    ${plannerSection()}
+    ${vacationSection()}`;
   $("tgt-src").value = src;
   updateToc();
 }
