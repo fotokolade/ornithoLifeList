@@ -272,14 +272,13 @@ function plannerSection() {
   planSeen();  // the tab is drawn anew: the life list or its filters may have changed
   if (!PLAN_SCOPES.includes(S.plan.scope)) S.plan.scope = PLAN_SCOPES.includes("de") ? "de" : PLAN_SCOPES[0];
   const meta = planData(S.plan.scope).meta;
-  const opt = (v, label, cur) => `<option value="${v}"${v === cur ? " selected" : ""}>${label}</option>`;
   return `<h2 data-toc="${esc(t("tocPlan"))}">${t("planTitle")}</h2>
     ${infoText(`${t("planHelp")}<br><br>${t("planSource", esc(meta.fetched), meta.years[0], meta.years[1])} ${esc(meta.citation)}`)}
     <div class="pick">
-      <select id="plan-scope" aria-label="${esc(t("planScope"))}">${PLAN_SCOPES.map(k => opt(k, t("planScope_" + k), S.plan.scope)).join("")}</select>
-      <select id="plan-month" aria-label="${esc(t("planMonth"))}">${opt("0", t("planYear"), String(S.plan.month))}${T.months.map((m, i) => opt(String(i + 1), m, String(S.plan.month))).join("")}</select>
-      <select id="plan-view" aria-label="${esc(t("planView"))}">${opt("dest", t("planViewDest"), S.plan.view)}${opt("sp", t("planViewSp"), S.plan.view)}</select>
-      ${S.plan.view === "dest" ? `<select id="plan-sort" aria-label="${esc(t("planSort"))}">${opt("n", t("planSortCount"), S.plan.sort)}${opt("name", t("planSortName"), S.plan.sort)}</select>` : ""}
+      <select id="plan-scope" aria-label="${esc(t("planScope"))}">${PLAN_SCOPES.map(k => optionHtml(k, t("planScope_" + k), S.plan.scope)).join("")}</select>
+      <select id="plan-month" aria-label="${esc(t("planMonth"))}">${optionHtml("0", t("planYear"), String(S.plan.month))}${T.months.map((m, i) => optionHtml(String(i + 1), m, String(S.plan.month))).join("")}</select>
+      <select id="plan-view" aria-label="${esc(t("planView"))}">${optionHtml("dest", t("planViewDest"), S.plan.view)}${optionHtml("sp", t("planViewSp"), S.plan.view)}</select>
+      ${S.plan.view === "dest" ? `<select id="plan-sort" aria-label="${esc(t("planSort"))}">${optionHtml("n", t("planSortCount"), S.plan.sort)}${optionHtml("name", t("planSortName"), S.plan.sort)}</select>` : ""}
       <input type="search" id="plan-q" placeholder="${esc(t(S.plan.view === "sp" ? "wishFilterPh" : "planFilterPh"))}" autocomplete="off" value="${esc(S.plan.q)}">
     </div>
     <div id="plan-out">${planOutHtml()}</div>`;

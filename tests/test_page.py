@@ -548,29 +548,51 @@ class PageTest(unittest.TestCase):
         self.assertEqual(hol(2027, "SN")["2027-03-26"], "goodFriday")  # Easter Sunday 2027 is 28 March
         self.assertEqual(len(hol(2026, "HE")), 10)
         self.assertIn("2026-12-24", page.evaluate("Object.fromEntries(vacHolidays(2026, 'HE', true))"))
+        plan = lambda frm, st, budget, eves="false": page.evaluate(f"""vacPlan(vacDayNr('{frm}'), '{st}', {budget}, {eves}).map(g => ({{
+            key: g.key, s: g.pick && vacIso(g.pick.s), e: g.pick && vacIso(g.pick.e), leave: g.pick && g.pick.leaveDays.length}}))""")
         # Ascension Day 2027 (a Thursday) with one day of leave: Thursday to Sunday
-        plan = page.evaluate("vacPlan(vacDayNr('2027-05-01'), 'SN', 1, false).map(g => ({key: g.key, s: vacIso(g.pick.s), e: vacIso(g.pick.e), leave: g.pick.leave}))")
-        self.assertEqual(plan[0], {"key": "2027-05-06", "s": "2027-05-06", "e": "2027-05-09", "leave": 1})
-        # Christmas Day and New Year's Day 2027 (Fridays) are proposals of their own
-        keys = [g["key"] for g in page.evaluate("vacPlan(vacDayNr('2026-12-01'), 'SN', 3, false)")]
-        self.assertEqual(keys[:2], ["2026-12-25", "2027-01-01"])
-        # the home state is the one with the most observation days (the sample export: Saxony)
+        self.assertEqual(plan("2027-05-01", "SN", 1)[0], {"key": "2027-05-06", "s": "2027-05-06", "e": "2027-05-09", "leave": 1})
+        # of equally long trips not one that leaves a single working day before a weekend, as Saturday to Thursday would
+        variants = page.evaluate("vacPlan(vacDayNr('2027-04-20'), 'SN', 3, false)[0].variants.map(x => [vacIso(x.s), vacIso(x.e), x.stranded])")
+        self.assertEqual([v[2] for v in variants], [0] * len(variants))
+        self.assertNotIn(["2027-05-01", "2027-05-06", 1], variants)
+        # Christmas Day and New Year's Day 2027 (Fridays) are proposals of their own that do not overlap
+        groups = plan("2026-12-01", "SN", 3)
+        self.assertEqual([g["key"] for g in groups[:2]], ["2026-12-25", "2027-01-01"])
+        self.assertLess(groups[0]["e"], groups[1]["s"])
+        for st, eves in (("BY", "true"), ("SN", "false")):
+            picks = [g for g in plan("2026-12-01", st, 5, eves) if g["s"]]
+            for x, y in zip(picks, picks[1:]):
+                self.assertLess(x["e"], y["s"], st)
+        # no day of leave: a Wednesday holiday makes no trip, but is still listed
+        epiphany = [g for g in plan("2026-12-01", "BY", 0) if g["key"] == "2027-01-06"]
+        self.assertEqual(epiphany, [{"key": "2027-01-06", "s": None, "e": None, "leave": None}])
+        # the home state is the one with the most observation days (the sample export: Saxony); it is not kept
+        # until the viewer picks it
         self.assertEqual(page.input_value("#vac-state"), "SN")
+        page.evaluate("S.vac.from = vacDayNr('2026-12-01'); redrawVacation()")
         cards = page.locator("#vac-out .vac")
-        self.assertGreater(cards.count(), 3)
+        self.assertIn("2. Weihnachtstag", cards.first.inner_text())  # a holiday on a Saturday is named too
+        self.assertIn("Mi 30.12.2026 – So 03.01.2027", cards.nth(1).inner_text())  # a trip into the next year names both years
         first = cards.first
-        pills = first.locator("[data-vac-pick]")
-        if pills.count() > 1:
-            before = first.locator(".vac-days").inner_text()
-            off = first.locator("[data-vac-pick]:not(.on)").first
-            off.click()
-            self.assertNotEqual(page.locator("#vac-out .vac").first.locator(".vac-days").inner_text(), before)
+        before = first.locator(".vac-days").inner_text()
+        first.locator("[data-vac-pick]:not(.on)").first.click()
+        self.assertNotEqual(page.locator("#vac-out .vac").first.locator(".vac-days").inner_text(), before)
+        # each of the three destinations lists its species
+        self.assertEqual(page.locator("#vac-out .vac").first.locator("details.vac-sp").count(),
+                         page.locator("#vac-out .vac").first.locator(".vac-dest li").count())
+        page.set_viewport_size({"width": 320, "height": 900})  # the cards fit a small phone
+        self.assertEqual(page.evaluate("document.documentElement.scrollWidth"), 320)
+        page.set_viewport_size({"width": 1400, "height": 900})
         page.select_option("#vac-budget", "0")
-        self.assertEqual(page.locator("#vac-out .vac [data-vac-pick]").count(), 0)  # no leave: one trip per holiday
+        self.assertNotIn("state", page.evaluate("JSON.parse(localStorage.getItem('lifelist-vacation'))"))
+        self.assertIn("kein Kurzurlaub", page.inner_text("#vac-out"))
         page.select_option("#vac-state", "BY")
         self.assertEqual(page.evaluate("JSON.parse(localStorage.getItem('lifelist-vacation')).state"), "BY")
         page.select_option("#f-lang", "en")
         self.assertIn("Vacation planner", page.inner_text("#tab-targets"))
+        self.assertIn("Bavaria", page.inner_text("#vac-out"))  # the destinations' states in the page's language
+        self.assertNotIn("Bayern", page.inner_text("#vac-out"))
         self.assertEqual(self.errors, [])
 
     def test_rare_vagrants_source(self):
