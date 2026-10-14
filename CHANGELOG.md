@@ -4,6 +4,9 @@ Die neueste Version steht oben. Die Downloads (`lifelist.exe`) gibt es auf der [
 
 ## Noch nicht veröffentlicht
 
+### Programm
+- **Update nach zusammengeführtem Branch:** Steht die lokale Kopie auf einem Branch, den es auf GitHub nicht mehr gibt (meist nach dem Zusammenführen gelöscht), bricht `update.py` (`update.bat`) nicht mehr mit einer git-Fehlermeldung ab. Es erklärt, dass die Neuerungen jetzt auf `master` liegen, und bietet an, dorthin zu wechseln und gleich zu aktualisieren; der alte Branch bleibt erhalten. Bei lokalen Änderungen wechselt es nicht und nennt die nötigen Schritte.
+
 ### Seite
 - **Urlaubsplaner (Reiter „Ziele“):** Schlägt für die nächsten zwölf Monate Reisen vor, aus den gesetzlichen Feiertagen deines Bundeslands und wenigen Urlaubstagen dazwischen (Brückentage). Voreingestellt ist das Bundesland mit den meisten deiner Beobachtungstage. Je Feiertag stehen die Möglichkeiten mit 0 bis zur gewählten Zahl an Urlaubstagen zur Wahl; vorgeschlagen ist die längste, bei der jeder Urlaubstag mindestens 2,5 freie Tage bringt. Zu jeder Reise nennt er die drei Landkreise, in denen in ihren Monaten die meisten deiner fehlenden Arten (nach der gewählten Quelle, also auch nur die eigene Wunschliste) eine gute oder mögliche Chance haben, mit den Arten zum Aufklappen; kurze Reisen bis vier Tage bleiben im eigenen Bundesland und seinen Nachbarn. Feiertage, aus denen sich mit den erlaubten Urlaubstagen kein Kurzurlaub machen lässt, stehen trotzdem in der Liste; Vorschläge, die sich überschneiden würden, werden zu einer Reise. Heiligabend und Silvester lassen sich als frei dazunehmen. Die Feiertage rechnet die Seite selbst aus, sie bleibt offline; Schulferien und örtliche Feiertage kennt sie nicht.
 

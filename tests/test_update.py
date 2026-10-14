@@ -117,6 +117,43 @@ class UpdateTest(unittest.TestCase):
         with self.assertRaises(update.UpdateError):
             self.run_update()
 
+    def gone_branch(self):
+        """the user is on a branch that was merged into master and then deleted on GitHub"""
+        git(self.dev, "checkout", "-q", "-b", "feature")
+        git(self.dev, "push", "-q", "origin", "feature")
+        git(self.user, "fetch", "-q")
+        git(self.user, "checkout", "-q", "-b", "feature", "--track", "origin/feature")
+        git(self.dev, "checkout", "-q", "master")
+        self.release("0.2.0")
+        git(self.dev, "push", "-q", "origin", "--delete", "feature")
+
+    def test_names_the_main_branch_when_the_own_one_is_gone(self):
+        self.gone_branch()
+        for _ in range(2):  # the second time the first run's fetch has already pruned origin/feature
+            with self.assertRaises(update.UpdateError) as ctx:
+                self.run_update()
+            self.assertIn("no longer exists on GitHub", str(ctx.exception))
+            self.assertIn("git checkout master", str(ctx.exception))
+        self.assertEqual(git(self.user, "rev-parse", "--abbrev-ref", "HEAD").strip(), "feature")
+
+    def test_switches_to_the_main_branch_when_asked(self):
+        self.gone_branch()
+        questions = []
+        n = update.update(self.user, out=self.lines.append, ask=lambda q: questions.append(q) or True)
+        self.assertEqual(n, 1)
+        self.assertIn("Switch to 'master'", questions[0])
+        self.assertEqual(git(self.user, "rev-parse", "--abbrev-ref", "HEAD").strip(), "master")
+        self.assertEqual(update.app_version(self.user), "0.2.0")
+        self.assertIn("feature", git(self.user, "branch", "--list", "feature"))  # the old branch is kept
+
+    def test_does_not_switch_with_local_changes(self):
+        self.gone_branch()
+        write(os.path.join(self.user, "src", "i18n.js"), "changed")
+        with self.assertRaises(update.UpdateError) as ctx:
+            update.update(self.user, out=self.lines.append, ask=lambda q: "Discard" in q)
+        self.assertIn("git stash", str(ctx.exception))
+        self.assertEqual(git(self.user, "rev-parse", "--abbrev-ref", "HEAD").strip(), "feature")
+
     def test_not_a_clone(self):
         plain = os.path.join(self.tmp.name, "plain")
         os.makedirs(plain)
