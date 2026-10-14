@@ -581,6 +581,41 @@ class PageTest(unittest.TestCase):
         # each of the three destinations lists its species
         self.assertEqual(page.locator("#vac-out .vac").first.locator("details.vac-sp").count(),
                          page.locator("#vac-out .vac").first.locator(".vac-dest li").count())
+        # the calendar: twelve months from December, the trips' days of leave marked
+        self.assertEqual(page.locator(".vac-month").count(), 12)
+        self.assertIn("Dezember 2026", page.locator(".vac-month").first.inner_text())
+        self.assertGreater(page.locator(".vac-days7 i.lv").count(), 0)
+        # days of leave a year (30 by default): the proposals are shortened to fit, and the plan says what is left
+        self.assertEqual(page.input_value("#vac-year"), "30")
+        page.select_option("#vac-budget", "5")
+        page.fill("#vac-year", "3")
+        page.press("#vac-year", "Tab")  # the change event
+        used = page.evaluate("""(() => { const c = vacChosen(VAC_CTX.groups), n = {};
+            for (const x of c.values()) if (x) for (const d of x.leaveDays) n[vacYear(d)] = (n[vacYear(d)] || 0) + 1; return n; })()""")
+        self.assertTrue(used and all(v <= 3 for v in used.values()), used)
+        self.assertIn("von 3 Urlaubstagen verplant", page.inner_text(".vac-usage"))
+        self.assertEqual(page.evaluate("JSON.parse(localStorage.getItem('lifelist-vacation')).year"), 3)
+        # a variant picked by hand stays, even when it is too much
+        big = page.locator("#vac-out .vac [data-vac-pick]").last
+        pick = big.get_attribute("data-vac-pick")
+        big.click()
+        self.assertEqual(page.locator(f'#vac-out [data-vac-pick="{pick}"]').get_attribute("aria-pressed"), "true")
+        page.fill("#vac-year", "30")
+        page.press("#vac-year", "Tab")
+        # "Urlaubsplan drucken": only the calendar and the table of trips
+        page.emulate_media(media="print")
+        page.evaluate("document.body.classList.add('print-vac'); window.dispatchEvent(new Event('beforeprint'))")
+        self.assertTrue(page.locator(".vac-cal").is_visible())
+        self.assertTrue(page.locator(".vac-table").is_visible())
+        self.assertFalse(page.locator("#vac-out .vac-list").is_visible())
+        self.assertFalse(page.locator("#tab-overview").is_visible())
+        self.assertFalse(page.locator("#wish-out").is_visible())
+        self.assertEqual(page.get_attribute("#tab-targets", "data-title"), "Urlaubsplan Sachsen")
+        page.evaluate("window.dispatchEvent(new Event('afterprint'))")
+        page.emulate_media(media="screen")
+        self.assertFalse(page.evaluate("document.body.classList.contains('print-vac')"))
+        page.evaluate("S.vac.from = vacDayNr('2026-12-01'); redrawVacation()")
+
         page.set_viewport_size({"width": 320, "height": 900})  # the cards fit a small phone
         self.assertEqual(page.evaluate("document.documentElement.scrollWidth"), 320)
         page.set_viewport_size({"width": 1400, "height": 900})

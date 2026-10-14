@@ -44,19 +44,19 @@ const VAC_RATIO = 2.5;
 const VAC_NEAR_LEN = 4;  // up to this many days the trip stays near home
 /** the German federal states (ornitho.de also has Luxembourg); a function, as S is built before this file's constants */
 function vacStateCodes() { return Object.keys(STR.de.states).filter(c => c !== "LU"); }
-/** @returns {{state: string, chosen: boolean, budget: number, eves: boolean, pick: Object<string, number>, from: number|null}} */
+/** @returns {{state: string, chosen: boolean, budget: number, eves: boolean, year: number, pick: Object<string, number>, from: number|null}} */
 function loadVac() {
   let saved = {};
   try { saved = JSON.parse(localStorage.getItem("lifelist-vacation") || "{}") || {}; } catch (e) { /* no or broken setting */ }
   const chosen = vacStateCodes().includes(saved.state);
   return { state: chosen ? saved.state : vacHomeState(), chosen,
     budget: Number.isInteger(saved.budget) && saved.budget >= 0 && saved.budget <= 5 ? saved.budget : 3,
-    eves: saved.eves === true, pick: {}, from: null };
+    eves: saved.eves === true, year: Number.isInteger(saved.year) && saved.year >= 0 && saved.year <= 99 ? saved.year : 30, pick: {}, from: null };
 }
 // the state is kept only once the viewer picked it: until then it follows the observation days of the export at hand
 function saveVac() {
-  const { state, chosen, budget, eves } = S.vac;
-  try { localStorage.setItem("lifelist-vacation", JSON.stringify(chosen ? { state, budget, eves } : { budget, eves })); } catch (e) { /* private mode may refuse */ }
+  const { state, chosen, budget, eves, year } = S.vac;
+  try { localStorage.setItem("lifelist-vacation", JSON.stringify(chosen ? { state, budget, eves, year } : { budget, eves, year })); } catch (e) { /* private mode may refuse */ }
 }
 /** the federal state with the most of the viewer's observation days, Saxony without any */
 function vacHomeState() {
@@ -227,48 +227,136 @@ function vacDate(nr, year = false) {
   return `${wd} ${md}${year ? (S.lang === "en" ? " " : "") + iso.slice(0, 4) : ""}`;
 }
 const vacToday = () => vacDayNr(`${TODAY_Y}-${TODAY_MD}`);
-/** what the cards share, from the last full redraw: a click on a variant redraws its card alone
- * @type {{groups: VacGroup[], data: PlanData|null, missing: PlanSpecies[], cache: Map<string, any>}|null} */
+const vacYear = nr => +vacIso(nr).slice(0, 4);
+/** what the cards, the calendar and the table share, from the last full redraw: a click on a variant redraws them
+ * without planning anew @type {{from: number, groups: VacGroup[], data: PlanData|null, missing: PlanSpecies[], cache: Map<string, any>}|null} */
 let VAC_CTX = null;
-/** @param {VacGroup} g */
-function vacCardHtml(g) {
+/**
+ * The trip each group goes with: the variant the viewer picked, else the proposed one, made shorter where the
+ * trips of a calendar year would take more days of leave than the year has (S.vac.year). Those losing the
+ * fewest days off per day of leave saved go first; trips the viewer picked stay as they are.
+ * @param {VacGroup[]} groups @returns {Map<VacGroup, VacTrip|null>}
+ */
+function vacChosen(groups) {
+  /** @type {Map<VacGroup, VacTrip|null>} */
+  const chosen = new Map();
+  for (const g of groups) chosen.set(g, g.variants.find(x => x.leaveDays.length === S.vac.pick[g.key]) || g.pick);
+  const used = y => [...chosen.values()].reduce((n, x) => n + (x ? x.leaveDays.filter(nr => vacYear(nr) === y).length : 0), 0);
+  const years = [...new Set(groups.flatMap(g => g.variants.flatMap(x => x.leaveDays.map(vacYear))))].sort();
+  for (const y of years) {
+    while (used(y) > S.vac.year) {
+      let best = null, cost = Infinity;
+      for (const g of groups) {
+        const cur = chosen.get(g), i = cur ? g.variants.indexOf(cur) : -1;
+        if (i < 1 || S.vac.pick[g.key] !== undefined || !cur.leaveDays.some(nr => vacYear(nr) === y)) continue;
+        const prev = g.variants[i - 1], c = (vacLen(cur) - vacLen(prev)) / (cur.leaveDays.length - prev.leaveDays.length);
+        if (c < cost) { cost = c; best = g; }
+      }
+      if (!best) break;  // what is left was picked by the viewer or takes no leave: shown as too much
+      const cur = /** @type {VacTrip} */ (chosen.get(best));
+      chosen.set(best, best.variants[best.variants.indexOf(cur) - 1]);
+    }
+  }
+  return chosen;
+}
+/** the three best destinations of a trip @param {VacTrip} trip */
+function vacTripDest(trip) {
   const { data, missing, cache } = /** @type {NonNullable<typeof VAC_CTX>} */ (VAC_CTX);
-  if (!g.pick) {
+  if (!data) return { near: null, top: [] };
+  const months = [];
+  for (let nr = trip.s; nr <= trip.e; nr++) { const m = +vacIso(nr).slice(5, 7) - 1; if (!months.includes(m)) months.push(m); }
+  const near = vacLen(trip) <= VAC_NEAR_LEN ? S.vac.state : null;
+  return { near, top: vacDestinations(data, missing, months, near, cache).slice(0, 3) };
+}
+/** a destination's state, in the page's language @param {PlanData} data @param {number} r */
+function vacParent(data, r) {
+  const parent = data.regions[r].parent, code = VAC_CODE_BY_NAME[parent];
+  return code ? stateName(code) : parent;
+}
+/** @param {VacTrip} trip */
+const vacRange = trip => `${vacDate(trip.s, vacYear(trip.s) !== vacYear(trip.e))} – ${vacDate(trip.e, true)}`;
+/** @param {VacGroup} g @param {VacTrip|null} trip */
+function vacCardHtml(g, trip) {
+  const { data } = /** @type {NonNullable<typeof VAC_CTX>} */ (VAC_CTX);
+  if (!trip) {
     // a holiday no trip of three days can be made of with the days of leave allowed
     return `<div class="card vac" data-vac="${esc(g.key)}"><div class="vac-head"><b>${g.hols.map(h => vacDate(h.nr, true)).join(", ")}</b>
       <span class="small-inline">${esc(g.hols.map(h => t("hol_" + h.k)).join(", "))}</span></div>
       <p class="vac-days small-inline">${t("vacNoTrip", S.vac.budget)}</p></div>`;
   }
-  const trip = g.variants.find(x => x.leaveDays.length === S.vac.pick[g.key]) || g.pick;
-  const crosses = vacIso(trip.s).slice(0, 4) !== vacIso(trip.e).slice(0, 4);
   const chips = g.variants.length > 1 ? `<span class="plan-switch" role="group" aria-label="${esc(t("vacVariants"))}">${g.variants.map(x =>
     `<button type="button" class="pill${x === trip ? " on" : ""}" data-vac-pick="${esc(g.key)}|${x.leaveDays.length}" aria-pressed="${x === trip}">${esc(t("vacVariant", x.leaveDays.length, vacLen(x)))}</button>`).join("")}</span>` : "";
   let dest = "";
   if (data) {
-    const months = [];
-    for (let nr = trip.s; nr <= trip.e; nr++) { const m = +vacIso(nr).slice(5, 7) - 1; if (!months.includes(m)) months.push(m); }
-    const near = vacLen(trip) <= VAC_NEAR_LEN ? S.vac.state : null;
+    const { near, top } = vacTripDest(trip);
     const spList = (/** @type {PlanSpecies[]} */ list) => list.map(planName).sort(collator.compare).map(esc).join(", ");
-    const top = vacDestinations(data, missing, months, near, cache).slice(0, 3);
     dest = !top.length ? `<p class="small-inline">${t(near ? "vacNoDestNear" : "vacNoDest")}</p>`
-      : `<p class="vac-where">${t(near ? "vacNear" : "vacFar")}</p><ol class="vac-dest">${top.map(x => {
-        const parent = data.regions[x.r].parent, code = VAC_CODE_BY_NAME[parent];
-        return `<li><b>${esc(data.regions[x.r].name)}</b> <span class="small-inline">${esc(code ? stateName(code) : parent)} · ${t("vacCounts", x.good.length, x.maybe.length)}</span>
+      : `<p class="vac-where">${t(near ? "vacNear" : "vacFar")}</p><ol class="vac-dest">${top.map(x =>
+        `<li><b>${esc(data.regions[x.r].name)}</b> <span class="small-inline">${esc(vacParent(data, x.r))} · ${t("vacCounts", x.good.length, x.maybe.length)}</span>
           <details class="vac-sp"><summary>${t("vacShowSpecies")}</summary>
-            ${x.good.length ? `<p><b>${t("planGood")}:</b> ${spList(x.good)}</p>` : ""}${x.maybe.length ? `<p><b>${t("planMaybe")}:</b> ${spList(x.maybe)}</p>` : ""}</details></li>`;
-      }).join("")}</ol>`;
+            ${x.good.length ? `<p><b>${t("planGood")}:</b> ${spList(x.good)}</p>` : ""}${x.maybe.length ? `<p><b>${t("planMaybe")}:</b> ${spList(x.maybe)}</p>` : ""}</details></li>`).join("")}</ol>`;
   }
   return `<div class="card vac" data-vac="${esc(g.key)}">
-    <div class="vac-head"><b>${vacDate(trip.s, crosses)} – ${vacDate(trip.e, true)}</b><span class="small-inline">${esc(trip.hol.map(k => t("hol_" + k)).join(", "))}</span></div>
+    <div class="vac-head"><b>${vacRange(trip)}</b><span class="small-inline">${esc(trip.hol.map(k => t("hol_" + k)).join(", "))}</span></div>
     <p class="vac-days">${t("vacDays", vacLen(trip), trip.leaveDays.length)}${trip.leaveDays.length ? ` <span class="small-inline">(${esc(trip.leaveDays.map(nr => vacDate(nr)).join(", "))})</span>` : ""}</p>
     ${chips}${dest}</div>`;
 }
-function vacOutHtml() {
-  const v = S.vac, groups = vacPlan((v.from ?? vacToday() + 1), v.state, v.budget, v.eves);
-  const data = PLAN_SCOPES.includes("de") ? planData("de") : null;
-  VAC_CTX = { groups, data, missing: data ? planMissing(data) : [], cache: new Map() };
+/** per calendar year the days of leave the trips take, against the year's days of leave @param {VacTrip[]} trips */
+function vacUsageHtml(trips) {
+  const { from } = /** @type {NonNullable<typeof VAC_CTX>} */ (VAC_CTX);
+  const years = [vacYear(from), vacYear(from + VAC_SPAN - 1)].filter((y, i, a) => a.indexOf(y) === i);
+  return `<p class="vac-usage">${years.map(y => {
+    const n = trips.reduce((a, x) => a + x.leaveDays.filter(nr => vacYear(nr) === y).length, 0), left = S.vac.year - n;
+    return `<span class="${left < 0 ? "vac-over" : ""}">${t(left < 0 ? "vacUsageOver" : "vacUsage", y, n, S.vac.year, Math.abs(left))}</span>`;
+  }).join(" · ")}</p>`;
+}
+/** the twelve months from the first day on, each a small month sheet: weekends, holidays, the trips and their days of leave
+ * @param {VacTrip[]} trips */
+function vacCalendarHtml(trips) {
+  const { from } = /** @type {NonNullable<typeof VAC_CTX>} */ (VAC_CTX);
+  const y0 = vacYear(from), hol = new Map([y0, y0 + 1].flatMap(y => [...vacHolidays(y, S.vac.state, S.vac.eves)]));
+  const leave = new Set(trips.flatMap(x => x.leaveDays)), inTrip = nr => trips.some(x => nr >= x.s && nr <= x.e);
+  const m0 = +vacIso(from).slice(5, 7) - 1;
+  const months = Array.from({ length: 12 }, (_, i) => {
+    const y = y0 + Math.floor((m0 + i) / 12), m = (m0 + i) % 12, first = Date.UTC(y, m, 1) / VAC_DAY, n = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
+    const cells = Array((vacDow(first) + 6) % 7).fill("<i></i>");
+    for (let d = 0; d < n; d++) {
+      const nr = first + d, h = hol.get(vacIso(nr)), dow = vacDow(nr);
+      const cls = [dow === 0 || dow === 6 ? "we" : "", h ? "hol" : "", inTrip(nr) ? "trip" : "", leave.has(nr) ? "lv" : ""].filter(Boolean).join(" ");
+      const tip = [h ? t("hol_" + h) : "", leave.has(nr) ? t("vacLegendLeave") : ""].filter(Boolean).join(", ");
+      cells.push(`<i${cls ? ` class="${cls}"` : ""}${tip ? ` title="${esc(tip)}"` : ""}>${d + 1}</i>`);
+    }
+    return `<div class="vac-month"><b>${T.months[m]} ${y}</b><div class="vac-days7">${T.weekdays.map(w => `<i class="wd">${esc(w)}</i>`).join("")}${cells.join("")}</div></div>`;
+  });
+  const key = (cls, label) => `<span><i class="${cls}">1</i> ${esc(label)}</span>`;
+  return `<div class="card vac-cal"><div class="vac-months">${months.join("")}</div>
+    <p class="vac-legend">${key("trip", t("vacLegendTrip"))}${key("trip lv", t("vacLegendLeave"))}${key("hol", t("vacLegendHol"))}${key("we", t("vacLegendWe"))}</p></div>`;
+}
+/** the trips as one table, for the printed plan @param {[VacGroup, VacTrip][]} rows */
+function vacTableHtml(rows) {
+  const { data } = /** @type {NonNullable<typeof VAC_CTX>} */ (VAC_CTX);
+  return `<div class="card vac-table"><table><thead><tr><th>${t("vacColWhen")}</th><th class="num">${t("vacColOff")}</th><th>${t("vacColLeave")}</th>
+    <th>${t("vacColHol")}</th>${data ? `<th>${t("vacColDest")}</th>` : ""}</tr></thead><tbody>${rows.map(([, trip]) => {
+    const top = data ? vacTripDest(trip).top[0] : null;
+    return `<tr><td>${vacRange(trip)}</td><td class="num">${vacLen(trip)}</td><td>${esc(trip.leaveDays.map(nr => vacDate(nr)).join(", ") || "–")}</td>
+      <td>${esc(trip.hol.map(k => t("hol_" + k)).join(", "))}</td>${data ? `<td>${top ? `${esc(data.regions[top.r].name)} <span class="small-inline">${esc(vacParent(data, top.r))} · ${t("vacCounts", top.good.length, top.maybe.length)}</span>` : "–"}</td>` : ""}</tr>`;
+  }).join("")}</tbody></table></div>`;
+}
+/** everything below the controls, from VAC_CTX */
+function vacBodyHtml() {
+  const { groups } = /** @type {NonNullable<typeof VAC_CTX>} */ (VAC_CTX);
   if (!groups.length) return `<p class="empty">${t("vacNone")}</p>`;
-  return `<div class="vac-list">${groups.map(vacCardHtml).join("")}</div>`;
+  const chosen = vacChosen(groups);
+  const rows = /** @type {[VacGroup, VacTrip][]} */ ([...chosen].filter(([, x]) => x));
+  const trips = rows.map(([, x]) => x);
+  return `${vacUsageHtml(trips)}${vacCalendarHtml(trips)}${vacTableHtml(rows)}
+    <div class="vac-list">${groups.map(g => vacCardHtml(g, /** @type {VacTrip|null} */ (chosen.get(g)))).join("")}</div>`;
+}
+function vacOutHtml() {
+  const v = S.vac, from = v.from ?? vacToday() + 1, groups = vacPlan(from, v.state, v.budget, v.eves);
+  const data = PLAN_SCOPES.includes("de") ? planData("de") : null;
+  VAC_CTX = { from, groups, data, missing: data ? planMissing(data) : [], cache: new Map() };
+  return vacBodyHtml();
 }
 function vacationSection() {
   const v = S.vac;
@@ -277,8 +365,10 @@ function vacationSection() {
     ${infoText(t("vacHelp", VAC_NEAR_LEN))}
     <div class="pick">
       <select id="vac-state" aria-label="${esc(t("vacState"))}">${states.map(c => optionHtml(c, stateName(c), v.state)).join("")}</select>
+      <label class="vac-chk">${t("vacYearDays")} <input type="number" id="vac-year" min="0" max="99" step="1" value="${v.year}"></label>
       <select id="vac-budget" aria-label="${esc(t("vacBudget"))}">${[0, 1, 2, 3, 4, 5].map(k => optionHtml(String(k), t("vacBudgetN", k), String(v.budget))).join("")}</select>
       <label class="vac-chk"><input type="checkbox" id="vac-eves"${v.eves ? " checked" : ""}> ${t("vacEves")}</label>
+      <button type="button" class="btn" id="vac-print">${t("vacPrint")}</button>
     </div>
     <div id="vac-out">${vacOutHtml()}</div>`;
 }
@@ -286,8 +376,8 @@ function redrawVacation() {
   const box = $("vac-out");
   if (box) box.innerHTML = vacOutHtml();
 }
-/** redraws one card after a different variant was picked @param {string} key */
-function redrawVacCard(key) {
-  const g = VAC_CTX && VAC_CTX.groups.find(x => x.key === key), card = $$(`#vac-out [data-vac="${CSS.escape(key)}"]`);
-  if (g && card) card.outerHTML = vacCardHtml(g);
+/** after a different variant was picked: the same plan, the trips fitted to the year anew */
+function redrawVacPick() {
+  const box = $("vac-out");
+  if (box && VAC_CTX) box.innerHTML = vacBodyHtml();
 }
