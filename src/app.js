@@ -293,10 +293,12 @@ function init() {
     document.documentElement.setAttribute("data-theme", "light");  // paper is always light, also for the canvas charts
     S.q = ""; S.open = new Set(); S.atlasF = "all"; S.regAll = Object.fromEntries(LEVELS.map(lv => [lv.lvl, true])); S.targetSrc = "all";
     S.wishQ = ""; S.wishOpen = new Set(WISH_GROUPS.map(([g]) => g));
+    const vacOnly = document.body.classList.contains("print-vac");
+    if (vacOnly) S.targetSrc = printBackup.targetSrc;  // its destinations follow the chosen source
     $("h-print").textContent = t("printed", new Date().toLocaleDateString(S.lang === "en" ? "en-GB" : "de-DE")) + (S.region === "all" ? "" : ", " + $("f-region").selectedOptions[0].text) + " · " + t("version", APP_VERSION);
     curveForPrint = true;
     // only the chosen tabs; the first one starts right under the header, the others on a new page
-    const chosen = printableTabs();
+    const chosen = vacOnly ? ["targets"] : printableTabs();
     const renders = { overview: renderOverview, list: renderList, targets: renderTargets, activity: renderActivity, regions: renderRegions, tours: renderTours };
     for (const tab of chosen) renders[tab]();
     for (const box of $$all("div.tab")) {
@@ -310,10 +312,12 @@ function init() {
     for (const d of $$all("details.info")) d.open = true;
     // each tab starts a page under its own name (the tab bar itself isn't printed)
     for (const b of $$all("#tabs button")) { const box = $("tab-" + b.dataset.tab); if (box) box.dataset.title = b.textContent.trim(); }
+    if (vacOnly) $("tab-targets").dataset.title = t("vacPrintTitle", stateName(S.vac.state));
   });
   window.addEventListener("afterprint", () => {
     curveForPrint = false;
     for (const box of $$all("div.tab")) { delete box.dataset.print; box.classList.remove("print-first"); }
+    document.body.classList.remove("print-vac");
     for (const d of $$all("details.info")) d.open = false;
     if (printBackup) {
       const { theme, ...state } = printBackup;
@@ -595,6 +599,10 @@ function init() {
     if (e.target.id === "plan-scope") { S.plan.scope = e.target.value; S.plan.open = S.plan.openG = null; S.plan.all = false; renderTargets(); }
     if (e.target.id === "plan-sort") { S.plan.sort = e.target.value === "name" ? "name" : "n"; redrawPlanner(); }
     if (e.target.id === "plan-month") { S.plan.month = +e.target.value; S.plan.all = false; redrawPlanner(); }
+    if (e.target.id === "vac-year") {
+      const n = Math.round(+e.target.value);
+      if (Number.isFinite(n) && n >= 0 && n <= 99) { S.vac.year = n; saveVac(); redrawVacPick(); }
+    }
     if (["vac-state", "vac-budget", "vac-eves"].includes(e.target.id)) {
       const v = S.vac;
       if (e.target.id === "vac-state") { v.state = e.target.value; v.chosen = true; }
@@ -632,10 +640,12 @@ function init() {
     const dest = e.target.closest("[data-plan-r]");
     if (dest) { const r = dest.dataset.planR; S.plan.open = S.plan.open === r ? null : r; planRedraw(`[data-plan-r="${CSS.escape(r)}"]`); return; }
     if (e.target.closest("[data-plan-more]")) { S.plan.all = !S.plan.all; planRedraw("[data-plan-more]"); return; }
+    // the vacation plan alone: calendar and table on a page of their own (see beforeprint)
+    if (e.target.closest("#vac-print")) { document.body.classList.add("print-vac"); setTimeout(() => window.print(), 50); return; }
     const vac = e.target.closest("[data-vac-pick]");
     if (vac) {
       const [key, k] = vac.dataset.vacPick.split("|");
-      S.vac.pick[key] = +k; redrawVacCard(key); refocus(`#vac-out [data-vac-pick="${CSS.escape(vac.dataset.vacPick)}"]`); return;
+      S.vac.pick[key] = +k; redrawVacPick(); refocus(`#vac-out [data-vac-pick="${CSS.escape(vac.dataset.vacPick)}"]`); return;
     }
     const grp = e.target.closest("[data-grp]");
     if (grp) { toggleWishGroup(grp.dataset.grp); return; }

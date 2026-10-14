@@ -118,7 +118,7 @@ if (initialTheme !== "system") document.documentElement.setAttribute("data-theme
  * @property {boolean} tourAll - show every tour instead of the newest ones
  * @property {string|null} tourRoute - key of the tour drawn on the map
  * @property {{on: boolean, year: number, day: number, speed: number, playing: boolean, sp: number[]|null, glow: number}} tl - the map's time-lapse: shown, year, day, days per second, playing, the taxa of the one species followed (null: all), afterglow in days
- * @property {{state: string, chosen: boolean, budget: number, eves: boolean, pick: Object<string, number>, from: number|null}} vac - vacation planner (vacation.js): federal state, whether the viewer picked it (only then is it kept in localStorage, with budget and eves), most days of leave per trip, 24 and 31 December off, the variant picked per group, a fixed first day instead of tomorrow (tests)
+ * @property {{state: string, chosen: boolean, budget: number, eves: boolean, year: number, pick: Object<string, number>, from: number|null}} vac - vacation planner (vacation.js): federal state, whether the viewer picked it (only then is it kept in localStorage, with the rest but pick and from), most days of leave per trip, 24 and 31 December off, days of leave per calendar year, the variant picked per group, a fixed first day instead of tomorrow (tests)
  * @property {number|null} focusSp - species index the life list scrolls to and highlights once, after a jump from another view
  */
 // the point in time the page opens with, and "Gesamt" returns to
